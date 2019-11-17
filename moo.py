@@ -18,6 +18,7 @@ for one in sys.argv[1:]:
 
     render = eval("render_" + dat["renderer"])
     text = render(dat["template"], dat["params"])
-    open(dat["artifact"], 'w').write(text.encode('utf-8'))
-
+    output = dat["artifact"]
+    open(dat["artifact"], 'wb').write(text.encode('utf-8'))
+    print (output)
 

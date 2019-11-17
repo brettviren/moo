@@ -9,13 +9,13 @@
         name: "TrigPrim",
         comment: "A trigger primitive (TP) represents a period of signal above threshold on a channel",
         fields: [ {
-            name: "chid",
+            name: "channel",
             type: "uint32",
             comment: "The channel identifier unique in some scope",
             required: true,
         }, {
             name: "tstart",
-            type: "int64",
+            type: "uint64",
             comment: "The absolute hardware clock count of the start of the TP",
             required: true,
         }, {

@@ -1,6 +1,6 @@
 // -*- jsonnet -*-
 
-local messages = import "ptmp-proto-v0.jsn";
+local messages = import "ptmp-proto-v0.jsonnet";
 
 {
     template: "protobuf.j2",

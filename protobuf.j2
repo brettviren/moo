@@ -2,15 +2,13 @@
 
 syntax = "{{ syntax }}";
 package {{ namespace }};
-
 {% for msg in messages %}
-// {{ msg.comment }}
+{{ ('\n' ~ msg.comment) | wordwrap(78) | replace('\n', '\n// ') }}
 message {{ msg.name }} {
-
-    {% for fld in msg.fields %}
-
-    // {{ fld.comment }}
-    {% if fld.required is defined and fld.required %}required{% else %}optional{% endif %}{{ fld.type }} {{ fld.name }} = {{ loop.index }};
-
+    {% for fld in msg.fields -%}
+    {{ ('\n' ~ fld.comment) | wordwrap(74) | replace('\n', '\n    // ') }}
+    {% if fld.required is defined and fld.required %}required {% elif fld.repeated and fld.repeated %}repeated {% else %}optional {% endif -%}
+    {{ fld.type }} {{ fld.name }} = {{ loop.index }};
+    {% endfor %}
 }
 {% endfor %}
