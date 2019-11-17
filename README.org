@@ -1,0 +1,5 @@
+#+BEGIN_EXAMPLE
+$ python3 -m venv venv
+$ source venv/bin/activate
+$ pip install jsonnet jinja2
+#+END_EXAMPLE

@@ -1,0 +1,16 @@
+// This file is entirely generated.  Do not edit.
+
+syntax = "{{ syntax }}";
+package {{ namespace }};
+
+{% for msg in messages %}
+// {{ msg.comment }}
+message {{ msg.name }} {
+
+    {% for fld in msg.fields %}
+
+    // {{ fld.comment }}
+    {% if fld.required is defined and fld.required %}required{% else %}optional{% endif %}{{ fld.type }} {{ fld.name }} = {{ loop.index }};
+
+}
+{% endfor %}
