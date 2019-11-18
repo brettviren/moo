@@ -26,3 +26,4 @@ $ kitten icat ptmp-msg-classes.png
 #+END_EXAMPLE
 
 [[file:ptmp-msg-classes.png]]
+

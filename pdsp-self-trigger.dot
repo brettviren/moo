@@ -1,0 +1,61 @@
+digraph {
+        rankdir=LR
+
+        subgraph cluster_fe {
+                label="front-end computer"
+                node[shape=box]
+                hf[label="Hit Finders\n(10/APA)"]
+                febuf[label="FE Buffer"]
+                feq[label="FE Query svc\n(≥1/APA)"]
+                node[shape=ellipse]
+        }
+
+        subgraph cluster_ds {
+                label="data-selection computer"
+                node[shape=box]
+                w1[label="Windowing\nbulk O(1ms)\n(10/APA)"]
+                w2[label="Windowing\nfor TC alg\n(10/APA)"]
+                z1[label="Zipper\nTP ordering\n(1/APA)"]
+                tcf[label="TC Finder\n(1/APA)"]
+                z2[label="Zipper\nTC ordering\n(1/APA)"]
+                tpq[label="TP Query\n(≤1/APA)"]
+                tcq[label="TC Query\n(≤1/APA)"]        
+                node[shape=ellipse]
+                tps_buf[label="TPs\n(bulk)"]
+                tps_win[label="TPs\n(async)"]
+                tps_winzip[label="TPs\n(sync'ed)"]
+                tcs[label="TCs\n(async)"]
+
+                {rank=same w1 w2}
+                {rank=same tcq tpq z2}
+        }
+
+        subgraph cluster_be {
+                label="back-end computer"
+                node[shape=box]
+                mlt[label="MLT"]
+                dfo[label="DFO"]
+                eb[label="EB"]
+                node[shape=ellipse]
+        }
+
+
+        node[shape=ellipse]
+        tps_raw[label="TPs\nraw from HF"]
+        tcs_zip[label="TCs\n(sync'ed)"]
+
+        hf -> tps_raw -> w1 -> tps_buf -> tpq
+        tps_raw -> w2 -> tps_win -> z1 -> tps_winzip -> tcf -> tcs -> z2
+        z2 -> tcs_zip -> mlt
+        tcs -> tcq
+        mlt -> dfo
+        eb -> dfo[dir=back]
+
+        edge[dir=both]
+        febuf->feq
+
+        edge[dir=both,style=dotted]
+        tpq -> eb[label="async\nscatter\ngather"]
+        tcq -> eb
+        feq -> eb
+}
