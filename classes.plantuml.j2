@@ -11,7 +11,7 @@ set namespaceSeparator ::
 class {{ msg.namespace}}::{{ msg.name }} <<message>> {
     {% for fld in msg.fields -%}
     {field} {{ fld.name }}: {{ fld.type }}
-    {%- if fld.type in nns %}{{ refs.append(fld.type) }}{%endif%}
+    {%- if fld.type in nns %}{% do refs.append(fld.type) %}{%endif%}
     {% endfor %}
 }
 {% for ref in refs %}
