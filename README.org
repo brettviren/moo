@@ -1,5 +1,28 @@
+#+title: moo - module oriented objects
+
+This package plays around with module-oriented programming such as
+seen successfully used in GSL/zproto/zproject but here using Jsonnet
+and Jinja2 (and maybe not so successfully).
+
+* Install
+
 #+BEGIN_EXAMPLE
 $ python3 -m venv venv
 $ source venv/bin/activate
 $ pip install jsonnet jinja2
 #+END_EXAMPLE
+
+* Use
+
+#+BEGIN_EXAMPLE
+$ ./moo.py ptmp-proto-pbv0.jsonnet 
+$ mkdir out ; protoc ptmp.proto --cpp_out=out
+$ ls out/
+ptmp.pb.cc  ptmp.pb.h
+
+$ ./moo.py ptmp-msg-classes-v0.jsonnet
+$ plantuml ptmp-msg-classes.plantuml
+$ kitten icat ptmp-msg-classes.png
+#+END_EXAMPLE
+
+[[file:ptmp-msg-classes.png]]
