@@ -1,0 +1,221 @@
+<?xml encoding="UTF-8"?>
+<!-- ?xml encoding="ISO-8859-1"? -->
+<!ELEMENT gdd ((import*, package+)+)>
+<!ATTLIST gdd
+        version          CDATA                             "1.0"
+>
+
+<!ELEMENT import EMPTY>
+<!ATTLIST import
+        name             CDATA                             #REQUIRED
+        std              (TRUE | FALSE)                    "FALSE"
+        soft             (TRUE | FALSE | FORWARDONLY)      "FALSE"
+        namespace        CDATA                             #IMPLIED
+>
+
+<!ELEMENT package ((import*, class*, namespace*, assoc*)*)>
+<!ATTLIST package
+        name             CDATA                             #REQUIRED
+        namespace        CDATA                             #IMPLIED
+>
+<!-- ELEMENT class ((class?, ..... -->
+<!ELEMENT class ((desc?, base?, copyconstructor?, assignmentoperator?, import?, location?, enum?, typedef?, constructor?, destructor?, method?, attribute?, relation?, template?)*)>
+<!ATTLIST class
+        name              CDATA                            #REQUIRED
+        author            CDATA                            #REQUIRED
+        desc              CDATA                            #REQUIRED
+        id                CDATA                            #IMPLIED
+        version           CDATA                            #IMPLIED
+        location          CDATA                            #IMPLIED
+        namespace         CDATA                            #IMPLIED
+        stdVectorTypeDef  (TRUE | FALSE)                   "FALSE"  
+        keyedContTypeDef  (TRUE | FALSE)                   "FALSE"  
+        contObjectTypeDef (TRUE | FALSE)                   "FALSE"
+        serializers       (TRUE | FALSE)                   "TRUE"    
+        virtual           (TRUE | FALSE)                   "TRUE"
+        allocator         (DEFAULT | NO | BOOST | BOOST2 | DEBUG )  "DEFAULT"    
+        defaultconstructor (TRUE | FALSE)                  "TRUE"
+        defaultdestructor  (TRUE | FALSE)                  "TRUE">
+       
+<!ELEMENT desc (#PCDATA)>
+<!ATTLIST desc
+        xml:space        (default | preserve)              #FIXED "preserve"
+>
+<!ELEMENT copyconstructor EMPTY>
+<!ELEMENT assignmentoperator EMPTY>
+<!ELEMENT location EMPTY>
+<!ATTLIST location
+        name             CDATA                             #REQUIRED
+        place            CDATA                             #REQUIRED
+        noQuote          (TRUE | FALSE)                    "FALSE"
+>
+<!ELEMENT namespace ((desc?, typedef?, enum?, class?, import?, attribute?, method?)*)>
+<!ATTLIST namespace
+        name             CDATA                             #REQUIRED
+        author           CDATA                             #IMPLIED
+        desc             CDATA                             #REQUIRED
+        scope            CDATA                             #IMPLIED
+>
+<!ELEMENT base EMPTY>
+<!ATTLIST base
+        name             CDATA                             #REQUIRED
+        virtual          (TRUE | FALSE)                    "FALSE"
+        access           (PUBLIC | PROTECTED | PRIVATE)    "PUBLIC"
+>
+<!ELEMENT enum (enumval*)>
+<!ATTLIST enum
+        name             CDATA                             #REQUIRED
+        desc             CDATA                             #REQUIRED
+        value            CDATA                             #IMPLIED
+        strTypConv       (TRUE | FALSE )                   "FALSE"
+        access           (PUBLIC | PROTECTED | PRIVATE)    "PRIVATE"
+        unknownValue     CDATA                             "Unknown"
+>
+<!ELEMENT enumval EMPTY>
+<!ATTLIST enumval
+        name             CDATA                             #REQUIRED
+        value            CDATA                             #IMPLIED
+        desc             CDATA                             #REQUIRED
+>
+<!ELEMENT typedef EMPTY>
+<!ATTLIST typedef 
+        desc             CDATA                             #REQUIRED
+        type             CDATA                             #REQUIRED
+        def              CDATA                             #REQUIRED
+        access           (PUBLIC | PROTECTED | PRIVATE)    "PRIVATE"
+>
+<!ELEMENT constructor (arg*, code?, arg*)>
+<!ATTLIST constructor
+        desc             CDATA                             #REQUIRED
+        argList          CDATA                             #IMPLIED
+        initList         CDATA                             #IMPLIED
+        explicit         (TRUE | FALSE)                    "FALSE"
+>
+<!ELEMENT destructor (arg*, code?, arg*)>
+<!ATTLIST destructor
+        desc             CDATA                             #REQUIRED
+        argList          CDATA                             #IMPLIED
+        virtual          (TRUE | FALSE)                    "FALSE"
+>
+<!ELEMENT method ((arg*, return?, arg*, code?, arg*) | (arg*, code?, arg*, return?, arg*))>
+<!ATTLIST method
+        name             CDATA                             #REQUIRED
+        desc             CDATA                             #REQUIRED
+        template         CDATA                             #IMPLIED
+        access           (PUBLIC | PROTECTED | PRIVATE)    "PUBLIC"
+        const            (TRUE | FALSE)                    "FALSE"
+        virtual          (TRUE | FALSE | PURE)             "FALSE"
+        static           (TRUE | FALSE)                    "FALSE"
+        inline           (TRUE | FALSE)                    "FALSE"
+        friend           (TRUE | FALSE)                    "FALSE"
+        type             CDATA                             "void"
+        argList          CDATA                             #IMPLIED
+        useBase          CDATA                             #IMPLIED
+>
+<!ELEMENT arg EMPTY>
+<!ATTLIST arg
+        type             CDATA                             #REQUIRED
+        name             CDATA                             #IMPLIED
+        const            (TRUE | FALSE)                    "FALSE"
+        inout            (BYVALUE | INPUT | INOUT | BOTH)  "INPUT"
+>
+<!ELEMENT return EMPTY>
+<!ATTLIST return
+        type             CDATA                             #REQUIRED
+        const            (TRUE | FALSE)                    "FALSE"
+>
+<!ELEMENT code (#PCDATA)>
+<!ATTLIST code
+        xml:space        (default | preserve)              #FIXED "preserve"
+>
+<!ELEMENT attribute (bitfield*)>
+<!ATTLIST attribute
+        type             CDATA                            #REQUIRED
+        name             CDATA                            #REQUIRED
+        desc             CDATA                            #REQUIRED
+        init             CDATA                            #IMPLIED
+        dictalias        CDATA                            #IMPLIED
+        access           (PUBLIC | PROTECTED | PRIVATE)   "PRIVATE"
+        compression      (TRUE | FALSE)                   "TRUE"
+        setMeth          (TRUE | FALSE)                   "TRUE"
+        getMeth          (TRUE | FALSE)                   "TRUE"
+        transient        (TRUE | FALSE)                   "FALSE"    
+        nonconstaccessor (TRUE | FALSE)                   "FALSE"
+>
+<!ELEMENT relation EMPTY>
+<!ATTLIST relation
+        type             CDATA                            #REQUIRED
+        name             CDATA                            #REQUIRED
+        desc             CDATA                            #REQUIRED
+        access           (PUBLIC | PROTECTED | PRIVATE)   "PRIVATE"
+        multiplicity     (1 | N | n | M | m)              "1"
+        serialize        (TRUE | FALSE)                   "TRUE"
+        setMeth          (TRUE | FALSE)                   "TRUE"
+        getMeth          (TRUE | FALSE)                   "TRUE"
+        addMeth          (TRUE | FALSE)                   "TRUE"
+        remMeth          (TRUE | FALSE)                   "TRUE"
+        clrMeth          (TRUE | FALSE)                   "TRUE"
+        nonconstaccessor (TRUE | FALSE)                   "FALSE"
+>
+<!ELEMENT bitfield EMPTY>
+<!ATTLIST bitfield
+        name             CDATA                             #REQUIRED
+        type             CDATA                             #IMPLIED
+        length           CDATA                             #REQUIRED
+        desc             CDATA                             #REQUIRED
+        startBit         CDATA                             #IMPLIED
+        exclusive        (TRUE | FALSE)                    "TRUE"
+        setMeth          (TRUE | FALSE)                    "TRUE"
+        getMeth          (TRUE | FALSE)                    "TRUE"
+        checkMeth        (TRUE | FALSE)                    "FALSE"
+>
+<!ELEMENT template EMPTY>
+<!ATTLIST template
+        name             CDATA                             #REQUIRED
+        t1               CDATA                             "THIS"
+        t2               CDATA                             #IMPLIED
+        t3               CDATA                             #IMPLIED
+        t4               CDATA                             #IMPLIED
+>
+
+<!ELEMENT assoc EMPTY>
+<!ATTLIST assoc
+        type             (1D | 2D)                         "1D"
+        weight           CDATA                             "NONE"
+        from             CDATA                             #REQUIRED
+        to               CDATA                             #REQUIRED
+>
+
+<!ENTITY KeyedObjectKey 'int'>
+<!ENTITY Reference '<template name="SmartRef"/>
+        <template name="SmartRefVector"/>'
+>
+<!ENTITY StlVector '<template name="vector" t1="THIS"/>'
+>
+<!ENTITY StlConstVector '<template name="vector" t1="const THIS"/>'
+>
+<!ENTITY StlPtrVector '<template name="vector" t1="THIS*"/>'
+>
+<!ENTITY StlConstPtrVector '<template name="vector" t1="const THIS*"/>'
+>
+<!ENTITY DataObject '<template name="SmartRef"/>
+        <template name="SmartRefVector"/>'
+>
+<!ENTITY ContainedObject '<template name="SmartRef"/>
+        <template name="SmartRefVector"/>
+        <template name="vector" t1="THIS*"/>
+        <template name="ObjectVector"/>'
+>
+<!ENTITY KeyedContainer '<template name="SmartRef"/>
+        <template name="SmartRefVector"/>
+        <template name="vector" t1="THIS*"/>
+        <template name="ObjectVector"/>
+        <template name="KeyedContainer"/>'
+>
+<!ENTITY KeyedObject '<template name="KeyedObject" t1="int"/>
+        <template name="SmartRef"/>
+        <template name="SmartRefVector"/>
+        <template name="vector" t1="THIS*"/>
+        <template name="ObjectVector"/>
+        <template name="KeyedContainer"/>'
+>
