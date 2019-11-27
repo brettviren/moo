@@ -3,19 +3,19 @@
 set namespaceSeparator ::
 {%- set nns = {} -%}
 {%- for msg in messages -%}
-{%- do nns.update({msg.name: msg.namespace}) -%}
+  {%- do nns.update({msg.name: msg.namespace}) -%}
 {%- endfor -%}
 
 {% for msg in messages %}
-{% set refs = [] %}
-class {{ msg.namespace}}::{{ msg.name }} <<message>> {
-    {% for fld in msg.fields -%}
+  {% set refs = [] %}
+  class {{ msg.namespace}}::{{ msg.name }} <<message>> {
+  {% for fld in msg.fields -%}
     {field} {{ fld.name }}: {{ fld.type }}
     {%- if fld.type in nns %}{% do refs.append(fld.type) %}{%endif%}
-    {% endfor %}
-}
-{% for ref in refs %}
-{{ msg.namespace }}::{{ msg.name }} *-- {{nns[ref]}}::{{ref}}
-{% endfor -%}
+  {% endfor %}
+  }
+  {% for ref in refs %}
+    {{ msg.namespace }}::{{ msg.name }} *-- {{nns[ref]}}::{{ref}}
+  {% endfor -%}
 {% endfor %}
 @enduml

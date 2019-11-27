@@ -15,14 +15,16 @@ $ pip install jsonnet jinja2
 * Use
 
 #+BEGIN_EXAMPLE
-$ ./moo.py ptmp-proto-pbv0.jsonnet 
-$ mkdir out ; protoc ptmp.proto --cpp_out=out
-$ ls out/
-ptmp.pb.cc  ptmp.pb.h
+  $ ./moo.py jsonnet/ptmp-main.jsonnet
+  ptmp-msg-classes.plantuml
+  ptmp.proto
 
-$ ./moo.py ptmp-msg-classes-v0.jsonnet
-$ plantuml ptmp-msg-classes.plantuml
-$ kitten icat ptmp-msg-classes.png
+  $ mkdir out ; protoc ptmp.proto --cpp_out=out
+  $ ls out/
+  ptmp.pb.cc  ptmp.pb.h
+
+  $ plantuml ptmp-msg-classes.plantuml
+  $ kitten icat ptmp-msg-classes.png
 #+END_EXAMPLE
 
 [[file:ptmp-msg-classes.png]]
