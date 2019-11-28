@@ -1,0 +1,55 @@
+// This file is 100% generated, do not edit.
+// Implement converter functions between WCT data interfaces and PB objects.
+
+// fixme: need to locate this header
+#include "wct-pb-funcs.h"
+
+{% for iface in ifaces %}
+{%- set proto = protos[iface.name] -%}
+{{ ('\n' ~ iface.comment) | wordwrap(70) | replace('\n', '\n// ') }}
+class PB{{ iface.name }} :: public WireCell::I{{ iface.name }} {
+public:
+    {{ iface.name }}(const {{ protons }}::{{ proto.name }}& obj) : m_obj(obj) {};
+    virtual ~{{ iface.name }}() {};
+
+{%- for methname, meth in iface.methods.items() %}
+{{ ('\n' ~ meth.comment) | wordwrap(64) | replace('\n', '\n    // ') }}
+    virtual {{ meth.return }} {{ methname }}({{ meth.args }}) const {
+{%- if meth.auto == "attribute" %}
+        return m_obj.{{ methname }}();
+{%- else -%};
+        return wct_iface_{{ iface.name | lower }}_{{ methname }}(m_obj);
+{%- endif %}
+    }
+{%- endfor %}
+
+private:
+    {{ protons }}::{{ proto.name }} m_obj;
+};
+{% endfor %}
+
+{% for iface in ifaces %}
+{% set proto = protos[iface.name] %}
+// Convert {{iface.name}} from WCT data interface to WCT protobuf object
+void
+WireCell::convert(const WireCell::I{{ iface.name}}::pointer &ifptr,
+                  {{ protons }}::{{ proto.name }}& pbobj)
+{
+{%- for field in proto.fields -%}
+{% if iface.methods[field.name] is defined and iface.methods[field.name].auto == "attribute" %}
+    auto {{field.name}} = ifptr->{{ field.name }}();
+{%- else %}
+    auto {{field.name}} = wcb_pb_{{ iface.name | lower }}_{{ field.name }}(ifptr);
+{%- endif %}
+    pbobj.set_{{ field.name }}({{ field.name }});
+{% endfor %}    
+}
+
+// Produce a WCT data interface from a WCT protobuf object.
+WireCell::I{{ iface.name }}::pointer
+WireCell::intern(const {{protons}}::{{proto.name}}& pbobj)
+{
+    return std::make_shared<PB{{ iface.name }}>(pbobj);
+}
+{% endfor %}
+

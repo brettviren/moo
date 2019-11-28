@@ -1,0 +1,25 @@
+// This file is 100% generated, do not edit.
+
+#ifndef WIRECELL_PB_FUNCS
+#define WIRECELL_PB_FUNCS
+
+{% for iface in ifaces %}
+#include "WireCellIface/I{{ iface.name }}.h"
+{% endfor %}
+
+namespace WireCell {
+
+    // Fill a PB object from its corresponding interface.  
+{%- for iface in ifaces %}
+    void fill({{protons}}::{{protos[iface.name].name}}& pbobj,
+              const I{{iface.name}}::pointer& ifptr);
+{%- endfor %}
+
+    // Produce data interface pointer from corresponding PB object.
+{%- for iface in ifaces %}
+    I{{iface.name}}::pointer intern(const {{protons}}::{{protos[iface.name].name}}& pbobj);
+{% endfor -%}
+
+}
+
+#endif

@@ -1,27 +1,30 @@
-// this defines schema
+// This defines a schema for a very basic description of data types.
+// It explicitly avoids supporting forms and concepts of different
+// representations.  This schema is expected to be extended by other
+// Jsonnet or Python processing.
 {
-    field : {
-        type: null,             // REQUIRED: data type
-        name: null,             // REQUIRED: field/variable name
-        comment: "",            // DEFAULT: description
-        initv: null,            // OPTIONAL: initial value
-        access: "public",       // DEFAULT: public/private/protected
-        scalar: true,           // DEFAULT: field is scalar, not array
-        optional: true,         // DEFAULT: object is whole even without field
+
+    // An attr associates a type to a name in some implicit context.
+    attr(type, name, comment="") :: {
+        // required type identifier
+        type: type,
+        // name of the attribute (in some assumed context such as an object)
+        name: name,
+        // decribe the attribute (in a context free way)
+        comment: comment,
     },
 
-    // here, object means class/struct not instance
-    object : {
-        name : null,            // REQUIRED: object (class) name
-        fields : [],            // DEFAULT: empty array of field
-        comment : null,         // DEFAULT: no comment
-        access : "public",      // DEFAULT: In C++, public is struct else class
-        version: 0,             // DEFAULT: version 0.
+    // An aggr aggregates attributes and is itself an attr.
+    aggr(name, comment, fields=[], type="struct") :: attr(type, name, comment) {
+        // the fields is an array of attr and marks this as an aggr
+        fields : fields,
     },
 
-    fieldify(f) :: $.field + f,
-
-    objectify(o) :: $.object + o + {
-        fields: [$.fieldify(f) for f in o.fields],
+    // An aseq is a sequence of attrs of the same type.  The "type" of
+    // this attribute remains that of the elements.  Existince of
+    // repeated marks this as an array.
+    aseq(type, name, comment="") :: attr(type,name,comment) {
+        repeated: true,
     },
+
 }

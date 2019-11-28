@@ -2,3 +2,7 @@
 venv
 __pycache__
 out
+PBTrace.h
+pbfuncs.cpp
+pbfuncs.h
+wct.proto
