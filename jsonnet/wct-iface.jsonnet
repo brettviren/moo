@@ -16,9 +16,8 @@
                 auto: "attribute",
             },
             charge : {
-                return: "const ChargeSequence&",
+                return: "const std::vector<float>&",
                 comment: "Access the ADC/charge waveform starting at tbin",
-                auto: false
             }
         }
     },
@@ -27,34 +26,30 @@
         comment: "A set of traces and associated metadata",
         methods: {
             frame_tags:  {
-                return: "const tag_list_t&",
+                return: "const WireCell::IFrame::tag_list_t&",
                 comment: "Tags on the frame",
-                auto: "attribute",
             },
             trace_tags:  {
-                return: "const tag_list_t&",
+                return: "const WireCell::IFrame::tag_list_t&",
                 comment: "Union of all sets of tags on traces",
-                auto: "attribute",
             },
             tagged_traces: {
-                return: "const trace_list_t&",
+                return: "const WireCell::IFrame::trace_list_t&",
                 comment: "Trace indices with given tag",
-                auto: false,
+                args: "const tag_t& tag",
             },
             trace_summary: {
-                return: "const trace_summary_t&",
+                return: "const WireCell::IFrame::trace_summary_t&",
                 comment: "Trace summary for given tag",
-                auto: false,
+                args: "const tag_t& tag",
             },
             traces: {
-                return: "ITrace::shared_vector",
+                return: "WireCell::ITrace::shared_vector",
                 comment: "All traces",
-                auto: false,
             },
             masks: {
-                return: "Waveform::ChannelMaskMap",
+                return: "WireCell::Waveform::ChannelMaskMap",
                 comment: "Channel mask map",
-                auto: false,
             },
             ident: {
                 return: "int",

@@ -2,15 +2,18 @@
 // Implement converter functions between WCT data interfaces and PB objects.
 
 // fixme: need to locate this header
-#include "wct-pb-funcs.h"
+#include "pbfuncs.h"
 
-{% for iface in ifaces %}
-{%- set proto = protos[iface.name] -%}
+#include "pbfuncs-handmade.h"
+
+{% for iface in ifaces.array %}
+{%- set proto = protos.byname[iface.name] -%}
+{%- set CLASS = "PB" + iface.name -%}
 {{ ('\n' ~ iface.comment) | wordwrap(70) | replace('\n', '\n// ') }}
-class PB{{ iface.name }} :: public WireCell::I{{ iface.name }} {
+class {{ CLASS }} : public WireCell::I{{ iface.name }} {
 public:
-    {{ iface.name }}(const {{ protons }}::{{ proto.name }}& obj) : m_obj(obj) {};
-    virtual ~{{ iface.name }}() {};
+    {{ CLASS }}(const {{ protons }}::{{ proto.name }}& obj) : m_obj(obj) {};
+    virtual ~{{ CLASS }}() {};
 
 {%- for methname, meth in iface.methods.items() %}
 {{ ('\n' ~ meth.comment) | wordwrap(64) | replace('\n', '\n    // ') }}
@@ -25,23 +28,22 @@ public:
 
 private:
     {{ protons }}::{{ proto.name }} m_obj;
-};
+};  // end {{ CLASS }}
 {% endfor %}
 
-{% for iface in ifaces %}
-{% set proto = protos[iface.name] %}
+{% for iface in ifaces.array %}
+{% set proto = protos.byname[iface.name] %}
 // Convert {{iface.name}} from WCT data interface to WCT protobuf object
 void
-WireCell::convert(const WireCell::I{{ iface.name}}::pointer &ifptr,
-                  {{ protons }}::{{ proto.name }}& pbobj)
+WireCell::fill({{ protons }}::{{ proto.name }}& pbobj,
+               const WireCell::I{{ iface.name}}::pointer &ifptr)
 {
 {%- for field in proto.fields -%}
 {% if iface.methods[field.name] is defined and iface.methods[field.name].auto == "attribute" %}
-    auto {{field.name}} = ifptr->{{ field.name }}();
+    pbobj.set_{{ field.name }}(ifptr->{{ field.name }}());
 {%- else %}
-    auto {{field.name}} = wcb_pb_{{ iface.name | lower }}_{{ field.name }}(ifptr);
+    wct_pb_{{ iface.name | lower }}_{{ field.name }}(pbobj, ifptr);
 {%- endif %}
-    pbobj.set_{{ field.name }}({{ field.name }});
 {% endfor %}    
 }
 

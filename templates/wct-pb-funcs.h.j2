@@ -3,21 +3,23 @@
 #ifndef WIRECELL_PB_FUNCS
 #define WIRECELL_PB_FUNCS
 
-{% for iface in ifaces %}
+{% for iface in ifaces.array %}
 #include "WireCellIface/I{{ iface.name }}.h"
 {% endfor %}
+
+#include "wct.pb.h"
 
 namespace WireCell {
 
     // Fill a PB object from its corresponding interface.  
-{%- for iface in ifaces %}
-    void fill({{protons}}::{{protos[iface.name].name}}& pbobj,
+{%- for iface in ifaces.array %}
+    void fill({{protons}}::{{protos.byname[iface.name].name}}& pbobj,
               const I{{iface.name}}::pointer& ifptr);
 {%- endfor %}
 
     // Produce data interface pointer from corresponding PB object.
-{%- for iface in ifaces %}
-    I{{iface.name}}::pointer intern(const {{protons}}::{{protos[iface.name].name}}& pbobj);
+{%- for iface in ifaces.array %}
+    I{{iface.name}}::pointer intern(const {{protons}}::{{protos.byname[iface.name].name}}& pbobj);
 {% endfor -%}
 
 }

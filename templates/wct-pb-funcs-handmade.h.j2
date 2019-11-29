@@ -1,0 +1,42 @@
+// This file is 100% generated, do not edit.
+
+// Declare the functions that need to be provided by hand.
+
+#ifndef WIRECELL_PB_FUNCS_HANDMADE
+#define WIRECELL_PB_FUNCS_HANDMADE
+
+{% for iface in ifaces.array %}
+#include "WireCellIface/I{{ iface.name }}.h"
+{% endfor %}
+
+#include "wct.pb.h"
+
+// Converters from WCT PB to data interface.
+{% for iface in ifaces.array %}
+{%- set proto = protos.byname[iface.name] -%}
+{%- set CLASS = "PB" + iface.name -%}
+{%- for methname, meth in iface.methods.items() %}
+{%- if not meth.auto %}
+{{ ('\n' ~ meth.comment) | wordwrap(64) | replace('\n', '\n// ') }}
+{{ meth.return }}
+wct_iface_{{ iface.name | lower }}_{{ methname }}(const {{ protons}}::{{ proto.name }}& obj);
+{%- endif %}
+{%- endfor %}
+{% endfor %}
+
+
+// Converters from WCT data interface to PB
+{% for iface in ifaces.array %}
+{%- set proto = protos.byname[iface.name] -%}
+{%- for field in proto.fields -%}
+{% if iface.methods[field.name] is defined and iface.methods[field.name].auto == "attribute" %}
+{%- else %}
+{{ ('\n' ~ field.comment) | wordwrap(64) | replace('\n', '\n// ') }}
+void wct_pb_{{ iface.name | lower }}_{{ field.name }}({{ protons}}::{{ proto.name }}& pbobj,
+    const WireCell::I{{ iface.name }}::pointer& ifptr);
+{%- endif %}
+{% endfor %}    
+{% endfor %}    
+
+
+#endif
