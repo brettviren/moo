@@ -6,12 +6,12 @@
         comment: "Interface to info about one trace",
         methods: {
             channel : {
-                return: "int",
+                return: "int32",
                 comment: "Return the identifier for the associated channel",
                 auto: "attribute",
             },
             tbin: {
-                return: "int",
+                return: "int32",
                 comment: "Return the tbin",
                 auto: "attribute",
             },

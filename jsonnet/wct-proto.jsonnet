@@ -17,15 +17,16 @@ local types = {
             {
                 type: types.int32,
                 name: "channel",
-                comment: "Identifier of channel associated with this waveform",
+                comment:"Identifier of channel associated with this waveform."
             }, {
                 type: types.int32,
                 name: "tbin",
-                comment: "Time bin relative to some time at which the first element of the charge array is to be taken",
+                comment: "Time bin relative to some time at which the first
+                    element of the charge array is to be taken."
             }, {
                 type: types.float,
                 name: "charge",
-                comment: "Contiguous charge measure on the channel starting at tbin",
+                comment:"Contiguous charge measure on the channel starting at tbin.",
                 repeated: true
             }
         ]
