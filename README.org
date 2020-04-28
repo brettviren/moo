@@ -1,6 +1,6 @@
-#+title: moo - module oriented objects
+#+title: moo - model oriented objects
 
-This package plays around with module-oriented programming such as
+This package plays around with model-oriented programming such as
 seen successfully used in GSL/zproto/zproject but here using Jsonnet
 and Jinja2 (and maybe not so successfully).
 

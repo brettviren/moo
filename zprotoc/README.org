@@ -1,0 +1,125 @@
+#+title: moo zprotoc
+
+Working title.
+
+* Overview
+
+moo zprotoc generates code that provides protocol endpoints.  It walks
+down the trail blazed by ZeroMQ's zproto but selects different
+*languages*:
+
+- modeling :: Jsonnet (instead of XML)
+- template :: Jinja2 (instead of GSL)
+- programming :: C++ with ~cppzmq~ (instead of C with CZMQ)
+
+
+* Layers
+
+The moo zprotoc is intended to produce *protocol endpoints*, although
+the approach and tools may be used in a similar manner for other types
+of application code generation.  The moo zprotoc system has these
+layers:
+
+- model :: a data structure defined in Jsonnet that describes the
+  *protocol endpoint behavior*, messages and methods.
+
+- codegen :: Jinja2 templates intermix generic source code with model
+  data to produce model-specific code.
+
+- support code :: some provided, hand-written code is assumed by the
+  codegen templates.  It is generic to all protocol endpoints that can
+  possibly be generated.
+
+- user code :: provide details not easily modeled.
+
+- result :: a compiled shared library ready for use in an application.
+
+* Behavior
+
+The "behavior" of the protocol endpoint means how the code responds to
+inputs.  Behavior is ultimately encoded as a state machine (SM)
+transition table which is provided by the model and from this a high
+performance ~boost.sml~ SM is generated as is a base class containing
+guard and action methods.  These methods are either pure virtual or if
+the model provides code snippets, they are final.
+
+The SM runs fully autonomously in a thread following the actor
+pattern.  The actor includes methods to handle protocol sockets used
+to communicate to the universe and special actor sockets used to
+communicate with the application through the API class.  The API class
+provides simple synchronous and asynchronous methods with which the
+application may control or query the actor and through the SM interact
+with the protocol.
+
+
+* Model Taxonomy
+
+Before we model, we must model the model.  The model provides a data
+structure that expresses describes a "protocol endpoint" by defining
+various objects in a taxonomy (type system).  These include
+
+- API method :: a *method* in the API class used by applications to
+  control or query the actor.  A method arguments can be thought of as
+  providing attributes to an object with a *type* that of the method
+  *name*.
+
+- API result :: an API method may be a command on the actor and expect
+  something back.  This something is a *result* which is an object with
+  a given type name.  It is converted to a return type of the method.
+
+- protocol message :: a *message* understood by the protocol and
+  received from or sent to the universe.  A message has a *name* which
+  determines its *type* similar to an API method.
+
+- SM events :: the objects that drive SM state changes.  An event has
+  a specific C++ type which corresponds to an API method or protocol
+  message type name.
+
+- endpoints :: a single model may describe multiple, related protocol
+  endpoints handlers.  For example a classic client/server
+  conversation has two separate handlers.  A symmetric conversation
+  may need one.  Complicated conversations may have multiple.  Each
+  endpoint handler uses a subset of a common set of states and events
+  shared with other endpoint handlers in the protocol.
+
+- API vs proto :: two classes for each protocol endpoint handler are
+  modeled: the API class is what the application uses and the proto
+  class is what is what the actor SM uses.
+
+* Modeling
+
+* Others
+
+** Zproto
+
+An improvement over the GSL based approach of Zproto is to make code
+generation and human coding distinct through C++ inheritance.  A file
+is either 100% generated or 100% human written.  There is no worry
+about lost work nor generated code not updating.
+
+It is hopeful that with these choices the powerful approach the Zproto
+will be made more accessible.  
+
+Beyond Zproto, other systems exist which are similar to moo zprotoc.
+
+** gRPC
+
+The gRPC system models message and method and generates code.  The
+protocol pattern limited to query/response/stream while moo zprotoc
+supports arbitrary conversation.  gRPC is synchronous-first with
+support for async but it is awkward.  moo zprotoc is
+asynchronous-first with first class and simple support for synchronous
+methods.  gRPC is asymmetric client/server.  moo zprotoc supports this
+pattern and as well as symmetric protocols and asymmetric multi-socket
+endpoints.  gRPC forces a particular message serialization (protobuf)
+while moo zprotoc is serialization-agnostic (for the protocol
+messages) and can use external serialization like protobuf, avro, etc.
+It has built-in support for all serialization supported by
+~nlohmann::json~.
+
+** Apache Thrift
+
+The documentation of Thrift is so poor it's hard to say much other
+than most of the gRPC statements apply.  Async is apparently not
+available.
+

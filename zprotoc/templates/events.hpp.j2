@@ -1,0 +1,25 @@
+/*
+ * THIS FILE IS TOTALLY GENERATED.  DO NOT EDIT
+ *
+ * {{license|wordwrap(72, wrapstring='\n * ')}}
+ *
+ * {{description|wordwrap(72, wrapstring='\n * ')}}
+ */
+#ifndef {{namespace|upper}}_EVENTS_HPP_SEEN
+#define {{namespace|upper}}_EVENTS_HPP_SEEN
+
+namespace {
+    {% for epname, ep in endpoints.items() %}
+    {% for eve in ep.events %}
+    struct {{eve.name}} {
+        const std::string name = "{{eve.name}}";
+        {% for attr in eve.attrs %}
+        {{attr.type.c}} {{attr.name}} = {{attr.def}};
+        {% endfor %}
+    };
+    {% endfor %}
+    {% endfor %}
+
+}
+
+#endif

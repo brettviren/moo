@@ -2,6 +2,7 @@
 #define MOO_EXTERNALS_HPP_SEEN
 
 #include "zmq.hpp"
+#include "zmq_addon.hpp"
 #include "json.hpp"
 
 namespace moo {

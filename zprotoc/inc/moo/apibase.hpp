@@ -4,6 +4,7 @@
 #include "moo/externals.hpp"
 
 #include <vector>
+#include <thread>
 
 namespace moo {
 
@@ -12,6 +13,11 @@ namespace moo {
 
     class apibase {
       public:
+
+        virtual ~apibase();
+
+        socket_t& command_link() { return m_cmdsock; }
+        socket_t& message_link() { return m_msgsock; }
 
         // Serialize a json object to a message
         message_t to_message(const json& obj);
@@ -25,12 +31,16 @@ namespace moo {
         
       protected:
 
-        // Subclass must call with its protocol implementation.
+        // Subclass must call with its protocol implementation which
+        // will be given to the actor.  It must not create any
+        // non-thread-safe sockets in its constructor.  
         apibase(std::unique_ptr<protobase> proto);
 
       private:
-        std::unique_ptr<protobase> m_proto;
-        socket_t m_cmdpipe, m_msgpipe;
+        context_t m_ctx;
+        // sockets make this class not copiable
+        socket_t m_cmdsock, m_msgsock;
+        std::thread m_actor;
     };
     
 } // moo
