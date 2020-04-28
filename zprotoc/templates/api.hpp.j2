@@ -1,0 +1,34 @@
+/*
+ * THIS FILE IS TOTALLY GENERATED.  DO NOT EDIT
+ *
+ * {{license|wordwrap(72, wrapstring='\n * ')}}
+ *
+ * {{description|wordwrap(72, wrapstring='\n * ')}}
+ */
+
+#ifndef {{namespace|upper}}_API_HPP_SEEN
+#define {{namespace|upper}}_API_HPP_SEEN
+
+#include "moo/apibase.hpp"
+
+namespace {{namespace}} {
+
+    {% for protoname, api in apis.items() %}
+
+    /** {{namespace}}::{{api.classname}} - API for {{protoname}} protocol
+     *
+     * {{api.description|wordwrap(72, wrapstring='\n     * ')}}
+     */
+    class {{api.classname}} : public moo::apibase {
+      public:
+        {% for met in api.methods %}
+        /// {{met.help}}
+        {{ met.type.c }} {{ met.message.name }} ( {% for f in met.message.attrs %}{{f.type.c}} {{f.name}} {{ "," if not loop.last }} {%endfor%});
+        {% endfor %}
+    };
+    {% endfor %}
+
+} // namespace {{namespace}}
+
+
+#endif // {{namespace|upper}}_API_HPP_SEEN

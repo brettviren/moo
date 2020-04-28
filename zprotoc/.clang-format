@@ -1,0 +1,9 @@
+Language:        Cpp
+BasedOnStyle: Google
+AccessModifierOffset: -2
+AllowAllConstructorInitializersOnNextLine: false
+AllowShortBlocksOnASingleLine: true
+IncludeBlocks:   Preserve
+IndentWidth:     4
+NamespaceIndentation: All
+SortIncludes:    false

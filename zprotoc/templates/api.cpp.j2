@@ -1,0 +1,47 @@
+/*
+ * THIS FILE IS TOTALLY GENERATED.  DO NOT EDIT
+ *
+ * {{license|wordwrap(72, wrapstring='\n * ')}}
+ *
+ * {{description|wordwrap(72, wrapstring='\n * ')}}
+ */
+
+#include "{{namespace}}/api.hpp"
+
+{% for apiname, api in apis.items() %}
+/*
+ * Methods for {{apiname}} API
+ */
+
+{% for met in api.methods %}
+// {{met.help}}
+{{ met.type.c }} {{namespace}}::{{api.classname}}::{{ met.message.name }} ( {% for f in met.message.attrs %}{{f.type.c}} {{f.name}}{{ "," if not loop.last }} {%endfor%})
+{
+    send_command({
+            {"name","{{met.message.name}}"},
+            {% for f in met.message.attrs -%}
+            { "{{f.name}}", {{f.name}} },
+            {%-endfor%}
+        });
+
+    {% if met.accepts %}
+    auto obj = recv_result();
+    {% if met.type.c != "void" %}
+
+    {% for acc in met.accepts %}
+    if (obj["name"] == "{{acc.message.name}}") {
+        {% for err in acc.errors %}
+        if (obj["{{err.key}}"] == {{err.value}}) {
+            {{err.code}}
+        }
+        {%endfor%}
+        return obj["{{acc.key}}"];
+    }
+    {% endfor-%}
+    {%endif%}
+    {%-endif %}
+    return {{ met.default }};
+}
+{%endfor%}
+
+{%endfor%}
