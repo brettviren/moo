@@ -4,14 +4,13 @@ Working title.
 
 * Overview
 
-moo zprotoc generates code that provides protocol endpoints.  It walks
-down the trail blazed by ZeroMQ's zproto but selects different
-*languages*:
+moo zprotoc generates code that provides ZeroMQ protocol endpoints.
+It walks down the trail blazed by ZeroMQ's zproto but does so with
+different *languages*:
 
 - modeling :: Jsonnet (instead of XML)
 - template :: Jinja2 (instead of GSL)
 - programming :: C++ with ~cppzmq~ (instead of C with CZMQ)
-
 
 * Layers
 
@@ -52,11 +51,8 @@ application may control or query the actor and through the SM interact
 with the protocol.
 
 
-* Model Taxonomy
 
-Before we model, we must model the model.  The model provides a data
-structure that expresses describes a "protocol endpoint" by defining
-various objects in a taxonomy (type system).  These include
+** blah blah
 
 - API method :: a *method* in the API class used by applications to
   control or query the actor.  A method arguments can be thought of as
@@ -86,7 +82,6 @@ various objects in a taxonomy (type system).  These include
   modeled: the API class is what the application uses and the proto
   class is what is what the actor SM uses.
 
-* Modeling
 
 * Others
 
