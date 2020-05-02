@@ -1,5 +1,0 @@
-.lock*
-.direnv
-.envrc
-build
-cut

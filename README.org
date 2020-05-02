@@ -1,31 +1,23 @@
 #+title: moo - model oriented objects
 
-This package plays around with model-oriented programming such as
-seen successfully used in GSL/zproto/zproject but here using Jsonnet
-and Jinja2 (and maybe not so successfully).
+* Overview
 
-* Install
+*moo* provides a system to model and generate code.  It walks down the
+trail blazed by ZeroMQ's [[https://github.com/zeromq/zproto][zproto]] but it does so with differing language
+choices:
 
-#+BEGIN_EXAMPLE
-$ python3 -m venv venv
-$ source venv/bin/activate
-$ pip install jsonnet jinja2
-#+END_EXAMPLE
+- modeling :: Jsonnet (instead of XML)
+- template :: Jinja2 (instead of GSL)
+- programming :: C++ with ~cppzmq~ (instead of C with CZMQ)
 
-* Use
+* Quick Start
 
-#+BEGIN_EXAMPLE
-  $ ./moo.py jsonnet/ptmp-main.jsonnet
-  ptmp-msg-classes.plantuml
-  ptmp.proto
+  #+begin_example
+  $ waf configure build
+  #+end_example
 
-  $ mkdir out ; protoc ptmp.proto --cpp_out=out
-  $ ls out/
-  ptmp.pb.cc  ptmp.pb.h
+* Documentation
 
-  $ plantuml ptmp-msg-classes.plantuml
-  $ kitten icat ptmp-msg-classes.png
-#+END_EXAMPLE
+https://brettviren.github.io/moo
 
-[[file:ptmp-msg-classes.png]]
 

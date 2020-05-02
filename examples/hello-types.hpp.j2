@@ -1,0 +1,37 @@
+/* 100% GENERATED FILE DO NOT EDIT
+ *
+ * Known types:
+ * {% for type in types %}
+ * - {{ type }}{% endfor %}
+ */
+
+#ifndef {{namespace|upper}}_{{obj.name|upper}}
+#define {{namespace|upper}}_{{obj.name|upper}}
+
+namespace {{namespace}} {
+
+struct {{obj.name}} {
+    {%- for attr in obj.attrs %}
+    {{attr.type.c}} {{attr.name}} = {% if attr.type.name == "str" -%}
+                            "{{attr.def}}"
+                        {%- else -%}{{attr.def}}{%- endif -%};
+    {%- endfor %}
+};
+
+void to_json(json& j, const person& p)
+{
+    j = json{
+        {%- for attr in obj.attrs -%}
+        {"{{attr.name}}", p.{{attr.name}}}{{ "," if not loop.last }}
+        {%- endfor -%}
+    };
+}
+
+void from_json(const json& j, person& p)
+{
+    {%- for attr in obj.attrs %}
+    j.at("{{attr.name}}").get_to(p.{{attr.name}});
+    {%- endfor %}
+}
+} // namespace {{namespace}}
+#endif

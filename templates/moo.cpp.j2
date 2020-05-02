@@ -1,0 +1,15 @@
+{% macro struct(obj) %}
+struct {{ obj.name }} {
+    {% for a in obj.attrs %}
+    {% if a.type.name == "str" %}
+        {{a.type.c}} {{a.name}} = "{{a.def}}";
+    {% else %}
+        {{a.type.c}} {{a.name}} = {{a.def}};
+    {% endif %}
+    {% endfor %}
+    };
+{% endmacro %}
+
+{% macro method_decl(m) %}
+{{m.type.c}} {{m.name}}({% for a in m.attrs %}{{a.type.c}} {{a.name}}{{ "," if not loop.last }}{% endfor %});
+{% endmacro %}

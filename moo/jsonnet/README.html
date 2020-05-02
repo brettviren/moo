@@ -1,0 +1,857 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+<!-- 2020-04-30 Thu 15:28 -->
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>&lrm;</title>
+<meta name="generator" content="Org mode" />
+<meta name="author" content="Brett Viren" />
+<style type="text/css">
+ <!--/*--><![CDATA[/*><!--*/
+  .title  { text-align: center;
+             margin-bottom: .2em; }
+  .subtitle { text-align: center;
+              font-size: medium;
+              font-weight: bold;
+              margin-top:0; }
+  .todo   { font-family: monospace; color: red; }
+  .done   { font-family: monospace; color: green; }
+  .priority { font-family: monospace; color: orange; }
+  .tag    { background-color: #eee; font-family: monospace;
+            padding: 2px; font-size: 80%; font-weight: normal; }
+  .timestamp { color: #bebebe; }
+  .timestamp-kwd { color: #5f9ea0; }
+  .org-right  { margin-left: auto; margin-right: 0px;  text-align: right; }
+  .org-left   { margin-left: 0px;  margin-right: auto; text-align: left; }
+  .org-center { margin-left: auto; margin-right: auto; text-align: center; }
+  .underline { text-decoration: underline; }
+  #postamble p, #preamble p { font-size: 90%; margin: .2em; }
+  p.verse { margin-left: 3%; }
+  pre {
+    border: 1px solid #ccc;
+    box-shadow: 3px 3px 3px #eee;
+    padding: 8pt;
+    font-family: monospace;
+    overflow: auto;
+    margin: 1.2em;
+  }
+  pre.src {
+    position: relative;
+    overflow: visible;
+    padding-top: 1.2em;
+  }
+  pre.src:before {
+    display: none;
+    position: absolute;
+    background-color: white;
+    top: -10px;
+    right: 10px;
+    padding: 3px;
+    border: 1px solid black;
+  }
+  pre.src:hover:before { display: inline;}
+  /* Languages per Org manual */
+  pre.src-asymptote:before { content: 'Asymptote'; }
+  pre.src-awk:before { content: 'Awk'; }
+  pre.src-C:before { content: 'C'; }
+  /* pre.src-C++ doesn't work in CSS */
+  pre.src-clojure:before { content: 'Clojure'; }
+  pre.src-css:before { content: 'CSS'; }
+  pre.src-D:before { content: 'D'; }
+  pre.src-ditaa:before { content: 'ditaa'; }
+  pre.src-dot:before { content: 'Graphviz'; }
+  pre.src-calc:before { content: 'Emacs Calc'; }
+  pre.src-emacs-lisp:before { content: 'Emacs Lisp'; }
+  pre.src-fortran:before { content: 'Fortran'; }
+  pre.src-gnuplot:before { content: 'gnuplot'; }
+  pre.src-haskell:before { content: 'Haskell'; }
+  pre.src-hledger:before { content: 'hledger'; }
+  pre.src-java:before { content: 'Java'; }
+  pre.src-js:before { content: 'Javascript'; }
+  pre.src-latex:before { content: 'LaTeX'; }
+  pre.src-ledger:before { content: 'Ledger'; }
+  pre.src-lisp:before { content: 'Lisp'; }
+  pre.src-lilypond:before { content: 'Lilypond'; }
+  pre.src-lua:before { content: 'Lua'; }
+  pre.src-matlab:before { content: 'MATLAB'; }
+  pre.src-mscgen:before { content: 'Mscgen'; }
+  pre.src-ocaml:before { content: 'Objective Caml'; }
+  pre.src-octave:before { content: 'Octave'; }
+  pre.src-org:before { content: 'Org mode'; }
+  pre.src-oz:before { content: 'OZ'; }
+  pre.src-plantuml:before { content: 'Plantuml'; }
+  pre.src-processing:before { content: 'Processing.js'; }
+  pre.src-python:before { content: 'Python'; }
+  pre.src-R:before { content: 'R'; }
+  pre.src-ruby:before { content: 'Ruby'; }
+  pre.src-sass:before { content: 'Sass'; }
+  pre.src-scheme:before { content: 'Scheme'; }
+  pre.src-screen:before { content: 'Gnu Screen'; }
+  pre.src-sed:before { content: 'Sed'; }
+  pre.src-sh:before { content: 'shell'; }
+  pre.src-sql:before { content: 'SQL'; }
+  pre.src-sqlite:before { content: 'SQLite'; }
+  /* additional languages in org.el's org-babel-load-languages alist */
+  pre.src-forth:before { content: 'Forth'; }
+  pre.src-io:before { content: 'IO'; }
+  pre.src-J:before { content: 'J'; }
+  pre.src-makefile:before { content: 'Makefile'; }
+  pre.src-maxima:before { content: 'Maxima'; }
+  pre.src-perl:before { content: 'Perl'; }
+  pre.src-picolisp:before { content: 'Pico Lisp'; }
+  pre.src-scala:before { content: 'Scala'; }
+  pre.src-shell:before { content: 'Shell Script'; }
+  pre.src-ebnf2ps:before { content: 'ebfn2ps'; }
+  /* additional language identifiers per "defun org-babel-execute"
+       in ob-*.el */
+  pre.src-cpp:before  { content: 'C++'; }
+  pre.src-abc:before  { content: 'ABC'; }
+  pre.src-coq:before  { content: 'Coq'; }
+  pre.src-groovy:before  { content: 'Groovy'; }
+  /* additional language identifiers from org-babel-shell-names in
+     ob-shell.el: ob-shell is the only babel language using a lambda to put
+     the execution function name together. */
+  pre.src-bash:before  { content: 'bash'; }
+  pre.src-csh:before  { content: 'csh'; }
+  pre.src-ash:before  { content: 'ash'; }
+  pre.src-dash:before  { content: 'dash'; }
+  pre.src-ksh:before  { content: 'ksh'; }
+  pre.src-mksh:before  { content: 'mksh'; }
+  pre.src-posh:before  { content: 'posh'; }
+  /* Additional Emacs modes also supported by the LaTeX listings package */
+  pre.src-ada:before { content: 'Ada'; }
+  pre.src-asm:before { content: 'Assembler'; }
+  pre.src-caml:before { content: 'Caml'; }
+  pre.src-delphi:before { content: 'Delphi'; }
+  pre.src-html:before { content: 'HTML'; }
+  pre.src-idl:before { content: 'IDL'; }
+  pre.src-mercury:before { content: 'Mercury'; }
+  pre.src-metapost:before { content: 'MetaPost'; }
+  pre.src-modula-2:before { content: 'Modula-2'; }
+  pre.src-pascal:before { content: 'Pascal'; }
+  pre.src-ps:before { content: 'PostScript'; }
+  pre.src-prolog:before { content: 'Prolog'; }
+  pre.src-simula:before { content: 'Simula'; }
+  pre.src-tcl:before { content: 'tcl'; }
+  pre.src-tex:before { content: 'TeX'; }
+  pre.src-plain-tex:before { content: 'Plain TeX'; }
+  pre.src-verilog:before { content: 'Verilog'; }
+  pre.src-vhdl:before { content: 'VHDL'; }
+  pre.src-xml:before { content: 'XML'; }
+  pre.src-nxml:before { content: 'XML'; }
+  /* add a generic configuration mode; LaTeX export needs an additional
+     (add-to-list 'org-latex-listings-langs '(conf " ")) in .emacs */
+  pre.src-conf:before { content: 'Configuration File'; }
+
+  table { border-collapse:collapse; }
+  caption.t-above { caption-side: top; }
+  caption.t-bottom { caption-side: bottom; }
+  td, th { vertical-align:top;  }
+  th.org-right  { text-align: center;  }
+  th.org-left   { text-align: center;   }
+  th.org-center { text-align: center; }
+  td.org-right  { text-align: right;  }
+  td.org-left   { text-align: left;   }
+  td.org-center { text-align: center; }
+  dt { font-weight: bold; }
+  .footpara { display: inline; }
+  .footdef  { margin-bottom: 1em; }
+  .figure { padding: 1em; }
+  .figure p { text-align: center; }
+  .equation-container {
+    display: table;
+    text-align: center;
+    width: 100%;
+  }
+  .equation {
+    vertical-align: middle;
+  }
+  .equation-label {
+    display: table-cell;
+    text-align: right;
+    vertical-align: middle;
+  }
+  .inlinetask {
+    padding: 10px;
+    border: 2px solid gray;
+    margin: 10px;
+    background: #ffffcc;
+  }
+  #org-div-home-and-up
+   { text-align: right; font-size: 70%; white-space: nowrap; }
+  textarea { overflow-x: auto; }
+  .linenr { font-size: smaller }
+  .code-highlighted { background-color: #ffff00; }
+  .org-info-js_info-navigation { border-style: none; }
+  #org-info-js_console-label
+    { font-size: 10px; font-weight: bold; white-space: nowrap; }
+  .org-info-js_search-highlight
+    { background-color: #ffff00; color: #000000; font-weight: bold; }
+  .org-svg { width: 90%; }
+  /*]]>*/-->
+</style>
+<script type="text/javascript">
+/*
+@licstart  The following is the entire license notice for the
+JavaScript code in this tag.
+
+Copyright (C) 2012-2020 Free Software Foundation, Inc.
+
+The JavaScript code in this tag is free software: you can
+redistribute it and/or modify it under the terms of the GNU
+General Public License (GNU GPL) as published by the Free Software
+Foundation, either version 3 of the License, or (at your option)
+any later version.  The code is distributed WITHOUT ANY WARRANTY;
+without even the implied warranty of MERCHANTABILITY or FITNESS
+FOR A PARTICULAR PURPOSE.  See the GNU GPL for more details.
+
+As additional permission under GNU GPL version 3 section 7, you
+may distribute non-source (e.g., minimized or compacted) forms of
+that code without the copy of the GNU GPL normally required by
+section 4, provided you include this license notice and a URL
+through which recipients can access the Corresponding Source.
+
+
+@licend  The above is the entire license notice
+for the JavaScript code in this tag.
+*/
+<!--/*--><![CDATA[/*><!--*/
+ function CodeHighlightOn(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(null != target) {
+     elem.cacheClassElem = elem.className;
+     elem.cacheClassTarget = target.className;
+     target.className = "code-highlighted";
+     elem.className   = "code-highlighted";
+   }
+ }
+ function CodeHighlightOff(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(elem.cacheClassElem)
+     elem.className = elem.cacheClassElem;
+   if(elem.cacheClassTarget)
+     target.className = elem.cacheClassTarget;
+ }
+/*]]>*///-->
+</script>
+</head>
+<body>
+<div id="content">
+<div id="outline-container-org2e5892c" class="outline-2">
+<h2 id="org2e5892c"><span class="section-number-2">1</span> Model Taxonomy</h2>
+<div class="outline-text-2" id="text-1">
+<p>
+Before we model, we must model the model.  Our eventual model is a
+data structure which follows a particular object schema.  That data
+structure will eventually describes all the parts that go into a
+"protocol endpoint" and so the schema it follows is described in term
+of the "taxonomy of protocol endpoints".  We don't know what the heck
+a "taxonomy of protocol endpoints" is, but that shouldn't stop us from
+creating it.
+</p>
+
+<p>
+But, first we must say that the data structure which is our model will
+be rather annoying to write out in long hand.  Thus we will model our
+model in Jsonnet.  So this section is really modeling a model of our
+model.  This is of course ridiculous (despite being true).  To keep it
+simple, moo gives us some Jsonnet functions and data structures to use
+when constructing model that forces the resulting data structure to be
+well formed.  In fact, it is these functions that define the schema
+which our templates must finally honor.
+</p>
+</div>
+
+
+<div id="outline-container-org1179768" class="outline-3">
+<h3 id="org1179768"><span class="section-number-3">1.1</span> Basic types</h3>
+<div class="outline-text-3" id="text-1-1">
+<p>
+Eventually our model will be applied a template to generate code.
+Most code needs to include some type names so we must be able to name
+types.  In moo we do that like:
+</p>
+
+<div class="org-src-container">
+<pre class="src src-jsonnet"><span style="color: #b4fa70;">local</span> lang = <span style="color: #b4fa70;">import</span> <span style="color: #e9b96e;">"moo/cpp.jsonnet"</span>;
+lang.types.string
+</pre>
+</div>
+
+<p>
+Which returns:
+</p>
+
+<div class="org-src-container">
+<pre class="src src-c++"><span style="color: #e9b96e;">"std::string"</span>
+</pre>
+</div>
+
+<p>
+A moo type is simply the name of some type in the target programming
+language stored in a Jsonnet variable which itself evokes the type
+name.  The Jsonnet variable name is consistent across all target
+variables.  Eg,
+</p>
+
+<div class="org-src-container">
+<pre class="src src-jsonnet"><span style="color: #b4fa70;">local</span> lang = <span style="color: #b4fa70;">import</span> <span style="color: #e9b96e;">"moo/python.jsonnet"</span>;
+lang.types.string
+</pre>
+</div>
+
+<p>
+Returns
+</p>
+
+<div class="org-src-container">
+<pre class="src src-c++"><span style="color: #e9b96e;">"str"</span>
+</pre>
+</div>
+
+<p>
+There are similar basic types defined for all your plain-old-data
+needs.  If any are missing, well, we can add them.  
+</p>
+
+<p>
+But, before we leave basic types there is one type which is not a type
+and that is <code>notype</code> which in C++ gives our friend, <code>void</code>.
+</p>
+</div>
+</div>
+
+<div id="outline-container-orga90492f" class="outline-3">
+<h3 id="orga90492f"><span class="section-number-3">1.2</span> Attributes</h3>
+<div class="outline-text-3" id="text-1-2">
+<p>
+It is sometimes not enough to simply name a type and we often must
+name a thing.  A named thing in moo is an attribute.  An attribute of
+what?  Who knows? (Well, we do, but we do not yet say).
+</p>
+
+<div class="org-src-container">
+<pre class="src src-jsonnet"><span style="color: #b4fa70;">local</span> moo = <span style="color: #b4fa70;">import</span> <span style="color: #e9b96e;">"moo.jsonnet"</span>;
+<span style="color: #b4fa70;">local</span> lang = <span style="color: #b4fa70;">import</span> <span style="color: #e9b96e;">"moo/cpp.jsonnet"</span>;
+moo.attribute(<span style="color: #e9b96e;">"color"</span>, lang.types.string, <span style="color: #e9b96e;">"purple"</span>)
+</pre>
+</div>
+
+<p>
+Returns:
+</p>
+
+<div class="org-src-container">
+<pre class="src src-json">{
+   <span style="color: #b4fa70;">"def"</span>: <span style="color: #e9b96e;">"purple"</span>,
+   <span style="color: #b4fa70;">"name"</span>: <span style="color: #e9b96e;">"color"</span>,
+   <span style="color: #b4fa70;">"type"</span>: <span style="color: #e9b96e;">"std::string"</span>
+}
+</pre>
+</div>
+
+<p>
+So, an attribute has a type, a name and a default (<code>"def"</code>) value of the
+given type.  It is fun to talk about one attribute here and one
+attribute there but sometimes we want more than one.  When we have
+many attributes we simply have an array of attribute.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-jsonnet"><span style="color: #b4fa70;">local</span> moo = <span style="color: #b4fa70;">import</span> <span style="color: #e9b96e;">"moo.jsonnet"</span>;
+<span style="color: #b4fa70;">local</span> lang = <span style="color: #b4fa70;">import</span> <span style="color: #e9b96e;">"moo/cpp.jsonnet"</span>;
+[
+  moo.attribute(<span style="color: #e9b96e;">"color"</span>, lang.types.string, <span style="color: #e9b96e;">"purple"</span>),
+  moo.attribute(<span style="color: #e9b96e;">"count"</span>, lang.types.integer, 0),
+]
+</pre>
+</div>
+
+<p>
+This compiles to:
+</p>
+
+<div class="org-src-container">
+<pre class="src src-json">[
+   {
+      <span style="color: #b4fa70;">"def"</span>: <span style="color: #e9b96e;">"purple"</span>,
+      <span style="color: #b4fa70;">"name"</span>: <span style="color: #e9b96e;">"color"</span>,
+      <span style="color: #b4fa70;">"type"</span>: <span style="color: #e9b96e;">"std::string"</span>
+   },
+   {
+      <span style="color: #b4fa70;">"def"</span>: <span style="color: #e9b2e3;">0</span>,
+      <span style="color: #b4fa70;">"name"</span>: <span style="color: #e9b96e;">"count"</span>,
+      <span style="color: #b4fa70;">"type"</span>: <span style="color: #e9b96e;">"int"</span>
+   }
+]
+</pre>
+</div>
+
+<p>
+These JSON examples are getting long and already Jsonnet's brevity is
+being appreciated.
+</p>
+</div>
+</div>
+
+<div id="outline-container-org91d8814" class="outline-3">
+<h3 id="org91d8814"><span class="section-number-3">1.3</span> Object</h3>
+<div class="outline-text-3" id="text-1-3">
+<p>
+Our next scale up in complexity is on the one hand rather simple.  We
+combine a "name" with some attributes and call it an "object".  The
+"name" we will interpret kind of like a type.
+</p>
+
+<p>
+In fact, in some cases, we interpret it exactly like a type.  Some
+templates will generate a target language <code>struct</code> or <code>class</code> type from a
+model object.  Others will generate a message schema or generate code
+that can make messages where the "name" is held by the message as a
+type identifier.
+</p>
+
+<p>
+We will also add an optional element of <code>object</code> which is a brief
+documentation string called <code>help</code>.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-jsonnet"><span style="color: #b4fa70;">local</span> moo = <span style="color: #b4fa70;">import</span> <span style="color: #e9b96e;">"moo.jsonnet"</span>;
+<span style="color: #b4fa70;">local</span> lang = <span style="color: #b4fa70;">import</span> <span style="color: #e9b96e;">"moo/cpp.jsonnet"</span>;
+moo.object(<span style="color: #e9b96e;">"candies"</span>, [
+  moo.attribute(<span style="color: #e9b96e;">"color"</span>, lang.types.string, <span style="color: #e9b96e;">"purple"</span>),
+  moo.attribute(<span style="color: #e9b96e;">"count"</span>, lang.types.integer, 0),
+], <span style="color: #e9b96e;">"A container full of yumminess"</span>)
+</pre>
+</div>
+
+<p>
+We'll omit the JSON as it's no long exciting to see all those curly
+braces and quotes.  The JSON object representation of <code>object</code> is not
+particularly important until we learn about writing templates but
+<code>.name</code> givs us the name, <code>.attrs</code> gives the array of attributes and <code>.help</code>
+gives us the help string.
+</p>
+
+<p>
+Let's think more about our <code>object</code>.  It models a compound of types and
+has a name that is kind of a type, but not really.  The name just
+identifies the type.  The <code>object</code> as a whole is the type.  Just like in
+C++ the <code>struct</code> name is not a type it just names a type.  Okay, so then
+shouldn't we be able to make an object with attributes that are
+themselves objects?  Let's not ask for permission.  Let's just do it:
+</p>
+
+<div class="org-src-container">
+<pre class="src src-jsonnet"><span style="color: #b4fa70;">local</span> moo = <span style="color: #b4fa70;">import</span> <span style="color: #e9b96e;">"moo.jsonnet"</span>;
+<span style="color: #b4fa70;">local</span> lang = <span style="color: #b4fa70;">import</span> <span style="color: #e9b96e;">"moo/cpp.jsonnet"</span>;
+<span style="color: #b4fa70;">local</span> candies = moo.object(<span style="color: #e9b96e;">"candies"</span>, [
+    moo.attribute(<span style="color: #e9b96e;">"color"</span>, lang.types.string, <span style="color: #e9b96e;">"purple"</span>),
+    moo.attribute(<span style="color: #e9b96e;">"count"</span>, lang.types.integer, 0),
+]);
+moo.object(<span style="color: #e9b96e;">"eat"</span>, [
+    moo.attribute(<span style="color: #e9b96e;">"snack"</span>, candies),
+])
+</pre>
+</div>
+
+<p>
+Well, that at least compiles to JSON.  We omitted the "help" for
+brevity.  We also did not give a default value for the <code>"eat"</code> object
+which holds a single <code>attribute</code> which is an <code>object</code>.  What sort of
+default can we give since we are modeling and not generating code?
+The answer is none, so we give none.  Templates that use the model can
+still make a default from an <code>object</code> as each attribute (which isn't an
+<code>object</code>) provide a default.
+</p>
+</div>
+</div>
+
+<div id="outline-container-orgf71ca13" class="outline-3">
+<h3 id="orgf71ca13"><span class="section-number-3">1.4</span> Method</h3>
+<div class="outline-text-3" id="text-1-4">
+<p>
+We say a "method" is a function called on an associated "instance".
+The call possibly has some arguments, each of a type and possibly
+returns a value of a type.  
+</p>
+
+<p>
+In moo we could model a <code>method</code> similar to an <code>object</code>.  The <code>name</code> of the
+<code>object</code> could be the name of the method, the attributes of the object
+could be the arguments.  
+</p>
+
+<p>
+But whence the return value and type?  We could model the <code>method</code> as an
+attribute.  Then we have the name, and the return value and type.
+But, now we've lost arguments (I hate losing arguments).
+</p>
+
+<p>
+We could make a special attribute of an <code>object</code> describe the return
+type but that feels too invasive and level smashing (I hate layer
+smashing).
+</p>
+
+<p>
+So we make a new model for a method which smooshes the two together.
+But we still note that the resulting <code>method</code> data structure looks a
+whole lot like an <code>attribute</code> or an <code>object</code>.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-jsonnet"><span style="color: #b4fa70;">local</span> moo = <span style="color: #b4fa70;">import</span> <span style="color: #e9b96e;">"moo.jsonnet"</span>;
+<span style="color: #b4fa70;">local</span> lang = <span style="color: #b4fa70;">import</span> <span style="color: #e9b96e;">"moo/cpp.jsonnet"</span>;
+moo.method(<span style="color: #e9b96e;">"open"</span>, lang.types.boolean, <span style="color: #e9b2e3;">false</span>, [
+    moo.attribute(<span style="color: #e9b96e;">"door"</span>, lang.types.string),
+    moo.attribute(<span style="color: #e9b96e;">"code"</span>, lang.types.integer, 1234)],
+           <span style="color: #e9b96e;">"Open a door with a code, return true if successful"</span>)
+</pre>
+</div>
+
+<p>
+We also see that the beauty of a <code>method</code> is, at best, skin deep.
+Except for the parts in <code>lang</code> which are target-language-specific, we
+have no way to specify the "guts" of the method.  If there are any
+guts to serve at all, it is up to the templates to do that carving.
+</p>
+</div>
+</div>
+
+<div id="outline-container-org9c2fda0" class="outline-3">
+<h3 id="org9c2fda0"><span class="section-number-3">1.5</span> State Machine</h3>
+<div class="outline-text-3" id="text-1-5">
+<p>
+The next model type is itself its own little world as moo has for
+modeling (hierarchical) finite state machines (FSM - not flying
+spaghetti monster).  If you do not know what FSMs are, go read
+<a href="https://en.wikipedia.org/wiki/Finite-state_machine">wikipedia</a>.  Go on, I'll wait.
+</p>
+
+<p>
+Back already?  Fascinating stuff, wasn't it.  As you learned, FSMs
+have a few interrelated parts and thus their modeling requires a few
+interrelated models.  
+</p>
+
+<p>
+SM are important to the great protocol endpoint taxonomy that we
+endeavor to one day define.  As programmers, we write SMs all the time
+without knowing it.  On the street they are called "an ugly mess of
+if/then/else and sometimes goto".  But in the pristine halls of
+academia (if I was still allowed in) we come up with names for messes
+and call it science.  So, "hierarchical finite state machine" it is.
+And, in fairness, modeling the mess of branching we ultimately always
+need gives us an excellent way to disentangle that mess and approach
+something that might resemble beauty.
+</p>
+
+<p>
+In moo we already know all the models we need to construct a model of
+an FSM.  Here are the
+</p>
+
+<dl class="org-dl">
+<dt>event</dt><dd><code>object</code></dd>
+<dt>guard</dt><dd><code>method</code> (returning boolean)</dd>
+<dt>action</dt><dd><code>method</code> (returning null)</dd>
+<dt>state</dt><dd><code>object</code> (likely devoid of attributes)</dd>
+<dt>transition</dt><dd>two states and optional event, guards and actions</dd>
+<dt>context</dt><dd><code>object</code> some contextual data accessible to guards and actions and the larger context calling the state machine</dd>
+<dt>machine</dt><dd><code>object</code> with at least one attribute named <code>tt</code> holding array of transitions and a <code>context</code> attribute.  A machine may also be used where a state is used and that's what lets us use the fancy word "hierarchical".</dd>
+</dl>
+
+
+<div class="org-src-container">
+<pre class="src src-jsonnet"><span style="color: #b4fa70;">local</span> moo = <span style="color: #b4fa70;">import</span> <span style="color: #e9b96e;">"moo.jsonnet"</span>;
+<span style="color: #b4fa70;">local</span> lang = <span style="color: #b4fa70;">import</span> <span style="color: #e9b96e;">"moo/cpp.jsonnet"</span>;
+<span style="color: #b4fa70;">local</span> string = lang.types.string;
+<span style="color: #b4fa70;">local</span> boolean = lang.types.boolean;
+<span style="color: #73d216;">// </span><span style="color: #73d216;">events</span>
+<span style="color: #b4fa70;">local</span> start = moo.object(<span style="color: #e9b96e;">"start"</span>, [moo.attribute(<span style="color: #e9b96e;">"greeting"</span>, string, <span style="color: #e9b96e;">'""'</span>)]);
+<span style="color: #b4fa70;">local</span> quit = moo.object(<span style="color: #e9b96e;">"quit"</span>);
+<span style="color: #73d216;">// </span><span style="color: #73d216;">states</span>
+<span style="color: #b4fa70;">local</span> ini = moo.object(<span style="color: #e9b96e;">"initializing"</span>);
+<span style="color: #b4fa70;">local</span> wrk = moo.object(<span style="color: #e9b96e;">"working"</span>);
+<span style="color: #b4fa70;">local</span> fin = moo.object(<span style="color: #e9b96e;">"finalizing"</span>);
+<span style="color: #73d216;">// </span><span style="color: #73d216;">guards</span>
+<span style="color: #b4fa70;">local</span> awake = moo.method(<span style="color: #e9b96e;">"check_awake"</span>, boolean, <span style="color: #e9b2e3;">false</span>);
+<span style="color: #b4fa70;">local</span> happy = moo.method(<span style="color: #e9b96e;">"check_happy"</span>, boolean, <span style="color: #e9b2e3;">false</span>);
+<span style="color: #73d216;">// </span><span style="color: #73d216;">actions</span>
+<span style="color: #b4fa70;">local</span> dowork = moo.method(<span style="color: #e9b96e;">"dig_that_hole"</span>, lang.types.notype);
+<span style="color: #73d216;">// </span><span style="color: #73d216;">transition table</span>
+<span style="color: #b4fa70;">local</span> tt = [
+    moo.transition(ini,wrk,start,[awake,happy],[dowork]),
+    moo.transition(wrk,fin,quit)
+];
+<span style="color: #b4fa70;">local</span> ctx = moo.object(<span style="color: #e9b96e;">"gear"</span>, [ moo.attribute(<span style="color: #e9b96e;">"lunch"</span>, string, <span style="color: #e9b96e;">'"sandwich"'</span>),
+                                 moo.attribute(<span style="color: #e9b96e;">"tool"</span>, string, <span style="color: #e9b96e;">'"hammer"'</span>) ]);
+<span style="color: #b4fa70;">local</span> worksm = moo.object(<span style="color: #e9b96e;">"work"</span>, [ moo.attribute(<span style="color: #e9b96e;">"tt"</span>, tt),
+                                    moo.attribute(<span style="color: #e9b96e;">"context"</span>, ctx) ]);
+worksm
+</pre>
+</div>
+
+<p>
+Modeling FSMs in moo requires embracing some caveats.  Ultimately the
+FSM implementation depends on how the template interprets the model.
+This is true for all moo models and templates but it's extra true for
+FSMs.  The FSM model may turn into a nest of <code>if/then/else</code> branches or
+the use of the <code>tt</code> may turn into a literal lookup into a transition
+table.  The instance of the <code>context</code> model may be explicitly passed
+into guards and actions or it may be "global".  In a likewise or
+different fashion the current event instance may be made available to
+these methods.  When we model the FSM we must know what data can be
+shared between the FSM parts but the model doesn't specify how it is
+shared, or even that it is shared, the template does.  
+</p>
+
+<p>
+This unfortunately produces a conceptual cycle between the model and
+the template.  Your humble author apologizes but I squeak a defense
+that to further specify the FSM in the model would limit how it may be
+implemented to the extent that the model would hold implementation
+code and break my promise that modeling does not require programming.
+</p>
+</div>
+</div>
+
+<div id="outline-container-orgbfdcd74" class="outline-3">
+<h3 id="orgbfdcd74"><span class="section-number-3">1.6</span> Command</h3>
+<div class="outline-text-3" id="text-1-6">
+<p>
+We now start to get out of the low level world of navel gathering on
+basic data structures and up our game to begin navel gathering on the
+mythical "protocol endpoint taxonomy".
+</p>
+
+<p>
+One of the most basic protocols is a back and maybe a forth exchange
+between two entities.  I tell you to jump, you say how high.  Or,
+maybe you simply ignore me.  Or, maybe you laugh in my face.  However
+it may play out, moo calls this exchange a "command" and we model it
+with a <code>command</code>.
+</p>
+
+<p>
+A command models something very much like a method.  You call an
+instance of a method and that may return you value.  The <code>name</code> and
+<code>arguments</code> to a <code>command</code> instance may form an <code>object</code> and we will think
+of that <code>object</code> as modeling a message sent to the other endpoint.
+</p>
+
+<p>
+That part is easy.  It's always easier to shout into the abyss.  It's
+harder to know what to do with the abyss answers.  Many types of
+messages may come back and we'd like to model the behavior the command
+enacts as a reaction.  Thankfully we just spent a section talking
+about how to model behavior and so we will use an FSM model.
+</p>
+
+<p>
+Lastly, we have that return value to deal with.  At most the <code>command</code>
+model can give the type and default value for the return.  The
+template may collude with the model of the actions of the FSM to
+effect a return or throw an exception.
+</p>
+
+<p>
+This again brings us dangerously close to actual programming while it
+was promised by moo (or rather by me) that we will slipped those
+shackles.  It's also getting dangerously close to smashing layers
+which someone recently claimed to hate.  Nonetheless we will try to stay true to our word.
+</p>
+
+<p>
+Let's start by seeing how to construct a command model.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-jsonnet"><span style="color: #b4fa70;">local</span> met = moo.method(<span style="color: #e9b96e;">"open"</span>,...);
+<span style="color: #b4fa70;">local</span> sm = moo.machine( ... );
+moo.command(met, sm, <span style="color: #e9b96e;">"Tell someone to open a door"</span>)
+</pre>
+</div>
+
+<p>
+Well, that looks simple.  I see a method.  I know what that is.  I see
+what looks like a help string.  That's nice and friendly.  And, I see
+an FSM model.  No worries.
+</p>
+</div>
+</div>
+
+<div id="outline-container-orgd2f4145" class="outline-3">
+<h3 id="orgd2f4145"><span class="section-number-3">1.7</span> Endpoint</h3>
+<div class="outline-text-3" id="text-1-7">
+<p>
+An endpoint there means one end if a protocol conversation and
+<code>endpoint</code> models it.  The "point" of an endpoint should be considered
+to live in isolation only reacting to input by producing output.
+</p>
+</div>
+</div>
+
+<div id="outline-container-orgb0499b8" class="outline-3">
+<h3 id="orgb0499b8"><span class="section-number-3">1.8</span> API</h3>
+<div class="outline-text-3" id="text-1-8">
+<p>
+An API models a number of commands that govern a captive endpoint.
+For example, an API template may generate an API class which
+application will instantiate and through its methods it will send
+command messages into an endpoint FSM and get back responses.  That
+FSM may also be handling messages from the cosmos.
+</p>
+</div>
+</div>
+</div>
+
+
+
+<div id="outline-container-orgaf3ccfb" class="outline-2">
+<h2 id="orgaf3ccfb"><span class="section-number-2">2</span> Templates</h2>
+<div class="outline-text-2" id="text-2">
+<p>
+In moo, templates are files in some nominal format but with extra
+template markup sprinkled around.  When a template compiler applies a
+data structure a new file in the nominal format is generated.  There
+are many template systems and you can use different ones while still
+using moo models.
+</p>
+
+<p>
+But, in moo we'll focus on Jinja2 templates.  There are many ways to
+use Jinja2 to apply data to templates but we will stick with the
+simplicity of using the <code>j2</code> command line program.  You can install it
+from PyPI like:
+</p>
+
+<pre class="example">
+$ pip install j2cli
+</pre>
+</div>
+
+<div id="outline-container-org1047c52" class="outline-3">
+<h3 id="org1047c52"><span class="section-number-3">2.1</span> Getting started</h3>
+<div class="outline-text-3" id="text-2-1">
+<p>
+Before we get "serious" let's look at a trivial example.  First, a C++
+template file:
+</p>
+
+<div class="org-src-container">
+<pre class="src src-c++"><span style="color: #73d216;">/*</span>
+<span style="color: #73d216;"> * Known types:</span>
+<span style="color: #73d216;"> * {% for type in types %}</span>
+<span style="color: #73d216;"> * - {{ type }}{% endfor %}</span>
+<span style="color: #73d216;"> */</span>
+
+<span style="color: #e090d7;">#if</span><span style="color: #e090d7;">n</span><span style="color: #e090d7;">def</span> {{<span style="color: #b4fa70;">namespace</span>|upper}}_{{obj.name|upper}}
+<span style="color: #e090d7;">#define</span> {{<span style="color: #b4fa70;">namespace</span>|upper}}_{{obj.name|upper}}
+
+<span style="color: #b4fa70;">namespace</span> {{<span style="color: #b4fa70;">namespace</span>}} {
+
+<span style="color: #b4fa70;">struct</span> {{obj.name}} {
+    {% <span style="color: #b4fa70;">for</span> attr in obj.attrs -%}
+    {{attr.type}} {{attr.name}} = {{attr.def}};
+    {% endfor -%}
+};
+
+<span style="color: #8cc4ff;">void</span> <span style="color: #fce94f;">to_json</span>(<span style="color: #8cc4ff;">json</span>&amp; <span style="color: #fcaf3e;">j</span>, <span style="color: #b4fa70;">const</span> <span style="color: #8cc4ff;">person</span>&amp; <span style="color: #fcaf3e;">p</span>) {
+    j = json{
+        {%- <span style="color: #b4fa70;">for</span> attr in obj.attrs -%}
+        {<span style="color: #e9b96e;">"{{attr.name}}"</span>, p.{{attr.name}}}{{ <span style="color: #e9b96e;">","</span> <span style="color: #b4fa70;">if</span> <span style="color: #b4fa70;">not</span> loop.last }}
+        {%- endfor -%}
+    };
+}
+
+<span style="color: #8cc4ff;">void</span> <span style="color: #fce94f;">from_json</span>(<span style="color: #b4fa70;">const</span> <span style="color: #8cc4ff;">json</span>&amp; <span style="color: #fcaf3e;">j</span>, <span style="color: #8cc4ff;">person</span>&amp; <span style="color: #fcaf3e;">p</span>) {
+    {% <span style="color: #b4fa70;">for</span> attr in obj.attrs -%}
+    j.at(<span style="color: #e9b96e;">"{{attr.name}}"</span>).get_to(p.{{attr.name}});
+    {% endfor -%}
+}
+}
+<span style="color: #e090d7;">#endif</span>
+</pre>
+</div>
+
+<p>
+And a simple model file:
+</p>
+
+<div class="org-src-container">
+<pre class="src src-jsonnet"><span style="color: #b4fa70;">local</span> moo = <span style="color: #b4fa70;">import</span> <span style="color: #e9b96e;">"moo.jsonnet"</span>;
+<span style="color: #b4fa70;">local</span> lang = <span style="color: #b4fa70;">import</span> <span style="color: #e9b96e;">"moo/cpp.jsonnet"</span>;
+{
+    types: lang.types,
+    namespace: <span style="color: #e9b96e;">"hello"</span>,
+    obj: moo.object(<span style="color: #e9b96e;">"MyType"</span>,[
+        moo.attribute(<span style="color: #e9b96e;">"x"</span>,lang.types.integer,0),
+        moo.attribute(<span style="color: #e9b96e;">"s"</span>,lang.types.string,<span style="color: #e9b96e;">'""'</span>)]),
+}
+</pre>
+</div>
+
+<p>
+We compile the template against the model with <code>j2</code> like:
+</p>
+
+<div class="org-src-container">
+<pre class="src src-shell">j2 -f json examples/hello-types.hpp.j2 &lt;(jsonnet -J . examples/hello-types.jsonnet) | clang-format
+</pre>
+</div>
+
+<div class="org-src-container">
+<pre class="src src-c++"><span style="color: #73d216;">/*</span>
+<span style="color: #73d216;"> * Known types:</span>
+<span style="color: #73d216;"> *</span>
+<span style="color: #73d216;"> * - boolean</span>
+<span style="color: #73d216;"> * - integer</span>
+<span style="color: #73d216;"> * - notype</span>
+<span style="color: #73d216;"> * - string</span>
+<span style="color: #73d216;"> */</span>
+
+<span style="color: #e090d7;">#if</span><span style="color: #e090d7;">n</span><span style="color: #e090d7;">def</span> HELLO_MYTYPE
+<span style="color: #e090d7;">#define</span> <span style="color: #fcaf3e;">HELLO_MYTYPE</span>
+
+<span style="color: #b4fa70;">namespace</span> <span style="color: #e9b2e3;">hello</span> {
+
+    <span style="color: #b4fa70;">struct</span> <span style="color: #8cc4ff;">MyType</span> {
+        <span style="color: #8cc4ff;">int</span> <span style="color: #fcaf3e;">x</span> = 0;
+        <span style="color: #e9b2e3;">std</span>::<span style="color: #8cc4ff;">string</span> <span style="color: #fcaf3e;">s</span> = <span style="color: #e9b96e;">""</span>;
+    };
+
+    <span style="color: #8cc4ff;">void</span> <span style="color: #fce94f;">to_json</span>(<span style="color: #8cc4ff;">json</span>&amp; <span style="color: #fcaf3e;">j</span>, <span style="color: #b4fa70;">const</span> <span style="color: #8cc4ff;">person</span>&amp; <span style="color: #fcaf3e;">p</span>) { j = json{{<span style="color: #e9b96e;">"x"</span>, p.x}, {<span style="color: #e9b96e;">"s"</span>, p.s}}; }
+
+    <span style="color: #8cc4ff;">void</span> <span style="color: #fce94f;">from_json</span>(<span style="color: #b4fa70;">const</span> <span style="color: #8cc4ff;">json</span>&amp; <span style="color: #fcaf3e;">j</span>, <span style="color: #8cc4ff;">person</span>&amp; <span style="color: #fcaf3e;">p</span>) {
+        j.at(<span style="color: #e9b96e;">"x"</span>).get_to(p.x);
+        j.at(<span style="color: #e9b96e;">"s"</span>).get_to(p.s);
+    }
+}  <span style="color: #73d216;">// </span><span style="color: #73d216;">namespace hello</span>
+<span style="color: #e090d7;">#endif</span>
+</pre>
+</div>
+
+<p>
+It's possible to fuss over the Jinja2 templates in order to get
+formatting just the way you like it.  For C++ it may be simpler to let
+<code>clang-format</code> to that work.
+</p>
+</div>
+</div>
+</div>
+</div>
+<div id="postamble" class="status">
+<p class="author">Author: Brett Viren</p>
+<p class="date">Created: 2020-04-30 Thu 15:28</p>
+<p class="validation"><a href="http://validator.w3.org/check?uri=referer">Validate</a></p>
+</div>
+</body>
+</html>

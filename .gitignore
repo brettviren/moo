@@ -1,8 +1,9 @@
+.lock*
+.direnv
+.envrc
+build
+cut
 *~
-venv
+org-html-themes
+*.egg-info
 __pycache__
-out
-PBTrace.h
-pbfuncs.cpp
-pbfuncs.h
-wct.proto

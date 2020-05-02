@@ -1,0 +1,16 @@
+pre {
+        font-family: monospace;
+        border-radius: 5px;
+}
+code {
+        /* no wrapping in code blocks (in addition to pre) */
+        white-space: nowrap;
+        // background-color: #666666;
+        // color: #ffffff;
+
+        border-width: 1px;
+        border-radius: 5px;
+        border-style: solid;
+        border-color: #00ff00
+}
+

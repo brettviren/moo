@@ -1,0 +1,35 @@
+{% import 'moo.cpp.j2' as moo %}
+#ifndef {{namespace|upper}}_{{classname|upper}}_HPP_SEEN
+#define {{namespace|upper}}_{{classname|upper}}_HPP_SEEN
+
+namespace {{namespace}} {
+
+    struct {{structname}} {
+        // states
+        {% for s in machine.states %}
+        {{ moo.struct(s)|indent }}
+        {% endfor %}
+
+        // events
+        {% for e in machine.events %}
+        {{ moo.struct(e)|indent }}
+        {% endfor %}
+
+        // guards
+        {% for g in machine.guards %}
+        {{ moo.method_decl(g)|indent }}
+        {% endfor %}
+
+        // actions
+        {% for a in machine.actions %}
+        {{ moo.method_decl(a)|indent }}
+        {% endfor %}
+
+        // context
+
+        {{ moo.struct(context)|indent }}
+        {{context.name}} ctx;
+    };
+}
+
+#endif // {{namespace|upper}}_{{classname|upper}}_HPP_SEEN
