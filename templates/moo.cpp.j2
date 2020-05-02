@@ -13,3 +13,10 @@ struct {{ obj.name }} {
 {% macro method_decl(m) %}
 {{m.type.c}} {{m.name}}({% for a in m.attrs %}{{a.type.c}} {{a.name}}{{ "," if not loop.last }}{% endfor %});
 {% endmacro %}
+
+
+{% macro smltt(tt) %}
+{% for t in tt %}
+{{ "," if not loop.first }}{{t.star if t.star}} state<{{t.ini}}> + event<{{t.eve}}> {% if t.grds %}[ {{ t.grds|join(" and ") }} ]{% endif %} / {% if t.acts|length == 1%}{{ t.acts[0] }}{% elif t.acts|length > 1%}({{t.acts|join(' and ')}}){%endif%} = state<{{ t.fin }}>
+{% endfor %}
+{% endmacro %}

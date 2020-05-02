@@ -46,7 +46,7 @@ local act = {
                              moo.values(events),
                              actions=moo.values(act),
                              tt = [
-            trans(states.ini, states.ini, events.bind, acts=[act.bind]),
+            trans(states.ini, states.ini, events.bind, acts=[act.bind], star="*"),
             trans(states.ini, states.ini, events.conn, acts=[act.conn]),
             trans(states.ini, states.run, events.start),
             trans(states.run, states.run, events.yodel, acts=[act.send]),

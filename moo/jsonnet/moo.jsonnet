@@ -47,7 +47,13 @@ local types = [
     // A state machine transition.  states and events are objects,
     // guards and actions are methods.
     transition :: function(ini,fin,eve=null,grds=[],acts=[],star=null) {
-        ini:ini,fin:fin,eve:eve,grds:grds,acts:acts,star:star},
+        ini:ini.name,
+        fin:fin.name,
+        eve:if std.type(eve)=='null' then null else eve.name,
+        grds:[g.name for g in grds],
+        acts:[a.name for a in acts],
+        star:star,
+    },
 
     // An FSM event is an object
     event :: self.object,

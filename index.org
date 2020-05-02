@@ -141,7 +141,7 @@ And, here is how ~moo~ can compile it to JSON and the result:
 #+end_src
 
 #+RESULTS:
-#+begin_SRC c++
+#+begin_src c++
 {
     "attrs": [
         {
@@ -172,7 +172,7 @@ And, here is how ~moo~ can compile it to JSON and the result:
     "help": "A container full of yumminess",
     "name": "candies"
 }
-#+end_SRC
+#+end_src
 
 Thrilling, isn't it.  And verbose.  You may think, why bother with
 Jsonnet, why not just write JSON.  Be my guest, friend.  Those ~type~
@@ -194,7 +194,7 @@ previous structure with just the first element of ~attrs~ selected:
 #+end_src
 
 #+RESULTS:
-#+begin_SRC c++
+#+begin_src c++
 {
     "def": "purple",
     "name": "color",
@@ -207,7 +207,7 @@ previous structure with just the first element of ~attrs~ selected:
         "p": "str"
     }
 }
-#+end_SRC
+#+end_src
 
 The "-p" specifies a "dot path" through the structure.  It's obvious what that means, right?
 
@@ -223,9 +223,9 @@ templates) or to use command line options:
 #+end_src
 
 #+RESULTS:
-#+begin_SRC c++
+#+begin_src c++
 "A container full of yumminess"
-#+end_SRC
+#+end_src
 
 Note, the options shown above work also for the ~moo generate~ command
 described next.
@@ -261,7 +261,7 @@ file:
 #+end_src
 
 #+RESULTS:
-#+begin_SRC c++
+#+begin_src c++
 /* 100% GENERATED FILE DO NOT EDIT
  ,*
  ,* Known types:
@@ -290,7 +290,7 @@ void from_json(const json& j, person& p)
 }
 } // namespace hello
 #endif
-#+end_SRC
+#+end_src
 
 In the spirit of the lack of understanding in this section, don't
 worry too much about this even being a valid C++ file.  Maybe it won't
@@ -352,7 +352,7 @@ example the ~moo.types.int~ type is this data structure,
 #+end_src
 
 #+RESULTS:
-#+begin_SRC c++
+#+begin_src c++
 {
     "c": "int",
     "def": 0,
@@ -361,7 +361,7 @@ example the ~moo.types.int~ type is this data structure,
     "name": "int",
     "p": "int"
 }
-#+end_SRC
+#+end_src
 
 It provides C++ (c), Python (p), Numpy dtype (n) and Jsonnet (j) types.  It also provides in the ~name~ the ~moo.types~ key and a default value as ~def~.  You can see all types with:
 
@@ -383,7 +383,7 @@ Which gives:
 #+end_src
 
 #+RESULTS:
-#+begin_SRC c++
+#+begin_src c++
 [
     "byte",
     "char",
@@ -401,7 +401,7 @@ Which gives:
     "uint8",
     "void"
 ]
-#+end_SRC
+#+end_src
 
 Not so exciting, I will grant you.  Just know that when you need to
 model a type you should use an attribute of ~moo.types~.
@@ -430,7 +430,7 @@ Compiling:
 #+end_src
 
 #+RESULTS:
-#+begin_SRC c++
+#+begin_src c++
 {
     "def": "purple",
     "name": "color",
@@ -443,7 +443,7 @@ Compiling:
         "p": "str"
     }
 }
-#+end_SRC
+#+end_src
 
 So, an ~attribute~ has a ~name~ a ~type~ and a default (~"def"~)
 value.  That value is given as a Jsonnet value of the corresponding
@@ -463,7 +463,7 @@ Compiling:
 #+end_src
 
 #+RESULTS:
-#+begin_SRC c++
+#+begin_src c++
 [
     {
         "def": "purple",
@@ -476,7 +476,7 @@ Compiling:
         "type": "integer"
     }
 ]
-#+end_SRC
+#+end_src
 
 While these Jsonnet examples are growing at a reasonable rate, their
 compiled JSON are getting long and annoying.  Already Jsonnet's
@@ -735,6 +735,19 @@ application will instantiate and through its methods it will send
 command messages into an endpoint FSM and get back responses.  That
 FSM may also be handling messages from the cosmos.
 
+
+** Template Model
+
+We'll next go on to templates themselves.  We'll see how they may
+assume a somewhat different model than the model models.  In some
+cases a template expect to be given a data structure which may be
+provided as some substructure of a model.  In these cases it's enough
+to dig out that substructure with ~moo generate -p dot.path~ as
+described above in [[Filtering Structure]].  In other cases we must make
+whole new Jsonnet files that use ~import~ and aggregate parts into new
+forms and possibly even apply complex functions to rearrange the model
+into a form the template can digest.  We'll see this almost
+immediately in the example ~echo-ctxsml.jsonnet~.
 
 
 * Templates
