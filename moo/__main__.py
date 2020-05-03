@@ -57,6 +57,25 @@ def generate(ctx, jpath, output, model, templ):
 
     pass
 
+@cli.command()
+@click.option('-J', '--jpath', envvar='JSONNET_PATH', multiple=True,
+              type=click.Path(exists=True, dir_okay=True, file_okay=False),
+              help="Extra directory to find Jsonnet files")
+@click.option('-o', '--output', default="/dev/stdout",
+              type=click.Path(exists=False, dir_okay=False, file_okay=True),
+              help="Output file, default is stdout")
+@click.argument('model')
+@click.pass_context
+def imports(ctx, jpath, output, model):
+    '''
+    Emit a list of imports required by the model
+    '''
+    deps = jsonnet.imports(model, jpath)
+    text = '\n'.join(deps)
+    with open(output, 'wb') as fp:
+        fp.write(text.encode())
+
+
 def main():
     cli(obj=dict())
 

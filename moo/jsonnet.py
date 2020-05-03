@@ -41,23 +41,32 @@ def resolve(filename, paths=()):
             return fp
     raise ValueError(f"file not found: {filename}")
 
-def make_import_callback(paths):
+class ImportCallback(object):
 
-    def import_callback(path, rel):
-        '''
-        Help jsonnet find imports
-        '''
-        nonlocal paths
-        paths = [path] + list(paths)
+    def __init__(self, paths=()):
+        self.paths = list(paths)
+        self.found = set()
+
+    def __call__(self, path, rel):
+        paths = [path] + self.paths
         for maybe in paths:
             try:
                 full_path, content = try_path(maybe, rel)
             except RuntimeError:
                 continue
             if content:
+                self.found.add(full_path)
                 return full_path, content
         raise RuntimeError('File not found')
-    return import_callback
+
+
+
+def clean_paths(paths):
+    paths = [os.path.realpath(p) for p in paths]
+    # fixme: moo.jsonnet library probably doesn't belong in the
+    # python source directory.
+    paths.append(os.path.join(os.path.dirname(__file__)))
+    return paths
 
 def load(fname, paths=(), **kwds):
     '''
@@ -71,19 +80,26 @@ def load(fname, paths=(), **kwds):
 
     No kwds for JSON, go fish.
     '''
-    paths = [os.path.realpath(p) for p in paths]
-    # fixme: moo.jsonnet library probably doesn't belong in the
-    # python source directory.
-    paths.append(os.path.join(os.path.dirname(__file__), 'jsonnet'))
+    paths = clean_paths(paths)
     fname = resolve(fname, paths)
-
+    
     if fname.endswith(".jsonnet"):
-        text = evaluate_file(fname, 
-                             import_callback = make_import_callback(paths),
-                             **kwds)
+        ic = ImportCallback(paths)
+        text = evaluate_file(fname, import_callback = ic, **kwds)
     elif fname.endswith(".json"):
         text = open(fname).read()
     else:
         return
     return json.loads(text)
 
+def imports(fname, paths=(), **kwds):
+    '''
+    Return the imports needed by the Jsonnet file
+    '''
+    paths = clean_paths(paths)
+    fname = resolve(fname, paths)
+    ic = ImportCallback(paths);
+    evaluate_file(fname, import_callback = ic, **kwds)
+    ret = list(ic.found)
+    ret.sort()
+    return ret
