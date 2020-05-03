@@ -64,13 +64,17 @@ def generate(ctx, jpath, output, model, templ):
 @click.option('-o', '--output', default="/dev/stdout",
               type=click.Path(exists=False, dir_okay=False, file_okay=True),
               help="Output file, default is stdout")
-@click.argument('model')
+@click.argument('filename')
 @click.pass_context
-def imports(ctx, jpath, output, model):
+def imports(ctx, jpath, output, filename):
     '''
     Emit a list of imports required by the model
     '''
-    deps = jsonnet.imports(model, jpath)
+    deps=list()
+    if filename.endswith('.jsonnet'):
+        deps = jsonnet.imports(filename, jpath)
+    if filename.endswith('.j2'):
+        deps = template.imports(filename)
     text = '\n'.join(deps)
     with open(output, 'wb') as fp:
         fp.write(text.encode())

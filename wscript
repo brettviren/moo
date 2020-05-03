@@ -32,34 +32,24 @@ class codegen(Task):
         with open(self.outputs[0].abspath(), 'wb') as fp:
             fp.write(text.encode())
 
-        
-
     def scan(self):
         deps = list()
-        print(f"scan: {self.inputs}")
         for maybe in self.inputs:
-            if not maybe.name.endswith('.jsonnet'):
-                continue
-            print("maybe:", type(maybe), maybe.abspath())
-            extra = moo.jsonnet.imports(maybe.abspath()) # need to give a JPATH
-            print ("extra:", type(extra), extra)
+            extra = list()
+            if maybe.name.endswith('.jsonnet'):
+                extra = moo.jsonnet.imports(maybe.abspath()) # need to give a JPATH
+            if maybe.name.endswith('.j2'):
+                extra = moo.template.imports(maybe.abspath())
             for one in extra:
                 node = self.generator.bld.root.find_resource(one)
-                assert(node)
-                print ("extra node:", node)
                 deps.append(node)
-        print (f'DEPS: {deps}')
         return (deps,time.time())
 
 
 @extension('.jsonnet')
 def add_jsonnet_deps(tgen, model):
-    print (f'TGEN {tgen}')
     tgt = tgen.bld.path.find_or_declare(tgen.target)
-    print (type(model),model)
     tmpl = tgen.bld.path.find_resource(tgen.template)
-    print (type(tmpl), tmpl)
-    print (type(tgt), tgt)
     tsk = tgen.create_task('codegen', [model, tmpl], tgt)
 
 
@@ -68,3 +58,8 @@ def build(bld):
     bld(source="examples/echo-ctxsml.jsonnet",
         template="templates/ctxsml.hpp.j2",
         target="echo-ctxsml.hpp")
+
+    bld.shlib(features="cxx",
+              includes='inc .',
+              source = "src/echo-ctxsml.cpp",
+              uselib_store=APPNAME)

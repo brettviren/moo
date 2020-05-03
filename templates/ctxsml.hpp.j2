@@ -1,6 +1,10 @@
 {% import 'moo.cpp.j2' as moo %}
+
 #ifndef {{namespace|upper}}_{{classname|upper}}_HPP_SEEN
 #define {{namespace|upper}}_{{classname|upper}}_HPP_SEEN
+
+#include <string>
+#include <sml.hpp>
 
 namespace {{namespace}} {
 
@@ -31,16 +35,17 @@ namespace {{namespace}} {
         {{context.name}} ctx;
 
         auto operator()() const noexcept {
-            using namespace sml;
+            using namespace boost::sml;
 
             // clang-format off
             return make_transition_table(
-{{ moo.smltt(machine.tt) }}
+{{ moo.smltt_lambdas(machine.tt) }}
                 );
             // clang-format on
         }
 
     };
+
 }
 
 #endif // {{namespace|upper}}_{{classname|upper}}_HPP_SEEN
