@@ -1,0 +1,28 @@
+{%- macro state(obj) %}
+struct {{ obj.name }} {
+    {% for a in obj.attrs %}
+    {% if a.type.name == "str" %}
+    {{a.type.c}} {{a.name}} = "{{a.def}}";
+    {% else %}
+    {{a.type.c}} {{a.name}} = {{a.def}};
+    {% endif %}
+    {% endfor %}
+    };
+{%- endmacro %}
+#ifndef {{namespace|upper}}_STATES_HPP_SEEN
+#define {{namespace|upper}}_STATES_HPP_SEEN
+
+#include <string>
+#include <sml.hpp>
+#include <cassert>
+
+
+namespace {{namespace}} {
+
+    {% for st in machine.states %}
+    {{ state(st)|indent }}
+    {% endfor %}
+
+}
+
+#endif

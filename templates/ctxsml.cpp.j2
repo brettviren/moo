@@ -1,11 +1,11 @@
 // This file is generated, you better copy it to somewhere else if you
 // edit it.
 
-#include "{{namespace|lower}}-{{structname|lower}}.hpp"
+#include "{{namespace|lower}}/{{structname|lower}}.hpp"
 
 // guards
 {% for eg in event_guards %}
-bool {{namespace}}::{{structname}}::{{eg[1].name}}(const {{namespace}}::{{structname}}::{{eg[0].name}}& event)
+bool {{namespace}}::{{structname}}::{{eg[1].name}}(const {{namespace}}::{{eg[0].name}}& event)
 {
     return false;
 }
@@ -13,7 +13,7 @@ bool {{namespace}}::{{structname}}::{{eg[1].name}}(const {{namespace}}::{{struct
 
 // actions
 {% for ea in event_actions %}
-void {{namespace}}::{{structname}}::{{ea[1].name}}(const {{namespace}}::{{structname}}::{{ea[0].name}}& event)
+void {{namespace}}::{{structname}}::{{ea[1].name}}(const {{namespace}}::{{ea[0].name}}& event)
 {
     return;
 }

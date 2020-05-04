@@ -1,8 +1,9 @@
 local moo = import "moo.jsonnet";
 local echo = import "echo.jsonnet";
 {
-    namespace: "ECHO",
+    namespace: "mex",
     structname: "CtxSml",
+    messages: echo.proto.machine.events,
     context: echo.proto.context,
     machine: echo.proto.machine,
     event_guards: moo.event_guards(self.machine),

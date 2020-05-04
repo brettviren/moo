@@ -1,0 +1,47 @@
+#ifndef {{namespace|upper}}_JSON_MESSAGES_HPP_SEEN
+#define {{namespace|upper}}_JSON_MESSAGES_HPP_SEEN
+
+#include "{{namespace}}/messages.hpp"
+
+#include "json.hpp"
+
+#include <string>
+#include <sml.hpp>
+#include <cassert>
+
+namespace {{namespace}} {
+    using json = nlohmann::json;
+
+    {% for msg in messages %}
+    inline
+    void to_json(json& j, const {{msg.name}}& obj) {
+        j = json{ {%- for a in msg.attrs -%}{{ ', ' if not loop.first }}{"{{a.name}}", obj.{{a.name}}}{%- endfor-%}};
+    }
+
+    inline
+    void from_json(const json& j, {{msg.name}}& obj) {
+        {% for a in msg.attrs %}
+        j.at("{{a.name}}").get_to(obj.{{a.name}});
+        {% endfor %}
+    }
+
+    inline
+    void to_zmp(zmq::message_t& msg, const {{msg.name}}& obj) {
+        json j;
+        to_json(j, obj);
+        const std::vector<std::uint8_t> v8 = json::to_msgpack(j);
+        msg.rebuild(v8.data(), v8.size());
+    }
+
+    inline
+    void from_zmp(const zmq::message_t& msg, {{msg.name}}& obj) {
+        const std::uint8_t* data = msg.data<std::uint8_t>();
+        const size_t size = msg.size();
+        const std::vector<std::uint8_t> vdat(data,data+size);
+        const json j = json::from_msgpack(vdat);
+        from_json(j, obj);
+    }
+    {% endfor %}
+}
+
+#endif

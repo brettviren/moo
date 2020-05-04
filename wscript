@@ -49,8 +49,12 @@ class codegen(Task):
 
 @extension('.jsonnet')
 def add_jsonnet_deps(tgen, model):
+    assert(model)
     tgt = tgen.bld.path.find_or_declare(tgen.target)
+    assert(tgt)
     tmpl = tgen.bld.path.find_resource(tgen.template)
+    if not tmpl:
+        raise ValueError(f"file not found: {tgen.template}")
     tsk = tgen.create_task('codegen', [model, tmpl], tgt)
 
 
@@ -68,18 +72,21 @@ class dotter(Task):
 
 def build(bld):
 
-    bld(source="examples/echo-ctxsml.jsonnet",
-        template="templates/ctxsml.hpp.j2",
-        target="echo-ctxsml.hpp")
+    ns="mex"
 
-    bld(source="examples/echo-ctxsml.jsonnet",
+    for tmpl in 'ctxsml states messages json_messages'.split():
+        bld(source=f"examples/{ns}-ctxsml.jsonnet",
+            template=f"templates/{tmpl}.hpp.j2",
+            target=f"{ns}/{tmpl}.hpp")
+
+    bld(source=f"examples/{ns}-ctxsml.jsonnet",
         template="templates/ctxsml.dot.j2",
-        target="echo-ctxsml.dot")
+        target=f"{ns}-ctxsml.dot")
 
-    bld(source="echo-ctxsml.dot")
+    bld(source=f"{ns}-ctxsml.dot")
 
     bld.shlib(features="cxx",
               includes='. inc build',
-              source = "src/echo-ctxsml.cpp",
+              source = f"src/{ns}-ctxsml.cpp",
               target = APPNAME.lower(),
               uselib_store=APPNAME.upper())
