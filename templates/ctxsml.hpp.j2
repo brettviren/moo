@@ -1,6 +1,10 @@
+/**
+ * The {{namespace}}::{{ctxsmlname}} context FSM for the {{protoname}} protocol
+ */
+
 {% import 'ctxsml_macros.j2' as moo %}
-#ifndef {{namespace|upper}}_{{structname|upper}}_HPP_SEEN
-#define {{namespace|upper}}_{{structname|upper}}_HPP_SEEN
+#ifndef {{namespace|upper}}_{{ctxsmlname|upper}}_HPP_SEEN
+#define {{namespace|upper}}_{{ctxsmlname|upper}}_HPP_SEEN
 
 #include "{{namespace|lower}}/messages.hpp"
 #include "{{namespace|lower}}/states.hpp"
@@ -11,7 +15,7 @@
 
 namespace {{namespace}} {
 
-    struct {{structname}} {
+    struct {{ctxsmlname}} {
 
         // event guards
         {% for eg in event_guards %}
@@ -41,9 +45,9 @@ namespace {{namespace}} {
     };
 
     inline
-    void test_{{structname}}() {
+    void test_{{ctxsmlname}}() {
         namespace sml = boost::sml;
-        sml::sm<{{structname}}> fsm{ {{structname}} {}};
+        sml::sm<{{ctxsmlname}}> fsm{ {{ctxsmlname}} {}};
         {% for et in test_fsm_events %}
         fsm.process_event({{namespace}}::{{et[0]}} {});
         assert(fsm.is(sml::state<{{namespace}}::{{et[1]}}>));

@@ -1,0 +1,39 @@
+#include "{{namespace}}/{{protoname|lower}}.hpp"
+
+void {{namespace}}::{{protoname|lower}}::init()
+{
+}
+
+template<typename FSM, typename Event>
+bool sendit(FSM& fsm, const json& jobj)
+{
+    Event event;
+    from_json(jobj, event);
+    return fsm.process_event(event);
+}
+
+// commands may need answering
+void {{namespace}}::{{protoname|lower}}::handle_command(zmq::socket_t& cmdsock)
+{
+    auto msg = cmdsock.recv();
+    auto jobj = zmp2json(msg);
+    std::string name = jobj["name"];
+    zio::message_t reply;
+    {% for cmd,t,f in commands %}
+    if (name == "{{ cmd.name }}") {
+        if (sendit<{{namespace}}::{{cmd.name}}>(fsm, jobj)) {
+            to_zmp(msg, fsm.{{t.name}});
+        }
+        else {
+            to_zmp(msg, fsm.{{f.name}});
+        }
+        cmdsock.send(msg);
+        return;
+    }
+    {% endfor %}
+}
+
+// 
+void {{namespace}}::{{protoname|lower}}::handle_message(zmq::socket_t& msgsock)
+{
+}

@@ -12,6 +12,20 @@
 namespace {{namespace}} {
     using json = nlohmann::json;
 
+    // these should be moved out to a non-jinja file
+    inline
+    json zmp2json(const zmq::message_t& msg) {
+        const std::uint8_t* data = msg.data<std::uint8_t>();
+        const size_t size = msg.size();
+        const std::vector<std::uint8_t> vdat(data,data+size);
+        return json::from_msgpack(vdat);
+    }
+    inline
+    zmq::message_t json2zmp(const json& j) {
+        const std::vector<std::uint8_t> v8 = json::to_msgpack(j);
+        return zmq::message(v8.data(), v8.size());
+    }
+
     {% for msg in messages %}
     inline
     void to_json(json& j, const {{msg.name}}& obj) {
@@ -41,6 +55,8 @@ namespace {{namespace}} {
         const json j = json::from_msgpack(vdat);
         from_json(j, obj);
     }
+
+
     {% endfor %}
 }
 

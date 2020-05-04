@@ -35,28 +35,34 @@ local act = {
     recv: moo.action("do_recv"),
 };
 
+local status_attribute = moo.attribute("status", moo.types.str);
+
 {
-    proto: {
+    // in echo every event is a command with the same status attribute
+    // as the return, good or bad.
+    commands : [
+        [eve, status_attribute, status_attribute]
+                for eve in moo.values(events)],
 
-        context: moo.context("context",
-                             [moo.attribute("status", moo.types.str)],
-                            "The protocol context object"),
+    context: moo.context("context",
+                         [status_attribute],
+                         "The protocol context object"),
 
-        machine: moo.machine("echo",
-                             moo.values(states),
-                             moo.values(events),
-                             actions=moo.values(act),
-                             tt = [
-            trans(states.ini, states.ini, events.bind, actions=[act.bind],
-                  star="*"),
-            trans(states.ini, states.ini, events.conn, actions=[act.conn]),
-            trans(states.ini, states.run, events.start),
-            trans(states.run, states.run, events.yodel, actions=[act.send]),
-            trans(states.run, states.run, events.echo,
-                  actions=[act.send,act.recv]),
-            trans(states.run, states.run, events.hear, actions=[act.recv]),
-            trans(states.ini, states.fin, events. stop, actions=[act.unlink]),
-            trans(states.run, states.fin, events. stop, actions=[act.unlink]),
-        ]),
-    }
+    machine: moo.machine("echo",
+                         moo.values(states),
+                         moo.values(events),
+                         actions=moo.values(act),
+                         tt =
+    [
+        trans(states.ini, states.ini, events.bind, actions=[act.bind],
+              star="*"),
+        trans(states.ini, states.ini, events.conn, actions=[act.conn]),
+        trans(states.ini, states.run, events.start),
+        trans(states.run, states.run, events.yodel, actions=[act.send]),
+        trans(states.run, states.run, events.echo,
+              actions=[act.send,act.recv]),
+        trans(states.run, states.run, events.hear, actions=[act.recv]),
+        trans(states.ini, states.fin, events. stop, actions=[act.unlink]),
+        trans(states.run, states.fin, events. stop, actions=[act.unlink]),
+    ]),
 }

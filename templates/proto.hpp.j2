@@ -1,46 +1,27 @@
-/*
- * THIS FILE IS TOTALLY GENERATED.  DO NOT EDIT
- *
- * {{license|wordwrap(72, wrapstring='\n * ')}}
- *
- * {{description|wordwrap(72, wrapstring='\n * ')}}
+/**
+ * {{protoname}} protocol handler.
  */
-#ifndef {{namespace|upper}}_PROTO_HPP_SEEN
-#define {{namespace|upper}}_PROTO_HPP_SEEN
+
+#ifndef {{namespace|upper}}_{{proto|upper}}_HPP_SEEN
+#define {{namespace|upper}}_{{proto|upper}}_HPP_SEEN
 
 #include "moo/protobase.hpp"
-#include "{{namespace}}/events.hpp"
 
 namespace {{namespace}} {
 
-    {% for epname, ep in endpoints.items() %}
+    struct {{proto}} : public moo::protobase {
+        
+      protected:
 
-    /** {{namespace}}::{{ep.proto.classname}} - {{epname}} protocol endpoint handler
-     *
-     * {{ep.proto.description|wordwrap(72, wrapstring='\n     * ')}}
-     */
-    class {{ep.proto.classname}} : public moo::protobase {
-      public:
-        virtual ~{{ep.proto.classname}}() {}
-
-        // user code implments
-
-        {% for eg in ep.eve_grds -%}
-        virtual bool {{eg[1]}}(const {{eg[0]}}& event);
-        {%- endfor %}
-
-        // actions
-        {% for ea in ep.eve_acts -%}
-        virtual void {{ea[1]}}(const {{ea[0]}}& event);
-        {%- endfor %}
-
-        // generated.
-        virtual void handle_command(moo::socket_t& cmdsock);
-        virtual void handle_message(moo::socket_t& msgsock);
+        virtual void init(){};
+        virtual void handle_command(zmq::socket_t& cmdsock);
+        virtual void handle_message(zmq::socket_t& msgsock);
+        
 
     };
 
-    {%- endfor %}    
 }
 
-#endif // {{namespace|upper}}_PROTO_HPP_SEEN
+
+
+#endif
