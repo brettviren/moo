@@ -1,4 +1,50 @@
-{% import 'moo.cpp.j2' as moo %}
+{% macro struct(obj) %}
+struct {{ obj.name }} {
+    {% for a in obj.attrs %}
+    {% if a.type.name == "str" %}
+        {{a.type.c}} {{a.name}} = "{{a.def}}";
+    {% else %}
+        {{a.type.c}} {{a.name}} = {{a.def}};
+    {% endif %}
+    {% endfor %}
+    };
+{% endmacro %}
+
+{% macro event_method_decl(e,m) %}
+{{m.type.c}} {{m.name}}(const {{e.name}}& event{% for a in m.attrs %}, {{a.type.c}} {{a.name}}{% endfor %});
+{% endmacro %}
+
+{% macro sml_lambda_guard(grds) %}
+{%- if grds|length > 0 -%}[{%- for g in grds -%}
+    {{ ' and ' if not loop.first }} [this](const auto& event){ return this->{{g.name}}(event); }
+    {%- endfor -%}]{%- endif -%}
+{% endmacro %}
+
+{% macro sml_lambda_action(acts) %}
+{%- if acts|length > 0 -%}({%- for a in acts -%}
+    {{ ', ' if not loop.first }} [this](const auto& event){ this->{{a.name}}(event); }
+    {%- endfor %} ){%- endif -%}
+{% endmacro %}
+
+{% macro sml_lambda_ega(t) %}
+{%- if t.event -%}
++ event<{{t.event.name}}>
+{%- endif -%}
+{%- if t.guards or t.actions %}
+{{ sml_lambda_guard(t.guards) }} / {{ sml_lambda_action(t.actions) }}
+{%- endif -%}
+{% endmacro %}
+
+{% macro sml_lambda_tran(t) %}
+{{t.star if t.star}} state<{{t.ini.name}}> {{sml_lambda_ega(t)}} = state<{{ t.fin.name }}>
+{% endmacro %}
+
+{% macro smltt_lambdas(tt) %}
+{% for t in tt -%}
+{{ "," if not loop.first }}{{ sml_lambda_tran(t) }}
+{% endfor %}
+{% endmacro %}
+
 
 #ifndef {{namespace|upper}}_{{classname|upper}}_HPP_SEEN
 #define {{namespace|upper}}_{{classname|upper}}_HPP_SEEN
@@ -11,35 +57,35 @@ namespace {{namespace}} {
     struct {{structname}} {
         // states
         {% for s in machine.states %}
-        {{ moo.struct(s)|indent }}
+        {{ struct(s)|indent }}
         {% endfor %}
 
         // events
         {% for e in machine.events %}
-        {{ moo.struct(e)|indent }}
+        {{ struct(e)|indent }}
         {% endfor %}
 
-        // guards
-        {% for g in machine.guards %}
-        {{ moo.method_decl(g)|indent }}
+        // event guards
+        {% for eg in event_guards %}
+        {{ event_method_decl(eg[0], eg[1])|indent }}
         {% endfor %}
 
         // actions
-        {% for a in machine.actions %}
-        {{ moo.method_decl(a)|indent }}
+        {% for ea in event_actions %}
+        {{ event_method_decl(ea[0], ea[1])|indent }}
         {% endfor %}
 
         // context
 
-        {{ moo.struct(context)|indent }}
+        {{ struct(context)|indent }}
         {{context.name}} ctx;
 
-        auto operator()() const noexcept {
+        auto operator()() {
             using namespace boost::sml;
 
             // clang-format off
             return make_transition_table(
-{{ moo.smltt_lambdas(machine.tt) }}
+{{ smltt_lambdas(machine.tt) }}
                 );
             // clang-format on
         }
