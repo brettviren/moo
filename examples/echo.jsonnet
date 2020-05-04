@@ -3,7 +3,7 @@ local moo = import "moo.jsonnet";
 local trans = moo.transition;
 
 local states = {
-    ini: moo.state("initalizing"),
+    ini: moo.state("initializing"),
     run: moo.state("running"),
     fin: moo.state("finalizing"),
 };
