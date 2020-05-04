@@ -7,3 +7,4 @@ cut
 org-html-themes
 *.egg-info
 __pycache__
+*.pyc

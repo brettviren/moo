@@ -62,4 +62,5 @@ def build(bld):
     bld.shlib(features="cxx",
               includes='inc .',
               source = "src/echo-ctxsml.cpp",
-              uselib_store=APPNAME)
+              target = APPNAME.lower(),
+              uselib_store=APPNAME.upper())

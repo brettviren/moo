@@ -12,6 +12,7 @@ setuptools.setup(
     install_requires = [
         "click",
         "jsonnet",
+        "jinja2",
 #        "transitions",
     ],
     entry_points = dict(
