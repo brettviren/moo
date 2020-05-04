@@ -4,7 +4,7 @@ import time
 # fixme: better to be a waf tool
 import moo
 from waflib.Task import Task
-from waflib.TaskGen import taskgen_method, extension
+from waflib.TaskGen import taskgen_method, extension, declare_chain
 
 APPNAME = 'moo'
 
@@ -16,6 +16,7 @@ def configure(cfg):
                          '-Wall', '-Wpedantic', '-Werror']
     cfg.load('compiler_cxx')
     cfg.find_program('moo', var='MOO', mandatory=True)
+    cfg.find_program('dot', var='DOT', mandatory=True)
     cfg.find_program('clang-format', var='CLANG_FORMAT', mandatory=False)
     p = dict(mandatory=True, args='--cflags --libs')
     cfg.check_cfg(package='libzmq', uselib_store='ZMQ', **p);
@@ -53,14 +54,32 @@ def add_jsonnet_deps(tgen, model):
     tsk = tgen.create_task('codegen', [model, tmpl], tgt)
 
 
+@extension('.dot')
+def make_dotters(tgen, dot):
+    for ext in ["png", "pdf", "svg"]:
+        out = dot.change_ext('.'+ext)
+        tsk = tgen.create_task('dotter', dot, [out])
+        tsk.env.DOT_FMT=ext
+
+
+class dotter(Task):
+    run_str = "${DOT} -T${DOT_FMT} -o ${TGT} ${SRC}"
+
+
 def build(bld):
 
     bld(source="examples/echo-ctxsml.jsonnet",
         template="templates/ctxsml.hpp.j2",
         target="echo-ctxsml.hpp")
 
+    bld(source="examples/echo-ctxsml.jsonnet",
+        template="templates/ctxsml.dot.j2",
+        target="echo-ctxsml.dot")
+
+    bld(source="echo-ctxsml.dot")
+
     bld.shlib(features="cxx",
-              includes='inc .',
+              includes='. inc build',
               source = "src/echo-ctxsml.cpp",
               target = APPNAME.lower(),
               uselib_store=APPNAME.upper())

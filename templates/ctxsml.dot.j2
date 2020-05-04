@@ -1,0 +1,17 @@
+{%- macro dot_name_list(objs, comma) -%}
+{%- for o in objs -%}{{ comma if not loop.first }}{{o.name}}{%- endfor -%}
+{%- endmacro -%}
+digraph {{namespace}}_{{structname}} {
+label="State machine transitions for {{namespace}}::{{structname}}"
+
+// states
+node[shape=circle];
+{% for s in machine.states %}
+"{{ s.name }}"[label="{{ s.name }}"];
+{% endfor %}
+
+// transitions
+{% for t in machine.tt %}
+   "{{t.ini.name}}" -> "{{t.fin.name}}"[label="[{{ dot_name_list(t.guards, " and ") }}] / ({{dot_name_list(t.actions, ", ")}})"];
+{% endfor %}
+}

@@ -136,16 +136,17 @@ file: [[file:examples/object1.jsonnet][examples/object1.jsonnet]] and included h
 
 And, here is how ~moo~ can compile it to JSON and the result:
 
-#+begin_src shell :exports both :results output code :wrap "SRC c++"
+#+BEGIN_SRC shell :exports both :results output code :wrap "SRC c++"
   moo compile examples/object1.jsonnet
-#+end_src
+#+END_SRC
 
 #+RESULTS:
-#+begin_src c++
+#+begin_SRC c++
 {
     "attrs": [
         {
             "def": "purple",
+            "model": "attribute",
             "name": "color",
             "type": {
                 "c": "std::string",
@@ -158,6 +159,7 @@ And, here is how ~moo~ can compile it to JSON and the result:
         },
         {
             "def": 0,
+            "model": "attribute",
             "name": "count",
             "type": {
                 "c": "int",
@@ -170,9 +172,12 @@ And, here is how ~moo~ can compile it to JSON and the result:
         }
     ],
     "help": "A container full of yumminess",
+    "model": "object",
     "name": "candies"
 }
-#+end_src
+#+end_SRC
+
+
 
 Thrilling, isn't it.  And verbose.  You may think, why bother with
 Jsonnet, why not just write JSON.  Be my guest, friend.  Those ~type~
@@ -822,7 +827,10 @@ The template is in [[file:templates/ctxsml.hpp.j2]] and our test model is in [[f
 #+end_src
 
 
+*** GraphViz
 
+
+*** Tests
 
 
 * Build system
@@ -831,6 +839,8 @@ The template is in [[file:templates/ctxsml.hpp.j2]] and our test model is in [[f
   :END:
 
 Waf.
+
+
 
 * Doing it differently
 
