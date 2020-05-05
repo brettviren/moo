@@ -12,7 +12,11 @@ namespace {{namespace}} {
     {% for m in messages %}
     struct {{m.name}} {
         {% for a in m.attrs %}
-        {{a.type.c}} {{a.name}};
+        {% if a.type.name == "str" %}
+        {{a.type.c}} {{a.name}} = "{{a.def}}";
+        {% else %}
+        {{a.type.c}} {{a.name}} = {{a.def}};
+        {% endif %}
         {% endfor %}
     };
     void to_json(json& j, const {{m.name}}& obj);
@@ -69,7 +73,7 @@ namespace {{namespace}} {
 
         // individual fields
         {% for f in fields %}
-        {{f.type.c}} m_{{f.name}};
+        {{f.type.c}} m_{{f.name}}{};
         {% endfor %}
 
 

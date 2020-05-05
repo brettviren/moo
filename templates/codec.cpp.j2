@@ -23,7 +23,11 @@ void {{namespace}}::decode_mp({{namespace}}::{{classname}}& me, const zmq::messa
     if (ident == {{msg.ident}}) {
         me.set_ident(ident);
         {% for a in msg.attrs %}
-        me.set_{{a.name}}(j.get<{{a.type.c}}>());
+        {
+            auto jval = j["{{a.name}}"];
+            {{a.type.c}} val = jval.get<{{a.type.c}}>();
+            me.set_{{a.name}}(val);
+        }
         {% endfor %}
         return;
     }

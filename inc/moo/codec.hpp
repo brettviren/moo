@@ -52,7 +52,7 @@ namespace moo {
 
       protected:
         // current message ident
-        int m_ident;
+        int m_ident{-1};
     };
 }
 #endif

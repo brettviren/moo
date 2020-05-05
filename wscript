@@ -84,10 +84,13 @@ def build(bld):
         target=f"mex/YodelCodec.hpp")
     bld(source="models/yodel/codec.jsonnet",
         template=f"templates/codec.cpp.j2",
-        target="YodelCodec.cpp")
+        target="src/YodelCodec.cpp")
+    bld(source="models/yodel/codec.jsonnet",
+        template=f"templates/test_codec.cpp.j2",
+        target="test/test_YodelCodec.cpp")
 
     cpps = bld.path.ant_glob('src/*.cpp')
-    cpps += [bld.path.find_or_declare("YodelCodec.cpp")]
+    cpps += [bld.path.find_or_declare("src/YodelCodec.cpp")]
 
     # for tmpl in 'ctxsml states messages json_messages'.split():
     #     bld(source=f"examples/{ns}-ctxsml.jsonnet",
@@ -100,6 +103,7 @@ def build(bld):
 
     # bld(source=f"{ns}-ctxsml.dot")
 
+
     bld.shlib(features="cxx",
               includes='. inc build',
               source = cpps,
@@ -107,3 +111,11 @@ def build(bld):
               use='ZMQ',
               uselib_store=APPNAME.upper())
     
+    rpath = [bld.env["PREFIX"] + '/lib', bld.path.find_or_declare(bld.out_dir)]
+
+    bld.program(features="cxx",
+                source="test/test_YodelCodec.cpp",
+                target="test/test_YodelCodec",
+                includes='. inc build',
+                rpath=rpath,
+                use='MOO ZMQ moo')
