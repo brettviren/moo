@@ -27,17 +27,23 @@ def cli(ctx):
 @click.option('-o', '--output', default="/dev/stdout",
               type=click.Path(exists=False, dir_okay=False, file_okay=True),
               help="Output file, default is stdout")
+@click.option('--string/--no-string', '-S/ ', default=False,
+              help="Treat output as string not JSON")
 @click.argument('model')
 @click.pass_context
-def compile(ctx, path, jpath, output, model):
+def compile(ctx, path, jpath, output, string, model):
     '''
     Compile a model to JSON
     '''
     data = jsonnet.load(model, jpath)
     if path:
         data = select_path(data, path)
+    if string:
+        text = data
+    else:
+        text = json.dumps(data, indent=4)
     with open(output, 'wb') as fp:
-        fp.write(json.dumps(data, indent=4).encode())
+        fp.write(text.encode())
 
 @cli.command()
 @click.option('-J', '--jpath', envvar='JSONNET_PATH', multiple=True,
@@ -61,12 +67,15 @@ def generate(ctx, jpath, output, model, templ):
 @click.option('-J', '--jpath', envvar='JSONNET_PATH', multiple=True,
               type=click.Path(exists=True, dir_okay=True, file_okay=False),
               help="Extra directory to find Jsonnet files")
+@click.option('-T', '--tpath', envvar='JINJA2_PATH', multiple=True,
+              type=click.Path(exists=True, dir_okay=True, file_okay=False),
+              help="Extra directory to find Jinja2 files")
 @click.option('-o', '--output', default="/dev/stdout",
               type=click.Path(exists=False, dir_okay=False, file_okay=True),
               help="Output file, default is stdout")
 @click.argument('filename')
 @click.pass_context
-def imports(ctx, jpath, output, filename):
+def imports(ctx, jpath, tpath, output, filename):
     '''
     Emit a list of imports required by the model
     '''
@@ -74,7 +83,7 @@ def imports(ctx, jpath, output, filename):
     if filename.endswith('.jsonnet'):
         deps = jsonnet.imports(filename, jpath)
     if filename.endswith('.j2'):
-        deps = template.imports(filename)
+        deps = template.imports(filename, tpath)
     text = '\n'.join(deps)
     with open(output, 'wb') as fp:
         fp.write(text.encode())

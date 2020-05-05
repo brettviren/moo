@@ -1,5 +1,5 @@
 #!/usr/bin/env waf
-
+import os
 import time
 # fixme: better to be a waf tool
 import moo
@@ -28,7 +28,9 @@ class codegen(Task):
     def run(self):
         model = self.inputs[0]
         templ = self.inputs[1]
-        data = moo.jsonnet.load(model.abspath(), ('.'))
+        top = self.generator.bld.path.abspath()
+        mpath = [os.path.join(top, "models")]
+        data = moo.jsonnet.load(model.abspath(),mpath)
         text = moo.template.render(templ.abspath(), data)
         with open(self.outputs[0].abspath(), 'wb') as fp:
             fp.write(text.encode())
@@ -37,10 +39,13 @@ class codegen(Task):
         deps = list()
         for maybe in self.inputs:
             extra = list()
+            top = self.generator.bld.path.abspath()
+            mpath = [os.path.join(top, "models")]
+            tpath = [os.path.join(top, "templates")]
             if maybe.name.endswith('.jsonnet'):
-                extra = moo.jsonnet.imports(maybe.abspath()) # need to give a JPATH
+                extra = moo.jsonnet.imports(maybe.abspath(),mpath)
             if maybe.name.endswith('.j2'):
-                extra = moo.template.imports(maybe.abspath())
+                extra = moo.template.imports(maybe.abspath(),tpath)
             for one in extra:
                 node = self.generator.bld.root.find_resource(one)
                 deps.append(node)
@@ -72,21 +77,33 @@ class dotter(Task):
 
 def build(bld):
 
-    ns="mex"
+    # need to generate target file name with like:
+    # moo compile -S -p classname models/yodel/codec.jsonnet
+    bld(source="models/yodel/codec.jsonnet",
+        template=f"templates/codec.hpp.j2",
+        target=f"mex/YodelCodec.hpp")
+    bld(source="models/yodel/codec.jsonnet",
+        template=f"templates/codec.cpp.j2",
+        target="YodelCodec.cpp")
 
-    for tmpl in 'ctxsml states messages json_messages'.split():
-        bld(source=f"examples/{ns}-ctxsml.jsonnet",
-            template=f"templates/{tmpl}.hpp.j2",
-            target=f"{ns}/{tmpl}.hpp")
+    cpps = bld.path.ant_glob('src/*.cpp')
+    cpps += [bld.path.find_or_declare("YodelCodec.cpp")]
 
-    bld(source=f"examples/{ns}-ctxsml.jsonnet",
-        template="templates/ctxsml.dot.j2",
-        target=f"{ns}-ctxsml.dot")
+    # for tmpl in 'ctxsml states messages json_messages'.split():
+    #     bld(source=f"examples/{ns}-ctxsml.jsonnet",
+    #         template=f"templates/{tmpl}.hpp.j2",
+    #         target=f"{ns}/{tmpl}.hpp")
 
-    bld(source=f"{ns}-ctxsml.dot")
+    # bld(source=f"examples/{ns}-ctxsml.jsonnet",
+    #     template="templates/ctxsml.dot.j2",
+    #     target=f"{ns}-ctxsml.dot")
+
+    # bld(source=f"{ns}-ctxsml.dot")
 
     bld.shlib(features="cxx",
               includes='. inc build',
-              source = f"src/{ns}-ctxsml.cpp",
+              source = cpps,
               target = APPNAME.lower(),
+              use='ZMQ',
               uselib_store=APPNAME.upper())
+    

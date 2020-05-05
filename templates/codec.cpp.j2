@@ -1,0 +1,79 @@
+#include "{{namespace}}/{{classname}}.hpp"
+
+{% for msg in messages %}
+void {{namespace}}::to_json(json& j, const {{namespace}}::{{msg.name}}& obj) 
+{
+    j = json{ {%- for a in msg.attrs -%}{{ ', ' if not loop.first }}{"{{a.name}}", obj.{{a.name}}}{%- endfor-%}};
+}
+{% endfor %}
+{% for msg in messages %}
+void {{namespace}}::from_json(const json& j, {{namespace}}::{{msg.name}}& obj)
+{
+    {% for a in msg.attrs %}
+    j.at("{{a.name}}").get_to(obj.{{a.name}});
+    {% endfor %}
+}
+{% endfor %}
+
+void {{namespace}}::decode_mp({{namespace}}::{{classname}}& me, const zmq::message_t& msg)
+{
+    json j = moo::zmp2json(msg);
+    int ident = j["ident"];
+    {% for msg in messages %}
+    if (ident == {{msg.ident}}) {
+        me.set_ident(ident);
+        {% for a in msg.attrs %}
+        me.set_{{a.name}}(j.get<{{a.type.c}}>());
+        {% endfor %}
+        return;
+    }
+    {% endfor %}
+    throw std::runtime_error("can not decode from zmp");
+}
+
+void {{namespace}}::encode_mp(const {{namespace}}::{{classname}}& me, zmq::message_t& msg)
+{
+    json j;
+    const int ident = me.get_ident();
+    j["ident"] = ident;
+    {% for msg in messages %}
+    if (ident == {{msg.ident}}) {
+        {% for a in msg.attrs %}
+        j["{{a.name}}"] = me.get_{{a.name}}();
+        {% endfor %}
+    }
+    {% endfor %}
+    msg = moo::json2zmp(j);
+}
+
+void {{namespace}}::{{classname}}::set(const zmq::message_t& msg)
+{
+    m_decoder(*this, msg);
+}
+
+void {{namespace}}::{{classname}}::get(zmq::message_t& msg)
+{
+    m_encoder(*this, msg);
+}
+
+
+// message getters
+{% for m in messages %}
+{{namespace}}::{{m.name}} {{namespace}}::{{classname}}::get_{{m.name|lower}}() const
+{
+    if (m_ident != {{m.ident}}) {
+        std::runtime_error("codec not set to message ident {{m.ident}}");
+    }
+    return {{namespace}}::{{m.name}} { {% for a in m.attrs %}{{ ', ' if not loop.first }}m_{{a.name}}{%endfor%} };
+}
+{% endfor %}
+
+{% for m in messages %}
+void {{namespace}}::{{classname}}::set_{{m.name|lower}}(const {{namespace}}::{{m.name}}& val) 
+{
+    m_ident = {{m.ident}};
+    {% for a in m.attrs %}
+    m_{{a.name}} = val.{{a.name}};
+    {% endfor %}
+}
+{% endfor %}

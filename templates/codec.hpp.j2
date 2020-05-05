@@ -1,0 +1,78 @@
+#ifndef {{namespace|upper}}_{{classname|upper}}_HPP_SEEN
+#define {{namespace|upper}}_{{classname|upper}}_HPP_SEEN
+
+#include "zmq.hpp"
+#include "json.hpp"
+#include "moo/codec.hpp"
+
+namespace {{namespace}} {
+    using json = nlohmann::json;
+
+    /// The messages the codec knows.
+    {% for m in messages %}
+    struct {{m.name}} {
+        {% for a in m.attrs %}
+        {{a.type.c}} {{a.name}};
+        {% endfor %}
+    };
+    void to_json(json& j, const {{m.name}}& obj);
+    void from_json(const json& j, {{m.name}}& obj);
+    {% endfor %}
+
+    
+    class {{classname}};
+
+    void decode_mp({{classname}}& me, const zmq::message_t& msg);
+    void encode_mp(const {{classname}}& me, zmq::message_t& msg);
+
+    /**
+     * The codec for the {{protoname}} protocol.
+     */
+    class {{classname}} : public moo::codec {
+      public:
+
+        using decoder_t = std::function<void({{classname}}& me, const zmq::message_t& msg)>;
+        using encoder_t = std::function<void(const {{classname}}& me, zmq::message_t& msg)>;
+
+        {{classname}}(encoder_t encoder = encode_mp, decoder_t decoder = decode_mp)
+                         : m_encoder(encoder), m_decoder(decoder) { };
+
+        virtual std::string proto_name() const { return "{{protoname}}"; }
+
+        virtual void set(const zmq::message_t& msg);
+        virtual void get(zmq::message_t& msg);
+
+        // message getters
+        {% for m in messages %}
+        {{namespace}}::{{m.name}} get_{{m.name|lower}}() const;
+        {% endfor %}
+
+        // message setters
+        {% for m in messages %}
+        void set_{{m.name|lower}}(const {{namespace}}::{{m.name}}& msg);
+        {% endfor %}
+
+        // individual field getters
+        {% for f in fields %}
+        {{f.type.c}} get_{{f.name}}() const { return m_{{f.name}}; }
+        {% endfor %}
+
+        // individual field setters
+        {% for f in fields %}
+        void set_{{f.name}}(const {{f.type.c}}& val) { m_{{f.name}} = val; }
+        {% endfor %}
+
+      private:
+
+        encoder_t m_encoder;
+        decoder_t m_decoder;
+
+        // individual fields
+        {% for f in fields %}
+        {{f.type.c}} m_{{f.name}};
+        {% endfor %}
+
+
+    };
+}
+#endif // {{namespace|upper}}_{{classname|upper}}_HPP_SEEN

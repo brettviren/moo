@@ -10,9 +10,10 @@ def render(template, params):
     tmpl = env.get_template(os.path.basename(template))
     return tmpl.render(**params)
 
-def imports(template):
+def imports(template, tpath):
     path = os.path.dirname(os.path.realpath(template))
-    env =  Environment(loader = FileSystemLoader(path),
+    
+    env =  Environment(loader = FileSystemLoader([path]+tpath),
                        trim_blocks = True, 
                        lstrip_blocks = True,
                        extensions=['jinja2.ext.do'])

@@ -111,6 +111,14 @@ local types = [
     keys(obj):: std.objectFields(obj),
     values(obj):: std.map(function(x) obj[x], std.objectFields(obj)),
 
+    // Return array of attributes which is the union of attributes of messages.
+    fields(msgs):: std.set(std.flattenArrays([m.attrs for m in msgs]),
+                           function(a) a.name),
+
+    // Given an array of objects, return an array with each object
+    // being given sequential "ident" attribute
+    identify(objs, key='ident', start=1):: [
+        objs[n]+{ [key]:start+n } for n in std.range(0, std.length(objs)-1)],
 
     event_things_byname(machine, thingname) ::
     [ std.split(s,":"),
