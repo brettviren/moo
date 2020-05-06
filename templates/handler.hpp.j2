@@ -1,0 +1,36 @@
+#ifndef {{namespace|upper}}_{{classname|upper}}_HPP_SEEN
+#define {{namespace|upper}}_{{classname|upper}}_HPP_SEEN
+
+#include "moo/handler.hpp"
+
+namespace {{namespace}}{
+
+    template<typename FSM>
+    class {{classname}} : public moo::handler {
+        FSM& m_fsm;
+        CODEC& m_codec;
+        zmq::socket_t& m_sock;
+      public:
+        {{classname}}(FSM& fsm, CODEC& codec, zmq::socket_t& sock)
+                         : m_fsm(fsm), m_codec(codec), m_sock(sock) {}
+
+        virtual void operator()(zmq::event_flags flags) {
+            while(m_sock.get(zmq::sockopt::events) && zmq::event_flags::pollin) {
+                m_codec.recv();
+                const int ident = m_codec.ident();
+                {% for msg in messages %}
+                if (ident == {{msg.ident}}) {
+                    auto eve = m_codec.get_{{msg.name}};
+                    bool ok = m_fsm.process_event(eve);
+                    // fixme: need to handle !ok
+                    continue;
+                }
+                {% endfor %}
+                // get here we don't know the message
+            }
+
+        }
+
+    };
+}
+#endif // {{namespace|upper}}_{{classname|upper}}_HPP_SEEN
