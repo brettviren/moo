@@ -31,6 +31,11 @@ class codegen(Task):
         top = self.generator.bld.path.abspath()
         mpath = [os.path.join(top, "models")]
         data = moo.jsonnet.load(model.abspath(),mpath)
+        if hasattr(self, 'structpath'):
+            print('STRUCTPATH',self.structpath)
+            data = moo.util.select_path(data, self.structpath)
+        else:
+            print('STRUCTPATH none for',templ)
         text = moo.template.render(templ.abspath(), data)
         with open(self.outputs[0].abspath(), 'wb') as fp:
             fp.write(text.encode())
@@ -61,7 +66,8 @@ def add_jsonnet_deps(tgen, model):
     if not tmpl:
         raise ValueError(f"file not found: {tgen.template}")
     tsk = tgen.create_task('codegen', [model, tmpl], tgt)
-
+    if hasattr(tgen, "structpath"):
+        tsk.structpath=tgen.structpath
 
 @extension('.dot')
 def make_dotters(tgen, dot):
@@ -79,30 +85,31 @@ def build(bld):
 
     # need to generate target file name with like:
     # moo compile -S -p classname models/yodel/codec.jsonnet
-    bld(source="models/yodel/codec.jsonnet",
-        template=f"templates/codec.hpp.j2",
-        target=f"mex/YodelCodec.hpp")
-    bld(source="models/yodel/codec.jsonnet",
-        template=f"templates/codec.cpp.j2",
-        target="src/YodelCodec.cpp")
-    bld(source="models/yodel/codec.jsonnet",
-        template=f"templates/test_codec.cpp.j2",
-        target="test/test_YodelCodec.cpp")
-
+    # headers:
     cpps = bld.path.ant_glob('src/*.cpp')
-    cpps += [bld.path.find_or_declare("src/YodelCodec.cpp")]
 
-    # for tmpl in 'ctxsml states messages json_messages'.split():
-    #     bld(source=f"examples/{ns}-ctxsml.jsonnet",
-    #         template=f"templates/{tmpl}.hpp.j2",
-    #         target=f"{ns}/{tmpl}.hpp")
+    bld(source="models/yodel/model.jsonnet",
+        template=f"templates/codec.hpp.j2",
+        structpath='codec',
+        target=f"mex/YodelCodec.hpp")
 
-    # bld(source=f"examples/{ns}-ctxsml.jsonnet",
-    #     template="templates/ctxsml.dot.j2",
-    #     target=f"{ns}-ctxsml.dot")
+    bld(source="models/yodel/model.jsonnet",
+        template=f"templates/handler.hpp.j2",
+        structpath='handlers.peer',
+        target=f"mex/YodelPeerHandler.hpp")
 
-    # bld(source=f"{ns}-ctxsml.dot")
+    for name in ['codec']:
+        tgt = f"src/Yodel{name.capitalize()}.cpp"
+        cpps += [bld.path.find_or_declare(tgt)]
+        bld(source="models/yodel/model.jsonnet",
+            template=f"templates/{name}.cpp.j2",
+            structpath=name,
+            target=tgt)
 
+    bld(source="models/yodel/model.jsonnet",
+        template=f"templates/test_codec.cpp.j2",
+        structpath='codec',
+        target="test/test_YodelCodec.cpp")
 
     bld.shlib(features="cxx",
               includes='. inc build',

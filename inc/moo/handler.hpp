@@ -1,3 +1,12 @@
+/**
+ * A moo::handler provides a base class for handling protocol
+ * messages.
+ *
+ * The subclass likely has access a codec.
+ *
+ * The subclass is likely an FSM.
+ */
+
 #ifndef MOO_HANDLER_HPP_SEEN
 #define MOO_HANDLER_HPP_SEEN
 
@@ -8,10 +17,10 @@ namespace moo {
     class handler {
       public:
         
-        virtual ~handler();
+        virtual ~handler() {}
 
-        // The handler call, subclass implements
-        virtual void operator()(zmq::event_flags flags) = 0;
+        /// Receive notification that a codec is ready for processing.
+        virtual void notice() = 0;
 
     };
 }

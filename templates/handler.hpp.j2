@@ -1,36 +1,57 @@
-#ifndef {{namespace|upper}}_{{classname|upper}}_HPP_SEEN
-#define {{namespace|upper}}_{{classname|upper}}_HPP_SEEN
+{% import 'ctxsml_macros.j2' as moo %}
+#ifndef {{namespace|upper}}_{{protoname|upper}}_HANDLER_HPP_SEEN
+#define {{namespace|upper}}_{{protoname|upper}}_HANDLER_HPP_SEEN
 
-#include "moo/handler.hpp"
+namespace {{namespace}} {
 
-namespace {{namespace}}{
+    namespace {{protoname}} {
+        // States
+        {% for st in machine.states %}
+        {{ moo.struct(st)|indent}}
+        {% endfor %}
 
-    template<typename FSM>
-    class {{classname}} : public moo::handler {
-        FSM& m_fsm;
-        CODEC& m_codec;
-        zmq::socket_t& m_sock;
-      public:
-        {{classname}}(FSM& fsm, CODEC& codec, zmq::socket_t& sock)
-                         : m_fsm(fsm), m_codec(codec), m_sock(sock) {}
+        // Events
+        {% for eve in machine.events %}
+        {{ moo.struct(eve)|indent}}
+        {% endfor %}
 
-        virtual void operator()(zmq::event_flags flags) {
-            while(m_sock.get(zmq::sockopt::events) && zmq::event_flags::pollin) {
-                m_codec.recv();
-                const int ident = m_codec.ident();
-                {% for msg in messages %}
-                if (ident == {{msg.ident}}) {
-                    auto eve = m_codec.get_{{msg.name}};
-                    bool ok = m_fsm.process_event(eve);
-                    // fixme: need to handle !ok
-                    continue;
-                }
-                {% endfor %}
-                // get here we don't know the message
+        struct Context {
+
+            virtual ~Context() {}
+
+            // event guards
+            {% for eg in machine.event_guards %}
+            {{ moo.event_method_decl_purevirt(eg[0], eg[1], namespace + "::" + protoname)|indent }}
+            {% endfor %}
+
+            // actions
+            {% for ea in machine.event_actions %}
+            {{ moo.event_method_decl_purevirt(ea[0], ea[1], namespace + "::" + protoname)|indent }}
+            {% endfor %}
+      
+        };
+
+        struct FSM {
+
+            auto operator()() {
+                using namespace boost::sml;
+                using namespace {{namespace}}::{{protoname}};
+
+                // clang-format off
+                return make_transition_table(
+{{ moo.smltt_lambdas(machine.tt) }}
+                    );
+                // clang-format on
             }
+        };
 
-        }
+        // Construct like:
+        //     MyContext ctx(myapp, proto_codec);
+        //     sml::sm<{{protoname}}::FSM> sm{ctx}
+        // Assuming MyContext inherits from {{protoname}}::Context
 
-    };
-}
-#endif // {{namespace|upper}}_{{classname|upper}}_HPP_SEEN
+    } // namespace {{protoname}}
+
+} // namespace {{namespace}}
+
+#endif // {{namespace|upper}}_{{protoname|upper}}_HANDLER_HPP_SEEN

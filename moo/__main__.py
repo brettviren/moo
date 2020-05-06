@@ -46,6 +46,8 @@ def compile(ctx, path, jpath, output, string, model):
         fp.write(text.encode())
 
 @cli.command()
+@click.option('-p', '--path', default="",
+              help="Specify a selection path into the model data structure")
 @click.option('-J', '--jpath', envvar='JSONNET_PATH', multiple=True,
               type=click.Path(exists=True, dir_okay=True, file_okay=False),
               help="Extra directory to find Jsonnet files")
@@ -55,8 +57,10 @@ def compile(ctx, path, jpath, output, string, model):
 @click.argument('model')
 @click.argument('templ')
 @click.pass_context
-def generate(ctx, jpath, output, model, templ):
+def generate(ctx, path, jpath, output, model, templ):
     data = jsonnet.load(model, jpath)
+    if path:
+        data = select_path(data, path)
     text = template.render(templ, data)
     with open(output, 'wb') as fp:
         fp.write(text.encode())

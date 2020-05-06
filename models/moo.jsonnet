@@ -41,6 +41,12 @@ local types = [
         model: "object",
         name:name, attrs:attrs, help:help },
 
+    // A message (really message schema) describes an object subject
+    // to serialization.
+    message(name, attrs=[], help="") :: self.object(name,attrs,help) {
+        model: "message",
+    },
+
     // A method is a conduit that sends a message to an entity, eg a
     // target language object.
     method(name, type=self.types.void, rdef=null, attrs=[], help="") :: {
@@ -85,14 +91,24 @@ local types = [
         name:name, type:$.types.void, rdef:null,
         attrs:attrs, help:help},
 
+    tt_states(tt) :: std.set(std.flattenArrays([[t.ini, t.fin] for t in tt]),
+                             function(s) s.name),
+    tt_events(tt) :: std.set([t.event for t in tt], function(e) e.name),
+    tt_guards(tt) :: std.set(std.flattenArrays([t.guards for t in tt]),
+                             function(g) g.name),
+    tt_actions(tt) :: std.set(std.flattenArrays([t.actions for t in tt]),
+                              function(a) a.name),
+
     // A state machine which may also be a state
-    machine(name, states, events=[], guards=[], actions=[], tt=[]) :: {
+    machine(name, tt=[]) :: {
         model:"machine",
         name:name,
-        states:states,
-        events:events,
-        guards:guards,
-        actions:actions,
+        states:$.tt_states(tt),
+        events:$.tt_events(tt),
+        guards:$.tt_guards(tt),
+        actions:$.tt_actions(tt),
+        event_guards:$.event_guards(self),
+        event_actions:$.event_actions(self),
         tt:tt},
 
     // A command injects an event into a FSM.
