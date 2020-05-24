@@ -1,0 +1,198 @@
+#+title: moo
+#+subtitle: Model Oriented Objects
+#+setupfile: setup.org
+
+
+* Introduction
+
+Model-oriented objects (moo) enacts a software development technique
+which replaces repetitive software development with code generation
+(codegen).  Code is generated using on or more /templates/ applied to a
+/model/.  A /data structure/ which is supplied by the model and applied to
+a template follows a defined /schema/ which forms a contract to allow
+models and templates to be develop independently.  
+
+** Example scenario
+
+As an example, consider a distributed data processing system.  It is
+considered to be decomposed into a number of /roles/ each defining
+certain characteristics (eg, as expressed as APIs).  Any given role
+may have more than on implementation and an implementation may provide
+more then one role.  In a deployed system there may be multiple
+instances of any given implementation.  
+
+To be more concrete consider a system with three roles: a producer and
+a consumer and an intervening broker.  Prior to development we know
+must be able to:
+
+- connect the output of the producer and the input of the consumer instances to broker instances.
+- configure each instance with information required to form those links.
+- configure each instance with implementation-specific items.
+- define target language (eg, C++) object representations of the messages to be exchanged.
+- develop object serialization methods which allow information to be transferred between instances of the roles.
+- implement finite state machines enacting implementation-specific behavior.
+- produce network topology diagrams and other documentation.
+
+The software produced to povide these features are all parameterized
+on a model and pieces of the model are required in multiple locations
+and realized in multiple forms.  We will model role aspects and apply
+a template to generate base classes and API documentation.  Models for
+message related parts will be applied to templates to create object
+representations and their serialization methods (possibly by generated
+models consumed by other codegen such as Protobuf or Avro).  Runtime
+models can be used to generate configuration object instances and
+network topology diagrams.
+
+** Shoulders 
+
+The ideas in moo are not unique but walk down the trail originally
+blazed by ZeroMQ's [[https://github.com/zeromq/zproto][zproto]] and [[https://github.com/zeromq/zproject][zproject]].  The main point of departure
+from this ZeroMQ technology is to use Jinja2 as the template language
+instead of [[https://github.com/zeromq/gsl][gsl]].  The default modeling language is [[https://jsonnet.org][Jsonnet]] but the ~moo~
+command line program will also accept JSON or any other format
+supported by [[https://github.com/ssato/python-anyconfig][anyconfig]].  It is important to pause here and make clear
+that at no point does moo require a developer to manually type any
+JSON into a text editor.
+
+** What moo brings
+
+The moo project provides these parts 
+
+- a ~moo~ command line program to perform codegen
+
+- a ~moo.jsonnet~ file providing the function primitives to define schema
+
+- example models and templates
+
+- example build system
+
+- (this) documentation
+
+** Getting started
+
+t.b.d. how to install and run an included example
+
+
+* Schema
+
+In moo, an object schema provides a contract between model and
+template developers. 
+
+** Hello Schema
+
+[[http://json-schema.org/][JSON Schema]] is adopted by moo to express schema and support functions
+are provided to allow JSON Schema to be produced from a Jsonnet
+program.  The relative succinctness of the two representations can be
+seen in the following example.  First, defining a schema in Jsonnet:
+
+#+include: examples/hello_schema.jsonnet src jsonnet
+
+The ~moo~ command can be used to compile this Jsonnet to JSON and it
+will be valid JSON Schema, by construction.
+
+#+begin_src shell :exports both :results output code :wrap "src json"
+  moo compile examples/hello_schema.jsonnet
+#+end_src
+
+#+RESULTS:
+#+begin_src json
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "properties": {
+        "name": {
+            "type": "string"
+        },
+        "url": {
+            "format": "uri",
+            "type": "string"
+        }
+    },
+    "required": [
+        "name",
+        "url"
+    ],
+    "type": "object"
+}
+#+end_src
+
+We will talk more about models in section [[Models]] later.  For now we
+write a very simple model in Jsonnet and compile it to JSON:
+
+#+include: examples/hello_model.jsonnet src jsonnet
+
+#+begin_src shell :exports both :results output code :wrap "src json"
+  moo compile examples/hello_model.jsonnet
+#+end_src
+
+#+RESULTS:
+#+begin_src json
+{
+    "name": "my home page",
+    "url": "https://brettviren.github.io/"
+}
+#+end_src
+
+Okay, these two are not so very different but later we will see how
+Jsonnet will allow conciseness in modeling.  For here it is enough to
+show how to use moo to validate the model against the schema.  This
+uses the Python package [[https://python-jsonschema.readthedocs.io][jsonschema]] for the heavy lifting.
+
+#+begin_src shell :exports both :results output code :wrap "src json"
+  moo validate -s examples/hello_schema.jsonnet examples/hello_model.jsonnet
+#+end_src
+
+#+RESULTS:
+#+begin_src json
+#+end_src
+
+The lack of any error indicates validity.  We can disturb the model by
+removing a required attribute key or providing a value of the wrong
+type.  For example, changing the ~url~ attribute to hold number ~42~ gives:
+
+#+begin_src shell :exports both :results output code :wrap "example"
+  moo validate -s examples/hello_schema.jsonnet examples/hello_model_invalid.jsonnet 2>&1 |tail -7
+#+end_src
+
+#+RESULTS:
+#+begin_example
+jsonschema.exceptions.ValidationError: 42 is not of type 'string'
+
+Failed validating 'type' in schema['properties']['url']:
+    {'format': 'uri', 'type': 'string'}
+
+On instance['url']:
+    42
+#+end_example
+
+
+
+** Larger Schema
+
+tbd: organization betwen moo-level schema and category-level.
+
+In the [[Introduction]] a system with producer/consumer/broker roles were
+described.  Any instance that enacts a particular role must receive an
+instance of a role-specific configuration object which is formed and
+delivered by code generated from a model and templates bound by a
+contract of a schema.  This section walks through developing these
+parts.
+
+First, we decompose the schema, exploiting any symmetry.  All roles
+will have some common parts.  We will assume an instance that enacts a
+role has an associated role identifier which will name the role and
+provide an instance name which is unique at least to all instances
+that enact the role.
+
+In this example, brokers receive information from producers and send
+information to consumers.  We will model the links for this
+information transfer as being between "ports" on each role.  Eg, the
+port of a producer is linked to a port of a broker.  We will say each
+port is at least given a unique identifier.  In practice, additional
+attributes are needed but let us assume this is sufficient for forming
+links.
+
+
+
+
+* Models
+

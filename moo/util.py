@@ -21,3 +21,7 @@ def select_path(obj, path):
         obj = obj[one]
 
     return obj
+
+def validate(model, schema):
+    import jsonschema
+    return jsonschema.validate(instance=model, schema=schema)

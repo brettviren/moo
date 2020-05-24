@@ -13,6 +13,8 @@ setuptools.setup(
         "click",
         "jsonnet",
         "jinja2",
+        "anyconfig",
+        "jsonschema",
 #        "transitions",
     ],
     entry_points = dict(

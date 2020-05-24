@@ -1,0 +1,570 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+<!-- 2020-05-23 Sat 20:54 -->
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>moo</title>
+<meta name="generator" content="Org mode" />
+<meta name="author" content="Brett Viren" />
+<style type="text/css">
+ <!--/*--><![CDATA[/*><!--*/
+  .title  { text-align: center;
+             margin-bottom: .2em; }
+  .subtitle { text-align: center;
+              font-size: medium;
+              font-weight: bold;
+              margin-top:0; }
+  .todo   { font-family: monospace; color: red; }
+  .done   { font-family: monospace; color: green; }
+  .priority { font-family: monospace; color: orange; }
+  .tag    { background-color: #eee; font-family: monospace;
+            padding: 2px; font-size: 80%; font-weight: normal; }
+  .timestamp { color: #bebebe; }
+  .timestamp-kwd { color: #5f9ea0; }
+  .org-right  { margin-left: auto; margin-right: 0px;  text-align: right; }
+  .org-left   { margin-left: 0px;  margin-right: auto; text-align: left; }
+  .org-center { margin-left: auto; margin-right: auto; text-align: center; }
+  .underline { text-decoration: underline; }
+  #postamble p, #preamble p { font-size: 90%; margin: .2em; }
+  p.verse { margin-left: 3%; }
+  pre {
+    border: 1px solid #ccc;
+    box-shadow: 3px 3px 3px #eee;
+    padding: 8pt;
+    font-family: monospace;
+    overflow: auto;
+    margin: 1.2em;
+  }
+  pre.src {
+    position: relative;
+    overflow: visible;
+    padding-top: 1.2em;
+  }
+  pre.src:before {
+    display: none;
+    position: absolute;
+    background-color: white;
+    top: -10px;
+    right: 10px;
+    padding: 3px;
+    border: 1px solid black;
+  }
+  pre.src:hover:before { display: inline;}
+  /* Languages per Org manual */
+  pre.src-asymptote:before { content: 'Asymptote'; }
+  pre.src-awk:before { content: 'Awk'; }
+  pre.src-C:before { content: 'C'; }
+  /* pre.src-C++ doesn't work in CSS */
+  pre.src-clojure:before { content: 'Clojure'; }
+  pre.src-css:before { content: 'CSS'; }
+  pre.src-D:before { content: 'D'; }
+  pre.src-ditaa:before { content: 'ditaa'; }
+  pre.src-dot:before { content: 'Graphviz'; }
+  pre.src-calc:before { content: 'Emacs Calc'; }
+  pre.src-emacs-lisp:before { content: 'Emacs Lisp'; }
+  pre.src-fortran:before { content: 'Fortran'; }
+  pre.src-gnuplot:before { content: 'gnuplot'; }
+  pre.src-haskell:before { content: 'Haskell'; }
+  pre.src-hledger:before { content: 'hledger'; }
+  pre.src-java:before { content: 'Java'; }
+  pre.src-js:before { content: 'Javascript'; }
+  pre.src-latex:before { content: 'LaTeX'; }
+  pre.src-ledger:before { content: 'Ledger'; }
+  pre.src-lisp:before { content: 'Lisp'; }
+  pre.src-lilypond:before { content: 'Lilypond'; }
+  pre.src-lua:before { content: 'Lua'; }
+  pre.src-matlab:before { content: 'MATLAB'; }
+  pre.src-mscgen:before { content: 'Mscgen'; }
+  pre.src-ocaml:before { content: 'Objective Caml'; }
+  pre.src-octave:before { content: 'Octave'; }
+  pre.src-org:before { content: 'Org mode'; }
+  pre.src-oz:before { content: 'OZ'; }
+  pre.src-plantuml:before { content: 'Plantuml'; }
+  pre.src-processing:before { content: 'Processing.js'; }
+  pre.src-python:before { content: 'Python'; }
+  pre.src-R:before { content: 'R'; }
+  pre.src-ruby:before { content: 'Ruby'; }
+  pre.src-sass:before { content: 'Sass'; }
+  pre.src-scheme:before { content: 'Scheme'; }
+  pre.src-screen:before { content: 'Gnu Screen'; }
+  pre.src-sed:before { content: 'Sed'; }
+  pre.src-sh:before { content: 'shell'; }
+  pre.src-sql:before { content: 'SQL'; }
+  pre.src-sqlite:before { content: 'SQLite'; }
+  /* additional languages in org.el's org-babel-load-languages alist */
+  pre.src-forth:before { content: 'Forth'; }
+  pre.src-io:before { content: 'IO'; }
+  pre.src-J:before { content: 'J'; }
+  pre.src-makefile:before { content: 'Makefile'; }
+  pre.src-maxima:before { content: 'Maxima'; }
+  pre.src-perl:before { content: 'Perl'; }
+  pre.src-picolisp:before { content: 'Pico Lisp'; }
+  pre.src-scala:before { content: 'Scala'; }
+  pre.src-shell:before { content: 'Shell Script'; }
+  pre.src-ebnf2ps:before { content: 'ebfn2ps'; }
+  /* additional language identifiers per "defun org-babel-execute"
+       in ob-*.el */
+  pre.src-cpp:before  { content: 'C++'; }
+  pre.src-abc:before  { content: 'ABC'; }
+  pre.src-coq:before  { content: 'Coq'; }
+  pre.src-groovy:before  { content: 'Groovy'; }
+  /* additional language identifiers from org-babel-shell-names in
+     ob-shell.el: ob-shell is the only babel language using a lambda to put
+     the execution function name together. */
+  pre.src-bash:before  { content: 'bash'; }
+  pre.src-csh:before  { content: 'csh'; }
+  pre.src-ash:before  { content: 'ash'; }
+  pre.src-dash:before  { content: 'dash'; }
+  pre.src-ksh:before  { content: 'ksh'; }
+  pre.src-mksh:before  { content: 'mksh'; }
+  pre.src-posh:before  { content: 'posh'; }
+  /* Additional Emacs modes also supported by the LaTeX listings package */
+  pre.src-ada:before { content: 'Ada'; }
+  pre.src-asm:before { content: 'Assembler'; }
+  pre.src-caml:before { content: 'Caml'; }
+  pre.src-delphi:before { content: 'Delphi'; }
+  pre.src-html:before { content: 'HTML'; }
+  pre.src-idl:before { content: 'IDL'; }
+  pre.src-mercury:before { content: 'Mercury'; }
+  pre.src-metapost:before { content: 'MetaPost'; }
+  pre.src-modula-2:before { content: 'Modula-2'; }
+  pre.src-pascal:before { content: 'Pascal'; }
+  pre.src-ps:before { content: 'PostScript'; }
+  pre.src-prolog:before { content: 'Prolog'; }
+  pre.src-simula:before { content: 'Simula'; }
+  pre.src-tcl:before { content: 'tcl'; }
+  pre.src-tex:before { content: 'TeX'; }
+  pre.src-plain-tex:before { content: 'Plain TeX'; }
+  pre.src-verilog:before { content: 'Verilog'; }
+  pre.src-vhdl:before { content: 'VHDL'; }
+  pre.src-xml:before { content: 'XML'; }
+  pre.src-nxml:before { content: 'XML'; }
+  /* add a generic configuration mode; LaTeX export needs an additional
+     (add-to-list 'org-latex-listings-langs '(conf " ")) in .emacs */
+  pre.src-conf:before { content: 'Configuration File'; }
+
+  table { border-collapse:collapse; }
+  caption.t-above { caption-side: top; }
+  caption.t-bottom { caption-side: bottom; }
+  td, th { vertical-align:top;  }
+  th.org-right  { text-align: center;  }
+  th.org-left   { text-align: center;   }
+  th.org-center { text-align: center; }
+  td.org-right  { text-align: right;  }
+  td.org-left   { text-align: left;   }
+  td.org-center { text-align: center; }
+  dt { font-weight: bold; }
+  .footpara { display: inline; }
+  .footdef  { margin-bottom: 1em; }
+  .figure { padding: 1em; }
+  .figure p { text-align: center; }
+  .equation-container {
+    display: table;
+    text-align: center;
+    width: 100%;
+  }
+  .equation {
+    vertical-align: middle;
+  }
+  .equation-label {
+    display: table-cell;
+    text-align: right;
+    vertical-align: middle;
+  }
+  .inlinetask {
+    padding: 10px;
+    border: 2px solid gray;
+    margin: 10px;
+    background: #ffffcc;
+  }
+  #org-div-home-and-up
+   { text-align: right; font-size: 70%; white-space: nowrap; }
+  textarea { overflow-x: auto; }
+  .linenr { font-size: smaller }
+  .code-highlighted { background-color: #ffff00; }
+  .org-info-js_info-navigation { border-style: none; }
+  #org-info-js_console-label
+    { font-size: 10px; font-weight: bold; white-space: nowrap; }
+  .org-info-js_search-highlight
+    { background-color: #ffff00; color: #000000; font-weight: bold; }
+  .org-svg { width: 90%; }
+  /*]]>*/-->
+</style>
+<link rel="stylesheet" type="text/css" href="export/styles/darksun/css/htmlize.css"/>
+<link rel="stylesheet" type="text/css" href="export/styles/darksun/css/darksun.css"/>
+<link rel="stylesheet" type="text/css" href="export/styles/darksun/css/hideshow.css"/>
+<script type="text/javascript" src="export/styles/darksun/js/jquery-1.11.0.min.js"></script>
+<script type="text/javascript" src="export/styles/darksun/js/jquery-ui-1.10.2.min.js"></script>
+<script type="text/javascript" src="export/styles/darksun/js/jquery.localscroll-min.js"></script>
+<script type="text/javascript" src="export/styles/darksun/js/jquery.scrollTo-1.4.3.1-min.js"></script>
+<script type="text/javascript" src="export/styles/darksun/js/jquery.zclip.min.js"></script>
+<script type="text/javascript" src="export/styles/darksun/js/darksun.js"></script>
+<script type="text/javascript" src="export/styles/darksun/js/hideshow.js"></script>
+<script type="text/javascript" src="export/styles/lib/js/jquery.stickytableheaders.min.js"></script>
+<script type="text/javascript">
+/*
+@licstart  The following is the entire license notice for the
+JavaScript code in this tag.
+
+Copyright (C) 2012-2020 Free Software Foundation, Inc.
+
+The JavaScript code in this tag is free software: you can
+redistribute it and/or modify it under the terms of the GNU
+General Public License (GNU GPL) as published by the Free Software
+Foundation, either version 3 of the License, or (at your option)
+any later version.  The code is distributed WITHOUT ANY WARRANTY;
+without even the implied warranty of MERCHANTABILITY or FITNESS
+FOR A PARTICULAR PURPOSE.  See the GNU GPL for more details.
+
+As additional permission under GNU GPL version 3 section 7, you
+may distribute non-source (e.g., minimized or compacted) forms of
+that code without the copy of the GNU GPL normally required by
+section 4, provided you include this license notice and a URL
+through which recipients can access the Corresponding Source.
+
+
+@licend  The above is the entire license notice
+for the JavaScript code in this tag.
+*/
+<!--/*--><![CDATA[/*><!--*/
+ function CodeHighlightOn(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(null != target) {
+     elem.cacheClassElem = elem.className;
+     elem.cacheClassTarget = target.className;
+     target.className = "code-highlighted";
+     elem.className   = "code-highlighted";
+   }
+ }
+ function CodeHighlightOff(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(elem.cacheClassElem)
+     elem.className = elem.cacheClassElem;
+   if(elem.cacheClassTarget)
+     target.className = elem.cacheClassTarget;
+ }
+/*]]>*///-->
+</script>
+</head>
+<body>
+<div id="content">
+<h1 class="title">moo
+<br />
+<span class="subtitle">Model Oriented Objects</span>
+</h1>
+<div id="table-of-contents">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents">
+<ul>
+<li><a href="#org3f4f0ae">Introduction</a>
+<ul>
+<li><a href="#org6b4d637">Example scenario</a></li>
+<li><a href="#orgb194401">Shoulders</a></li>
+<li><a href="#orgcb2d091">What moo brings</a></li>
+<li><a href="#org74bddbc">Getting started</a></li>
+</ul>
+</li>
+<li><a href="#org367d6e5">Schema</a>
+<ul>
+<li><a href="#orgcdec23c">Hello Schema</a></li>
+<li><a href="#org15479bb">Larger Schema</a></li>
+</ul>
+</li>
+<li><a href="#org060a71f">Models</a></li>
+</ul>
+</div>
+</div>
+
+
+<div id="outline-container-org3f4f0ae" class="outline-2">
+<h2 id="org3f4f0ae">Introduction</h2>
+<div class="outline-text-2" id="text-org3f4f0ae">
+<p>
+Model-oriented objects (moo) enacts a software development technique
+which replaces repetitive software development with code generation
+(codegen).  Code is generated using on or more <i>templates</i> applied to a
+<i>model</i>.  A <i>data structure</i> which is supplied by the model and applied to
+a template follows a defined <i>schema</i> which forms a contract to allow
+models and templates to be develop independently.  
+</p>
+</div>
+
+<div id="outline-container-org6b4d637" class="outline-3">
+<h3 id="org6b4d637">Example scenario</h3>
+<div class="outline-text-3" id="text-org6b4d637">
+<p>
+As an example, consider a distributed data processing system.  It is
+considered to be decomposed into a number of <i>roles</i> each defining
+certain characteristics (eg, as expressed as APIs).  Any given role
+may have more than on implementation and an implementation may provide
+more then one role.  In a deployed system there may be multiple
+instances of any given implementation.  
+</p>
+
+<p>
+To be more concrete consider a system with three roles: a producer and
+a consumer and an intervening broker.  Prior to development we know
+must be able to:
+</p>
+
+<ul class="org-ul">
+<li>connect the output of the producer and the input of the consumer instances to broker instances.</li>
+<li>configure each instance with information required to form those links.</li>
+<li>configure each instance with implementation-specific items.</li>
+<li>define target language (eg, C++) object representations of the messages to be exchanged.</li>
+<li>develop object serialization methods which allow information to be transferred between instances of the roles.</li>
+<li>implement finite state machines enacting implementation-specific behavior.</li>
+<li>produce network topology diagrams and other documentation.</li>
+</ul>
+
+<p>
+The software produced to povide these features are all parameterized
+on a model and pieces of the model are required in multiple locations
+and realized in multiple forms.  We will model role aspects and apply
+a template to generate base classes and API documentation.  Models for
+message related parts will be applied to templates to create object
+representations and their serialization methods (possibly by generated
+models consumed by other codegen such as Protobuf or Avro).  Runtime
+models can be used to generate configuration object instances and
+network topology diagrams.
+</p>
+</div>
+</div>
+
+<div id="outline-container-orgb194401" class="outline-3">
+<h3 id="orgb194401">Shoulders</h3>
+<div class="outline-text-3" id="text-orgb194401">
+<p>
+The ideas in moo are not unique but walk down the trail originally
+blazed by ZeroMQ's <a href="https://github.com/zeromq/zproto">zproto</a> and <a href="https://github.com/zeromq/zproject">zproject</a>.  The main point of departure
+from this ZeroMQ technology is to use Jinja2 as the template language
+instead of <a href="https://github.com/zeromq/gsl">gsl</a>.  The default modeling language is <a href="https://jsonnet.org">Jsonnet</a> but the <code>moo</code>
+command line program will also accept JSON or any other format
+supported by <a href="https://github.com/ssato/python-anyconfig">anyconfig</a>.  It is important to pause here and make clear
+that at no point does moo require a developer to manually type any
+JSON into a text editor.
+</p>
+</div>
+</div>
+
+<div id="outline-container-orgcb2d091" class="outline-3">
+<h3 id="orgcb2d091">What moo brings</h3>
+<div class="outline-text-3" id="text-orgcb2d091">
+<p>
+The moo project provides these parts 
+</p>
+
+<ul class="org-ul">
+<li>a <code>moo</code> command line program to perform codegen</li>
+
+<li>a <code>moo.jsonnet</code> file providing the function primitives to define schema</li>
+
+<li>example models and templates</li>
+
+<li>example build system</li>
+
+<li>(this) documentation</li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-org74bddbc" class="outline-3">
+<h3 id="org74bddbc">Getting started</h3>
+<div class="outline-text-3" id="text-org74bddbc">
+<p>
+t.b.d. how to install and run an included example
+</p>
+</div>
+</div>
+</div>
+
+
+<div id="outline-container-org367d6e5" class="outline-2">
+<h2 id="org367d6e5">Schema</h2>
+<div class="outline-text-2" id="text-org367d6e5">
+<p>
+In moo, an object schema provides a contract between model and
+template developers. 
+</p>
+</div>
+
+<div id="outline-container-orgcdec23c" class="outline-3">
+<h3 id="orgcdec23c">Hello Schema</h3>
+<div class="outline-text-3" id="text-orgcdec23c">
+<p>
+<a href="http://json-schema.org/">JSON Schema</a> is adopted by moo to express schema and support functions
+are provided to allow JSON Schema to be produced from a Jsonnet
+program.  The relative succinctness of the two representations can be
+seen in the following example.  First, defining a schema in Jsonnet:
+</p>
+
+<div class="org-src-container">
+<pre class="src src-jsonnet"><span style="color: #b4fa70;">local</span> moo = <span style="color: #b4fa70;">import</span> <span style="color: #e9b96e;">"moo.jsonnet"</span>;
+<span style="color: #b4fa70;">local</span> ms = moo.schema;
+ms.schema(
+    ms.object(
+        {
+            name:ms.string(),
+            url:ms.string(format=<span style="color: #e9b96e;">"uri"</span>)
+        },
+        required=[<span style="color: #e9b96e;">"name"</span>, <span style="color: #e9b96e;">"url"</span>]
+    )
+)
+</pre>
+</div>
+
+<p>
+The <code>moo</code> command can be used to compile this Jsonnet to JSON and it
+will be valid JSON Schema, by construction.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-shell">moo compile examples/hello_schema.jsonnet
+</pre>
+</div>
+
+<div class="org-src-container">
+<pre class="src src-json">{
+    <span style="color: #b4fa70;">"$schema"</span>: <span style="color: #e9b96e;">"http://json-schema.org/draft-07/schema#"</span>,
+    <span style="color: #b4fa70;">"properties"</span>: {
+        <span style="color: #b4fa70;">"name"</span>: {
+            <span style="color: #b4fa70;">"type"</span>: <span style="color: #e9b96e;">"string"</span>
+        },
+        <span style="color: #b4fa70;">"url"</span>: {
+            <span style="color: #b4fa70;">"format"</span>: <span style="color: #e9b96e;">"uri"</span>,
+            <span style="color: #b4fa70;">"type"</span>: <span style="color: #e9b96e;">"string"</span>
+        }
+    },
+    <span style="color: #b4fa70;">"required"</span>: [
+        <span style="color: #e9b96e;">"name"</span>,
+        <span style="color: #e9b96e;">"url"</span>
+    ],
+    <span style="color: #b4fa70;">"type"</span>: <span style="color: #e9b96e;">"object"</span>
+}
+</pre>
+</div>
+
+<p>
+We will talk more about models in section <a href="#org060a71f">Models</a> later.  For now we
+write a very simple model in Jsonnet and compile it to JSON:
+</p>
+
+<div class="org-src-container">
+<pre class="src src-jsonnet">{
+    name: <span style="color: #e9b96e;">"my home page"</span>,
+    url : <span style="color: #e9b96e;">"https://brettviren.github.io/"</span>
+}
+</pre>
+</div>
+
+<div class="org-src-container">
+<pre class="src src-shell">moo compile examples/hello_model.jsonnet
+</pre>
+</div>
+
+<div class="org-src-container">
+<pre class="src src-json">{
+    <span style="color: #b4fa70;">"name"</span>: <span style="color: #e9b96e;">"my home page"</span>,
+    <span style="color: #b4fa70;">"url"</span>: <span style="color: #e9b96e;">"https://brettviren.github.io/"</span>
+}
+</pre>
+</div>
+
+<p>
+Okay, these two are not so very different but later we will see how
+Jsonnet will allow conciseness in modeling.  For here it is enough to
+show how to use moo to validate the model against the schema.  This
+uses the Python package <a href="https://python-jsonschema.readthedocs.io">jsonschema</a> for the heavy lifting.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-shell">moo validate -s examples/hello_schema.jsonnet examples/hello_model.jsonnet
+</pre>
+</div>
+
+<div class="org-src-container">
+<pre class="src src-json">
+</pre>
+</div>
+
+<p>
+The lack of any error indicates validity.  We can disturb the model by
+removing a required attribute key or providing a value of the wrong
+type.  For example, changing the <code>url</code> attribute to hold number <code>42</code> gives:
+</p>
+
+<div class="org-src-container">
+<pre class="src src-shell">moo validate -s examples/hello_schema.jsonnet examples/hello_model_invalid.jsonnet 2&gt;&amp;1 |tail -7
+</pre>
+</div>
+
+<pre class="example">
+jsonschema.exceptions.ValidationError: 42 is not of type 'string'
+
+Failed validating 'type' in schema['properties']['url']:
+    {'format': 'uri', 'type': 'string'}
+
+On instance['url']:
+    42
+</pre>
+</div>
+</div>
+
+
+
+<div id="outline-container-org15479bb" class="outline-3">
+<h3 id="org15479bb">Larger Schema</h3>
+<div class="outline-text-3" id="text-org15479bb">
+<p>
+tbd: organization betwen moo-level schema and category-level.
+</p>
+
+<p>
+In the <a href="#org3f4f0ae">Introduction</a> a system with producer/consumer/broker roles were
+described.  Any instance that enacts a particular role must receive an
+instance of a role-specific configuration object which is formed and
+delivered by code generated from a model and templates bound by a
+contract of a schema.  This section walks through developing these
+parts.
+</p>
+
+<p>
+First, we decompose the schema, exploiting any symmetry.  All roles
+will have some common parts.  We will assume an instance that enacts a
+role has an associated role identifier which will name the role and
+provide an instance name which is unique at least to all instances
+that enact the role.
+</p>
+
+<p>
+In this example, brokers receive information from producers and send
+information to consumers.  We will model the links for this
+information transfer as being between "ports" on each role.  Eg, the
+port of a producer is linked to a port of a broker.  We will say each
+port is at least given a unique identifier.  In practice, additional
+attributes are needed but let us assume this is sufficient for forming
+links.
+</p>
+</div>
+</div>
+</div>
+
+
+
+
+<div id="outline-container-org060a71f" class="outline-2">
+<h2 id="org060a71f">Models</h2>
+</div>
+</div>
+<div id="postamble" class="status">
+<p class="author">Author: Brett Viren</p>
+<p class="date">Created: 2020-05-23 Sat 20:54</p>
+<p class="validation"><a href="http://validator.w3.org/check?uri=referer">Validate</a></p>
+</div>
+</body>
+</html>
