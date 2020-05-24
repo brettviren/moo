@@ -21,6 +21,8 @@ def cli(ctx):
     ctx.ensure_object(dict)
 
 @cli.command("validate")
+@click.option('-S', '--spath', default="",
+              help="Specify a selection path into the schema data structure")
 @click.option('-D', '--dpath', default="",
               help="Specify a selection path into the model data structure")
 @click.option('-J', '--jpath', envvar='JSONNET_PATH', multiple=True,
@@ -32,11 +34,9 @@ def cli(ctx):
 @click.option('-s', '--schema', 
               type=click.Path(exists=True, dir_okay=False, file_okay=True),
               help="JSON Schema file")
-@click.option('-S', '--spath', default="",
-              help="Specify a selection path into the schema data structure")
 @click.argument('model')
 @click.pass_context
-def cmd_validate(ctx, dpath, jpath, output, schema, spath, model):
+def cmd_validate(ctx, spath, dpath, jpath, output, schema, model):
     '''
     Compile a model to JSON
     '''
@@ -45,7 +45,7 @@ def cmd_validate(ctx, dpath, jpath, output, schema, spath, model):
     else:
         data = anyconfig.load(model)
     if dpath:
-        print(f"selecting model at {spath}")
+        print(f"selecting model substructure at {dpath}")
         data = select_path(data, dpath)
 
     if schema.endswith(".jsonnet"):
@@ -53,13 +53,13 @@ def cmd_validate(ctx, dpath, jpath, output, schema, spath, model):
     else:
         scheme = anyconfig.load(schema)
     if spath:
-        print(f"selecting schema at {spath}")
+        print(f"selecting schema substructure at {spath}")
         scheme = select_path(scheme, spath)
 
     validate(data, scheme)
 
 @cli.command()
-@click.option('-p', '--path', default="",
+@click.option('-P', '--path', default="",
               help="Specify a selection path into the model data structure")
 @click.option('-J', '--jpath', envvar='JSONNET_PATH', multiple=True,
               type=click.Path(exists=True, dir_okay=True, file_okay=False),

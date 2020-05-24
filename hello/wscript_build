@@ -1,0 +1,4 @@
+bld(source="model_hp.jsonnet", target="hello_link.html",
+    template=bld.path.find_resource("link.html.j2"))
+bld(source="model_hp.jsonnet", target="hello_downloader.sh",
+    template=bld.path.find_resource("downloader.sh.j2"))

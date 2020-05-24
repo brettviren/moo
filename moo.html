@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2020-05-23 Sat 20:54 -->
+<!-- 2020-05-24 Sun 18:55 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>moo</title>
@@ -261,146 +261,132 @@ for the JavaScript code in this tag.
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents">
 <ul>
-<li><a href="#org3f4f0ae">Introduction</a>
+<li><a href="#intro">Introduction</a>
 <ul>
-<li><a href="#org6b4d637">Example scenario</a></li>
-<li><a href="#orgb194401">Shoulders</a></li>
-<li><a href="#orgcb2d091">What moo brings</a></li>
-<li><a href="#org74bddbc">Getting started</a></li>
+<li><a href="#hello-codgen">Hello codegen</a>
+<ul>
+<li><a href="#hello-schema">Hello schema</a></li>
+<li><a href="#hello-model">Hello model</a></li>
+<li><a href="#org5bb7012">Hello template</a></li>
+<li><a href="#hello-building">Hello building</a></li>
 </ul>
 </li>
-<li><a href="#org367d6e5">Schema</a>
-<ul>
-<li><a href="#orgcdec23c">Hello Schema</a></li>
-<li><a href="#org15479bb">Larger Schema</a></li>
+<li><a href="#extended-example">Extended example</a></li>
 </ul>
 </li>
-<li><a href="#org060a71f">Models</a></li>
+<li><a href="#schema">Schema</a>
+<ul>
+<li><a href="#jvjs">Jsonnet vs JSON Schema</a></li>
+<li><a href="#composition">Composition</a></li>
+<li><a href="#selection">Selection</a>
+<ul>
+<li><a href="#jsonnet-selection">Jsonnet selection</a></li>
+<li><a href="#cli-selection">Command line selection</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#models">Models</a></li>
+<li><a href="#templates">Templates</a></li>
+<li><a href="#command">Command</a></li>
+<li><a href="#python">Python</a></li>
+<li><a href="#hello-building">Build</a></li>
 </ul>
 </div>
 </div>
 
-
-<div id="outline-container-org3f4f0ae" class="outline-2">
-<h2 id="org3f4f0ae">Introduction</h2>
-<div class="outline-text-2" id="text-org3f4f0ae">
+<div id="outline-container-orgd088ba3" class="outline-2">
+<h2 id="intro">Introduction</h2>
+<div class="outline-text-2" id="text-intro">
 <p>
-Model-oriented objects (moo) enacts a software development technique
-which replaces repetitive software development with code generation
-(codegen).  Code is generated using on or more <i>templates</i> applied to a
-<i>model</i>.  A <i>data structure</i> which is supplied by the model and applied to
-a template follows a defined <i>schema</i> which forms a contract to allow
-models and templates to be develop independently.  
-</p>
-</div>
-
-<div id="outline-container-org6b4d637" class="outline-3">
-<h3 id="org6b4d637">Example scenario</h3>
-<div class="outline-text-3" id="text-org6b4d637">
-<p>
-As an example, consider a distributed data processing system.  It is
-considered to be decomposed into a number of <i>roles</i> each defining
-certain characteristics (eg, as expressed as APIs).  Any given role
-may have more than on implementation and an implementation may provide
-more then one role.  In a deployed system there may be multiple
-instances of any given implementation.  
+Model-oriented objects (moo) is a code generator (codegen).  A data
+structure (the model) may be applied to a code <i>template</i> to produce
+code.  This is a common approach and moo is particularly influenced by
+the code generator <a href="https://github.com/zeromq/gsl">gsl</a> as it is applied to <a href="https://github.com/zeromq/zproto">zproto</a>/<a href="https://github.com/zeromq/zproject">zproject</a> templates
+by the ZeroMQ community.
 </p>
 
 <p>
-To be more concrete consider a system with three roles: a producer and
-a consumer and an intervening broker.  Prior to development we know
-must be able to:
+moo consists of these main aspects:
 </p>
 
 <ul class="org-ul">
-<li>connect the output of the producer and the input of the consumer instances to broker instances.</li>
-<li>configure each instance with information required to form those links.</li>
-<li>configure each instance with implementation-specific items.</li>
-<li>define target language (eg, C++) object representations of the messages to be exchanged.</li>
-<li>develop object serialization methods which allow information to be transferred between instances of the roles.</li>
-<li>implement finite state machines enacting implementation-specific behavior.</li>
-<li>produce network topology diagrams and other documentation.</li>
+<li>Schema is used to provide an explicit contract between <i>model</i> and
+<i>template</i> developers.  moo provides support for developing schema
+with <a href="https://jsonnet.org">Jsonnet</a> and supports the use of JSON, XML, YAML and various
+other languages.  The resulting schema data structure is expected to
+adhere to <a href="http://json-schema.org/">JSON Schema</a> and use of the moo Jsonnet support functions
+assures this adherence by construction.</li>
+
+<li>Models may be developed in the same variety of languages as schema
+and moo provides support for developing them with <a href="https://jsonnet.org">Jsonnet</a> which,
+tied with developing schema in Jsonnet, help to reduce errors by
+making the model compliant by construction.</li>
+
+<li>Templates are developed primarily in whatever language is intended
+for the target code (C++, Python, LaTeX, GraphViz dot, etc).  moo
+provides support for interspersing such files with directives
+written in markup supported by <a href="https://jinja.palletsprojects.com">Jinja2</a>.</li>
+
+<li>The <code>moo</code> Python module provides methods to handle all of the actions
+involved in the codegen including compiling of Jsonnet to JSON,
+reading Jsonnet, JSON, XML, YAML, etc into data structures,
+validating of model data structure against schema data structure and
+finally applying a model to a template to generate code.</li>
+
+<li>The <code>moo</code> program exposes the same functionality to the command line.</li>
+
+<li>A <a href="https://waf.io">Waf</a> build system example is provided which demonstrates how to
+generate the tasks to generate code.</li>
 </ul>
 
 <p>
-The software produced to povide these features are all parameterized
-on a model and pieces of the model are required in multiple locations
-and realized in multiple forms.  We will model role aspects and apply
-a template to generate base classes and API documentation.  Models for
-message related parts will be applied to templates to create object
-representations and their serialization methods (possibly by generated
-models consumed by other codegen such as Protobuf or Avro).  Runtime
-models can be used to generate configuration object instances and
-network topology diagrams.
-</p>
-</div>
-</div>
-
-<div id="outline-container-orgb194401" class="outline-3">
-<h3 id="orgb194401">Shoulders</h3>
-<div class="outline-text-3" id="text-orgb194401">
-<p>
-The ideas in moo are not unique but walk down the trail originally
-blazed by ZeroMQ's <a href="https://github.com/zeromq/zproto">zproto</a> and <a href="https://github.com/zeromq/zproject">zproject</a>.  The main point of departure
-from this ZeroMQ technology is to use Jinja2 as the template language
-instead of <a href="https://github.com/zeromq/gsl">gsl</a>.  The default modeling language is <a href="https://jsonnet.org">Jsonnet</a> but the <code>moo</code>
-command line program will also accept JSON or any other format
-supported by <a href="https://github.com/ssato/python-anyconfig">anyconfig</a>.  It is important to pause here and make clear
-that at no point does moo require a developer to manually type any
-JSON into a text editor.
-</p>
-</div>
-</div>
-
-<div id="outline-container-orgcb2d091" class="outline-3">
-<h3 id="orgcb2d091">What moo brings</h3>
-<div class="outline-text-3" id="text-orgcb2d091">
-<p>
-The moo project provides these parts 
+The moo package and tooling is layered to abstract the general support
+needed to generate code from any domain-specific features and it
+includes examples and support for some specific domains.
 </p>
 
-<ul class="org-ul">
-<li>a <code>moo</code> command line program to perform codegen</li>
-
-<li>a <code>moo.jsonnet</code> file providing the function primitives to define schema</li>
-
-<li>example models and templates</li>
-
-<li>example build system</li>
-
-<li>(this) documentation</li>
-</ul>
-</div>
-</div>
-
-<div id="outline-container-org74bddbc" class="outline-3">
-<h3 id="org74bddbc">Getting started</h3>
-<div class="outline-text-3" id="text-org74bddbc">
 <p>
-t.b.d. how to install and run an included example
-</p>
-</div>
-</div>
-</div>
-
-
-<div id="outline-container-org367d6e5" class="outline-2">
-<h2 id="org367d6e5">Schema</h2>
-<div class="outline-text-2" id="text-org367d6e5">
-<p>
-In moo, an object schema provides a contract between model and
-template developers. 
+The remainder of this introduction provides a quick-start guide to
+install the moo package and then walks through a simple "Hello
+codegen!" example.  Remaining sections cover each main aspect listed above
 </p>
 </div>
 
-<div id="outline-container-orgcdec23c" class="outline-3">
-<h3 id="orgcdec23c">Hello Schema</h3>
-<div class="outline-text-3" id="text-orgcdec23c">
+<div id="outline-container-org45884af" class="outline-3">
+<h3 id="hello-codgen">Hello codegen</h3>
+<div class="outline-text-3" id="text-hello-codgen">
 <p>
-<a href="http://json-schema.org/">JSON Schema</a> is adopted by moo to express schema and support functions
-are provided to allow JSON Schema to be produced from a Jsonnet
-program.  The relative succinctness of the two representations can be
-seen in the following example.  First, defining a schema in Jsonnet:
+In this example we develop a trivial schema, a model that adheres to
+the schema and a template that accepts schema-valid models.  We will
+defer until later sections some aspects of real world complexity
+including the use of multiple models, multiple templates, applying
+model substructure, and handling complex codegen task patterns.
+</p>
+
+<p>
+This process will be presented in a linear manner which progresses
+through schema, model, template, codegen.  In real development one
+should expect a more iterative process.  For example, during template
+development it may be discovered that the current model is inadequate.
+The schema would then modified and the model updated and then the
+template may be changed.  As new templates are devised this iteration
+may repeat.  The power of codegen comes by allowing the number of
+templates to grow for a given schema while also allowing novel models
+to be formed which immediately benefit from the available templates.
+The factoring necessarily to achieve this power comes at a cost of
+this iteration.  Strategies to manage this cost are given in later
+sections.
+</p>
+</div>
+
+<div id="outline-container-org616bae3" class="outline-4">
+<h4 id="hello-schema">Hello schema</h4>
+<div class="outline-text-4" id="text-hello-schema">
+<p>
+We start with the schema.  As said above, moo schema adheres to <a href="http://json-schema.org/">JSON
+Schema</a> although we develop it in Jsonnet (really, who likes writing
+JSON?).  Here is our "hello" schema
 </p>
 
 <div class="org-src-container">
@@ -419,23 +405,47 @@ ms.schema(
 </div>
 
 <p>
-The <code>moo</code> command can be used to compile this Jsonnet to JSON and it
-will be valid JSON Schema, by construction.
+A tutorial on Jsonnet won't be included here instead we point the
+interested reader to the well written <a href="https://jsonnet.org/learning/tutorial.html">Jsonnet tutorial</a> and <a href="https://jsonnet.org/ref/stdlib.html">standard
+library reference</a>.  But, one thing to take note of is the first line:
 </p>
 
 <div class="org-src-container">
-<pre class="src src-shell">moo compile examples/hello_schema.jsonnet
+<pre class="src src-jsonnet"><span style="color: #b4fa70;">local</span> moo = <span style="color: #b4fa70;">import</span> <span style="color: #e9b96e;">"moo.jsonnet"</span>;
+</pre>
+</div>
+
+<p>
+This <code>moo</code> Jsonnet module provides the functions used to assure the
+resulting schema data structure adheres to JSON Schema.  It also
+provides other helper functions.  The <a href="moo/moo.jsonnet">moo.jsonnet</a> file itself may be
+found in the <code>moo</code> Python package directory.
+</p>
+
+<p>
+We may compile this "hello" schema Jsonnet file using the C++ or Go
+command line programs but the <code>moo</code> command is provided and brings some
+additional convenience.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-shell">moo compile hello/schema.jsonnet
 </pre>
 </div>
 
 <div class="org-src-container">
 <pre class="src src-json">{
+    <span style="color: #b4fa70;">"$id"</span>: <span style="color: #e9b2e3;">null</span>,
     <span style="color: #b4fa70;">"$schema"</span>: <span style="color: #e9b96e;">"http://json-schema.org/draft-07/schema#"</span>,
+    <span style="color: #b4fa70;">"definitions"</span>: {},
     <span style="color: #b4fa70;">"properties"</span>: {
         <span style="color: #b4fa70;">"name"</span>: {
+            <span style="color: #b4fa70;">"$id"</span>: <span style="color: #e9b2e3;">null</span>,
+            <span style="color: #b4fa70;">"format"</span>: <span style="color: #e9b2e3;">null</span>,
             <span style="color: #b4fa70;">"type"</span>: <span style="color: #e9b96e;">"string"</span>
         },
         <span style="color: #b4fa70;">"url"</span>: {
+            <span style="color: #b4fa70;">"$id"</span>: <span style="color: #e9b2e3;">null</span>,
             <span style="color: #b4fa70;">"format"</span>: <span style="color: #e9b96e;">"uri"</span>,
             <span style="color: #b4fa70;">"type"</span>: <span style="color: #e9b96e;">"string"</span>
         }
@@ -450,40 +460,71 @@ will be valid JSON Schema, by construction.
 </div>
 
 <p>
-We will talk more about models in section <a href="#org060a71f">Models</a> later.  For now we
-write a very simple model in Jsonnet and compile it to JSON:
+This shows clearly the relative conciseness of Jsonnet compared to
+JSON and that will become more substantial as our schemas become more
+complex.
+</p>
+
+<p>
+This "hello" schema describes a simple object of two attibutes, <code>name</code>
+which is a string and a <code>url</code> which is also a string and of a particular
+format.  This is JSON Schema language and to learn this simple
+language, see <a href="http://json-schema.org/understanding-json-schema/">Understanding JSON Schema</a>.
+</p>
+
+<p>
+By looking at the schema we may be tempted to guess what it describes.
+We might guess it describes a bookmark entry or maybe an entry in a
+personal contact manager or maybe an element of a configuration
+system.  However, the schema does not determine any semantic meaning.
+The model will provide actual values and that will more strongly hint
+at meaning but ultimately it is the templates that express the final
+nature.  It is important to hold this distinction in mind when
+defining schema.  If a schema works for different purposes, there is
+no reason to reinvent a new one just to satisfy different semantics.
+</p>
+</div>
+</div>
+
+<div id="outline-container-org96271d2" class="outline-4">
+<h4 id="hello-model">Hello model</h4>
+<div class="outline-text-4" id="text-hello-model">
+<p>
+Our first "hello" model is even simpler than the schema in both its
+Jsonnet and JSON representation.
 </p>
 
 <div class="org-src-container">
 <pre class="src src-jsonnet">{
-    name: <span style="color: #e9b96e;">"my home page"</span>,
-    url : <span style="color: #e9b96e;">"https://brettviren.github.io/"</span>
+    name: <span style="color: #e9b96e;">"moo home page"</span>,
+    url : <span style="color: #e9b96e;">"https://brettviren.github.io/moo"</span>
 }
 </pre>
 </div>
 
 <div class="org-src-container">
-<pre class="src src-shell">moo compile examples/hello_model.jsonnet
+<pre class="src src-shell">moo compile hello/model_hp.jsonnet
 </pre>
 </div>
 
 <div class="org-src-container">
 <pre class="src src-json">{
-    <span style="color: #b4fa70;">"name"</span>: <span style="color: #e9b96e;">"my home page"</span>,
-    <span style="color: #b4fa70;">"url"</span>: <span style="color: #e9b96e;">"https://brettviren.github.io/"</span>
+    <span style="color: #b4fa70;">"name"</span>: <span style="color: #e9b96e;">"moo home page"</span>,
+    <span style="color: #b4fa70;">"url"</span>: <span style="color: #e9b96e;">"https://brettviren.github.io/moo"</span>
 }
 </pre>
 </div>
 
 <p>
-Okay, these two are not so very different but later we will see how
-Jsonnet will allow conciseness in modeling.  For here it is enough to
-show how to use moo to validate the model against the schema.  This
-uses the Python package <a href="https://python-jsonschema.readthedocs.io">jsonschema</a> for the heavy lifting.
+The values and the model file name now give hints as to semantic
+meaning the modeler had in mind.  But the template developer only
+cares that this model is valid against a schema.  We may use the <code>moo</code>
+command line program to perform validation, relying on the Python
+package <a href="https://python-jsonschema.readthedocs.io">jsonschema</a> for the heavy lifting.
 </p>
 
 <div class="org-src-container">
-<pre class="src src-shell">moo validate -s examples/hello_schema.jsonnet examples/hello_model.jsonnet
+<pre class="src src-shell">moo validate -s hello/schema.jsonnet hello/model_hp.jsonnet
 </pre>
 </div>
 
@@ -495,75 +536,500 @@ uses the Python package <a href="https://python-jsonschema.readthedocs.io">jsons
 <p>
 The lack of any error indicates validity.  We can disturb the model by
 removing a required attribute key or providing a value of the wrong
-type.  For example, changing the <code>url</code> attribute to hold number <code>42</code> gives:
+type.  For example, let us change the <code>url</code> attribute value to hold the
+integer <code>42</code>.
 </p>
 
 <div class="org-src-container">
-<pre class="src src-shell">moo validate -s examples/hello_schema.jsonnet examples/hello_model_invalid.jsonnet 2&gt;&amp;1 |tail -7
+<pre class="src src-jsonnet"><span style="color: #b4fa70;">local</span> hello = <span style="color: #b4fa70;">import</span> <span style="color: #e9b96e;">"model_hp.jsonnet"</span>;
+hello { url : 42 }
+</pre>
+</div>
+
+<p>
+Note, this takes the first model and overrides the <code>url</code> attribute with
+a new one.  If the first model changes in orthogonal ways, this
+derived model need not.  We can now determine that new model is no
+longer valid against the schema:
+</p>
+
+<div class="org-src-container">
+<pre class="src src-shell">moo validate -s hello/schema.jsonnet hello/model_hp_invalid.jsonnet 2&gt;&amp;1 |tail -7
 </pre>
 </div>
 
 <pre class="example">
-jsonschema.exceptions.ValidationError: 42 is not of type 'string'
+jsonschema.exceptions.SchemaError: None is not of type 'string'
 
-Failed validating 'type' in schema['properties']['url']:
-    {'format': 'uri', 'type': 'string'}
+Failed validating 'type' in metaschema['properties']['$id']:
+    {'format': 'uri-reference', 'type': 'string'}
 
-On instance['url']:
-    42
+On schema['$id']:
+    None
 </pre>
 </div>
 </div>
 
-
-
-<div id="outline-container-org15479bb" class="outline-3">
-<h3 id="org15479bb">Larger Schema</h3>
-<div class="outline-text-3" id="text-org15479bb">
+<div id="outline-container-org5bb7012" class="outline-4">
+<h4 id="org5bb7012">Hello template</h4>
+<div class="outline-text-4" id="text-org5bb7012">
 <p>
-tbd: organization betwen moo-level schema and category-level.
+It is the template where all this abstract rubber finally meets the
+road.  With all the build of that abstraction, it is admittedly
+anticlimactic to see some ways we put it to use.  It is only as
+complexity increases that benefits will be paid.  For now, consider a
+painfully trivial web site that merely holds a link:
 </p>
 
-<p>
-In the <a href="#org3f4f0ae">Introduction</a> a system with producer/consumer/broker roles were
-described.  Any instance that enacts a particular role must receive an
-instance of a role-specific configuration object which is formed and
-delivered by code generated from a model and templates bound by a
-contract of a schema.  This section walks through developing these
-parts.
-</p>
+<div class="org-src-container">
+<pre class="src src-html">&lt;<span style="color: #fce94f;">html</span>&gt;
+&lt;<span style="color: #fce94f;">a</span> <span style="color: #fcaf3e;">href</span>=<span style="color: #e9b96e;">"{{url}}"</span>&gt;{{name}}&lt;/<span style="color: #fce94f;">a</span>&gt;
+&lt;/<span style="color: #fce94f;">html</span>&gt;
+</pre>
+</div>
+<div class="org-src-container">
+<pre class="src src-shell">moo generate hello/model_hp.jsonnet hello/link.html.j2
+</pre>
+</div>
+
+<div class="org-src-container">
+<pre class="src src-html">&lt;<span style="color: #fce94f;">html</span>&gt;
+&lt;<span style="color: #fce94f;">a</span> <span style="color: #fcaf3e;">href</span>=<span style="color: #e9b96e;">"https://brettviren.github.io/moo"</span>&gt;moo home page&lt;/<span style="color: #fce94f;">a</span>&gt;
+&lt;/<span style="color: #fce94f;">html</span>&gt;
+</pre>
+</div>
 
 <p>
-First, we decompose the schema, exploiting any symmetry.  All roles
-will have some common parts.  We will assume an instance that enacts a
-role has an associated role identifier which will name the role and
-provide an instance name which is unique at least to all instances
-that enact the role.
+Or a simple command line tool that bakes in specific targets for download.
 </p>
+<div class="org-src-container">
+<pre class="src src-shell"><span style="color: #73d216;">#</span><span style="color: #73d216;">!/bin/</span><span style="color: #b4fa70;">bash</span>
+<span style="color: #e090d7;">echo</span> <span style="color: #e9b96e;">"Downloading {{name}}"</span>
+wget -O <span style="color: #e9b96e;">"{{name}}"</span> <span style="color: #e9b96e;">"{{url}}"</span>
+</pre>
+</div>
+<div class="org-src-container">
+<pre class="src src-shell">moo generate hello/model_hp.jsonnet hello/downloader.sh.j2
+</pre>
+</div>
+
+<div class="org-src-container">
+<pre class="src src-shell"><span style="color: #73d216;">#</span><span style="color: #73d216;">!/bin/</span><span style="color: #b4fa70;">bash</span>
+<span style="color: #e090d7;">echo</span> <span style="color: #e9b96e;">"Downloading moo home page"</span>
+wget -O <span style="color: #e9b96e;">"moo home page"</span> <span style="color: #e9b96e;">"https://brettviren.github.io/moo"</span>
+</pre>
+</div>
+
 
 <p>
-In this example, brokers receive information from producers and send
-information to consumers.  We will model the links for this
-information transfer as being between "ports" on each role.  Eg, the
-port of a producer is linked to a port of a broker.  We will say each
-port is at least given a unique identifier.  In practice, additional
-attributes are needed but let us assume this is sufficient for forming
-links.
+This example shows an obvious <i>semantic sheer</i> between what the model
+developer and the template developer was thinking.  While the code
+generation works perfectly, there are two interpretations of <code>name</code>.
+The more restrictive the schema may be the stronger is the contract
+between model and template developers.  In practice, the two will
+often be one person and these sheers will be ironed out by extending
+the schema and model to cover both semantic understandings or if the
+sheer is too great, developing new or derived schema.
+</p>
+</div>
+</div>
+
+<div id="outline-container-org9798c0f" class="outline-4">
+<h4 id="hello-building">Hello building</h4>
+<div class="outline-text-4" id="text-hello-building">
+<p>
+This example is simple enough that command line invocations are
+sufficient.  As our system of schema, models and templates grow, a
+layer of automated task generation becomes rather welcome.  moo
+provides a Waf-based example of that.  The main <a href="wscript">wscript</a> file may be
+used as a starting point and our "hello" example provides a
+<a href="hello/wscript_build">wscript<sub>build</sub></a> file showing how one may extend the main wscript to
+handle domain-specific codegen.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-python">bld(source=<span style="color: #e9b96e;">"model_hp.jsonnet"</span>, target=<span style="color: #e9b96e;">"hello_link.html"</span>,
+    template=bld.path.find_resource(<span style="color: #e9b96e;">"link.html.j2"</span>))
+bld(source=<span style="color: #e9b96e;">"model_hp.jsonnet"</span>, target=<span style="color: #e9b96e;">"hello_downloader.sh"</span>,
+    template=bld.path.find_resource(<span style="color: #e9b96e;">"downloader.sh.j2"</span>))
+</pre>
+</div>
+
+<p>
+And build:
+</p>
+<pre class="example">
+$ waf configure
+$ waf
+$ ls build/hello_*
+</pre>
+
+<p>
+This build is fairly simple and so each target is exhaustively listed.
+As the number of targets grow we may exploit symmetries to codify the
+Waf task generation.
 </p>
 </div>
 </div>
 </div>
 
 
+<div id="outline-container-orge2fdb42" class="outline-3">
+<h3 id="extended-example">Extended example</h3>
+<div class="outline-text-3" id="text-extended-example">
+<p>
+As systems go, "hello" is fairly trivial.  The rest of this document
+will use an extended example to illustrate how moo handles more
+complexity and this section gives an overview of its parts.  
+</p>
+
+<p>
+We consider a simple, distributed data processing system.  We
+decompose the system into various conceptual <i>roles</i>.  To each role we
+associate some semantic meaning and expected general behavior.  There
+will be some commonalities across all roles or across a subset and we
+will exploit their symmetry to simplify modeling while still
+accommodating their own unique characteristics, interfaces, etc.
+</p>
+
+<p>
+In generating code, we allow a role to have more than one
+<i>implementation</i>.  In a sense, a role is an abstract conceptual (and
+possibly literal) base class and an implementation is a similar,
+concrete subclass.  In principle, any number of layers of this
+conceptual inheritance may be employed but the example will stick to
+one.
+</p>
+
+<p>
+In final deployments, each implementation may have many <i>instances</i> (eg,
+we may execute many copies of a program).  We will seek to take this
+into account in our modeling.
+</p>
+
+<p>
+To be more concrete consider a system which we will call PBC, named
+after its three roles: a <b>producer</b> and a <b>consumer</b> and an intervening
+<b>broker</b>.  Prior to any development we know some of what the result must
+be able to do:
+</p>
+
+<ul class="org-ul">
+<li>Connect the output of the producers and the input of the consumers to the brokers.</li>
+<li>Define target language (eg, C++) object representations of the messages to be exchanged.</li>
+<li>Develop object serialization methods which allow information to be transferred between instances of the roles.</li>
+<li>Define finite state machines enacting implementation-specific behavior.</li>
+<li>Configure each instance with their role-specific and implementation-specific configuration items.</li>
+<li>Produce network topology diagrams and other documentation.</li>
+</ul>
+</div>
+</div>
+</div>
 
 
-<div id="outline-container-org060a71f" class="outline-2">
-<h2 id="org060a71f">Models</h2>
+<div id="outline-container-orga79dbb2" class="outline-2">
+<h2 id="schema">Schema</h2>
+<div class="outline-text-2" id="text-schema">
+<p>
+In moo, the schema provides a contract between model and template
+developers.  JSON Schema is selected to provide a "meta-schema" to
+which moo expect any schema data structures to adhere.  In <code>moo.jsonnet</code>
+moo provides support to construct JSON Schema compliant structure in
+Jsonnet.
+</p>
+</div>
+
+<div id="outline-container-orgd5a7736" class="outline-3">
+<h3 id="jvjs">Jsonnet vs JSON Schema</h3>
+<div class="outline-text-3" id="text-jvjs">
+<p>
+To develop schema data structures with moo's Jsonnet, one should first
+become familiar with JSON Schema itself.  The <a href="http://json-schema.org/understanding-json-schema/">Understanding JSON
+Schema</a> document provides a fast and excellent learning resource.  A
+large, if not complete, fraction of JSON Schema is reflected into
+<code>moo.schema</code> functions.  Thus, one may learn JSON Schema and then map
+its terms to functions provided by moo.
+</p>
+
+<p>
+For example, a simple schema describing a string may be written in
+JSON Schema as:
+</p>
+
+<div class="org-src-container">
+<pre class="src src-json">{<span style="color: #b4fa70;">"type"</span>: <span style="color: #e9b96e;">"string"</span>}
+</pre>
+</div>
+
+<p>
+and with moo's Jsonnet support as
+</p>
+
+<div class="org-src-container">
+<pre class="src src-jsonnet"><span style="color: #b4fa70;">local</span> moo = <span style="color: #b4fa70;">import</span> <span style="color: #e9b96e;">"moo.jsonnet"</span>;
+moo.schema.string()
+</pre>
+</div>
+
+<p>
+As we saw in the "hello" example, moo Jsonnet function calls may be
+nested to build up more complex, nested JSON Schema structure.
+</p>
+</div>
+</div>
+
+<div id="outline-container-orgbeff432" class="outline-3">
+<h3 id="composition">Composition</h3>
+<div class="outline-text-3" id="text-composition">
+<p>
+Both Jsonnet and JSON Schema have their own forms to compose structure
+through <i>references</i>.  This allows defining structure in one place and
+using it in multiple places.  Jsonnet references are resolved during
+compilation while JSON Schema references are purely logical and
+resolved by some interpreter (in case of moo, that's the <code>jsonschema</code>
+Python module).  There are a number of trade-offs in selecting how to
+employ references.
+</p>
+
+<p>
+Jsonnet provides these reference idioms:
+</p>
+
+<ul class="org-ul">
+<li>an object produced by one file may be referenced in another via <code>import</code>.</li>
+<li>an object may be defined in a <code>local</code> variable and used multiple times within that file.</li>
+<li>structure produced by a file may be referenced within the structure with <code>self</code> or <code>super</code> keywords and <code>$.</code> paths.</li>
+</ul>
+
+<p>
+Here is a contrived example of these.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-jsonnet"><span style="color: #b4fa70;">local</span> moo = <span style="color: #b4fa70;">import</span> <span style="color: #e9b96e;">"moo.jsonnet"</span>;
+<span style="color: #b4fa70;">local</span> ss = <span style="color: #b4fa70;">import</span> <span style="color: #e9b96e;">"subschema.jsonnet"</span>;
+<span style="color: #b4fa70;">local</span> sss = ss.subsubschema;
+{
+  <span style="color: #73d216;">// double colon isn't output</span>
+  foo :: moo.schema.string(),
+  moo.schema.schema($.foo)
+  <span style="color: #73d216;">// or equivalently</span>
+  <span style="color: #73d216;">// moo.schema.schema(self.foo)</span>
+}
+</pre>
+</div>
+
+
+<p>
+The benefit of using Jsonnet references is that they are first class
+elements of the Jsonnet language.  This means the Jsonnet compiler
+will find mistakes.
+</p>
+
+<p>
+A potential drawback is that the Jsonnet compiler resolves references
+by replacing them with a copy of what they reference.  When the same
+structure is referenced multiple times it leads to duplication in the
+output.  Since no human need process the output this redundancy in the
+output typically does not lead to any problems.  In some cases it may
+lead to slower Jsonnet compile times.
+</p>
+
+<p>
+However, a hard limitation of Jsonnet references is that they can not
+express a recursive data structure without leading the compiler to run
+forever or fail with a stack overflow. 
+</p>
+
+<p>
+JSON Schema references are provided through a <i>special form</i>:
+</p>
+
+<div class="org-src-container">
+<pre class="src src-json">{ <span style="color: #b4fa70;">"$ref"</span>: <span style="color: #e9b96e;">"&lt;path&gt;"</span> }
+</pre>
+</div>
+
+<p>
+This entire special form is replaced by the value associated to the
+attribute found at <code>"&lt;path&gt;"</code> somewhere in the rest of the JSON.  By
+convention, a <code>"&lt;path&gt;"</code> is expected to references an attribute under a
+top level <code>"definitions"</code> attribute.  For example:
+</p>
+
+<div class="org-src-container">
+<pre class="src src-json">{ <span style="color: #b4fa70;">"$ref"</span>: <span style="color: #e9b96e;">"#/definitions/target"</span> }
+</pre>
+</div>
+
+<p>
+would be replaced by <code>&lt;content&gt;</code> as found at:
+</p>
+
+<div class="org-src-container">
+<pre class="src src-json">{
+    <span style="color: #b4fa70;">"definitions"</span> : {
+        <span style="color: #b4fa70;">"target"</span> : &lt;content&gt;
+    }
+}
+</pre>
+</div>
+
+<p>
+JSON Schema also provides way to define a target with an <code>$id</code> attribute
+but this feature is currently unsupported by the Python module
+<code>jsonschema</code> which moo relies on and we will discard it from
+consideration.
+</p>
+
+<p>
+In Jsonnet, the JSON Schema special form <code>{ "$ref" : "&lt;path&gt;" }</code> may be
+created using a call to <code>moo.schema.ref(&lt;path&gt;)</code> and if the conventional
+<code>"definitions"</code> is used then a shorter <code>moo.schema.ref("target")</code> may be
+used.
+</p>
+
+<p>
+In either case, it is required for the Jsonnet developer to assure that
+<code>&lt;path&gt;</code> is included in the output.  The conventional <code>"definitions"</code> may be provided to <code>moo.schema.schema()</code> as an argument.
+</p>
+</div>
+</div>
+
+<div id="outline-container-org7c00947" class="outline-3">
+<h3 id="selection">Selection</h3>
+<div class="outline-text-3" id="text-selection">
+<p>
+Schema is described in a nested way with schema being composed of more
+schema (it's schemas all the way down).  It will often be the case
+that a model or a template or both require a schema which is embedded
+in a larger schema.  moo allows selecting sub-schema in two ways:
+through Jsonnet and on the command line.
+</p>
+</div>
+
+<div id="outline-container-org344c8ed" class="outline-4">
+<h4 id="jsonnet-selection">Jsonnet selection</h4>
+<div class="outline-text-4" id="text-jsonnet-selection">
+<p>
+Jsonnet provides selection in the same way as composition, that is
+through references.  One may construct a large schema in one Jsonnet
+file and write a second Jsonnet file which imports the first and
+exposes the desired subset.  The first may be written to assist in
+this selection.  For example, if the main schema has:
+</p>
+
+<div class="org-src-container">
+<pre class="src src-jsonnet"><span style="color: #b4fa70;">local</span> defs = {
+    broker: { ... },
+};
+{
+    defs:: defs,
+    schema : moo.schema.schema(...)
+}
+</pre>
+</div>
+
+<p>
+Then this Jsonnet file can evaluate to just the broker:
+</p>
+
+<div class="org-src-container">
+<pre class="src src-jsonnet"><span style="color: #b4fa70;">local</span> main = <span style="color: #b4fa70;">import</span> <span style="color: #e9b96e;">"schema.jsonnet"</span>;
+main.defs.broker
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org181d8cb" class="outline-4">
+<h4 id="cli-selection">Command line selection</h4>
+<div class="outline-text-4" id="text-cli-selection">
+<p>
+The <code>moo</code> command line provides a way to reference into schema (and
+model) structure.  For example, the schema that governs the <code>url</code>
+property of the top-level "hello" schema can be selected out during
+compilation:
+</p>
+
+<div class="org-src-container">
+<pre class="src src-shell">moo compile -P properties.url hello/schema.jsonnet
+</pre>
+</div>
+
+<div class="org-src-container">
+<pre class="src src-json">{
+    <span style="color: #b4fa70;">"$id"</span>: <span style="color: #e9b2e3;">null</span>,
+    <span style="color: #b4fa70;">"format"</span>: <span style="color: #e9b96e;">"uri"</span>,
+    <span style="color: #b4fa70;">"type"</span>: <span style="color: #e9b96e;">"string"</span>
+}
+</pre>
+</div>
+
+<p>
+The <code>moo</code> command also provides a way to simultaneously select a schema
+path and a model path.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-shell">moo validate -D name -S properties.name -s hello/schema.jsonnet hello/model_hp.jsonnet
+</pre>
+</div>
+
+<div class="org-src-container">
+<pre class="src src-json">
+</pre>
+</div>
+
+<p>
+Again, lack of any error shows a successful validation.
+</p>
+</div>
+</div>
+</div>
+</div>
+
+
+
+
+
+<div id="outline-container-org7c7c956" class="outline-2">
+<h2 id="models">Models</h2>
+<div class="outline-text-2" id="text-models">
+</div>
+</div>
+
+
+<div id="outline-container-orgfbed08e" class="outline-2">
+<h2 id="templates">Templates</h2>
+<div class="outline-text-2" id="text-templates">
+</div>
+</div>
+
+
+<div id="outline-container-org3af5099" class="outline-2">
+<h2 id="command">Command</h2>
+<div class="outline-text-2" id="text-command">
+</div>
+</div>
+
+
+<div id="outline-container-org470d3c2" class="outline-2">
+<h2 id="python">Python</h2>
+<div class="outline-text-2" id="text-python">
+</div>
+</div>
+
+
+<div id="outline-container-org52d774c" class="outline-2">
+<h2 id="hello-building">Build</h2>
+<div class="outline-text-2" id="text-hello-building">
+</div>
 </div>
 </div>
 <div id="postamble" class="status">
 <p class="author">Author: Brett Viren</p>
-<p class="date">Created: 2020-05-23 Sat 20:54</p>
+<p class="date">Created: 2020-05-24 Sun 18:55</p>
 <p class="validation"><a href="http://validator.w3.org/check?uri=referer">Validate</a></p>
 </div>
 </body>

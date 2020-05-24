@@ -40,34 +40,34 @@ local defs = {
 
     port : ms.object({
         ident : ms.string(),
-        links : ms.array(ms.ref("link"))
+        links : ms.array(ms.def("link"))
     }, "port"),
 
     producer : ms.object({
-        role: ms.ref("role"),
+        role: ms.def("role"),
         ports: ms.object({
-            output: ms.ref("port")
+            output: ms.def("port")
         }),
     }),
 
     consumer : ms.object({
-        role: ms.ref("role"),
+        role: ms.def("role"),
         ports: ms.object({
-            input: ms.ref("port")
+            input: ms.def("port")
         }),
     }),
 
     broker : ms.object({
-        role: ms.ref("role"),
+        role: ms.def("role"),
         ports: ms.object({
-            input: ms.ref("port"),
-            output: ms.ref("port")
+            input: ms.def("port"),
+            output: ms.def("port")
         }),
     })
 };
 
 local body = ms.array(ms.anyOf([
-    ms.ref(n) for n in ["producer", "consumer", "broker"]]));
+    ms.def(n) for n in ["producer", "consumer", "broker"]]));
                          
 
 

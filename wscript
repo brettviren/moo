@@ -62,7 +62,9 @@ def add_jsonnet_deps(tgen, model):
     assert(model)
     tgt = tgen.bld.path.find_or_declare(tgen.target)
     assert(tgt)
-    tmpl = tgen.bld.path.find_resource(tgen.template)
+    tmpl = tgen.template
+    if isinstance(tmpl, str):
+        tmpl = tgen.bld.path.find_resource(tgen.template)
     if not tmpl:
         raise ValueError(f"file not found: {tgen.template}")
     tsk = tgen.create_task('codegen', [model, tmpl], tgt)
@@ -82,47 +84,7 @@ class dotter(Task):
 
 
 def build(bld):
-
-    # need to generate target file name with like:
-    # moo compile -S -p classname models/yodel/codec.jsonnet
-    # headers:
-    cpps = bld.path.ant_glob('src/*.cpp')
-
-    bld(source="models/yodel/model.jsonnet",
-        template=f"templates/codec.hpp.j2",
-        structpath='codec',
-        target=f"mex/YodelCodec.hpp")
-
-    bld(source="models/yodel/model.jsonnet",
-        template=f"templates/handler.hpp.j2",
-        structpath='handlers.peer',
-        target=f"mex/YodelPeerHandler.hpp")
-
-    for name in ['codec']:
-        tgt = f"src/Yodel{name.capitalize()}.cpp"
-        cpps += [bld.path.find_or_declare(tgt)]
-        bld(source="models/yodel/model.jsonnet",
-            template=f"templates/{name}.cpp.j2",
-            structpath=name,
-            target=tgt)
-
-    bld(source="models/yodel/model.jsonnet",
-        template=f"templates/test_codec.cpp.j2",
-        structpath='codec',
-        target="test/test_YodelCodec.cpp")
-
-    bld.shlib(features="cxx",
-              includes='. inc build',
-              source = cpps,
-              target = APPNAME.lower(),
-              use='ZMQ',
-              uselib_store=APPNAME.upper())
-    
-    rpath = [bld.env["PREFIX"] + '/lib', bld.path.find_or_declare(bld.out_dir)]
-
-    bld.program(features="cxx",
-                source="test/test_YodelCodec.cpp",
-                target="test/test_YodelCodec",
-                includes='. inc build',
-                rpath=rpath,
-                use='MOO ZMQ moo')
+    sd = [one.parent.abspath() for one in bld.path.ant_glob("**/wscript_build")]
+    if (sd):
+        bld.recurse(sd)
+        
