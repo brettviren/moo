@@ -7,7 +7,7 @@ local defs = {
     role : ms.object({
         name : ms.enum(["producer","consumer","broker"]),
         ident : ms.string(),
-    }, "role"),
+    }),
     
     link : ms.oneOf( [
         {
@@ -36,12 +36,12 @@ local defs = {
                 }
             ])
         }
-    ], "link"),
+    ]),
 
     port : ms.object({
         ident : ms.string(),
         links : ms.array(defs.link)
-    }, "port"),
+    }),
 
     producer : ms.object({
         role: defs.role,
@@ -70,9 +70,7 @@ local defs = {
 {
     defs :: defs,
 
-    schema: ms.schema(ms.array(ms.anyOf([defs.producer, defs.consumer, defs.broker])),
-                      id = "https://brettviren.github.io/moo/schema/pbc.json",
-                      version="draft-07"),
+    schema: std.prune(ms.schema(ms.array(ms.anyOf([defs.producer, defs.consumer, defs.broker])), version="draft-07")),
 
     types: mt  {
         hostport(tcphost, tcpport) :: {host:tcphost,

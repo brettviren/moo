@@ -6,10 +6,10 @@ import os
 import sys
 import json
 import click
-import anyconfig
+
 import jsonschema
-from moo import jsonnet, template
-from moo.util import select_path, validate
+from moo import jsonnet, template, io
+from moo.util import validate, resolve
 
 
 @click.group()
@@ -31,32 +31,18 @@ def cli(ctx):
 @click.option('-o', '--output', default="/dev/stdout",
               type=click.Path(exists=False, dir_okay=False, file_okay=True),
               help="Output file, default is stdout")
-@click.option('-s', '--schema', 
-              type=click.Path(exists=True, dir_okay=False, file_okay=True),
-              help="JSON Schema file")
+@click.option('-s', '--schema', type=str,
+              help="JSON Schema (a file of JSON schema or a JSON Schema version)")
 @click.argument('model')
 @click.pass_context
 def cmd_validate(ctx, spath, dpath, jpath, output, schema, model):
     '''
-    Compile a model to JSON
+    Validate a model against a schema
     '''
-    if model.endswith(".jsonnet"):
-        data = jsonnet.load(model, jpath)
-    else:
-        data = anyconfig.load(model)
-    if dpath:
-        print(f"selecting model substructure at {dpath}")
-        data = select_path(data, dpath)
+    data = io.load(model, jpath, dpath)
+    sche = io.load_schema(schema, jpath, spath)
+    validate(data, sche)
 
-    if schema.endswith(".jsonnet"):
-        scheme = jsonnet.load(schema, jpath)
-    else:
-        scheme = anyconfig.load(schema)
-    if spath:
-        print(f"selecting schema substructure at {spath}")
-        scheme = select_path(scheme, spath)
-
-    validate(data, scheme)
 
 @cli.command()
 @click.option('-P', '--path', default="",
@@ -75,9 +61,7 @@ def compile(ctx, path, jpath, output, string, model):
     '''
     Compile a model to JSON
     '''
-    data = jsonnet.load(model, jpath)
-    if path:
-        data = select_path(data, path)
+    data = io.load(model, jpath, path)
     if string:
         text = data
     else:
@@ -86,7 +70,7 @@ def compile(ctx, path, jpath, output, string, model):
         fp.write(text.encode())
 
 @cli.command()
-@click.option('-p', '--path', default="",
+@click.option('-P', '--path', default="",
               help="Specify a selection path into the model data structure")
 @click.option('-J', '--jpath', envvar='JSONNET_PATH', multiple=True,
               type=click.Path(exists=True, dir_okay=True, file_okay=False),
@@ -98,10 +82,10 @@ def compile(ctx, path, jpath, output, string, model):
 @click.argument('templ')
 @click.pass_context
 def generate(ctx, path, jpath, output, model, templ):
-    data = jsonnet.load(model, jpath)
-    if path:
-        data = select_path(data, path)
-    text = template.render(templ, data)
+    moo = io.load("moo.jsonnet", jpath, "templ")
+
+    data = io.load(model, jpath, path)
+    text = template.render(templ, dict(model=data, moo=moo))
     with open(output, 'wb') as fp:
         fp.write(text.encode())
 
