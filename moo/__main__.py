@@ -81,9 +81,11 @@ def compile(ctx, path, jpath, output, string, model):
 @click.argument('model')
 @click.argument('templ')
 @click.pass_context
-def generate(ctx, path, jpath, output, model, templ):
+def render(ctx, path, jpath, output, model, templ):
+    '''
+    Render a template against a model.
+    '''
     moo = io.load("moo.jsonnet", jpath, "templ")
-
     data = io.load(model, jpath, path)
     text = template.render(templ, dict(model=data, moo=moo))
     with open(output, 'wb') as fp:

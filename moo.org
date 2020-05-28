@@ -10,74 +10,57 @@
   :END:
 
 
-Model-oriented objects (moo) generates code by applying a code
+Model-oriented objects (*moo*) generates code by applying a code
 /template/ to a data structure (the model).  
 
 #+begin_center
 $moo(M, T) \to C$
 #+end_center
 
-This is an age old idea and moo is particularly influenced by the code
+This is an age old idea and *moo* is particularly influenced by the code
 generator [[https://github.com/zeromq/gsl][gsl]] as it is applied to [[https://github.com/zeromq/zproto][zproto]]/[[https://github.com/zeromq/zproject][zproject]] templates by the
-ZeroMQ community.
+ZeroMQ community to generate client, servers, protocols and entire
+software projects.  *moo*'s contributions to this idea include:
 
-moo provides a general basis for generation.  Some example of its
-application include modeling and generating native language data
-structures, their serialization methods, RPC or other protocol message
-and endpoint behaviors (finite state machines), application and system
-wide configuration methods and their configuration objects,
-documentation, architectural and design diagrams and even artwork.
+- support for defining models in essentially any data language that
+  can produce valid data structure, specifically all supported by the
+  [[https://github.com/ssato/python-anyconfig][anyconfig]] Python package (JSON, YAML, XML, INI, etc).
 
-moo consists of these main aspects:
+- special support for defining models in the [[https://jsonnet.org][Jsonnet]] data language.
 
-- A moo *model* is a data structure such as one might represent in JSON,
-  YAML or in Python with ~dict~ and ~list~ objects and fundamental string
-  and numeric types.  With moo you may define a model in many
-  languages (JSON, XML, YAML and various others) and moo provides
-  explicit support for using the [[https://jsonnet.org][Jsonnet]] data language.  See the
-  section [[Models]] for details.
+- support for defining model schema in the vocabulary of [[http://json-schema.org/][JSON Schema]].
+  Schema may be developed in all the same languages as models and *moo*
+  provides special support for Jsonnet, including a Jsonnet interface
+  to JSON Schema vocabulary.
 
-- A moo *template* is a file written primarily in whatever target code
-  language (C++, Python, LaTeX, GraphViz dot, SQL, HTML, etc) which
-  has [[https://jinja.palletsprojects.com][Jinja2]] template markup added.  Details are found in [[Templates]].
+- defining templates in the [[https://jinja.palletsprojects.com][Jinja2]] template markup used in many other
+  projects.
 
-- Developers of models and templates should form a contract by
-  producing a *schema*.  A model may then be validated against the
-  schema to assure it provides a structure expected by the template.
-  Some models themselves provide elements which are schema (eg,
-  modeling a message type).  These models may include schema
-  structure.  Schema data structures may be written in the same
-  variety of languages as may models and moo provides support for
-  Jsonnet.  In moo a schema data structure must be expressed as [[http://json-schema.org/][JSON
-  Schema]] (regardless of the language).  moo includes a JSON Schema
-  that validates JSON Schema and it may be used in user schema to
-  validate models that include parts which are written as JSON Schema
-  forms.  See the section [[Schema]] for more information.
+- a command line, Python modules and example [[https://waf.io][Waf]] build system that
+  shows how one may compile, , validation and render models into code
+  and build and test that code.
 
-- The ~moo~ Python module provides methods to handle all of the actions
-  involved in the codegen including compiling of Jsonnet to JSON,
-  reading Jsonnet, JSON, XML, YAML, etc into memory-resident data
-  structures, validating those structures and finally applying them to
-  a template to generate code.  See [[Python]].
+The change in languages adopted by *moo* is expected to enable better
+project factoring, model and template reuse and easier development.
 
-- The ~moo~ program exposes the same functionality to the command line
-  and is described more in [[Command]].
-
-- A [[https://waf.io][Waf]] build system example is provided which demonstrates how to
-  generate the tasks to generate code.  See [[Build]].
-
-The remainder of this introduction provides a quick-start guide to
-install the moo package and then walks through a simple "Hello
-codegen!" example.  Remaining sections cover each main aspect listed above
 
 ** Quick start
    :PROPERTIES:
    :CUSTOM_ID: quickstart
    :END:
 
-- install
-- build
-- ~moo --help~
+The ~moo~ command line and Python module is provided as a Python
+package and is installed in the "usual way".  Here is one:
+
+#+begin_example
+  $ git clone https://github.com/brettviren/moo.git
+  $ python3 -m venv venv
+  $ source venv/bin/activate
+  $ pip install -e .
+  $ moo --help
+  $ moo validate --help
+  $ moo validate moo/moo.jsonnet
+#+end_example
 
 ** Hello codegen
    :PROPERTIES:
@@ -98,15 +81,14 @@ Our first "hello" model is very simple.
 
 #+include: hello/model_hp.jsonnet src jsonnet
 
-This example is simple that the use of Jsonnet rather than base JSON
-hardly seems useful.  However, for anyone that has ever had to write
-raw JSON, simply being able to drop quotes around keys and leave in a
-final comma makes Jsonnet so much more human friendly.
+This example is so simple that the use of Jsonnet rather than base
+JSON seems like overkill.  However, for anyone that has ever had to
+write raw JSON, simply being able to drop quotes around keys and leave
+in a final comma makes Jsonnet so much more human friendly.  As our
+models grown in complexity we will see how Jsonnet becomes even more
+useful and how *moo* provides some additional help.
 
-As our models grown in complexity we will see how Jsonnet becomes even
-more useful and how moo provides some additional help.
-
-We can generate JSON:
+We can /compile/ the Jsonnet to JSON with the ~moo~ command line program:
 
 #+begin_src shell :exports both :results output code :wrap "src json"
   moo compile hello/model_hp.jsonnet
@@ -124,30 +106,44 @@ That's it.  That's our boring object.  Next, let's put it to use.
 
 *** Hello template
 
-It is the template where all an abstract rubber model finally meets
-the road.  We may write many types of templates that all accept many
-models which adhere to a particular schema (see [[Hello schema]] next).
-Here we show two.
+It is the template where the abstract model is made real.  We may
+write many types of templates that all accept many models which adhere
+to a particular schema.  Here we show two.
 
 First is a simple web page which interprets the model as an HTML link.
 
 #+include: hello/link.html.j2 src html
+
+Note the model data structure is available as a Jinja2 parameter
+~model~.  Other parameters may be included, for example, *moo* will pass
+in a ~moo~ parameter holding a helpful data structure and we will see
+this used in the codec example.
+
+We may /render/ the template against the model with the ~moo~ command line
+program:
+
 #+begin_src shell :exports both :results output code :wrap "src html"
-  moo generate hello/model_hp.jsonnet hello/link.html.j2
+  moo render hello/model_hp.jsonnet hello/link.html.j2
 #+end_src
 
 #+RESULTS:
 #+begin_src html
 <html>
-<a href="https://brettviren.github.io/moo">moo home page</a>
+<a href=""></a>
 </html>
 #+end_src
 
-The second is a simple command line tool that bakes in specific
-targets for download.
+A boring web page for a boring model.
+
+The second "hello" example template is a simple command line tool that
+bakes in specific targets for download.
+
 #+include: hello/downloader.sh.j2 src shell
+
+It is rendered with:
+
 #+begin_src shell :exports both :results output code :wrap "src shell"
-  moo generate hello/model_hp.jsonnet hello/downloader.sh.j2
+  moo render hello/model_hp.jsonnet hello/downloader.sh.j2
 #+end_src
 
 #+RESULTS:
@@ -163,32 +159,33 @@ wget -O "moo home page" "https://brettviren.github.io/moo"
     :CUSTOM_ID: hello-schema
     :END:
 
-In moo, schema is strictly optional but recommended.  It used to
-specify how a compliant model may be structured in order to form a
-contract between model and template developers.
+In *moo*, schema is used to specify how a valid model must be
+structured in order to form a contract between model and template
+developers.
 
 Here is our "hello" schema which may validate our "hello" model:
 
 #+include: hello/schema.jsonnet src jsonnet
 
-We start to see some non-trivial Jsonnet and some support moo provides
-for writing schema.  A tutorial on Jsonnet won't be included here
-instead we point the interested reader to the well written [[https://jsonnet.org/learning/tutorial.html][Jsonnet
-tutorial]] and [[https://jsonnet.org/ref/stdlib.html][standard library reference]].  But, one thing to take note
-of is the first line:
+We start to see some non-trivial Jsonnet.  A tutorial on Jsonnet won't
+be included here instead we point the interested reader to the well
+written [[https://jsonnet.org/learning/tutorial.html][Jsonnet]]
+tutorial and [[https://jsonnet.org/ref/stdlib.html][standard]] library
+reference.  
+
+One thing to take note of is the first line:
 
 #+begin_src jsonnet
 local moo = import "moo.jsonnet";
 #+end_src
 
-This ~moo.jsonnet~ module provides all of moo's extra support for
+This ~moo.jsonnet~ module provides all of *moo*'s extra support for
 Jsonnet.  For most schema and models developed in Jsonnet it will be
 helpful to use.  It is found in the ~moo~ Python package directory and
-is located automatically by the ~moo~ command line program.
+is located automatically by the ~moo~ command line program.  The user
+may provide their own Jsonnet libraries.
 
-We may compile this "hello" schema Jsonnet file using the C++ or Go
-command line programs but the ~moo~ command is provided and brings some
-additional convenience.
+Like with a model file we may compile a schema file to JSON with the ~moo~ command line program:
 
 #+begin_src shell :exports both :results output code :wrap "src json"
   moo compile hello/schema.jsonnet
@@ -215,13 +212,15 @@ additional convenience.
 }
 #+end_src
 
+This is example of a JSON document that follows the vocabulary of JSON
+Schema.  We won't give a tutorial on JSON Schema either but is a simple vocabulary and the reader is suggested to read the document [[http://json-schema.org/understanding-json-schema/][Understanding JSON Schema]].
+
 This "hello" schema will accept a model as valid if it has two
-attributes: ~name~ which has a value of string and ~url~ which is also a
-string following a particular format.  This is JSON Schema language
-and to learn this simple language, see [[http://json-schema.org/understanding-json-schema/][Understanding JSON Schema]].
+attributes: ~name~ which has a value of string and ~url~ which is also
+a string following a particular format.
 
 We may use the ~moo~ command line program to perform validation of the
-model against the schema.  It relies on the Python package [[https://python-jsonschema.readthedocs.io][jsonschema]]
+"hello" model against this schema.  It relies on the Python package [[https://python-jsonschema.readthedocs.io][jsonschema]]
 for the heavy lifting and its coverage of JSON Schema specification.
 
 #+begin_src shell :exports both :results output code :wrap "src json"
@@ -267,11 +266,12 @@ On instance['url']:
 
 This example is simple enough that command line invocations are
 sufficient.  As our system of schema, models and templates grow, a
-layer of automated task generation becomes rather welcome.  moo
-provides a Waf-based example of that.  The main [[file:wscript][wscript]] file may be
-used as a starting point and our "hello" example provides a
-[[file:hello/wscript_build][wscript_build]] file showing how one may extend the main wscript to
-handle domain-specific codegen.
+layer of automated task generation becomes rather welcome.  *moo*
+provides a Waf-based example of that.  The main
+[[file:wscript][~wscript~]] file may be used as a starting point and our
+"hello" example provides a [[file:hello/wscript_build][~wscript_build~]]
+file showing how one may extend the main wscript to handle
+domain-specific codegen.
 
 #+include: hello/wscript_build src python
 
@@ -280,113 +280,159 @@ And build:
   $ waf configure
   $ waf
   $ ls build/hello_*
+  build/hello_downloader.sh  build/hello_link.html
 #+end_example
 
-This build is fairly simple and so each target is exhaustively listed.
-As the number of targets grow we may exploit symmetries to codify the
-Waf task generation.
+This build is fairly simple and so the ~wscript_build~ file is
+hand-crafted.  Clearly the right thing to do is to "render" a *moo*
+model into a set of Waf tasks.  In this case instead of using a Jinja2
+template, Waf task generator would be developed that directly
+interpreters *moo* models and spawns the tasks.
 
 
 * A codec
    :PROPERTIES:
-   :CUSTOM_ID: going-forward
+   :CUSTOM_ID: ex-codec
    :END:
 
-This section uses moo to develop an extended example to show more of
-what may be accomplished with moo.  The goal will be to generate code
-which implements a /codec/.  Here, a codec means software that can
-serialize a data structure that is represented by native language
-types into a series of bytes (encode) and from a properly encoded
-series of bytes reproduce the structure (decode).  One way to
-illustrate a codec is shown in the following diagram:
+This section uses *moo* to develop an extended (although for now
+rather incomplete) example to show more of what may be accomplished
+with *moo*.  We describe the project and then dive into its schema,
+models and templates and end with some ideas for where to go next.
+
+The goal of the project will be to generate code which implements a
+/codec/.  Here, a codec means software that can serialize a data
+structure represented as native language types (eg a C++ ~struct~)
+into a series of bytes (encode) and from a properly encoded series of
+bytes reproduce the structure (decode).  One way to illustrate a codec
+is shown in the following diagram:
 
 [[file:./codec.svg]]
 
-The /recv/ represents a source of encoded data or /messages/ and likewise
-the /send/ is a sink.  We will allow different /types/ of encoded messages
-to map differently to the data structure of the codec. In the diagram
-the data structure is represented by the /fields/ node.  The /id/ is a
-special field made explicit and is used to represent the message type
-or the mapping from encoding to structure.  The /setters/ and /getters/
-represent field accessor methods such as may be used by an application
-to modify or query the current value held in the codec.
+The /recv/ represents a source of encoded data or /messages/ (eg a
+socket) and likewise the /send/ is a sink.  The codec will define a
+number of different /types/ of messages.  In the diagram, the data
+structure held in the messages is represented by the /fields/ node.
+The /id/ is a special field made explicit and is used to represent the
+message type or the mapping between encoding and structure.  The
+/setters/ and /getters/ represent field accessor methods such as may
+be used by an application to modify or query the current value held in
+the codec.
 
-Given multiple message types, possibly sharing semantically identical
-fields, there are two extremes how to represent the data structure
-managed by the codec.
+In general, a codec will have multiple, related message types.  It is
+likely that they will share some fields which are identical in name,
+type and semantic meaning.  There are two extremes in how one may
+realize this
 
-The first one is to present the /fields/ as a flat set of attributes
+The first extreme presents the /fields/ as a flat set of attributes
 where only those attributes which are mapped to the current /id/ are
-considered valid for calling.  The codec API then provides one /getter/
-and one /setter/ method for the union of fields across all supported
-messages.
+considered valid for calling.  The codec API then provides one
+/getter/ and one /setter/ method for the union of fields across all
+supported messages.  This is the idiom adopted by ZeroMQ Zproto and
+has a benefit in minimizing copies.  Assuring only accessors
+associated with the current /id/ are accessed is troublesome for
+hand-crafted code but as Zproto also generated most of the
+application, this collusion is easy to assure in practice.
 
 The other extreme is to maintain strict one-to-one mapping between
-message type and a native language type (typically a ~struct~ or ~class~).
-The codec API then provides one /getter/ and one /setter/ for each message
-type which allows atomic access to the corresponding native language
-type.
+message type and a native language type (typically a ~struct~ or
+~class~).  The codec API then provides one /getter/ and one /setter/
+for each message type which allows atomic access to the corresponding
+native language type.  This is the idiom of, for example, use of
+Protobuf serialization.  The explicit retaining of an atomic object is
+convenient for hand-crafted code.  It does require more copying and
+tends to encourage the serialization objects to permeate through
+application code.
 
-The general development parts include: 
+The concerns in the development of our fledgling codec include:
 
-- schema :: we will expect our models to describe messages types in terms of an /id/ of type string and a /body/ which is specified as a schema.
+- schema :: we will expect our models to describe messages types in
+  terms of an /id/ of type string and a /body/ which is specified as a
+  schema.
 
-- model :: our model describe message types such as may be used in a simple control, configure and monitor (CCM) system
+- model :: our model will describe various message types such as may
+  be used to enact control, configuration and monitoring (CCM) of a
+  distributed system
 
-- templates :: we will make templates to define C++ types corresponding to each message, C++ functions to serialize them using at least two methods (JSON and MessagePack), test code, documentation, etc.
+- templates :: we will make templates to define C++ types
+  corresponding to each message, C++ functions to serialize them using
+  at least two methods (JSON and MessagePack), test code,
+  documentation, etc.  (But, really, for now we merely render message
+  type models to their C++ ~struct~)
 
-** Schema
+* Schema
   :PROPERTIES:
   :CUSTOM_ID: schema
   :END:
 
-In moo, schema plays a central role and we need to describe a bit
-before diving in.  
+This section gives details on *moo* schema in the context of the codec
+example
 
-The primary purpose of a schema document in moo is to provide a
+** Validation vs assertion
+   :PROPERTIES:
+   :CUSTOM_ID: valid-v-assert
+   :END:
+
+
+The primary purpose of a schema document in *moo* is to provide a
 /contract/ between model and template developers.  We wish to write
-$N_M$ models which may be applied to $N_T$ templates.  Without such a
-contract, we must validate by applying each template to each model and
-look for failures.  This is a $N_M \times N_T$ process.  By
-insinuating a contract in the form of a schema it becomes a $N_M +
-N_T$ process.
+$N_M$ models which may be applied to $N_T$ templates.  An implicit
+contract must be validated by looking for errors in $N_M \times N_T$
+renderings.  By insinuating an explicit contract, many errors can be
+detected in $N_M$ validations against the schema.  For this use we
+write data structures in the vocabulary of JSON Schema.
 
-The second use of schema is that sometimes our models need to describe
-"types of things" and that is precisely what a schema does.  An
-immediate example will include the codec message types.  Instead of
-inventing a new way for models to express schema separate from the
-schema used to validate models, moo uses the same schema language for
-both purposes, JSON Schema.
+The second use of schema in *moo* is to assert structure for the
+purpose of generating its implementation.  For example, we want to
+render a model of a codec message type into a C++ ~struct~.  Unlike
+validation which may need to be more accepting, schema to assert
+structure must not have any ambiguity.  
 
-This may sound convoluted and recursive, and it is.  However, there is
-a schema written in JSON Schema which validates any schema written in
-JSON Schema (including itself).  Thus we can include JSON Schema in
-our schema and in our models.  
+A subset of JSON Schema vocabulary may be used to assert unambiguous
+schema, however it has two practical problems.  First, it adds extra
+layers of structure in order to support meta information (eg, the
+~"requires"~ and ~"parameters"~ keywords of a JSON Schema ~object~).
+Iterating models with this extra structure puts a fairly large burden
+on template development.  The second problem is that JSON Schema
+vocabulary only supports the data types found in JSON (array, object,
+string, number, Boolean).  To generate code we need a more expressive
+set of types (eg, "unsigned 64 bit integer").  JSON Schema ~object~
+could be extended to include non-standard keywords to support these
+extensions.  However, we may provide this extension more simply and
+solve the first problem by developing our own assertion schema (which
+we do below in [[Models]]).
 
-With moo we may provide data structures represented in many languages.
+** Jsonnet vs JSON Schema
+   :PROPERTIES:
+   :CUSTOM_ID: js-v-js
+   :END:
+
+
+With *moo* we may provide data structures represented in many languages.
 Any language format supported by the ~anyconfig~ Python module or any
 language that may produce such formats may be used.  In particular,
-moo provides support for creating data structures for moo using
-Jsonnet.  The reason why such variety can be supported by moo is that
+*moo* provides support for creating data structures for *moo* using
+Jsonnet.  The reason why such variety can be supported by *moo* is that
 schema validation, application of model to template and other
 operations all occur on data structures in memory.  Populating those
 structures from a particular persistent representation is factored out
 and parameterized by the format.  This may be extended in the future
 to support data structures loaded from SQL or noSQL type stores.
 
-Thus, to develop your own schema data structures with moo's Jsonnet,
-first spend some quality time with [[http://json-schema.org/understanding-json-schema/][Understanding JSON Schema]].  This
-document provides a fast and excellent learning resource to understand
-JSON Schema.  A large, if not complete, fraction of JSON Schema is
-reflected into ~moo.schema~ functions so as you learn JSON Schema focus
-on structure not on syntax and you may then map JSON Schema keywords
-into moo Jsonnet functions.  
+Thus, to develop your own schema data structures with *moo*'s Jsonnet,
+first spend some quality time with
+[[http://json-schema.org/understanding-json-schema/][Understanding
+JSON Schema]].  This document provides a fast and excellent learning
+resource to understand JSON Schema.  A large, if not complete,
+fraction of JSON Schema is reflected into ~moo.schema~ functions so as
+you learn JSON Schema focus on structure not on syntax and you may
+then map JSON Schema keywords into *moo* Jsonnet functions.
 
-As we will see used next, moo Jsonnet also provides additional schema
+As we will see used next, *moo* Jsonnet also provides additional schema
 to more exactly specify types including attributes for numeric sizes,
 formats, units.
 
-*** Codec schema
+** Codec schema
    :PROPERTIES:
    :CUSTOM_ID: codec-schema
    :END:
@@ -419,7 +465,7 @@ use the same model.  OTOH, we may also produce Python native types
 which are compatible with C++ native types when joined by suitably
 matching Python and C++ ends of serialization methods.
 
-In any case, in a formal moo Jsonnet schema the codec schema can be
+In any case, in a formal *moo* Jsonnet schema the codec schema can be
 defined as:
 
 #+include: codec/schema.jsonnet src jsonnet
@@ -501,42 +547,52 @@ works:.
 No news is good news.
 
 
-** Models
+* Models
   :PROPERTIES:
   :CUSTOM_ID: models
   :END:
 
-In moo, a model is a data structure which describes some abstract
+In *moo*, a model is a data structure which describes some abstract
 "thing" (object) with the goal that it may be applied to one or more
 templates in order to generate code.  A model should adhere to (be
-validated by) a schema as just discussed.
+validated by) a schema.
+
+** Modeling languages
+   :PROPERTIES:
+   :CUSTOM_ID: mod-lang
+   :END:
 
 Just as with a schema, a developer may define a model in many data
-languages.  moo supports models written in JSON, XML, YAML, and
+languages.  *moo* supports models written in JSON, XML, YAML, and
 various others (anything supported by the ~anyconfig~ Python module).
 And of course developers are free to develop models in any form that
 may generate these formats.  What ultimately matters is the in-memory
 model data structure.
 
-That variety aside, moo provides special support for defining models
+That variety aside, *moo* provides special support for defining models
 in Jsonnet.  In particular, it provides functions to help create a
 model in ways that assure consistent forms across models and in ways
 that tend to produce models which are, by construction, valid against
 schema.
 
-In a properly constructed moo ~schema.jsonnet~ file, these functions are
+In a properly constructed *moo* ~schema.jsonnet~ file, these functions are
 available under the ~.types~ attribute.  It should extend the ~.types~
 structure from any inherited schema starting with what is provided by
 ~moo.jsonnet~.  Unlike the structure under ~.schema~, the structure
 provided by ~.types~ functions is assertive and not used for validation.
 
-In this section will develop a model for the CCM codec example
-described above.
+** Codec models
+   :PROPERTIES:
+   :CUSTOM_ID: ccm-codec
+   :END:
+
+Here is a very simple codec for controlling, configuring and
+monitoring a distributed system.
 
 #+include: ccm/model.jsonnet src jsonnet
 
-Consider the ~"config"~ message type which we can show as JSON Schema
-like:
+Consider the ~"config"~ message type for which we can individually show
+as JSON Schema like:
 
 #+begin_src shell :exports both :results output code :wrap "src json"
   moo compile -P 0 ccm/model.jsonnet
@@ -565,6 +621,11 @@ like:
     "ident": "config"
 }
 #+end_src
+
+** Roles and their implementation
+   :PROPERTIES:
+   :CUSTOM_ID: roles
+   :END:
 
 Real systems will have many entities to configure.  Considering the
 system from a top-down view, we may define a number of abstract
@@ -625,28 +686,34 @@ The same template that can consume each of the message type models in
 implantation called "server".
 
 
-** Templates
+* Templates
   :PROPERTIES:
   :CUSTOM_ID: templates
   :END:
 
-In moo, templates are files written in some target language with
+In *moo*, templates are files written in some target language with
 Jinja2 markup interspersed.  A template applied to a model to generate
 code in that target language.  The template is developed with the
 model's schema in mind.
 
-This section extends the CCM codec example.  The first template to
+** C++ class header template
+   :PROPERTIES:
+   :CUSTOM_ID: cpp-class-tmpl
+   :END:
+
+This section extends the CCM codec example but with a template that is
+in principle generic to any codec model.  The first template to
 illustrate is one that generates a native language C++ type for a
 model of a message type.
 
-#+include: codec/mtype-first-try.hpp.j2 src c++
+#+include: codec/mtype.hpp.j2 src c++
 
 
 And, when we apply the first ~"config"~ message type model by selecting
 the zeroth element of the full model:
 
 #+begin_src shell :exports both :results output code :wrap "src c++"
-  moo generate -P 0 ccm/model.jsonnet codec/mtype-first-try.hpp.j2
+  moo render -P 0 ccm/model.jsonnet codec/mtype.hpp.j2
 #+end_src
 
 #+RESULTS:
@@ -664,30 +731,32 @@ struct config {
 #endif // 
 #+end_src
 
-Now, as the template file name indicates, this represents a first try
-and there are many things that make it clearly inadequate.  In
-particular, we would like a way to give a C++ namespace and maybe some
-hint at what C++ header file this might live in so that we may include
-that in the header guards.
 
-* Command
-  :PROPERTIES:
-  :CUSTOM_ID: command
-  :END:
+* Forward
+
+** Factoring
+   :PROPERTIES:
+   :CUSTOM_ID: factoring
+   :END:
 
 
-* Python
-  :PROPERTIES:
-  :CUSTOM_ID: python
-  :END:
+This codec example remained very simple and very incomplete.  Now,
+that it is presented it should be clear more work is needed.  As the
+scope of the development increases so will the complexity.  Some
+factoring and reuse is needed.  For example:
 
+- A class header file template should take a model which combines
+  information about a the file, C++ namespace and finally the actual
+  class.
 
-* Build
-  :PROPERTIES:
-  :CUSTOM_ID: build
-  :END:
+- Such a model should be validated against a schema which is similarly
+  factored into file, namespace and class declaration sub-schema.
 
-* Other
+- The template should be similarly factored using macros so these
+  macros may be reused in different template contexts.
+
+- The file model would be used in a ~wscript_build.j2~ macro to add
+  Waf build tasks.
 
 ** Composition
    :PROPERTIES:
@@ -698,15 +767,20 @@ Both Jsonnet and JSON Schema have their own forms to /compose/ structure
 through /references/.  This allows defining structure in one place and
 using it in multiple places.  Jsonnet references are resolved during
 compilation while JSON Schema references are purely logical and
-resolved by some interpreter (in case of moo, that's the ~jsonschema~
+resolved by some interpreter (in case of *moo*, that's the ~jsonschema~
 Python module).  There are a number of trade-offs in selecting how to
 employ references.
 
 Jsonnet provides these idioms for composing structure with references:
 
-- an object produced by one file may be referenced in another via ~import~.
-- an object may be defined in a ~local~ variable and used multiple times within that file. 
-- structure produced by a file may be referenced within the structure with ~self~ or ~super~ keywords and ~$.~ paths.
+- an object produced by one file may be referenced in another via
+  ~import~.
+
+- an object may be defined in a ~local~ variable and used multiple
+  times within that file.
+
+- structure produced by a file may be referenced within the structure
+  with ~self~ or ~super~ keywords and ~$.~ paths.
 
 The benefit of using Jsonnet references is that they are first class
 elements of the Jsonnet language.  This means the Jsonnet compiler
@@ -753,7 +827,7 @@ would be replaced by ~<content>~ as found at:
 
 JSON Schema also provides way to define a target with an ~$id~ attribute
 but this feature is currently unsupported by the Python module
-~jsonschema~ which moo relies on and we will discard it from
+~jsonschema~ which *moo* relies on and we will discard it from
 consideration.
 
 In Jsonnet, the JSON Schema special form ~{ "$ref" : "<path>" }~ may be
@@ -761,8 +835,10 @@ created using a call to ~moo.schema.ref(<path>)~ and if the conventional
 ~"definitions"~ is used then a shorter ~moo.schema.ref("target")~ may be
 used.
 
-In either case, it is required for the Jsonnet developer to assure that
-~<path>~ is included in the output.  The conventional ~"definitions"~ may be provided to ~moo.schema.schema()~ as an argument.
+In either case, it is required for the Jsonnet developer to assure
+that ~<path>~ is included in the output.  The conventional
+~"definitions"~ may be provided to ~moo.schema.schema()~ as an
+argument.
 
 Unless a recursive data structure is required, or the Jsonnet
 structure requires prohibitively long times to compile, it is
@@ -777,7 +853,7 @@ referencing.
 Schema is described in a nested way with schema being composed of more
 schema (it's schemas all the way down).  It will often be the case
 that a model or a template or both require a schema which is embedded
-in a larger schema.  moo allows selecting sub-schema in two ways:
+in a larger schema.  *moo* allows selecting sub-schema in two ways:
 through Jsonnet and on the command line.
 
 *** Jsonnet selection

@@ -30,13 +30,13 @@ class codegen(Task):
         templ = self.inputs[1]
         top = self.generator.bld.path.abspath()
         mpath = [os.path.join(top, "models")]
-        data = moo.jsonnet.load(model.abspath(),mpath)
+        data = moo.io.load(model.abspath(),mpath)
+        moot = moo.io.load("moo.jsonnet", mpath, "templ")
+
         if hasattr(self, 'structpath'):
-            print('STRUCTPATH',self.structpath)
             data = moo.util.select_path(data, self.structpath)
-        else:
-            print('STRUCTPATH none for',templ)
-        text = moo.template.render(templ.abspath(), data)
+
+        text = moo.template.render(templ.abspath(), dict(model=data, moo=moot))
         with open(self.outputs[0].abspath(), 'wb') as fp:
             fp.write(text.encode())
 
