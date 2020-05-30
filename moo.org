@@ -503,25 +503,36 @@ JSON Schema:
 #+end_src
 
 #+RESULTS:
-#+begin_example
+#+begin_src json
 {
-    "items": {
-        "properties": {
-            "body": {
-                "$ref": "https://json-schema.org/draft-07/schema"
+    "properties": {
+        "mtypes": {
+            "items": {
+                "properties": {
+                    "body": {
+                        "$ref": "https://json-schema.org/draft-07/schema"
+                    },
+                    "ident": {
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "ident"
+                ],
+                "type": "object"
             },
-            "ident": {
-                "type": "string"
-            }
+            "type": "array"
         },
-        "required": [
-            "ident"
-        ],
-        "type": "object"
+        "namepath": {
+            "items": {
+                "type": "string"
+            },
+            "type": "array"
+        }
     },
-    "type": "array"
+    "type": "object"
 }
-#+end_example
+#+end_src
 
 
 Note how JSON Schema '$ref' keyword is used to refer to schema held
@@ -595,7 +606,7 @@ Consider the ~"config"~ message type for which we can individually show
 as JSON Schema like:
 
 #+begin_src shell :exports both :results output code :wrap "src json"
-  moo compile -P 0 ccm/model.jsonnet
+  moo compile -P mtypes.0 ccm/model.jsonnet
 #+end_src
 
 #+RESULTS:
@@ -608,6 +619,7 @@ as JSON Schema like:
             "mootype": "str"
         },
         "issued": {
+            "def": 0,
             "dtype": "i8",
             "mootype": "num",
             "unit": "ms"
@@ -667,6 +679,7 @@ We show this latter technique with this contrived example:
             "mootype": "str"
         },
         "issued": {
+            "def": 0,
             "dtype": "i8",
             "mootype": "num",
             "unit": "ms"
@@ -706,29 +719,47 @@ in principle generic to any codec model.  The first template to
 illustrate is one that generates a native language C++ type for a
 model of a message type.
 
-#+include: codec/mtype.hpp.j2 src c++
+#+include: codec/class_header.hpp.j2 src c++
 
-
-And, when we apply the first ~"config"~ message type model by selecting
-the zeroth element of the full model:
+And, when we apply the ccm model:
 
 #+begin_src shell :exports both :results output code :wrap "src c++"
-  moo render -P 0 ccm/model.jsonnet codec/mtype.hpp.j2
+  moo render ccm/model.jsonnet codec/class_header.hpp.j2
 #+end_src
 
 #+RESULTS:
 #+begin_src c++
-// The message type 
-#ifndef CONFIG
-#define CONFIG
+#ifndef CCM_MESSAGES_HPP
+#define CCM_MESSAGES_HPP
 
+namespace ccm {
 struct config {
     std::string ident = "config";
     std::string cfgid = "";
     int64_t issued = 0;
     std::string role = "";
 };
-#endif // 
+
+struct start {
+    std::string ident = "start";
+    int64_t issued = 0;
+};
+
+struct stop {
+    std::string ident = "stop";
+    int64_t issued = 0;
+};
+
+struct log {
+    std::string ident = "log";
+    int64_t issued = 0;
+    std::string level = "";
+    std::string message = "";
+};
+
+}
+
+#endif //  CCM_MESSAGES_HPP
 #+end_src
 
 

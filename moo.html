@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2020-05-28 Thu 14:38 -->
+<!-- 2020-05-30 Sat 16:29 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>moo 無</title>
@@ -289,7 +289,7 @@ for the JavaScript code in this tag.
 <li><a href="#hello-codgen">Hello codegen</a>
 <ul>
 <li><a href="#hello-model">Hello model</a></li>
-<li><a href="#orgd66740c">Hello template</a></li>
+<li><a href="#orgc2d3b7c">Hello template</a></li>
 <li><a href="#hello-schema">Hello schema</a></li>
 <li><a href="#hello-building">Hello build</a></li>
 </ul>
@@ -316,7 +316,7 @@ for the JavaScript code in this tag.
 <li><a href="#cpp-class-tmpl">C++ class header template</a></li>
 </ul>
 </li>
-<li><a href="#org25490ad">Forward</a>
+<li><a href="#orga3ffa89">Forward</a>
 <ul>
 <li><a href="#factoring">Factoring</a></li>
 <li><a href="#composition">Composition</a></li>
@@ -458,9 +458,9 @@ That's it.  That's our boring object.  Next, let's put it to use.
 </div>
 </div>
 
-<div id="outline-container-orgd66740c" class="outline-4">
-<h4 id="orgd66740c">Hello template</h4>
-<div class="outline-text-4" id="text-orgd66740c">
+<div id="outline-container-orgc2d3b7c" class="outline-4">
+<h4 id="orgc2d3b7c">Hello template</h4>
+<div class="outline-text-4" id="text-orgc2d3b7c">
 <p>
 It is the template where the abstract model is made real.  We may
 write many types of templates that all accept many models which adhere
@@ -954,7 +954,12 @@ defined as:
     ident: ms.string(),
     body: ms.jsonschema(),
     mtype: ms.object({ident:$.ident,body:$.body}, [<span style="color: #e9b96e;">"ident"</span>]),
-    codec: ms.array($.mtype),
+    codec: ms.object({
+        <span style="color: #73d216;">// An codec has a location.</span>
+        namepath: ms.array(ms.string()),
+        <span style="color: #73d216;">// and a set of message types.</span>
+        mtypes: ms.array($.mtype),
+    }),
 
     schema : std.prune($.codec),
 
@@ -1009,21 +1014,32 @@ JSON Schema:
 
 <div class="org-src-container">
 <pre class="src src-json">{
-    <span style="color: #b4fa70;">"items"</span>: {
-        <span style="color: #b4fa70;">"properties"</span>: {
-            <span style="color: #b4fa70;">"body"</span>: {
-                <span style="color: #b4fa70;">"$ref"</span>: <span style="color: #e9b96e;">"https://json-schema.org/draft-07/schema"</span>
+    <span style="color: #b4fa70;">"properties"</span>: {
+        <span style="color: #b4fa70;">"mtypes"</span>: {
+            <span style="color: #b4fa70;">"items"</span>: {
+                <span style="color: #b4fa70;">"properties"</span>: {
+                    <span style="color: #b4fa70;">"body"</span>: {
+                        <span style="color: #b4fa70;">"$ref"</span>: <span style="color: #e9b96e;">"https://json-schema.org/draft-07/schema"</span>
+                    },
+                    <span style="color: #b4fa70;">"ident"</span>: {
+                        <span style="color: #b4fa70;">"type"</span>: <span style="color: #e9b96e;">"string"</span>
+                    }
+                },
+                <span style="color: #b4fa70;">"required"</span>: [
+                    <span style="color: #e9b96e;">"ident"</span>
+                ],
+                <span style="color: #b4fa70;">"type"</span>: <span style="color: #e9b96e;">"object"</span>
             },
-            <span style="color: #b4fa70;">"ident"</span>: {
-                <span style="color: #b4fa70;">"type"</span>: <span style="color: #e9b96e;">"string"</span>
-            }
+            <span style="color: #b4fa70;">"type"</span>: <span style="color: #e9b96e;">"array"</span>
         },
-        <span style="color: #b4fa70;">"required"</span>: [
-            <span style="color: #e9b96e;">"ident"</span>
-        ],
-        <span style="color: #b4fa70;">"type"</span>: <span style="color: #e9b96e;">"object"</span>
+        <span style="color: #b4fa70;">"namepath"</span>: {
+            <span style="color: #b4fa70;">"items"</span>: {
+                <span style="color: #b4fa70;">"type"</span>: <span style="color: #e9b96e;">"string"</span>
+            },
+            <span style="color: #b4fa70;">"type"</span>: <span style="color: #e9b96e;">"array"</span>
+        }
     },
-    <span style="color: #b4fa70;">"type"</span>: <span style="color: #e9b96e;">"array"</span>
+    <span style="color: #b4fa70;">"type"</span>: <span style="color: #e9b96e;">"object"</span>
 }
 </pre>
 </div>
@@ -1118,12 +1134,15 @@ monitoring a distributed system.
 <span style="color: #73d216;">// This model wants every message type to carry some common fields</span>
 <span style="color: #b4fa70;">local</span> mtype(ident, payload={}) = ct.mtype(ident, ct.timestamp + payload);
 
-std.prune([
-    mtype(<span style="color: #e9b96e;">"config"</span>, {role:ct.str(), cfgid: ct.str()}),
-    mtype(<span style="color: #e9b96e;">"start"</span>),
-    mtype(<span style="color: #e9b96e;">"stop"</span>),
-    mtype(<span style="color: #e9b96e;">"log"</span>, {level: ct.str(), message: ct.str()}),
-])
+{
+    namepath: [<span style="color: #e9b96e;">"ccm"</span>],
+    mtypes: std.prune([
+        mtype(<span style="color: #e9b96e;">"config"</span>, {role:ct.str(), cfgid: ct.str()}),
+        mtype(<span style="color: #e9b96e;">"start"</span>),
+        mtype(<span style="color: #e9b96e;">"stop"</span>),
+        mtype(<span style="color: #e9b96e;">"log"</span>, {level: ct.str(), message: ct.str()}),
+    ])
+}
 </pre>
 </div>
 
@@ -1133,7 +1152,7 @@ as JSON Schema like:
 </p>
 
 <div class="org-src-container">
-<pre class="src src-shell">moo compile -P 0 ccm/model.jsonnet
+<pre class="src src-shell">moo compile -P mtypes.0 ccm/model.jsonnet
 </pre>
 </div>
 
@@ -1199,7 +1218,7 @@ We show this latter technique with this contrived example:
 <pre class="src src-jsonnet"><span style="color: #b4fa70;">local</span> codec = <span style="color: #b4fa70;">import</span> <span style="color: #e9b96e;">"codec/schema.jsonnet"</span>;
 <span style="color: #b4fa70;">local</span> ct = codec.types;
 <span style="color: #b4fa70;">local</span> parent = <span style="color: #b4fa70;">import</span> <span style="color: #e9b96e;">"model.jsonnet"</span>;
-<span style="color: #b4fa70;">local</span> cfg = parent[0];
+<span style="color: #b4fa70;">local</span> cfg = parent.mtypes[0];
 
 cfg {
     body: <span style="color: #b4fa70;">super</span>.body {
@@ -1275,46 +1294,68 @@ model of a message type.
 </p>
 
 <div class="org-src-container">
-<pre class="src src-c++">{%- macro defval(p) -%}
-{% <span style="color: #b4fa70;">if</span> p.mootype == <span style="color: #e9b96e;">"str"</span> %}<span style="color: #e9b96e;">"{{ p.def }}"</span>{% <span style="color: #b4fa70;">else</span> %}{{ p.def }}{% endif %}
-{%- endmacro -%}
-<span style="color: #73d216;">// </span><span style="color: #73d216;">The message type {{ident}}</span>
-<span style="color: #e090d7;">#if</span><span style="color: #e090d7;">n</span><span style="color: #e090d7;">def</span> {{model.ident|upper}}
-<span style="color: #e090d7;">#define</span> {{model.ident|upper}}
+<pre class="src src-c++">{% extends <span style="color: #e9b96e;">"header.hpp.j2"</span> %}
+{% <span style="color: #b4fa70;">import</span> <span style="color: #e9b96e;">"macros.cpp.j2"</span> as cpp %}
 
-<span style="color: #b4fa70;">struct</span> {{model.ident}} {
-    <span style="color: #e9b2e3;">std</span>::<span style="color: #8cc4ff;">string</span> <span style="color: #fcaf3e;">ident</span> = <span style="color: #e9b96e;">"{{model.ident}}"</span>;
-    {% <span style="color: #b4fa70;">for</span> n,p <span style="color: #8cc4ff;">in</span> <span style="color: #fcaf3e;">model</span>.body.items() %}
-    {{ moo.lang.cpp[p.mootype][p.dtype] }} {{ n }} = {{ defval(p) }};
-    {% endfor %}
-};
-<span style="color: #e090d7;">#endif</span> <span style="color: #73d216;">// </span><span style="color: #73d216;">{{ident|upper}}</span>
+{% set namepath = model.namepath %}
+{% set filename = <span style="color: #e9b96e;">"messages"</span> %}
+
+{% block body %}
+{% <span style="color: #b4fa70;">for</span> name in namepath %}
+<span style="color: #b4fa70;">namespace</span> {{ name }} {
+{% endfor %}
+{% <span style="color: #b4fa70;">for</span> mtype in model.mtypes %}
+{{ cpp.structdef(moo, mtype) }}
+
+{% endfor %}
+{% <span style="color: #b4fa70;">for</span> name in namepath %}
+}
+{% endfor %}
+{% endblock %}
 </pre>
 </div>
 
-
 <p>
-And, when we apply the first <code>"config"</code> message type model by selecting
-the zeroth element of the full model:
+And, when we apply the ccm model:
 </p>
 
 <div class="org-src-container">
-<pre class="src src-shell">moo render -P 0 ccm/model.jsonnet codec/mtype.hpp.j2
+<pre class="src src-shell">moo render ccm/model.jsonnet codec/class_header.hpp.j2
 </pre>
 </div>
 
 <div class="org-src-container">
-<pre class="src src-c++"><span style="color: #73d216;">// </span><span style="color: #73d216;">The message type </span>
-<span style="color: #e090d7;">#if</span><span style="color: #e090d7;">n</span><span style="color: #e090d7;">def</span> CONFIG
-<span style="color: #e090d7;">#define</span> <span style="color: #fcaf3e;">CONFIG</span>
+<pre class="src src-c++"><span style="color: #e090d7;">#if</span><span style="color: #e090d7;">n</span><span style="color: #e090d7;">def</span> CCM_MESSAGES_HPP
+<span style="color: #e090d7;">#define</span> <span style="color: #fcaf3e;">CCM_MESSAGES_HPP</span>
 
+<span style="color: #b4fa70;">namespace</span> <span style="color: #e9b2e3;">ccm</span> {
 <span style="color: #b4fa70;">struct</span> <span style="color: #8cc4ff;">config</span> {
     <span style="color: #e9b2e3;">std</span>::<span style="color: #8cc4ff;">string</span> <span style="color: #fcaf3e;">ident</span> = <span style="color: #e9b96e;">"config"</span>;
     <span style="color: #e9b2e3;">std</span>::<span style="color: #8cc4ff;">string</span> <span style="color: #fcaf3e;">cfgid</span> = <span style="color: #e9b96e;">""</span>;
     <span style="color: #8cc4ff;">int64_t</span> <span style="color: #fcaf3e;">issued</span> = 0;
     <span style="color: #e9b2e3;">std</span>::<span style="color: #8cc4ff;">string</span> <span style="color: #fcaf3e;">role</span> = <span style="color: #e9b96e;">""</span>;
 };
-<span style="color: #e090d7;">#endif</span> <span style="color: #73d216;">// </span>
+
+<span style="color: #b4fa70;">struct</span> <span style="color: #8cc4ff;">start</span> {
+    <span style="color: #e9b2e3;">std</span>::<span style="color: #8cc4ff;">string</span> <span style="color: #fcaf3e;">ident</span> = <span style="color: #e9b96e;">"start"</span>;
+    <span style="color: #8cc4ff;">int64_t</span> <span style="color: #fcaf3e;">issued</span> = 0;
+};
+
+<span style="color: #b4fa70;">struct</span> <span style="color: #8cc4ff;">stop</span> {
+    <span style="color: #e9b2e3;">std</span>::<span style="color: #8cc4ff;">string</span> <span style="color: #fcaf3e;">ident</span> = <span style="color: #e9b96e;">"stop"</span>;
+    <span style="color: #8cc4ff;">int64_t</span> <span style="color: #fcaf3e;">issued</span> = 0;
+};
+
+<span style="color: #b4fa70;">struct</span> <span style="color: #8cc4ff;">log</span> {
+    <span style="color: #e9b2e3;">std</span>::<span style="color: #8cc4ff;">string</span> <span style="color: #fcaf3e;">ident</span> = <span style="color: #e9b96e;">"log"</span>;
+    <span style="color: #8cc4ff;">int64_t</span> <span style="color: #fcaf3e;">issued</span> = 0;
+    <span style="color: #e9b2e3;">std</span>::<span style="color: #8cc4ff;">string</span> <span style="color: #fcaf3e;">level</span> = <span style="color: #e9b96e;">""</span>;
+    <span style="color: #e9b2e3;">std</span>::<span style="color: #8cc4ff;">string</span> <span style="color: #fcaf3e;">message</span> = <span style="color: #e9b96e;">""</span>;
+};
+
+}
+
+<span style="color: #e090d7;">#endif</span> <span style="color: #73d216;">//  </span><span style="color: #73d216;">CCM_MESSAGES_HPP</span>
 </pre>
 </div>
 </div>
@@ -1322,9 +1363,9 @@ the zeroth element of the full model:
 </div>
 
 
-<div id="outline-container-org25490ad" class="outline-2">
-<h2 id="org25490ad">Forward</h2>
-<div class="outline-text-2" id="text-org25490ad">
+<div id="outline-container-orga3ffa89" class="outline-2">
+<h2 id="orga3ffa89">Forward</h2>
+<div class="outline-text-2" id="text-orga3ffa89">
 </div>
 <div id="outline-container-factoring" class="outline-3">
 <h3 id="factoring">Factoring</h3>
@@ -1563,7 +1604,7 @@ Again, lack of any error shows a successful validation.
 </div>
 <div id="postamble" class="status">
 <p class="author">Author: Brett Viren</p>
-<p class="date">Created: 2020-05-28 Thu 14:38</p>
+<p class="date">Created: 2020-05-30 Sat 16:29</p>
 <p class="validation"><a href="http://validator.w3.org/check?uri=referer">Validate</a></p>
 </div>
 </body>

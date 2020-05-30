@@ -1,0 +1,12 @@
+{%- macro defval(p) -%}
+{% if p.mootype == "str" %}"{{ p.def }}"{% else %}{{ p.def }}{% endif %}
+{%- endmacro -%}
+
+{%- macro structdef(moo, model) -%}
+struct {{model.ident}} {
+    std::string ident = "{{model.ident}}";
+    {% for n,p in model.body.items() %}
+    {{ moo.lang.cpp[p.mootype][p.dtype] }} {{ n }} = {{ defval(p) }};
+    {% endfor %}
+};
+{%- endmacro -%}
