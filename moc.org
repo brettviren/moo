@@ -1,0 +1,44 @@
+#+title: moc
+#+subtitle: Model Oriented Configuration
+
+* Overview
+
+moc is a moo for /configuring/ a system.  moc provides
+
+- an abstract entry point for a process to obtain configuration information
+
+- implementations of the entry point 
+
+- schema for describing configuration structure
+
+- methods to implement configuration structure
+
+- a working demonstration
+
+The working demonstration is a distributed system which decomposes into 
+
+- a single, general software /application/ (something with a ~main()~) which aggregates
+
+- a set of software /components/ that are provided in
+
+- dynamically loaded plugin shared libraries resulting in a number of
+
+- running /process/ instances 
+
+The application is general and has these explicit parts:
+
+- command line parsing 
+- load any plugins named on the CLI
+- instantiate a moc entry point component based on CLI arguments
+- execute moc entry point to receive application configuration
+- load additional plugins as per cfg
+- instantiate components as per cfg
+- apply component cfg on instances
+- execute instances
+
+This demo is a one-shot configuration, there is no re-config mechanism.  This may be developed as an extension.
+
+moc configuration information may exist in serialized /message/ form and in a native language (C++/python) fully typed class.  The code providing /deserializing/ methods is generated based on a moo schema defining the configuration structure.  Generated code is compiled into headers and source which the application and components may be developed against.
+
+
+

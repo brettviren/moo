@@ -33,15 +33,23 @@ def cli(ctx):
               help="Output file, default is stdout")
 @click.option('-s', '--schema', type=str,
               help="JSON Schema (a file of JSON schema or a JSON Schema version)")
+@click.option('-V', '--validator', default="jsonschema",
+              type=click.Choice(["jsonschema","fastjsonschema"]),
+              help="Specify which validator")
+
 @click.argument('model')
 @click.pass_context
-def cmd_validate(ctx, spath, dpath, jpath, output, schema, model):
+def cmd_validate(ctx, spath, dpath, jpath, output, schema, validator, model):
     '''
     Validate a model against a schema
     '''
     data = io.load(model, jpath, dpath)
     sche = io.load_schema(schema, jpath, spath)
-    validate(data, sche)
+    res = validate(data, sche, validator)
+    text = json.dumps(res, indent=4)
+    with open(output, 'wb') as fp:
+        fp.write(text.encode())
+
 
 
 @cli.command()

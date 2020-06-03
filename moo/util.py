@@ -24,10 +24,14 @@ def select_path(obj, path):
 
     return obj
 
-def validate(model, schema):
-    import jsonschema
-    return jsonschema.validate(instance=model, schema=schema)
-
+def validate(model, schema, validator):
+    if validator == "jsonschema":
+        from jsonschema import validate
+        return validate(instance=model, schema=schema)
+    if validator == "fastjsonschema":
+        from fastjsonschema import validate
+        return validate(schema, model)
+    raise ValueError(f"unknown validator: {validator}")
 
 def clean_paths(paths):
     if isinstance(paths, str):

@@ -290,6 +290,66 @@ template, Waf task generator would be developed that directly
 interpreters *moo* models and spawns the tasks.
 
 
+** Meaning of schema and model
+
+A moo model is something that satisfies all these requirements:
+
+- is a data structure
+- for which it is *possible* to represent as a JSON document
+- validates against a moo schema 
+
+A moo schema is something that satisfies all these requirements:
+
+- is a data structure
+- for which it is *possible* to represent as a [[https://tools.ietf.org/html/draft-handrews-json-schema-02][JSON Schema]] document
+- and validates against the JSON Schema meta schema
+
+The first requirement for each means moo does not cares about
+persistent representation but just about in-memory structure.  Loading
+data structure from multiple file representations are supported by
+moo.  
+
+The second requirement for both means that the data structure is
+ultimately expressed in fundamental data types supported by JSON:
+object (set of keyword/value pairs, eg Python ~dict~), array (ordered
+set of values, eg Python ~list~) and scalar values of general type
+string, number and Boolean.
+
+The requirement that a moo schema may be expressed as JSON Schema
+means the set of keywords and their semantic meaning as defined by the
+JSON Schema standard are used.  Such structure may be validated
+against JSON Schema meta schema which is itself written in JSON Schema
+vocabulary so is self validating.  The version of [[https://tools.ietf.org/html/draft-handrews-json-schema-02][JSON Schema]]
+currently usedfollowed by moo is known as "draft 2019-09" and
+sometimes informally as "draft-08".
+
+A moo model is often used to express schema to be asserted on a moo
+template in order to generate code to handle objects.  This schema is
+that of the objects and not of the moo model itself.  For example, a
+moo model may describe a *type* of configuration object.  Let us assume
+this object will hold a particular attribute which is a "time stamp".
+
+The moo model of this type of object will be applied to a moo template
+to produce C++ ~struct~ with a "time stamp" attribute as well as
+serialization methods so that an instance of the ~struct~ may be
+transported across a network or serialized to a file.  The time stamp
+may be some integer value (eg, number of microseconds since the Unix
+Epoch).  
+
+To generate such code, the model must express the type of the time
+stamp more specifically than one can with just the JSON "number" type.
+It needs to specify memory size (eg 8 bytes), integer format (eg
+signed), possibly an ordering (little/big endian) and maybe a unit (eg
+microsecond vs second).
+
+To provide for this level of specificity, moo provides Jsonnet
+functions that can generate both model structure (which is perfectly
+valid by construction) and schema structure that validates it.  This
+is somewhat belt-and-suspenders but.... what?
+
+
+
+
 * A codec
    :PROPERTIES:
    :CUSTOM_ID: ex-codec
