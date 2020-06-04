@@ -65,6 +65,12 @@ local objif(key, val) = if std.type(val)=="null" then {} else {key:val};
             // tbd. JSON Schema supports a few more things
         },
 
+        // Return object with obj2 merged into obj1
+        update(obj1, obj2) :: obj1 {
+            super.properties + obj2.properties,
+            super.required + obj2.required
+        },
+
         /// A JSON Schema string schema matches any literal string in
         /// a model.
         string(format=null) :: {type:"string"} + objif("format", format),
@@ -78,8 +84,8 @@ local objif(key, val) = if std.type(val)=="null" then {} else {key:val};
 
         /// A litteral array of items in a model.  Items may be a
         /// single schema object or an array of schema objects.
-        array(items=[]) ::
-        {type:"array", items:items},
+        array(items=[],minItems=0) ::
+        {type:"array", items:items, minItems:minItems},
 
         /// Matches a specific, literal string in the model.
         const(str) :: { const: str },

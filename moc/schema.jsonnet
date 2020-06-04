@@ -1,16 +1,8 @@
 // This document defines a schema to validate a model of a configuration object.
 
-
 local moo = import "moo.jsonnet";
 local ms = moo.schema;
 local objif = moo.objif;
-local ct(typename, rest={}, req=[]) =
-    ms.object({
-        // A type name is required
-        typename:ms.const(typename),
-        // names of ports that the app should supply to the component
-        ports:ms.array(ms.string())
-    } +rest, ["typename"]+req);
 
 {
     schema: {
@@ -75,80 +67,51 @@ local ct(typename, rest={}, req=[]) =
             links: ms.array(ms.oneOf($.schema.linkages)),
         }, ["ident", "stype"]),
 
-        // A component is some portion of an application (usually
-        // implemented as a factory constucted object)
-        component : ms.object({
+        // A component from the point of view of an application
+        use_component: ms.object({
+
             // every component has an instance name unique at least to the app
             ident: ms.string(),
-            // configuration specific to the component type
-            typeconfig: ms.oneOf($.schema.known_component_types)
-        }, ["ident","typeconfig"]),
+
+            // A name path locates the component impementation.  The
+            // final entry is typically assumed to be a class name and
+            // prior entries are, eg, a C++ namespace or Python module
+            // path.  This must match what is used for a def_component
+            namepath:ms.array(ms.string()),
+
+            // names of ports that the app should supply to the component
+            ports:ms.array(ms.string())
+        }, ["ident","codename")),
 
         application: ms.object({
             // An application have a name by which it is uniquely known
             ident: ms.string(),
             // An application may have a set of ports.  
-            portset: ms.array(ms.array($.schema.port)),
+            portset: ms.array($.schema.port),
             plugins: ms.array(ms.string()),
-            components: ms.array($.schema.component),
+            components: ms.array($.schema.use_component),
         }, ["ident"]),
+
+        // define schema for component implementation 
+        def_component(namepath, scheme) :: ms.object({
+            
+            // A component is located, eg for a C++ namespace or
+            // Python module.  The last element of the path must be
+            // usable as a class name.
+            namepath: namepath,
+
+        }, ["namepath"]), ms.object(scheme, std.objectFields(scheme))
 
         known_component_types : [
 
-            ct("TestSource", {nmessages: ms.integer()}, ["nmessages"]),
-            ct("TestFanout", {inport: ms.string()}, ["inport"]),
-            ct("TestFanin", {outport: ms.string()}, ["outport"]),
-            ct("TestSink")
+            typcfg("TestSource", {nmessages: ms.integer()}, ["nmessages"]),
+            typcfg("TestFanout", {inport: ms.string()}, ["inport"]),
+            typcfg("TestFanin", {outport: ms.string()}, ["outport"]),
+            typcfg("TestSink")
             
         ],
 
     },
 
-    types: {
-        application(ident, components=[], plugins=[], portset=[]) :: {
-            ident: ident, components: components, plugins:plugins,
-            portset:portset
-        },
-
-        component(ident, typeconfig) :: {
-            ident:ident, typeconfig:typeconfig
-        },
-
-        // Create a bind to any zeromq address
-        bind(addr) :: {
-            ltype:"bind",
-            address: addr,
-        },
-        // Create a bind for TCP to a optional host and port
-        bind_tcp(host=null, port=0) :: {
-            ltype:"bind",
-            port:port,
-        } + objif("host",host),
-
-        // Create a connect to any zeromq address
-        connect(addr) :: {
-            ltype:"connect",
-            address:addr
-        },
-
-        // Create a connect that will auto connect via discovery
-        connect_auto(nodename, portname) :: {
-            ltype:"connect",
-            nodename: nodename,
-            portname: portname,
-        },
-
-        port(ident, stype, links=[]) :: {
-            ident:ident, stype:stype, links:links
-        },
-
-        test_source(ident, nmsg, ports) :: {
-            ident: ident,
-            typeconfig: {
-                typename: "TestSource",
-                nmessages: nmsg,
-                ports: ports
-            }
-        }
-    }
 }
+

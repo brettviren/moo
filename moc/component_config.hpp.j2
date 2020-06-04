@@ -1,0 +1,18 @@
+{% extends "header.hpp.j2" %}
+{% block body %}
+{% set clsname = namepath[-1] %}
+
+{% for name in namepath %}
+namespace {{ name }} {
+{% endfor %}
+
+struct {{ clsname }} {
+
+    {% for f in fields %}
+
+};
+
+{% for name in namepath %}
+}
+{% endfor %}
+{% endblock %}
