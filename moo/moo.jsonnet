@@ -1,7 +1,7 @@
 local jss = import "jss.json";
 
 local json_schema_version = "draft-07";
-local objif(key, val) = if std.type(val)=="null" then {} else {key:val};
+local objif(key, val) = if std.type(val)=="null" then {} else {[key]:val};
 
 {
     zmq : {
@@ -66,14 +66,22 @@ local objif(key, val) = if std.type(val)=="null" then {} else {key:val};
         },
 
         // Return object with obj2 merged into obj1
-        update(obj1, obj2) :: obj1 {
-            super.properties + obj2.properties,
-            super.required + obj2.required
+        update(obj1, obj2) :: obj1 + {
+            properties: obj1.properties + obj2.properties,
+            required: obj1.required + obj2.required
         },
+
+        /// A JSON Schema null type matches literal null
+        nulltype() :: {type:"null"},
+
+        /// A JSON Schema boolean matches literal true or false
+        boolean() :: {type:"string"},
 
         /// A JSON Schema string schema matches any literal string in
         /// a model.
-        string(format=null) :: {type:"string"} + objif("format", format),
+        string(format=null,pattern=null) :: {
+            type:"string"} + objif("format", format)
+            + objif("pattern", pattern),
 
         /// A JSON Schema number matches any literal number in a
         /// model.
@@ -110,7 +118,7 @@ local objif(key, val) = if std.type(val)=="null" then {} else {key:val};
         /// JSON Schema "draft-08" convention places reusable schema
         /// under this special path in the JSON structure in order to
         /// then reference it.
-        def(id) :: {"$ref": "#/#def/"+id },
+        def(id) :: {"$ref": "#/definitions/"+id },
 
         /// Top level schema is one with some extras attributes.  The
         /// "id" should point to a URL controlled by the developer of
@@ -123,8 +131,10 @@ local objif(key, val) = if std.type(val)=="null" then {} else {key:val};
         // schema which is written as a JSON Schema document:
         metaschema(version=json_schema_version) :: {
             "$ref":  "https://json-schema.org/%s/schema"%version },
+    },
 
 
+    mootypes: {
         /// moo defines JSON Schema structure based on a
         /// "sub-vocabulary" that resides in JSON Schema "object".
         

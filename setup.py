@@ -15,6 +15,7 @@ setuptools.setup(
         "jinja2",
         "anyconfig",
         "jsonschema",
+        "fastjsonschema",
 #        "transitions",
     ],
     entry_points = dict(
