@@ -9,3 +9,4 @@ org-html-themes
 __pycache__
 *.pyc
 .ccls-cache
+ltximg

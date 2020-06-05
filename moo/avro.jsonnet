@@ -1,8 +1,12 @@
 // Define a JSON Schema that validates Avro schema documents
 // https://avro.apache.org/docs/current/spec.html
+
+// fixme: would like a way to generate a JSON Schema from Avro Schema
+// so that an Avro object may be validated.
+
 local moo = import "moo.jsonnet";
 local ms = moo.schema;
-
+local objif(key, val) = if std.type(val)=="null" then {} else {[key]:val};
 local primitives = {
     integers: ["int", "long"],
     floats: ["float", "double"],
@@ -11,8 +15,6 @@ local primitives = {
     not_null: self.numbers + self.strings + ["boolean"],
     all: self.not_null + ["null"],
 };
-
-local tn(n, extra={}) = {type:n} + extra;
 
 {
     schema: {
@@ -84,13 +86,13 @@ local tn(n, extra={}) = {type:n} + extra;
             },["type", "name", "size"]),
 
             all_but_union:: [
-                ms.def("map"),
-                ms.def("array"),
+                ms.def("type_name"),
+                ms.def("primitive_type_name"),
+                ms.def("primitive_type"),
                 ms.def("enum"),
                 ms.def("record"),
-                ms.def("primitive_type"),
-                ms.def("primitive_type_name"),
-                ms.def("type_name"),
+                ms.def("map"),
+                ms.def("array"),
             ],
 
             all:: self.all_but_union + [self.union],
@@ -99,32 +101,30 @@ local tn(n, extra={}) = {type:n} + extra;
         anyOf: self.definitions.all
     },
 
-    /// Functions to create models which are valid against Avro schema
+    /// Functions to create models which are valid against JSON Schema for Avro schema.
+    ///
     model: {
         // first make the primitives into attributes to avoid
         // stringification of type names in user models.
-        nulltype:tn("null"),
-    } + {[n]:tn(n) for n in primitives.not_null } + {
+        nulltype:"null",
+    } + {[n]:n for n in primitives.not_null } + {
 
         // Define a field of a record
-        field(name, type, default=null, order="ignore", aliases=[], doc=""):: {
-            type:type, name:name, default:default, order:order,
-            aliases:aliases, doc:doc
-        },
+        field(name, type, default=null, order="ignore", aliases=null, doc=null):: {
+            type:type, name:name, order:order,
+        } +objif("default", default) +objif("aliases",aliases)+objif("doc",doc),
 
         // Define a record
-        record(name, fields, namespace="", aliases=[], doc="") :: {
+        record(name, fields, namespace=null, aliases=null, doc=null) :: {
             type:"record",
-            name:name, fields:fields, namespace:namespace,
-            aliases:aliases, doc:doc
-        },
+            name:name, fields:fields
+        } + objif("namespace", namespace) + objif("aliases", aliases) + objif("doc", doc),
 
         // Define an enum
-        enum(name, symbols, namespace="", aliases="", default="", doc=""):: {
-            type:"enum",
-            name:name, symbols:symbols, namespace:namespace,
-            aliases:aliases, default:default, doc:doc
-        },
+        enum(name, symbols, namespace=null, aliases=null, default=null, doc=null):: {
+            type:"enum", name:name, symbols:symbols, 
+        } + objif("namespace", namespace) + objif("aliases", aliases)
+            + objif("default", default) + objif("doc", doc),
 
         // Define an array
         array(items) :: { type:"array", items:items },
