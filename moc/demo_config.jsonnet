@@ -2,6 +2,7 @@
 local avro = import "avro.jsonnet";
 local am = avro.model;
 
+// apparently avro only lets us have namespace one level deep.
 local namespace="moc";
 
 {
@@ -95,9 +96,10 @@ local namespace="moc";
             $.model.portdef,
             $.model.compdef,
             $.model.node,
-            $.model.source,
         ],
 
+    },
+    app: {
         // A source configure class
         source: am.record("Source",
                           namespace=namespace,
@@ -106,6 +108,27 @@ local namespace="moc";
                                        doc="Number of messages to source, negative means run forever"),
                           ], doc="A config for a source component"),
         
+        proxy: am.record("Proxy",
+                         namespace=namespace,
+                         fields=[
+                             am.field("iports", am.array(am.string),
+                                      doc="Array of input port names"),
+                             am.field("oports", am.array(am.string),
+                                      doc="Array of output port names"),
+                         ]),
+        sink: am.record("Sink",
+                        namespace=namespace,
+                        fields=[],
+                        doc="A sink component"),
+        nljs : {
+            namepath: std.split(namespace, '.'),
+                        types: $.app.avro,
+        },
+        avro: [
+            $.app.source,
+            $.app.proxy,
+            $.app.sink,            
+        ]
     },
 
     // Here define some configuration object instances.
