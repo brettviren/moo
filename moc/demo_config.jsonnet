@@ -2,6 +2,8 @@
 local avro = import "avro.jsonnet";
 local am = avro.model;
 
+local namespace="moc";
+
 {
     // JSON Schema describing valid demo config modes.
     schema: {},
@@ -10,39 +12,49 @@ local am = avro.model;
     // models themselves.
     model: {
 
-        junk: am.enum("addrtype", ["direct","discover"], default="direct"),
+        linktype: am.enum("LinkType", ["bind","connect"], default="bind",
+                          namespace=namespace),
 
-
+        addrtype: am.enum("AddrType", ["direct","discover"], default="direct",
+                          namespace=namespace),
 
         // A linkdef describes all possible ways to make a single link
-        linkdef: am.record("linkdef", namespace="moc.demo.config",
+        linkdef: am.record("Link",
+                           namespace=namespace,
                            fields=[
-                               am.field("linktype", am.enum("linktype", ["bind","connect"], default="bind"),
+                               am.field("linktype",
+                                        "LinkType",
                                         doc="The socket may bind or connect the link"),
 
-                               am.field("addrtype", am.enum("addrtype", ["direct","discover"], default="direct"),
-                                        doc="Determin how the address string is to be interpreted"),
+                               am.field("addrtype",
+                                        "AddrType",
+                                        doc="Determine how the address string is to be interpreted"),
+
                                am.field("address", am.string, 
                                         doc="The address to link to")
                            ],
                            doc="Describes how a single link is to be made"),
 
         // A portdef describes the port configuration object 
-        portdef: am.record("portdef", namespace="moc.demo.config",
+        portdef: am.record("Port",
+                           namespace=namespace,
                            fields=[
                                am.field("ident", am.string,
                                         doc="Identify the port uniquely in th enode"),
-                               am.field("links", am.array($.model.linkdef), 
+                               am.field("links",
+                                        am.array("Link"), 
+                                        //am.array($.model.linkdef), 
                                         doc="Describe how this port should link to addresses"),
                            ],
                            doc="A port configuration object",),
 
         // A compdef describes the component configuration object
-        compdef: am.record("compdef", namespace="moc.demo.config",
+        compdef: am.record("Comp",
+                           namespace=namespace,
                            fields=[
                                am.field("ident", am.string, 
                                         doc="Identify copmponent instance uniquely in the node"),
-                               am.field("typename", am.string, 
+                               am.field("type_name", am.string, 
                                         doc="Identify the component implementation"),
                                am.field("portlist", am.array(am.string), 
                                         doc="Identity of ports required by component"),
@@ -55,20 +67,40 @@ local am = avro.model;
         // those ports.  A node base configuration class has
         // attributes which give enough info to instantiate and apply
         // configuration to components
-        node: am.record("node", namespace="moc.demo.config",
+        node: am.record("Node",
+                        namespace=namespace,
                         fields=[
                             am.field("ident", am.string, 
                                      doc="Idenfity the node instance"),
-                            am.field("portdefs", am.array($.model.portdef), 
+                            am.field("portdefs",
+                                     //am.array($.model.portdef), 
+                                     am.array("Port"), 
                                      doc="Define ports on the node to be used by components"),
-                            am.field("compdefs", am.array($.model.compdef),
+                            am.field("compdefs",
+                                     //am.array($.model.compdef),
+                                     am.array("Comp"),
                                      doc="Define components the node should instantiate and configure"),
                         ],
                         doc="A node configures ports and components"),
         
 
+        nljs : {
+            namepath: std.split(namespace, '.'),
+            types: $.model.avro,
+        },
+        avro:[
+            $.model.linktype,
+            $.model.addrtype,
+            $.model.linkdef,
+            $.model.portdef,
+            $.model.compdef,
+            $.model.node,
+            $.model.source,
+        ],
+
         // A source configure class
-        source: am.record("source", namespace="moc.demo.config",
+        source: am.record("Source",
+                          namespace=namespace,
                           fields=[
                               am.field("ntosend", am.int, -1,
                                        doc="Number of messages to source, negative means run forever"),
@@ -92,7 +124,7 @@ local am = avro.model;
             }],
             comps: [{
                 ident: "mysource1",
-                typename: "MySource",
+                type_name: "MySource",
                 portlist: ["src"],
                 config: std.manifestJson($.objects.mysource),
             }]

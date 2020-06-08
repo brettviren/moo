@@ -2,17 +2,17 @@
 
 import os
 
-def select_path(obj, path):
+def select_path(obj, path, delim='.'):
     '''Select out a part of obj structure based on a path.
 
-    The path is a list or a "."-separated string.
+    The path is a list or a delim-separated string.
 
     Any element of the path that looks like an integer will be cast to
     one assuming it indexes an array.
 
     '''
     if isinstance(path, str):
-        path = path.split('.')
+        path = path.split(delim)
     for one in path:
         if not one:
             break
@@ -62,3 +62,31 @@ def resolve(filename, paths=()):
             return fp
     raise ValueError(f"file not found: {filename}")
 
+def deref(data, path=None):
+    defs = data.pop("definitions")
+    data = deref_defs(data, defs)
+    if path in ("yes", "true"):
+        return data
+    return select_path(data, path)
+    
+
+def deref_defs(ctx, defs):
+    '''
+    Convert special form substructure:
+
+    {"$ref":"#/definitions/<def>"}
+
+    To the value of attribute <def> of defs.
+    '''
+    if type(ctx) in [int, float, str, bool]:
+        return ctx
+    if isinstance(ctx, list):
+        return [deref_defs(ele, defs) for ele in ctx]
+    ret = dict()
+    for key, val in ctx.items():
+        if isinstance(val, dict) and "$ref" in val:
+            ref = val["$ref"]
+            ref = ref[len("#/definitions/"):]
+            val = select_path(defs, ref, "/")
+        ret[key] = deref_defs(val, defs)
+    return ret

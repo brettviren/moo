@@ -9,7 +9,7 @@ import click
 
 import jsonschema
 from moo import jsonnet, template, io
-from moo.util import validate, resolve
+from moo.util import validate, resolve, deref as dereference
 
 
 @click.group()
@@ -63,13 +63,17 @@ def cmd_validate(ctx, spath, dpath, jpath, output, schema, validator, model):
               help="Output file, default is stdout")
 @click.option('--string/--no-string', '-S/ ', default=False,
               help="Treat output as string not JSON")
+@click.option('--deref', default=None,
+              help="Dereference JSON Schema $ref (yes/true or select path)")
 @click.argument('model')
 @click.pass_context
-def compile(ctx, path, jpath, output, string, model):
+def compile(ctx, path, jpath, output, string, deref, model):
     '''
     Compile a model to JSON
     '''
     data = io.load(model, jpath, path)
+    if deref:
+        data = dereference(data, deref)
     if string:
         text = data
     else:

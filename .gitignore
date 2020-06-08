@@ -10,3 +10,8 @@ __pycache__
 *.pyc
 .ccls-cache
 ltximg
+moc/demo_config.hpp
+moc/demo_config.json
+moc/demo_config_nljs.hpp
+*.cut
+TAGS

@@ -42,3 +42,145 @@ moc configuration information may exist in serialized /message/ form and in a na
 
 
 
+
+
+* 
+
+Make a base object of functions that generate schema.  Make JSON
+Schema for validation, avro for generation or simple for templates.
+
+* mock up
+
+Want:
+
+- define rules for validating structure expressed in JSON
+- map a structure composed values in JSON types to C++/Python class definitions
+- generate code to serialize values to C++/Python instances
+- allow for partial serializing in order to delegate serializing.
+
+Want to construct a node, eg inside ~main()~ or maybe inside some main ~Application~ object:
+
+#+begin_src c++
+  // This mock up will create and configure an instance of "Node" which
+  // whill create, configure and aggregate instances of "Port" and
+  // "Comp" (component) each of which uses some subset of the ports.
+
+  // The process is driven by a particular configuration istream.  The
+  // program may have different types of config streams and which used
+  // is determined by a meta configuration such as provided on the
+  // command line.  The CfgStreamKey categorizes the type and any
+  // additional information needed to instantiate or access a config
+  // stream.
+  CfgStreamKey cfg_stream_info = parse_cli_arg_for_cfg_stream_info();
+
+  // Resolve the key a CfgStream object.  A CfgStream provides a
+  // sequence interface.  Maybe like std::istream, std::queue, or ZeroMQ
+  // socket.
+  CfgStream& cfgstream = get_cfgstream(cfg_stream_info); 
+
+  std::vector<Node> nodes;
+  while (!cfgstream.empty()) {
+      nodes.emplace_back(cfgstream);
+  }
+#+end_src
+
+Inside the ~Node~ constructor we process the configuration stream to make ports and node components.
+
+#+begin_src c++
+  // We assume the stream follows a protocol.  The stream is to consist
+  // of distinct frames and frames are grouped into messages.  A frame
+  // is read into application memory in an atomic manner.  The number of
+  // frames in a message the the interpretation of each frame may depend
+  // on previous frames in the message.
+
+  // We assume a message has an initial frame consisting of a string
+  // which gives the format to assume for the second frame.  Eg,
+  // ["JSON",<JSON text>].  We hide this interpretation and return a C++
+  // class that the Node constructor code knows.  More on this constructor
+  // later.
+  NodeCfg nodecfg(cfgstream);
+
+  cout << "Loading node ID: " << nodecfg.ident() << "\n";
+
+  // A node instantiates, configures and aggregates ports.  Here, a port
+  // is assumed to be some socket with a "smart" constuction driven by
+  // the configuration.  Eg, it may perform auto discovery of peers.
+  // But, in this mock up it also represents any type of shared objects
+  // or resources that need to be constructed outside the components.
+  // Note: in this mockup, configuration supersedes ports.  We may want
+  // to have configuratoin delivered via a port in which case these
+  // patterns need to be largely refactored.  One way would be to allow
+  // a component to be a node.  Then use a top node constructed a local
+  // cfgstream to construct a component node that listens on a port to
+  // produce a configuration stream that generates one or more new nodes.
+  std::vector<Port> ports;
+  for (PortCfg portcfg: nodecfg.portdefs()) {
+      ports.emplace_back(portcfg);
+  }
+  go_online(ports);
+
+  // We may need to use ports outside the constructor and at least
+  // should keep them alive.
+  m_ports = ports;
+
+  // The Node constructor only cares about configuring any components
+  // and does so through a factory method which returns a component as
+  // an abtrace IConfigurable facet.  We assume the factory holds on to
+  // the instance.
+  for (CompCfg compcfg : nodecfg.compdefs()) {
+      // Get type name and instance identifier
+      auto tn = compcfg.type_name();
+      auto id = compcfg.ident();
+      auto& comp = factory.get<IComponent>(tn, id);
+      // Some components need ports, but the node creates them so the
+      // component says which ones they want by name (ident).
+      auto ports = get_ports(compcfg.ports());
+      comp->configure(id, cfgstream, ports);
+  }
+
+  // This mockup is about configuration patterns so it omits other
+  // possible Node-level configuration items.  As a placeholder we imply
+  // that by saving the NodeCfg for use in other Node methods.
+  m_cfg = nodecfg;
+
+  // But, suggest one possible additional configuration processing: Not
+  // all components are necessarily configurable and thus the node is
+  // given a possible superset which lists all components that are
+  // runable.
+  for (auto torun : compcfg.runnables()) {
+      m_runables.push_back(factor.get<IRunnable>(torun));
+  }
+  // later in a Node::run() we may forward the call to components.
+#+end_src
+
+
+We create
+
+- a configuration object (cfgobj) in JSON 
+- a validation object (valobj) in JSON Schema vocabulary to validate a cfgobj
+- a definition structure (defobj) in Avro Schema to produce C++ or Python types
+
+Processing
+
+- a defobj is created as JSON
+- Avro generate is run to produce C++ or Python
+- a cfgobj is created as JSON
+-  
+
+* Configuration store
+
+We want:
+
+- to construct an application out of components dynamically driven by configuration information. 
+- Provide configuration in a way that can be progressively consumed and applied 
+- Allow for multiple sources of config, including files and messages.
+- Provide serialization to native types.
+- Do not tightly couple configuration and interpretation
+
+The stream introduced above breaks that last one.  Eg configuration
+frames in the stream must be ordered to match how the code tries to
+apply.  In the example, depth-first ordering is required.  This is
+however a natural order for eg JSON.
+
+
+ 

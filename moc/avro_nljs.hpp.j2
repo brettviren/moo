@@ -1,0 +1,36 @@
+#ifndef {{model.namepath|join("_")|upper}}_AVRO_NLJS_HPP
+#define {{model.namepath|join("_")|upper}}_AVRO_NLJS_HPP
+
+#include "json.hpp"
+
+{% for name in model.namepath %}
+namespace {{ name }} {
+{% endfor %}    
+using json = nlohmann::json;
+
+{% for t in model.types %}
+{% if t.type == "record" %}
+// Converters for {{t.name}}
+// {{t.doc}}
+inline
+void to_json(json& j, const {{t.name}}& obj) {
+    j = json{
+        {% for f in t.fields %}
+        {"{{f.name}}", obj.{{f.name}}}{{ "," if not loop.last }}
+        {% endfor%}
+    };
+}
+inline
+void from_json(const json& j, {{t.name}}& obj) {
+    {% for f in t.fields %}
+    j.at("{{f.name}}").get_to(obj.{{f.name}});    
+    {% endfor%}
+}
+{% endif %}
+
+{%endfor%}
+
+{% for name in model.namepath %}
+}
+{% endfor %}
+#endif
