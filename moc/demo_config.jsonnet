@@ -16,9 +16,6 @@ local namespace="moc";
         linktype: am.enum("LinkType", ["bind","connect"], default="bind",
                           namespace=namespace),
 
-        addrtype: am.enum("AddrType", ["direct","discover"], default="direct",
-                          namespace=namespace),
-
         // A linkdef describes all possible ways to make a single link
         linkdef: am.record("Link",
                            namespace=namespace,
@@ -26,10 +23,6 @@ local namespace="moc";
                                am.field("linktype",
                                         "LinkType",
                                         doc="The socket may bind or connect the link"),
-
-                               am.field("addrtype",
-                                        "AddrType",
-                                        doc="Determine how the address string is to be interpreted"),
 
                                am.field("address", am.string, 
                                         doc="The address to link to")
@@ -86,12 +79,11 @@ local namespace="moc";
         
 
         nljs : {
-            namepath: std.split(namespace, '.'),
+            namespace: namespace,
             types: $.model.avro,
         },
         avro:[
             $.model.linktype,
-            $.model.addrtype,
             $.model.linkdef,
             $.model.portdef,
             $.model.compdef,
@@ -121,8 +113,8 @@ local namespace="moc";
                         fields=[],
                         doc="A sink component"),
         nljs : {
-            namepath: std.split(namespace, '.'),
-                        types: $.app.avro,
+            namespace: namespace,
+            types: $.app.avro,
         },
         avro: [
             $.app.source,
@@ -137,19 +129,18 @@ local namespace="moc";
         // an instance of a node 
         mynode: {
             ident: "mynode1",
-            ports: [{
+            portdefs: [{
                 ident:"src",
-                links:[{
+                links: [{
                     linktype: "bind",
-                    addrtype: "direct",
                     address: "" // default bind
                 }],
             }],
-            comps: [{
+            compdefs: [{
                 ident: "mysource1",
                 type_name: "MySource",
                 portlist: ["src"],
-                config: std.manifestJson($.objects.mysource),
+                config: "MySource::mysource1 config string",
             }]
         },
 
