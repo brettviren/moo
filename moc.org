@@ -1,19 +1,16 @@
 #+title: moc
 #+subtitle: Model Oriented Configuration
 
+
 * Overview
 
-moc is a moo for /configuring/ a system.  moc provides
+moc is a moo for a /configuration/ system.  It provides::
 
-- an abstract entry point for a process to obtain configuration information
+- a shared library of tooling for handling configuration streams
 
-- implementations of the entry point 
+- (meta) schema for defining configuration objects and for generating serialization code.
 
-- schema for describing configuration structure
-
-- methods to implement configuration structure
-
-- a working demonstration
+- a demo application and configuration
 
 The working demonstration is a distributed system which decomposes into 
 
