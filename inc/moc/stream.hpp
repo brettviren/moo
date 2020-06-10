@@ -9,29 +9,6 @@ namespace moc {
 
     using json = nlohmann::json;
 
-    // A moc stream provides ordered configuration objects.  At lowest
-    // level a moc stream is a sequence of bytes.  Next it is a
-    // sequence of "frames" which are simply a sequence of N bytes,
-    // prefixed N.  Where N is less than 255 it is held as a single
-    // byte and otherwise as four bytes.  One or more frames may be
-    // grouped in some way and the group is called a message.  moc
-    // requires the initial frame of a message to be an array of ASCII
-    // characters that provide a hint as how many subsequent frames
-    // are considered as part of the message and how these frames are
-    // to be interpeted.  For consider this stream which depicts a
-    // frame as [size|content]:
-    // 
-    //     [4|JSON][8|{"a":42}]
-    //
-    // This is two frames, the first is 4 bytes holding ascii "JSON"
-    // (no terminateing \0 character).  The next frame is 8 bytes and
-    // as the hint indicates, is to be interpreted as JSON text.
-    //
-    // Currently moc supports any format supported by nlohmann::json
-    // with the following 4 character hints: JSON, BSON, CBOR, MSGP
-    // (MessagePack), UBJS (UBJSON).  After a hint frame is exactly
-    // one body frame holding data in the hinted format.
-
     // A moc stream may be provided in various ways, eg from a file,
     // ZeroMQ socket, etc.  Each call to a stream source function
     // should return the next frame.

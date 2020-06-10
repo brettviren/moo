@@ -1,16 +1,258 @@
 #+title: moc
 #+subtitle: Model Oriented Configuration
+#+setupfile: setup.org
+#+options: broken-links:mark
 
 
 * Overview
+  :PROPERTIES:
+  :CUSTOM_ID: overview
+  :END:
+
 
 moc is a moo for a /configuration/ system.  It provides::
 
-- a shared library of tooling for handling configuration streams
+- a simple protocol for delivering configuration information in a variety of /formats/.
 
-- (meta) schema for defining configuration objects and for generating serialization code.
+- a vocabulary for defining the /schema/ that configuration information should follow.
 
-- a demo application and configuration
+- tooling to validate configuration objects against their schema.
+
+- code generators creating native language (C++/Python) types and serialization methods between those types and configuration objects.
+
+- native language libraries and shell programs for producing and consuming configuration streams.
+
+- a demo application and configuration.
+
+* Dive in
+  :PROPERTIES:
+  :CUSTOM_ID: dive-in
+  :END:
+
+
+* Technical design
+  :PROPERTIES:
+  :CUSTOM_ID: technical-design
+  :END:
+
+** Streams, frames and messages
+   :PROPERTIES:
+   :CUSTOM_ID: stream-frame-message
+   :END:
+
+
+The moc configuration stream specifies a simple, layered and general
+purpose stream format.  A moc stream be realized as an array in
+memory, a file, through message passing or similar means.  The higher
+layers allow for application-specific formats to extend the basic
+format.
+
+The moc configuration stream layers are:
+
+- bytes :: A *moc byte stream* consists of a sequence of 8 bit bytes with no initial size nor end marker.  The start of the stream is determined by implementation (array element 0, begin of file, first message, etc).
+
+- frames :: A *moc frame stream* consists of a contiguous range of the byte stream which may be read into memory in an atomic manner.  A frame has two parts: a *size* and a *body*.  The value of the size gives the size of the body in bytes.  A size less than 255 bytes is stored as a single byte.  To indicate a body size of 255 bytes or larger the first byte of size is ~0xFF~ and the subsequent four bytes holds the size value.
+
+- messages :: A *moc message stream* consists of a contiguous range of the frame stream.  The first frame in a message is called a *hint* and its value specifies how and what number of remaining *payload* frames should be interpreted as part of the message.  A moc defines the form of the hint body and reserves a set of hint values (described below).
+
+- schema :: A *moc schema* specifies the structure expected in a payload frame body, between payloads in a message and between messages in a stream.  (also described below)
+
+** Message types
+   :PROPERTIES:
+   :CUSTOM_ID: message-types
+   :END:
+
+
+A moc message type is determined by the value of the body of the first frame of the message and is the *hint*.  A hint is restricted to be composed of the subset of printable ASCII which may make up a C symbol.
+
+moc defines a set of hints in the following table.  Each hint specifies the low-level format or syntax to assume for the subsequent and only other frame in the message.  The last columns show the whether the format is currently supported in the moc implementation for the given native language.  The moc reserved hints are:
+
+|------+------------------+-----+--------|
+| hint | payload encoding | C++ | Python |
+|------+------------------+-----+--------|
+| JSON | JSON string      | yes |        |
+| BSON | Binary JSON      | yes |        |
+| CBOR | Binary JSON      | yes |        |
+| UBJS | Binary JSON      | yes |        |
+| MSGP | Message Pack     | yes |        |
+| JSNT | Jsonnet string   |     |        |
+| AVRJ | Avro JSON        |     |        |
+| AVRB | Avro binary      |     |        |
+| PBUF | Protobuf         |     |        |
+|------+------------------+-----+--------|
+
+An example message in JSON is shown next with a frame depicted as ~[size|body]~ where the ~size~ in a binary value and the ~body~ is expressed in ASCII:
+
+#+begin_example
+[4|JSON][8|{"a":42}]
+#+end_example
+
+** Schema
+   :PROPERTIES:
+   :CUSTOM_ID: schema
+   :END:
+
+
+The producer and consumer of a moc *message stream* must honor a shared *contract* (or *schema*) which governs the structure of the data.  A particular schema may span one of these possible levels of context:
+
+- payload :: the structure of a given payload frame body.  
+- intra message :: the structure of payload frames in a message.  
+- inter message :: the structure of messages in a stream
+
+moc provides a means to rigorously define schema as a (meta) data structure and with two goals in mind for the use of a schema:
+
+- validation :: a schema may be used to check if a given data object (aka *model*) obeys the contract defined by the schema.
+- generation :: a schema object may be applied to a *template* in order to generate a *representation*.
+
+These two goals require different data structure.  For example, a validation schema is well represented as a data structure which itself obeys the JSON Schema while a generation schema is better represented by a data structure which itself obeys the Avro Schema.  
+
+To avoid developing two conceptually identical schema structures to satisfy these two forms, moc provides support for a developer to define a schema abstractly in the form of Jsonnet function calls.  These functions are parameterized on a Jsonnet object holding primitive schema defining functions.  This allows the same developer-provided functions to be called with JSON Schema primitives or with Avro Schema primitives and output the proper structure for each.
+
+** Example schema
+   :PROPERTIES:
+   :CUSTOM_ID: example-schema
+   :END:
+
+
+A simple example makes this clear.  As described above, moc reserves a set of message type hints.  We may define schema for this simple frame like:
+
+#+include: moc/simple.jsonnet src jsonnet
+
+With the above, ~moo~ can validate that ~data~ is correct against ~jscm~:
+
+#+begin_src shell :exports both :results output code :wrap "example"
+moo validate -s moc/simple.jsonnet -S jscm -D data moc/simple.jsonnet
+#+end_src
+
+#+RESULTS:
+#+begin_example
+null
+#+end_example
+
+The null means no error.
+
+We may use ~moo~ to compile the ~avro~ structure to an Avro schema JSON file and generate code:
+
+#+begin_src shell :exports both :results output code :wrap "src c++"
+moo compile -P avro moc/simple.jsonnet > simple.json
+avrogencpp -n moc -i simple.json -o simple_avro.hpp
+grep -m1 -A10 Hint: simple_avro.hpp
+#+end_src
+
+#+RESULTS:
+#+begin_src c++
+enum class Hint: unsigned {
+    JSON,
+    BSON,
+    CBOR,
+    UBJS,
+    MSGP,
+    JSNT,
+    AVRJ,
+    AVRB,
+    PBUF,
+};
+#+end_src
+
+In that header is more generated code to serialize this ~enum~ via the Avro codec.  moc may provide methods to transparently select that codec based on the "hint" being ~AVRJ~ or ~AVRB~.
+
+moc also supports ~nlohmann::json~ family of codecs to support the remaining hints besides ~PBUF~.  With a suitable template file and the info supplied in the model by the ~tmpl~ attribute, ~moo~ can generate the needed code like:
+
+#+begin_src shell :exports both :results output code :wrap "src c++"
+moo render -P tmpl moc/simple.jsonnet moc/avro_nljs.hpp.j2 > simple_nljs.hpp
+grep -m1 -A10 ENUM simple_nljs.hpp
+#+end_src
+
+#+RESULTS:
+#+begin_src c++
+    NLOHMANN_JSON_SERIALIZE_ENUM( Hint, {
+            { moc::Hint::JSON, "JSON" },
+            { moc::Hint::BSON, "BSON" },
+            { moc::Hint::CBOR, "CBOR" },
+            { moc::Hint::UBJS, "UBJS" },
+            { moc::Hint::MSGP, "MSGP" },
+            { moc::Hint::JSNT, "JSNT" },
+            { moc::Hint::AVRJ, "AVRJ" },
+            { moc::Hint::AVRB, "AVRB" },
+            { moc::Hint::PBUF, "PBUF" },
+        })
+#+end_src
+
+Where this snippet shows how we ultimately rely on a CPP macro provided by ~nlohmann~ to generate codec.  This produces ~to_json()~ and ~from_json()~ type functions.
+
+** Payload schema
+   :PROPERTIES:
+   :CUSTOM_ID: payload-schema
+   :END:
+
+
+The simple example above may be considered also an example of a trivial payload body schema.  However, a payload schema will typically be rather more complex.  It will be built from various primitive schema types as well as built up further upon types it defines itself.  For example, consider a schema describing the simple object example from [[https://github.com/nlohmann/json/#arbitrary-types-conversions][nlohmann::json]] documentation:
+
+#+include: moc/person.jsonnet src jsonnet
+
+The fundamental types provided by moo are an amalgamation of those named by Avro and JSON Schema: ~boolean~, ~string~, ~number~, ~array~ of a type and ~record~ aggregating a number of ~field~ elements, each of a type.  
+
+** Intra-message Schema
+   :PROPERTIES:
+   :CUSTOM_ID: intra-message
+   :END:
+
+
+The message type hints reserved by moc also specify exactly one message payload frame may follow.  The intra-message schema for these types is thus specified.
+
+Application developers are free to extend the supported hints to include message types with multiple payload frames.  They may develop schema to describe the message as a hole in terms of an array of schema.  
+
+For example, an application may prefer define a "PEOPLE" message type which puts in each frame a ~person~ record as described in the example above.  An intra-message schema may then be defined as the ~people~ schema.  What is required in the Jsonnet is to expose more of the internal schema structure for example as:
+
+#+begin_src jsonnet
+  // as above
+  {
+      schema(s):: {
+          // [...as above omitted...]
+          // person
+          people: s.array(self.person),
+      }
+      jscm: self.schema(j.schema).people,
+      avro: self.schema(a.schema).people,
+  }
+#+end_src
+
+Note we comment out the "return value" ~person~ and instead use its local definition as a type to define the returned ~people~.
+
+The same document may produce JSON Schema and Avro schema for all abstract schema:
+
+#+begin_src jsonnet
+  {
+      schema(s) :: {
+          // locals as above but return object of:
+          person: person,
+          people: people,
+      }
+      jscm: self.schema(j.schema),
+      avro: self.schema(a.schema),
+  }
+#+end_src
+
+When applying either of the produced schema one has to take into account the substructure.  Eg, ~avro.person~ would be used to generate a ~Person~ object.
+
+** Inter-message schema
+   :PROPERTIES:
+   :CUSTOM_ID: inter-message
+   :END:
+
+Inter-message schema may be (under) specified simply as an array of expected hints.   Or the same patterns described above may be extended to cover multiple messages as they are shown to cover multiple frames.  In other words, it may be schema all the way down.  
+
+* Package layout
+
+
+* Extensions
+
+- new hints to allow different payload format or 0 or more than one payload frames
+- intra-message schema when multiple payloads are allowed.  this can likely mimic inter-message schema
+
+
+* Blah blah
+
 
 The working demonstration is a distributed system which decomposes into 
 
