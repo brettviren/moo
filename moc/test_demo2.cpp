@@ -1,41 +1,30 @@
-/** demo moc showing some low level things.  
-
+/** demo moc as an application using high-level config stream
  */
 
 #include "demo_config.hpp"
 #include "demo_config_nljs.hpp"
 
-// fixme: goal is to make this in a plugin
-#include "demo_app.hpp"
-#include "demo_app_nljs.hpp"
-
+#include "moc/stream.hpp"
 #include "moc/util.hpp"
 
-#include "json.hpp"
-
-#include <iostream>
 #include <fstream>
-
-using json = nlohmann::json;
-
 
 int main(int argc, char* argv[])
 {
-    assert(argc>1);
+    std::string streamname = "/dev/stdin";
+    if (argc > 1) {
+        streamname = argv[1];
+    }
+    std::string streamtype = "";
+    if (argc > 2) {
+        streamtype = argv[2];
+    }
+    std::ifstream fstr(streamname);
+    // fixme: add zeromq or other network stream examples
 
-    // fixme: future we need this istream to be returned via factory
-    // method based on argv values so we may switch between, eg,
-    // delivering via local file and socket.
-    std::ifstream cfgstream(argv[1]);
+    moc::type_stream ts = moc::make_type_stream(fstr, streamtype);
 
-    // fixme: here we expose the nature of the representation used in
-    // the "transport" of the configuration information.  We'd like to
-    // hide that to allow different representations to be dynamically
-    // selected.  The mechanism of that needs to be templated/typed.
-    json jobj;
-    cfgstream >> jobj;
-    auto nodecfg = jobj.get<moc::Node>();
-
+    auto nodecfg = ts.pop<moc::Node>();
     std::cout << "Config for moc::Node ID: \"" << nodecfg.ident << "\"\n";
 
     // Iterate through our configuration.  In this demo we will
@@ -70,26 +59,5 @@ int main(int argc, char* argv[])
         
     }
 
-    // We now get the component instance configuration as the next
-    // object in the config stream.  As with nodecfg we seek to
-    // hide the use of json types in future versions.
-    //
-    // Something like:
-    //
-    // icomp = factory.get(compcfg.type_name, compcfg.ident);
-    // icomp->configure(cfgstream);
-    while (true) {
-        json jobj;
-        try {
-            cfgstream >> jobj;
-        }
-        catch (json::parse_error& pe) {
-            if (pe.id == 101) {
-                break;
-            }
-            throw ;
-        }
-        std::cout << "\t\tinstance config:\n" << jobj << "\n";
-    }
     return 0;
 }

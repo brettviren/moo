@@ -1,0 +1,963 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+<!-- 2020-06-11 Thu 19:32 -->
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>moc</title>
+<meta name="generator" content="Org mode" />
+<meta name="author" content="Brett Viren" />
+<style type="text/css">
+ <!--/*--><![CDATA[/*><!--*/
+  .title  { text-align: center;
+             margin-bottom: .2em; }
+  .subtitle { text-align: center;
+              font-size: medium;
+              font-weight: bold;
+              margin-top:0; }
+  .todo   { font-family: monospace; color: red; }
+  .done   { font-family: monospace; color: green; }
+  .priority { font-family: monospace; color: orange; }
+  .tag    { background-color: #eee; font-family: monospace;
+            padding: 2px; font-size: 80%; font-weight: normal; }
+  .timestamp { color: #bebebe; }
+  .timestamp-kwd { color: #5f9ea0; }
+  .org-right  { margin-left: auto; margin-right: 0px;  text-align: right; }
+  .org-left   { margin-left: 0px;  margin-right: auto; text-align: left; }
+  .org-center { margin-left: auto; margin-right: auto; text-align: center; }
+  .underline { text-decoration: underline; }
+  #postamble p, #preamble p { font-size: 90%; margin: .2em; }
+  p.verse { margin-left: 3%; }
+  pre {
+    border: 1px solid #ccc;
+    box-shadow: 3px 3px 3px #eee;
+    padding: 8pt;
+    font-family: monospace;
+    overflow: auto;
+    margin: 1.2em;
+  }
+  pre.src {
+    position: relative;
+    overflow: visible;
+    padding-top: 1.2em;
+  }
+  pre.src:before {
+    display: none;
+    position: absolute;
+    background-color: white;
+    top: -10px;
+    right: 10px;
+    padding: 3px;
+    border: 1px solid black;
+  }
+  pre.src:hover:before { display: inline;}
+  /* Languages per Org manual */
+  pre.src-asymptote:before { content: 'Asymptote'; }
+  pre.src-awk:before { content: 'Awk'; }
+  pre.src-C:before { content: 'C'; }
+  /* pre.src-C++ doesn't work in CSS */
+  pre.src-clojure:before { content: 'Clojure'; }
+  pre.src-css:before { content: 'CSS'; }
+  pre.src-D:before { content: 'D'; }
+  pre.src-ditaa:before { content: 'ditaa'; }
+  pre.src-dot:before { content: 'Graphviz'; }
+  pre.src-calc:before { content: 'Emacs Calc'; }
+  pre.src-emacs-lisp:before { content: 'Emacs Lisp'; }
+  pre.src-fortran:before { content: 'Fortran'; }
+  pre.src-gnuplot:before { content: 'gnuplot'; }
+  pre.src-haskell:before { content: 'Haskell'; }
+  pre.src-hledger:before { content: 'hledger'; }
+  pre.src-java:before { content: 'Java'; }
+  pre.src-js:before { content: 'Javascript'; }
+  pre.src-latex:before { content: 'LaTeX'; }
+  pre.src-ledger:before { content: 'Ledger'; }
+  pre.src-lisp:before { content: 'Lisp'; }
+  pre.src-lilypond:before { content: 'Lilypond'; }
+  pre.src-lua:before { content: 'Lua'; }
+  pre.src-matlab:before { content: 'MATLAB'; }
+  pre.src-mscgen:before { content: 'Mscgen'; }
+  pre.src-ocaml:before { content: 'Objective Caml'; }
+  pre.src-octave:before { content: 'Octave'; }
+  pre.src-org:before { content: 'Org mode'; }
+  pre.src-oz:before { content: 'OZ'; }
+  pre.src-plantuml:before { content: 'Plantuml'; }
+  pre.src-processing:before { content: 'Processing.js'; }
+  pre.src-python:before { content: 'Python'; }
+  pre.src-R:before { content: 'R'; }
+  pre.src-ruby:before { content: 'Ruby'; }
+  pre.src-sass:before { content: 'Sass'; }
+  pre.src-scheme:before { content: 'Scheme'; }
+  pre.src-screen:before { content: 'Gnu Screen'; }
+  pre.src-sed:before { content: 'Sed'; }
+  pre.src-sh:before { content: 'shell'; }
+  pre.src-sql:before { content: 'SQL'; }
+  pre.src-sqlite:before { content: 'SQLite'; }
+  /* additional languages in org.el's org-babel-load-languages alist */
+  pre.src-forth:before { content: 'Forth'; }
+  pre.src-io:before { content: 'IO'; }
+  pre.src-J:before { content: 'J'; }
+  pre.src-makefile:before { content: 'Makefile'; }
+  pre.src-maxima:before { content: 'Maxima'; }
+  pre.src-perl:before { content: 'Perl'; }
+  pre.src-picolisp:before { content: 'Pico Lisp'; }
+  pre.src-scala:before { content: 'Scala'; }
+  pre.src-shell:before { content: 'Shell Script'; }
+  pre.src-ebnf2ps:before { content: 'ebfn2ps'; }
+  /* additional language identifiers per "defun org-babel-execute"
+       in ob-*.el */
+  pre.src-cpp:before  { content: 'C++'; }
+  pre.src-abc:before  { content: 'ABC'; }
+  pre.src-coq:before  { content: 'Coq'; }
+  pre.src-groovy:before  { content: 'Groovy'; }
+  /* additional language identifiers from org-babel-shell-names in
+     ob-shell.el: ob-shell is the only babel language using a lambda to put
+     the execution function name together. */
+  pre.src-bash:before  { content: 'bash'; }
+  pre.src-csh:before  { content: 'csh'; }
+  pre.src-ash:before  { content: 'ash'; }
+  pre.src-dash:before  { content: 'dash'; }
+  pre.src-ksh:before  { content: 'ksh'; }
+  pre.src-mksh:before  { content: 'mksh'; }
+  pre.src-posh:before  { content: 'posh'; }
+  /* Additional Emacs modes also supported by the LaTeX listings package */
+  pre.src-ada:before { content: 'Ada'; }
+  pre.src-asm:before { content: 'Assembler'; }
+  pre.src-caml:before { content: 'Caml'; }
+  pre.src-delphi:before { content: 'Delphi'; }
+  pre.src-html:before { content: 'HTML'; }
+  pre.src-idl:before { content: 'IDL'; }
+  pre.src-mercury:before { content: 'Mercury'; }
+  pre.src-metapost:before { content: 'MetaPost'; }
+  pre.src-modula-2:before { content: 'Modula-2'; }
+  pre.src-pascal:before { content: 'Pascal'; }
+  pre.src-ps:before { content: 'PostScript'; }
+  pre.src-prolog:before { content: 'Prolog'; }
+  pre.src-simula:before { content: 'Simula'; }
+  pre.src-tcl:before { content: 'tcl'; }
+  pre.src-tex:before { content: 'TeX'; }
+  pre.src-plain-tex:before { content: 'Plain TeX'; }
+  pre.src-verilog:before { content: 'Verilog'; }
+  pre.src-vhdl:before { content: 'VHDL'; }
+  pre.src-xml:before { content: 'XML'; }
+  pre.src-nxml:before { content: 'XML'; }
+  /* add a generic configuration mode; LaTeX export needs an additional
+     (add-to-list 'org-latex-listings-langs '(conf " ")) in .emacs */
+  pre.src-conf:before { content: 'Configuration File'; }
+
+  table { border-collapse:collapse; }
+  caption.t-above { caption-side: top; }
+  caption.t-bottom { caption-side: bottom; }
+  td, th { vertical-align:top;  }
+  th.org-right  { text-align: center;  }
+  th.org-left   { text-align: center;   }
+  th.org-center { text-align: center; }
+  td.org-right  { text-align: right;  }
+  td.org-left   { text-align: left;   }
+  td.org-center { text-align: center; }
+  dt { font-weight: bold; }
+  .footpara { display: inline; }
+  .footdef  { margin-bottom: 1em; }
+  .figure { padding: 1em; }
+  .figure p { text-align: center; }
+  .equation-container {
+    display: table;
+    text-align: center;
+    width: 100%;
+  }
+  .equation {
+    vertical-align: middle;
+  }
+  .equation-label {
+    display: table-cell;
+    text-align: right;
+    vertical-align: middle;
+  }
+  .inlinetask {
+    padding: 10px;
+    border: 2px solid gray;
+    margin: 10px;
+    background: #ffffcc;
+  }
+  #org-div-home-and-up
+   { text-align: right; font-size: 70%; white-space: nowrap; }
+  textarea { overflow-x: auto; }
+  .linenr { font-size: smaller }
+  .code-highlighted { background-color: #ffff00; }
+  .org-info-js_info-navigation { border-style: none; }
+  #org-info-js_console-label
+    { font-size: 10px; font-weight: bold; white-space: nowrap; }
+  .org-info-js_search-highlight
+    { background-color: #ffff00; color: #000000; font-weight: bold; }
+  .org-svg { width: 90%; }
+  /*]]>*/-->
+</style>
+<link rel="stylesheet" type="text/css" href="export/styles/darksun/css/htmlize.css"/>
+<link rel="stylesheet" type="text/css" href="export/styles/darksun/css/darksun.css"/>
+<link rel="stylesheet" type="text/css" href="export/styles/darksun/css/hideshow.css"/>
+<script type="text/javascript" src="export/styles/darksun/js/jquery-1.11.0.min.js"></script>
+<script type="text/javascript" src="export/styles/darksun/js/jquery-ui-1.10.2.min.js"></script>
+<script type="text/javascript" src="export/styles/darksun/js/jquery.localscroll-min.js"></script>
+<script type="text/javascript" src="export/styles/darksun/js/jquery.scrollTo-1.4.3.1-min.js"></script>
+<script type="text/javascript" src="export/styles/darksun/js/jquery.zclip.min.js"></script>
+<script type="text/javascript" src="export/styles/darksun/js/darksun.js"></script>
+<script type="text/javascript" src="export/styles/darksun/js/hideshow.js"></script>
+<script type="text/javascript" src="export/styles/lib/js/jquery.stickytableheaders.min.js"></script>
+<script type="text/javascript">
+/*
+@licstart  The following is the entire license notice for the
+JavaScript code in this tag.
+
+Copyright (C) 2012-2020 Free Software Foundation, Inc.
+
+The JavaScript code in this tag is free software: you can
+redistribute it and/or modify it under the terms of the GNU
+General Public License (GNU GPL) as published by the Free Software
+Foundation, either version 3 of the License, or (at your option)
+any later version.  The code is distributed WITHOUT ANY WARRANTY;
+without even the implied warranty of MERCHANTABILITY or FITNESS
+FOR A PARTICULAR PURPOSE.  See the GNU GPL for more details.
+
+As additional permission under GNU GPL version 3 section 7, you
+may distribute non-source (e.g., minimized or compacted) forms of
+that code without the copy of the GNU GPL normally required by
+section 4, provided you include this license notice and a URL
+through which recipients can access the Corresponding Source.
+
+
+@licend  The above is the entire license notice
+for the JavaScript code in this tag.
+*/
+<!--/*--><![CDATA[/*><!--*/
+ function CodeHighlightOn(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(null != target) {
+     elem.cacheClassElem = elem.className;
+     elem.cacheClassTarget = target.className;
+     target.className = "code-highlighted";
+     elem.className   = "code-highlighted";
+   }
+ }
+ function CodeHighlightOff(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(elem.cacheClassElem)
+     elem.className = elem.cacheClassElem;
+   if(elem.cacheClassTarget)
+     target.className = elem.cacheClassTarget;
+ }
+/*]]>*///-->
+</script>
+</head>
+<body>
+<div id="content">
+<h1 class="title">moc
+<br />
+<span class="subtitle">Model Oriented Configuration</span>
+</h1>
+<div id="table-of-contents">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents">
+<ul>
+<li><a href="#overview">Overview</a></li>
+<li><a href="#dive-in">Dive in</a></li>
+<li><a href="#technical-design">Technical design</a>
+<ul>
+<li><a href="#stream-frame-message">Streams, frames and messages</a></li>
+<li><a href="#message-types">Reserved message types</a></li>
+<li><a href="#byte-stream-formats">Byte stream formats</a></li>
+<li><a href="#schema">Schema</a></li>
+<li><a href="#example-schema">Example schema</a></li>
+<li><a href="#payload-schema">Payload schema</a></li>
+<li><a href="#intra-message">Intra-message Schema</a></li>
+<li><a href="#inter-message">Inter-message schema</a></li>
+</ul>
+</li>
+<li><a href="#orgad45330">Package layout</a></li>
+<li><a href="#org63b6a2f">Extensions</a></li>
+<li><a href="#org815dfb1">Blah blah</a></li>
+<li><a href="#org3e5fadd">mock up</a></li>
+<li><a href="#org4c7bca8">Configuration store</a></li>
+</ul>
+</div>
+</div>
+
+
+<div id="outline-container-overview" class="outline-2">
+<h2 id="overview">Overview</h2>
+<div class="outline-text-2" id="text-overview">
+<p>
+moc is a moo for a <i>configuration</i> system.  It provides::
+</p>
+
+<ul class="org-ul">
+<li>a vocabulary for defining the <i>schema</i> that configuration information should follow.</li>
+
+<li>tooling to validate configuration objects against their schema.</li>
+
+<li>code generators creating native language (C++/Python) types and serialization methods between those types and configuration objects.</li>
+
+<li>native language libraries and shell programs for producing and consuming configuration in a variety of <i>formats</i> and media including files and <i>streams</i>.</li>
+
+<li>a demo application and configuration.</li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-dive-in" class="outline-2">
+<h2 id="dive-in">Dive in</h2>
+<div class="outline-text-2" id="text-dive-in">
+<p>
+moc is currently not production but rather provides a mock up demo.
+To use it, first install the <code>moo</code> Python package eg like:
+</p>
+
+<pre class="example">
+$ echo layout python3 &gt; .envrc
+$ direnv allow
+</pre>
+
+<p>
+Or, if you don't have <code>direnv</code>
+</p>
+
+<pre class="example">
+$ python3 -m venv venv
+$ source venv/bin/activiate
+</pre>
+
+<p>
+Then install <code>moo</code>
+</p>
+
+<pre class="example">
+$ pip install -e .
+$ moo --help
+</pre>
+
+<p>
+The moc demo is in <a href="moc/">moc/</a>:
+</p>
+
+<pre class="example">
+$ cd moc
+$ make
+</pre>
+</div>
+</div>
+
+
+<div id="outline-container-technical-design" class="outline-2">
+<h2 id="technical-design">Technical design</h2>
+<div class="outline-text-2" id="text-technical-design">
+<p>
+moc is a <b>moo</b> focused on generating configuration objects and various means to deliver them into an application.  This section describes aspects of the technical design.
+</p>
+</div>
+
+<div id="outline-container-stream-frame-message" class="outline-3">
+<h3 id="stream-frame-message">Streams, frames and messages</h3>
+<div class="outline-text-3" id="text-stream-frame-message">
+<p>
+moc configuration data follows an abstract low level format which may be realized in a few ways and independently from the concrete high level schema of the delivered content.  This provides flexibility to an application to select how configuration information is delivered  
+</p>
+
+<p>
+The abstract low level format is defined in terms of <b>streams</b> of <b>bytes</b>, <b>frames</b> and <b>messages</b> as described:
+</p>
+
+<dl class="org-dl">
+<dt>bytes</dt><dd>A <b>moc byte stream</b> consists of a sequence of 8 bit bytes.  Several types of byte streams are supported by moc including commonly known ones (eg, a JSON object or a <a href="https://en.wikipedia.org/wiki/JSON_streaming">JSON stream</a> and ones suitable for message passing systems like ZeroMQ).  Some byte streams may place limits the format of information they carry (eg, a JSON Stream may be used only for JSON text).</dd>
+
+<dt>frames</dt><dd>A <b>moc frame stream</b> consists of a logical sequence of frames derived from a bytes stream.  A frame is a contiguous and finite sequence of bytes which may be read into memory in an atomic manner.  If two byte streams support the format of a frame then they both shall decode an identical frame identically.</dd>
+
+<dt>messages</dt><dd>A <b>moc message stream</b> consists of a logical sequence of messages derived from a frame stream.  The application may determine the extent and interpretation of the message by progressively examining the frames.  moc messages must have an initial frame, called the message type <b>hint</b> which must consist of only printable ASCII characters suitable for use in forming a C symbol.  moc reserves a number of hint values, listed in the table below which are to be used to identify the low-level format of the next and last frame in the message called the <b>payload</b>.  The application is free to extend the list of message type hints it supports.</dd>
+
+<dt>types</dt><dd>A <b>moc type stream</b> produces a stream of objects in native language type.  It serializes messages from a moc message stream.  When used, the application must know the type expected.</dd>
+</dl>
+</div>
+</div>
+
+<div id="outline-container-message-types" class="outline-3">
+<h3 id="message-types">Reserved message types</h3>
+<div class="outline-text-3" id="text-message-types">
+<p>
+The set of reserved moc message type hints are:
+</p>
+
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+
+
+<colgroup>
+<col  class="org-left" />
+
+<col  class="org-left" />
+
+<col  class="org-left" />
+
+<col  class="org-left" />
+</colgroup>
+<thead>
+<tr>
+<th scope="col" class="org-left">hint</th>
+<th scope="col" class="org-left">payload encoding</th>
+<th scope="col" class="org-left">C++</th>
+<th scope="col" class="org-left">Python</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="org-left">JSON</td>
+<td class="org-left">JSON string</td>
+<td class="org-left">yes</td>
+<td class="org-left">&#xa0;</td>
+</tr>
+
+<tr>
+<td class="org-left">BSON</td>
+<td class="org-left">Binary JSON</td>
+<td class="org-left">yes</td>
+<td class="org-left">&#xa0;</td>
+</tr>
+
+<tr>
+<td class="org-left">CBOR</td>
+<td class="org-left">Binary JSON</td>
+<td class="org-left">yes</td>
+<td class="org-left">&#xa0;</td>
+</tr>
+
+<tr>
+<td class="org-left">UBJS</td>
+<td class="org-left">Binary JSON</td>
+<td class="org-left">yes</td>
+<td class="org-left">&#xa0;</td>
+</tr>
+
+<tr>
+<td class="org-left">MSGP</td>
+<td class="org-left">Message Pack</td>
+<td class="org-left">yes</td>
+<td class="org-left">&#xa0;</td>
+</tr>
+
+<tr>
+<td class="org-left">JSNT</td>
+<td class="org-left">Jsonnet string</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">&#xa0;</td>
+</tr>
+
+<tr>
+<td class="org-left">AVRJ</td>
+<td class="org-left">Avro JSON</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">&#xa0;</td>
+</tr>
+
+<tr>
+<td class="org-left">AVRB</td>
+<td class="org-left">Avro binary</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">&#xa0;</td>
+</tr>
+
+<tr>
+<td class="org-left">PBUF</td>
+<td class="org-left">Protobuf</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">&#xa0;</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+
+<div id="outline-container-byte-stream-formats" class="outline-3">
+<h3 id="byte-stream-formats">Byte stream formats</h3>
+<div class="outline-text-3" id="text-byte-stream-formats">
+<p>
+moc provides byte stream decoding for a few common types:
+</p>
+
+<dl class="org-dl">
+<dt>JSON</dt><dd>the bytes stream is assumed to be a <a href="https://en.wikipedia.org/wiki/JSON_streaming">JSON stream</a>.  As it may only hold JSON format data the moc message type hint is implicitly and always <code>JSON</code>.  The stream may consist of an admixed concatenation of JSON types.  The first frame from a JSON byte stream is the string <code>JSON</code> which is implicitly generated.  The second frame will contain the JSON text of the first JSON type in the stream.  This then repeats until the stream is exhausted.</dd>
+
+<dt>SHFM</dt><dd>a "size-hinted framed message" may hold arbitrary data (binary and text, including JSON) and is well suited for use with ZeroMQ or other message passing systems.  In the byte stream, a frame is prefixed with a binary value holding the size of the frame data measured in bytes.  If less than 255 the size value is stored in a single byte.  If the size is 255 or greater but less than 2<sup>32</sup>-1 the first byte is 255 (<code>0xff</code>) and the next four bytes hold the size as a 32 bit integer.  The first frame in a message shall provide the message type hint and for hints reserved by moc, the subsequent and only other frame in the message holds the payload frame of that type.  An example SHFM message is shown next with a frame depicted as <code>[size|body]</code> where the <code>size</code> in a binary value and the <code>body</code> is expressed in ASCII:</dd>
+</dl>
+
+<pre class="example">
+[4|JSON][8|{"a":42}]
+</pre>
+</div>
+</div>
+
+<div id="outline-container-schema" class="outline-3">
+<h3 id="schema">Schema</h3>
+<div class="outline-text-3" id="text-schema">
+<p>
+The producer and consumer of a moc <b>message stream</b> must honor a shared <b>contract</b> (or <b>schema</b>) which governs the structure of the data.  A particular schema may span one of these possible levels of context:
+</p>
+
+<dl class="org-dl">
+<dt>payload</dt><dd>the structure of a given payload frame body.</dd>
+<dt>intra message</dt><dd>the structure of payload frames in a message.</dd>
+<dt>inter message</dt><dd>the structure of messages in a stream</dd>
+</dl>
+
+<p>
+moc provides a means to rigorously define schema as a (meta) data structure and with two goals in mind for the use of a schema:
+</p>
+
+<dl class="org-dl">
+<dt>validation</dt><dd>a schema may be used to check if a given data object (aka <b>model</b>) obeys the contract defined by the schema.</dd>
+<dt>generation</dt><dd>a schema object may be applied to a <b>template</b> in order to generate a <b>representation</b>.</dd>
+</dl>
+
+<p>
+These two goals require different data structure.  For example, a validation schema is well represented as a data structure which itself obeys the JSON Schema while a generation schema is better represented by a data structure which itself obeys the Avro Schema.  
+</p>
+
+<p>
+To avoid developing two conceptually identical schema structures to satisfy these two forms, moc provides support for a developer to define a schema abstractly in the form of Jsonnet function calls.  These functions are parameterized on a Jsonnet object holding primitive schema defining functions.  This allows the same developer-provided functions to be called with JSON Schema primitives or with Avro Schema primitives and output the proper structure for each.
+</p>
+</div>
+</div>
+
+<div id="outline-container-example-schema" class="outline-3">
+<h3 id="example-schema">Example schema</h3>
+<div class="outline-text-3" id="text-example-schema">
+<p>
+A simple example makes this clear.  As described above, moc reserves a set of message type hints.  We may define schema for this simple frame like:
+</p>
+
+<div class="org-src-container">
+<pre class="src src-jsonnet"><span style="color: #73d216;">// access schema primitive functions</span>
+<span style="color: #b4fa70;">local</span> moc = <span style="color: #b4fa70;">import</span> <span style="color: #e9b96e;">"moc.jsonnet"</span>;
+{
+    schema(s):: {
+        hint: s.enum(<span style="color: #e9b96e;">"Hint"</span>, [<span style="color: #e9b96e;">"JSON"</span>,<span style="color: #e9b96e;">"BSON"</span>,<span style="color: #e9b96e;">"CBOR"</span>,<span style="color: #e9b96e;">"UBJS"</span>,<span style="color: #e9b96e;">"MSGP"</span>,
+                              <span style="color: #e9b96e;">"JSNT"</span>,<span style="color: #e9b96e;">"AVRJ"</span>,<span style="color: #e9b96e;">"AVRB"</span>,<span style="color: #e9b96e;">"PBUF"</span>]),
+    },
+
+    base: <span style="color: #b4fa70;">self</span>.schema(moc.base).hint,
+    avro: <span style="color: #b4fa70;">self</span>.schema(moc.avro).hint,
+    jscm: <span style="color: #b4fa70;">self</span>.schema(moc.jscm).hint,
+    tmpl: {
+        namespace: <span style="color: #e9b96e;">"moc"</span>,
+        types: [ $.avro ],
+    },
+
+    data: <span style="color: #e9b96e;">"JSON"</span>,
+
+}
+</pre>
+</div>
+
+<p>
+With the above, <code>moo</code> can validate that <code>data</code> is correct against <code>jscm</code>:
+</p>
+
+<div class="org-src-container">
+<pre class="src src-shell">moo validate -s moc/simple.jsonnet -S jscm -D data moc/simple.jsonnet
+</pre>
+</div>
+
+<pre class="example">
+null
+</pre>
+
+<p>
+The null means no error.
+</p>
+
+<p>
+We may use <code>moo</code> to compile the <code>avro</code> structure to an Avro schema JSON file and generate code:
+</p>
+
+<div class="org-src-container">
+<pre class="src src-shell">moo compile -P avro moc/simple.jsonnet &gt; simple.json
+avrogencpp -n moc -i simple.json -o simple_avro.hpp
+grep -m1 -A10 Hint: simple_avro.hpp
+</pre>
+</div>
+
+<div class="org-src-container">
+<pre class="src src-c++">
+</pre>
+</div>
+
+<p>
+In that header is more generated code to serialize this <code>enum</code> via the Avro codec.  moc may provide methods to transparently select that codec based on the "hint" being <code>AVRJ</code> or <code>AVRB</code>.
+</p>
+
+<p>
+moc also supports <code>nlohmann::json</code> family of codecs to support the remaining hints besides <code>PBUF</code>.  With a suitable template file and the info supplied in the model by the <code>tmpl</code> attribute, <code>moo</code> can generate the needed code like:
+</p>
+
+<div class="org-src-container">
+<pre class="src src-shell">moo render -P tmpl moc/simple.jsonnet moc/avro_nljs.hpp.j2 &gt; simple_nljs.hpp
+grep -m1 -A10 ENUM simple_nljs.hpp
+</pre>
+</div>
+
+<div class="org-src-container">
+<pre class="src src-c++">NLOHMANN_JSON_SERIALIZE_ENUM( Hint, {
+        { <span style="color: #e9b2e3;">moc</span>::<span style="color: #e9b2e3;">Hint</span>::JSON, <span style="color: #e9b96e;">"JSON"</span> },
+        { <span style="color: #e9b2e3;">moc</span>::<span style="color: #e9b2e3;">Hint</span>::BSON, <span style="color: #e9b96e;">"BSON"</span> },
+        { <span style="color: #e9b2e3;">moc</span>::<span style="color: #e9b2e3;">Hint</span>::CBOR, <span style="color: #e9b96e;">"CBOR"</span> },
+        { <span style="color: #e9b2e3;">moc</span>::<span style="color: #e9b2e3;">Hint</span>::UBJS, <span style="color: #e9b96e;">"UBJS"</span> },
+        { <span style="color: #e9b2e3;">moc</span>::<span style="color: #e9b2e3;">Hint</span>::MSGP, <span style="color: #e9b96e;">"MSGP"</span> },
+        { <span style="color: #e9b2e3;">moc</span>::<span style="color: #e9b2e3;">Hint</span>::JSNT, <span style="color: #e9b96e;">"JSNT"</span> },
+        { <span style="color: #e9b2e3;">moc</span>::<span style="color: #e9b2e3;">Hint</span>::AVRJ, <span style="color: #e9b96e;">"AVRJ"</span> },
+        { <span style="color: #e9b2e3;">moc</span>::<span style="color: #e9b2e3;">Hint</span>::AVRB, <span style="color: #e9b96e;">"AVRB"</span> },
+        { <span style="color: #e9b2e3;">moc</span>::<span style="color: #e9b2e3;">Hint</span>::PBUF, <span style="color: #e9b96e;">"PBUF"</span> },
+    })
+</pre>
+</div>
+
+<p>
+Where this snippet shows how we ultimately rely on a CPP macro provided by <code>nlohmann</code> to generate codec.  This produces <code>to_json()</code> and <code>from_json()</code> type functions.
+</p>
+</div>
+</div>
+
+<div id="outline-container-payload-schema" class="outline-3">
+<h3 id="payload-schema">Payload schema</h3>
+<div class="outline-text-3" id="text-payload-schema">
+<p>
+The simple example above may be considered also an example of a trivial payload body schema.  However, a payload schema will typically be rather more complex.  It will be built from various primitive schema types as well as built up further upon types it defines itself.  For example, consider a schema describing the simple object example from <a href="https://github.com/nlohmann/json/#arbitrary-types-conversions">nlohmann::json</a> documentation:
+</p>
+
+<div class="org-src-container">
+<pre class="src src-jsonnet"><span style="color: #b4fa70;">local</span> moc = <span style="color: #b4fa70;">import</span> <span style="color: #e9b96e;">"moc.jsonnet"</span>;
+
+{
+    schema(s) :: {
+        <span style="color: #b4fa70;">local</span> name = s.string(pattern=<span style="color: #e9b96e;">'^[a-zA-Z ]$'</span>),
+        <span style="color: #b4fa70;">local</span> address = s.string(pattern=<span style="color: #e9b96e;">'^[a-zA-Z0-9 ]$'</span>),
+        <span style="color: #b4fa70;">local</span> age = s.number(<span style="color: #e9b96e;">"i4"</span>, {minimum:0}),
+        <span style="color: #b4fa70;">local</span> person = s.record(<span style="color: #e9b96e;">"Person"</span>, [
+            s.field(<span style="color: #e9b96e;">"name"</span>, name),
+            s.field(<span style="color: #e9b96e;">"address"</span>, address),
+            s.field(<span style="color: #e9b96e;">"age"</span>, age)
+        ]),
+        ret: person,
+    }.ret,
+
+    base: <span style="color: #b4fa70;">self</span>.schema(moc.base),
+    avro: <span style="color: #b4fa70;">self</span>.schema(moc.avro),
+    jscm: <span style="color: #b4fa70;">self</span>.schema(moc.jscm),
+
+
+}
+</pre>
+</div>
+
+<p>
+The fundamental types provided by moo are an amalgamation of those named by Avro and JSON Schema: <code>boolean</code>, <code>string</code>, <code>number</code>, <code>array</code> of a type and <code>record</code> aggregating a number of <code>field</code> elements, each of a type.  
+</p>
+</div>
+</div>
+
+<div id="outline-container-intra-message" class="outline-3">
+<h3 id="intra-message">Intra-message Schema</h3>
+<div class="outline-text-3" id="text-intra-message">
+<p>
+The message type hints reserved by moc also specify exactly one message payload frame may follow.  The intra-message schema for these types is thus specified.
+</p>
+
+<p>
+Application developers are free to extend the supported hints to include message types with multiple payload frames.  They may develop schema to describe the message as a hole in terms of an array of schema.  
+</p>
+
+<p>
+For example, an application may prefer define a "PEOPLE" message type which puts in each frame a <code>person</code> record as described in the example above.  An intra-message schema may then be defined as the <code>people</code> schema.  What is required in the Jsonnet is to expose more of the internal schema structure for example as:
+</p>
+
+<div class="org-src-container">
+<pre class="src src-jsonnet"><span style="color: #73d216;">// as above</span>
+{
+    schema(s):: {
+        <span style="color: #73d216;">// [...as above omitted...]</span>
+        <span style="color: #73d216;">// person</span>
+        people: s.array(<span style="color: #b4fa70;">self</span>.person),
+    }
+    jscm: <span style="color: #b4fa70;">self</span>.schema(j.schema).people,
+    avro: <span style="color: #b4fa70;">self</span>.schema(a.schema).people,
+}
+</pre>
+</div>
+
+<p>
+Note we comment out the "return value" <code>person</code> and instead use its local definition as a type to define the returned <code>people</code>.
+</p>
+
+<p>
+The same document may produce JSON Schema and Avro schema for all abstract schema:
+</p>
+
+<div class="org-src-container">
+<pre class="src src-jsonnet">{
+    schema(s) :: {
+        <span style="color: #73d216;">// locals as above but return object of:</span>
+        person: person,
+        people: people,
+    }
+    jscm: <span style="color: #b4fa70;">self</span>.schema(j.schema),
+    avro: <span style="color: #b4fa70;">self</span>.schema(a.schema),
+}
+</pre>
+</div>
+
+<p>
+When applying either of the produced schema one has to take into account the substructure.  Eg, <code>avro.person</code> would be used to generate a <code>Person</code> object.
+</p>
+</div>
+</div>
+
+<div id="outline-container-inter-message" class="outline-3">
+<h3 id="inter-message">Inter-message schema</h3>
+<div class="outline-text-3" id="text-inter-message">
+<p>
+Inter-message schema may be (under) specified simply as an array of expected hints.   Or the same patterns described above may be extended to cover multiple messages as they are shown to cover multiple frames.  In other words, it may be schema all the way down.  
+</p>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgad45330" class="outline-2">
+<h2 id="orgad45330">Package layout</h2>
+</div>
+
+
+<div id="outline-container-org63b6a2f" class="outline-2">
+<h2 id="org63b6a2f">Extensions</h2>
+<div class="outline-text-2" id="text-org63b6a2f">
+<ul class="org-ul">
+<li>new hints to allow different payload format or 0 or more than one payload frames</li>
+<li>intra-message schema when multiple payloads are allowed.  this can likely mimic inter-message schema</li>
+</ul>
+</div>
+</div>
+
+
+<div id="outline-container-org815dfb1" class="outline-2">
+<h2 id="org815dfb1">Blah blah</h2>
+<div class="outline-text-2" id="text-org815dfb1">
+<p>
+The working demonstration is a distributed system which decomposes into 
+</p>
+
+<ul class="org-ul">
+<li>a single, general software <i>application</i> (something with a <code>main()</code>) which aggregates</li>
+
+<li>a set of software <i>components</i> that are provided in</li>
+
+<li>dynamically loaded plugin shared libraries resulting in a number of</li>
+
+<li>running <i>process</i> instances</li>
+</ul>
+
+<p>
+The application is general and has these explicit parts:
+</p>
+
+<ul class="org-ul">
+<li>command line parsing</li>
+<li>load any plugins named on the CLI</li>
+<li>instantiate a moc entry point component based on CLI arguments</li>
+<li>execute moc entry point to receive application configuration</li>
+<li>load additional plugins as per cfg</li>
+<li>instantiate components as per cfg</li>
+<li>apply component cfg on instances</li>
+<li>execute instances</li>
+</ul>
+
+<p>
+This demo is a one-shot configuration, there is no re-config mechanism.  This may be developed as an extension.
+</p>
+
+<p>
+moc configuration information may exist in serialized <i>message</i> form and in a native language (C++/python) fully typed class.  The code providing <i>deserializing</i> methods is generated based on a moo schema defining the configuration structure.  Generated code is compiled into headers and source which the application and components may be developed against.
+</p>
+</div>
+</div>
+
+
+
+
+
+
+<div id="outline-container-org3e5fadd" class="outline-2">
+<h2 id="org3e5fadd">mock up</h2>
+<div class="outline-text-2" id="text-org3e5fadd">
+<p>
+Want:
+</p>
+
+<ul class="org-ul">
+<li>define rules for validating structure expressed in JSON</li>
+<li>map a structure composed values in JSON types to C++/Python class definitions</li>
+<li>generate code to serialize values to C++/Python instances</li>
+<li>allow for partial serializing in order to delegate serializing.</li>
+</ul>
+
+<p>
+Want to construct a node, eg inside <code>main()</code> or maybe inside some main <code>Application</code> object:
+</p>
+
+<div class="org-src-container">
+<pre class="src src-c++"><span style="color: #73d216;">// </span><span style="color: #73d216;">This mock up will create and configure an instance of "Node" which</span>
+<span style="color: #73d216;">// </span><span style="color: #73d216;">whill create, configure and aggregate instances of "Port" and</span>
+<span style="color: #73d216;">// </span><span style="color: #73d216;">"Comp" (component) each of which uses some subset of the ports.</span>
+
+<span style="color: #73d216;">// </span><span style="color: #73d216;">The process is driven by a particular configuration istream.  The</span>
+<span style="color: #73d216;">// </span><span style="color: #73d216;">program may have different types of config streams and which used</span>
+<span style="color: #73d216;">// </span><span style="color: #73d216;">is determined by a meta configuration such as provided on the</span>
+<span style="color: #73d216;">// </span><span style="color: #73d216;">command line.  The CfgStreamKey categorizes the type and any</span>
+<span style="color: #73d216;">// </span><span style="color: #73d216;">additional information needed to instantiate or access a config</span>
+<span style="color: #73d216;">// </span><span style="color: #73d216;">stream.</span>
+<span style="color: #8cc4ff;">CfgStreamKey</span> <span style="color: #fcaf3e;">cfg_stream_info</span> = parse_cli_arg_for_cfg_stream_info();
+
+<span style="color: #73d216;">// </span><span style="color: #73d216;">Resolve the key a CfgStream object.  A CfgStream provides a</span>
+<span style="color: #73d216;">// </span><span style="color: #73d216;">sequence interface.  Maybe like std::istream, std::queue, or ZeroMQ</span>
+<span style="color: #73d216;">// </span><span style="color: #73d216;">socket.</span>
+<span style="color: #8cc4ff;">CfgStream</span>&amp; <span style="color: #fcaf3e;">cfgstream</span> = get_cfgstream(cfg_stream_info); 
+
+<span style="color: #e9b2e3;">std</span>::<span style="color: #8cc4ff;">vector</span>&lt;Node&gt; <span style="color: #fcaf3e;">nodes</span>;
+<span style="color: #b4fa70;">while</span> (!cfgstream.empty()) {
+    nodes.emplace_back(cfgstream);
+}
+</pre>
+</div>
+
+<p>
+Inside the <code>Node</code> constructor we process the configuration stream to make ports and node components.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-c++"><span style="color: #73d216;">// </span><span style="color: #73d216;">We assume the stream follows a protocol.  The stream is to consist</span>
+<span style="color: #73d216;">// </span><span style="color: #73d216;">of distinct frames and frames are grouped into messages.  A frame</span>
+<span style="color: #73d216;">// </span><span style="color: #73d216;">is read into application memory in an atomic manner.  The number of</span>
+<span style="color: #73d216;">// </span><span style="color: #73d216;">frames in a message the the interpretation of each frame may depend</span>
+<span style="color: #73d216;">// </span><span style="color: #73d216;">on previous frames in the message.</span>
+
+<span style="color: #73d216;">// </span><span style="color: #73d216;">We assume a message has an initial frame consisting of a string</span>
+<span style="color: #73d216;">// </span><span style="color: #73d216;">which gives the format to assume for the second frame.  Eg,</span>
+<span style="color: #73d216;">// </span><span style="color: #73d216;">["JSON",&lt;JSON text&gt;].  We hide this interpretation and return a C++</span>
+<span style="color: #73d216;">// </span><span style="color: #73d216;">class that the Node constructor code knows.  More on this constructor</span>
+<span style="color: #73d216;">// </span><span style="color: #73d216;">later.</span>
+<span style="color: #8cc4ff;">NodeCfg</span> <span style="color: #fce94f;">nodecfg</span>(cfgstream);
+
+cout &lt;&lt; <span style="color: #e9b96e;">"Loading node ID: "</span> &lt;&lt; nodecfg.ident() &lt;&lt; <span style="color: #e9b96e;">"\n"</span>;
+
+<span style="color: #73d216;">// </span><span style="color: #73d216;">A node instantiates, configures and aggregates ports.  Here, a port</span>
+<span style="color: #73d216;">// </span><span style="color: #73d216;">is assumed to be some socket with a "smart" constuction driven by</span>
+<span style="color: #73d216;">// </span><span style="color: #73d216;">the configuration.  Eg, it may perform auto discovery of peers.</span>
+<span style="color: #73d216;">// </span><span style="color: #73d216;">But, in this mock up it also represents any type of shared objects</span>
+<span style="color: #73d216;">// </span><span style="color: #73d216;">or resources that need to be constructed outside the components.</span>
+<span style="color: #73d216;">// </span><span style="color: #73d216;">Note: in this mockup, configuration supersedes ports.  We may want</span>
+<span style="color: #73d216;">// </span><span style="color: #73d216;">to have configuratoin delivered via a port in which case these</span>
+<span style="color: #73d216;">// </span><span style="color: #73d216;">patterns need to be largely refactored.  One way would be to allow</span>
+<span style="color: #73d216;">// </span><span style="color: #73d216;">a component to be a node.  Then use a top node constructed a local</span>
+<span style="color: #73d216;">// </span><span style="color: #73d216;">cfgstream to construct a component node that listens on a port to</span>
+<span style="color: #73d216;">// </span><span style="color: #73d216;">produce a configuration stream that generates one or more new nodes.</span>
+<span style="color: #e9b2e3;">std</span>::<span style="color: #8cc4ff;">vector</span>&lt;Port&gt; <span style="color: #fcaf3e;">ports</span>;
+<span style="color: #b4fa70;">for</span> (<span style="color: #8cc4ff;">PortCfg</span> <span style="color: #fcaf3e;">portcfg</span>: nodecfg.portdefs()) {
+    ports.emplace_back(portcfg);
+}
+go_online(ports);
+
+<span style="color: #73d216;">// </span><span style="color: #73d216;">We may need to use ports outside the constructor and at least</span>
+<span style="color: #73d216;">// </span><span style="color: #73d216;">should keep them alive.</span>
+m_ports = ports;
+
+<span style="color: #73d216;">// </span><span style="color: #73d216;">The Node constructor only cares about configuring any components</span>
+<span style="color: #73d216;">// </span><span style="color: #73d216;">and does so through a factory method which returns a component as</span>
+<span style="color: #73d216;">// </span><span style="color: #73d216;">an abtrace IConfigurable facet.  We assume the factory holds on to</span>
+<span style="color: #73d216;">// </span><span style="color: #73d216;">the instance.</span>
+<span style="color: #b4fa70;">for</span> (<span style="color: #8cc4ff;">CompCfg</span> <span style="color: #fcaf3e;">compcfg</span> : nodecfg.compdefs()) {
+    <span style="color: #73d216;">// </span><span style="color: #73d216;">Get type name and instance identifier</span>
+    <span style="color: #b4fa70;">auto</span> <span style="color: #fcaf3e;">tn</span> = compcfg.type_name();
+    <span style="color: #b4fa70;">auto</span> <span style="color: #fcaf3e;">id</span> = compcfg.ident();
+    <span style="color: #b4fa70;">auto</span>&amp; <span style="color: #fcaf3e;">comp</span> = factory.get&lt;IComponent&gt;(tn, id);
+    <span style="color: #73d216;">// </span><span style="color: #73d216;">Some components need ports, but the node creates them so the</span>
+    <span style="color: #73d216;">// </span><span style="color: #73d216;">component says which ones they want by name (ident).</span>
+    <span style="color: #b4fa70;">auto</span> <span style="color: #fcaf3e;">ports</span> = get_ports(compcfg.ports());
+    comp-&gt;configure(id, cfgstream, ports);
+}
+
+<span style="color: #73d216;">// </span><span style="color: #73d216;">This mockup is about configuration patterns so it omits other</span>
+<span style="color: #73d216;">// </span><span style="color: #73d216;">possible Node-level configuration items.  As a placeholder we imply</span>
+<span style="color: #73d216;">// </span><span style="color: #73d216;">that by saving the NodeCfg for use in other Node methods.</span>
+m_cfg = nodecfg;
+
+<span style="color: #73d216;">// </span><span style="color: #73d216;">But, suggest one possible additional configuration processing: Not</span>
+<span style="color: #73d216;">// </span><span style="color: #73d216;">all components are necessarily configurable and thus the node is</span>
+<span style="color: #73d216;">// </span><span style="color: #73d216;">given a possible superset which lists all components that are</span>
+<span style="color: #73d216;">// </span><span style="color: #73d216;">runable.</span>
+<span style="color: #b4fa70;">for</span> (<span style="color: #b4fa70;">auto</span> <span style="color: #fcaf3e;">torun</span> : compcfg.runnables()) {
+    m_runables.push_back(factor.get&lt;IRunnable&gt;(torun));
+}
+<span style="color: #73d216;">// </span><span style="color: #73d216;">later in a Node::run() we may forward the call to components.</span>
+</pre>
+</div>
+
+
+<p>
+We create
+</p>
+
+<ul class="org-ul">
+<li>a configuration object (cfgobj) in JSON</li>
+<li>a validation object (valobj) in JSON Schema vocabulary to validate a cfgobj</li>
+<li>a definition structure (defobj) in Avro Schema to produce C++ or Python types</li>
+</ul>
+
+<p>
+Processing
+</p>
+
+<ul class="org-ul">
+<li>a defobj is created as JSON</li>
+<li>Avro generate is run to produce C++ or Python</li>
+<li>a cfgobj is created as JSON</li>
+<li></li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-org4c7bca8" class="outline-2">
+<h2 id="org4c7bca8">Configuration store</h2>
+<div class="outline-text-2" id="text-org4c7bca8">
+<p>
+We want:
+</p>
+
+<ul class="org-ul">
+<li>to construct an application out of components dynamically driven by configuration information.</li>
+<li>Provide configuration in a way that can be progressively consumed and applied</li>
+<li>Allow for multiple sources of config, including files and messages.</li>
+<li>Provide serialization to native types.</li>
+<li>Do not tightly couple configuration and interpretation</li>
+</ul>
+
+<p>
+The stream introduced above breaks that last one.  Eg configuration
+frames in the stream must be ordered to match how the code tries to
+apply.  In the example, depth-first ordering is required.  This is
+however a natural order for eg JSON.
+</p>
+</div>
+</div>
+</div>
+<div id="postamble" class="status">
+<p class="author">Author: Brett Viren</p>
+<p class="date">Created: 2020-06-11 Thu 19:32</p>
+<p class="validation"><a href="http://validator.w3.org/check?uri=referer">Validate</a></p>
+</div>
+</body>
+</html>

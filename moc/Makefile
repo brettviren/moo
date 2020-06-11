@@ -1,4 +1,4 @@
-all: test_demo.log
+all: test_demo.log test_demo2.log
 
 demo_config.json: demo_config.jsonnet
 	moo compile -P model.avro $< > $@
@@ -13,7 +13,7 @@ demo_config_nljs.hpp: demo_config.jsonnet avro_nljs.hpp.j2
 demo_app_nljs.hpp: demo_config.jsonnet avro_nljs.hpp.j2 
 	moo render -P app.nljs $^ > $@
 
-test_demo: test_demo.cpp demo_config.hpp demo_config_nljs.hpp demo_app.hpp demo_app_nljs.hpp
+test_%: test_%.cpp demo_config.hpp demo_config_nljs.hpp demo_app.hpp demo_app_nljs.hpp
 	g++  -ggdb3 -std=c++17 -Wall -o $@ $< \
            -I ../inc -I. -I$(HOME)/opt/avro/include \
            -L$(HOME)/opt/avro/lib -lavrocpp \
@@ -32,12 +32,12 @@ demo_config_objects.json: demo_config_node.json demo_config_app.json
 	cat $^ > $@
 
 
-test_demo.log: demo_config_objects.json test_demo 
-	./test_demo $< > $@
+%.log: % demo_config_objects.json 
+	./$< > $@
 	cat $@
 
 clean:
-	rm -f demo_config.json demo_config.hpp demo_config_nljs.hpp test_demo
+	rm -f demo_config.json demo_config.hpp demo_config_nljs.hpp test_demo test_demo2
 	rm -f demo_config_objects.json test_demo.log
 	rm -f demo_app_nljs.hpp demo_app.hpp demo_app.json
 	rm -f demo_config_app.json demo_config_node.json 

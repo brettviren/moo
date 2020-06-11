@@ -12,15 +12,13 @@
 
 moc is a moo for a /configuration/ system.  It provides::
 
-- a simple protocol for delivering configuration information in a variety of /formats/.
-
 - a vocabulary for defining the /schema/ that configuration information should follow.
 
 - tooling to validate configuration objects against their schema.
 
 - code generators creating native language (C++/Python) types and serialization methods between those types and configuration objects.
 
-- native language libraries and shell programs for producing and consuming configuration streams.
+- native language libraries and shell programs for producing and consuming configuration in a variety of /formats/ and media including files and /streams/.
 
 - a demo application and configuration.
 
@@ -29,43 +27,66 @@ moc is a moo for a /configuration/ system.  It provides::
   :CUSTOM_ID: dive-in
   :END:
 
+moc is currently not production but rather provides a mock up demo.
+To use it, first install the ~moo~ Python package eg like:
+
+#+begin_example
+  $ echo layout python3 > .envrc
+  $ direnv allow
+#+end_example
+
+Or, if you don't have ~direnv~
+
+#+begin_example
+  $ python3 -m venv venv
+  $ source venv/bin/activiate
+#+end_example
+
+Then install ~moo~
+
+#+begin_example
+  $ pip install -e .
+  $ moo --help
+#+end_example
+
+The moc demo is in [[file:moc/][moc/]]:
+
+#+begin_example
+  $ cd moc
+  $ make
+#+end_example
+
 
 * Technical design
   :PROPERTIES:
   :CUSTOM_ID: technical-design
   :END:
 
+moc is a *moo* focused on generating configuration objects and various means to deliver them into an application.  This section describes aspects of the technical design.
+
 ** Streams, frames and messages
    :PROPERTIES:
    :CUSTOM_ID: stream-frame-message
    :END:
 
+moc configuration data follows an abstract low level format which may be realized in a few ways and independently from the concrete high level schema of the delivered content.  This provides flexibility to an application to select how configuration information is delivered  
 
-The moc configuration stream specifies a simple, layered and general
-purpose stream format.  A moc stream be realized as an array in
-memory, a file, through message passing or similar means.  The higher
-layers allow for application-specific formats to extend the basic
-format.
+The abstract low level format is defined in terms of *streams* of *bytes*, *frames* and *messages* as described:
 
-The moc configuration stream layers are:
+- bytes :: A *moc byte stream* consists of a sequence of 8 bit bytes.  Several types of byte streams are supported by moc including commonly known ones (eg, a JSON object or a [[https://en.wikipedia.org/wiki/JSON_streaming][JSON stream]] and ones suitable for message passing systems like ZeroMQ).  Some byte streams may place limits the format of information they carry (eg, a JSON Stream may be used only for JSON text).
 
-- bytes :: A *moc byte stream* consists of a sequence of 8 bit bytes with no initial size nor end marker.  The start of the stream is determined by implementation (array element 0, begin of file, first message, etc).
+- frames :: A *moc frame stream* consists of a logical sequence of frames derived from a bytes stream.  A frame is a contiguous and finite sequence of bytes which may be read into memory in an atomic manner.  If two byte streams support the format of a frame then they both shall decode an identical frame identically.  
 
-- frames :: A *moc frame stream* consists of a contiguous range of the byte stream which may be read into memory in an atomic manner.  A frame has two parts: a *size* and a *body*.  The value of the size gives the size of the body in bytes.  A size less than 255 bytes is stored as a single byte.  To indicate a body size of 255 bytes or larger the first byte of size is ~0xFF~ and the subsequent four bytes holds the size value.
+- messages :: A *moc message stream* consists of a logical sequence of messages derived from a frame stream.  The application may determine the extent and interpretation of the message by progressively examining the frames.  moc messages must have an initial frame, called the message type *hint* which must consist of only printable ASCII characters suitable for use in forming a C symbol.  moc reserves a number of hint values, listed in the table below which are to be used to identify the low-level format of the next and last frame in the message called the *payload*.  The application is free to extend the list of message type hints it supports.
 
-- messages :: A *moc message stream* consists of a contiguous range of the frame stream.  The first frame in a message is called a *hint* and its value specifies how and what number of remaining *payload* frames should be interpreted as part of the message.  A moc defines the form of the hint body and reserves a set of hint values (described below).
+- types :: A *moc type stream* produces a stream of objects in native language type.  It serializes messages from a moc message stream.  When used, the application must know the type expected.
 
-- schema :: A *moc schema* specifies the structure expected in a payload frame body, between payloads in a message and between messages in a stream.  (also described below)
-
-** Message types
+** Reserved message types
    :PROPERTIES:
    :CUSTOM_ID: message-types
    :END:
 
-
-A moc message type is determined by the value of the body of the first frame of the message and is the *hint*.  A hint is restricted to be composed of the subset of printable ASCII which may make up a C symbol.
-
-moc defines a set of hints in the following table.  Each hint specifies the low-level format or syntax to assume for the subsequent and only other frame in the message.  The last columns show the whether the format is currently supported in the moc implementation for the given native language.  The moc reserved hints are:
+The set of reserved moc message type hints are:
 
 |------+------------------+-----+--------|
 | hint | payload encoding | C++ | Python |
@@ -81,7 +102,17 @@ moc defines a set of hints in the following table.  Each hint specifies the low-
 | PBUF | Protobuf         |     |        |
 |------+------------------+-----+--------|
 
-An example message in JSON is shown next with a frame depicted as ~[size|body]~ where the ~size~ in a binary value and the ~body~ is expressed in ASCII:
+** Byte stream formats
+   :PROPERTIES:
+   :CUSTOM_ID: byte-stream-formats
+   :END:
+
+
+moc provides byte stream decoding for a few common types:
+
+- JSON :: the bytes stream is assumed to be a [[https://en.wikipedia.org/wiki/JSON_streaming][JSON stream]].  As it may only hold JSON format data the moc message type hint is implicitly and always ~JSON~.  The stream may consist of an admixed concatenation of JSON types.  The first frame from a JSON byte stream is the string ~JSON~ which is implicitly generated.  The second frame will contain the JSON text of the first JSON type in the stream.  This then repeats until the stream is exhausted.
+
+- SHFM :: a "size-hinted framed message" may hold arbitrary data (binary and text, including JSON) and is well suited for use with ZeroMQ or other message passing systems.  In the byte stream, a frame is prefixed with a binary value holding the size of the frame data measured in bytes.  If less than 255 the size value is stored in a single byte.  If the size is 255 or greater but less than 2^32-1 the first byte is 255 (~0xff~) and the next four bytes hold the size as a 32 bit integer.  The first frame in a message shall provide the message type hint and for hints reserved by moc, the subsequent and only other frame in the message holds the payload frame of that type.  An example SHFM message is shown next with a frame depicted as ~[size|body]~ where the ~size~ in a binary value and the ~body~ is expressed in ASCII:
 
 #+begin_example
 [4|JSON][8|{"a":42}]
@@ -283,10 +314,6 @@ moc configuration information may exist in serialized /message/ form and in a na
 
 
 
-* 
-
-Make a base object of functions that generate schema.  Make JSON
-Schema for validation, avro for generation or simple for templates.
 
 * mock up
 
