@@ -1,0 +1,17 @@
+#+title: moo and moc
+#+subtitle: Model Oriented Objects and Configuration
+#+setupfile: setup.org
+
+
+This repository is a playground of ideas on leveraging the power of
+modeling software as data and generated code from those models.  Some
+of it is actually useful but in general it is meant to explore and
+demonstrate ideas and not intended for production (as-is).
+
+For some entries into what is here see:
+
+- [[file:moc.org][moc]] :: model oriented configuration, for a design and demo how to apply moo ideas to complex application configuration problems.
+
+- [[file:moo.org][moo]] :: model oriented objects, for a more broad consideration.
+
+- [[file:README.org][README]] :: the source readme file
