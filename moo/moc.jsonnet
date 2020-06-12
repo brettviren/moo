@@ -33,7 +33,9 @@ local objif(key, val) = if std.type(val)=="null" then {} else {[key]:val};
             what:"sequence", type:type,
         },
 
-        enum(name, symbols):: {what:"enum", name:name, symbols:symbols, },
+        enum(name, symbols, default=null,doc=null):: {
+            what:"enum", name:name, symbols:symbols}
+            +objif("default",default)+objif("doc",doc),
     },
 
     // The avro set of fundamental schema functions produce Avro
@@ -46,6 +48,8 @@ local objif(key, val) = if std.type(val)=="null" then {} else {[key]:val};
             f4: "float",
             f8: "double",
         },
+        local typeref(what) = if std.type(what)=="string" then what else
+            if what.type == "record" then what.name else what,
 
         // fixme: need function to resolve a type structure to a type
         // name.  For record it is .name which is the type.  All
@@ -64,7 +68,7 @@ local objif(key, val) = if std.type(val)=="null" then {} else {[key]:val};
 
         // A field is an attribute of a record.
         field(name, type, default=null, doc=null):: {
-            name:name, type:type.type,
+            name:name, type:typeref(type)
         } + objif("default",default) + objif("doc", doc),
 
         // A record is a class/struct/object.  
@@ -73,9 +77,10 @@ local objif(key, val) = if std.type(val)=="null" then {} else {[key]:val};
         } + objif("doc",doc),
 
         // A sequence in avro is an array
-        sequence(type):: { type:"array", items:type, },
+        sequence(type):: { type:"array", items:typeref(type), },
 
-        enum(name, symbols):: {type:"enum", name:name, symbols:symbols, },
+        enum(name, symbols, default=null, doc=null):: {
+            type:"enum", name:name, symbols:symbols}+objif("default",default)+objif("doc",doc),
     },
     
     // The jscm set of fundamntal schema functions produce JSON Schema
@@ -118,8 +123,7 @@ local objif(key, val) = if std.type(val)=="null" then {} else {[key]:val};
 
         // 
         field(name, type, default=null, doc=null):: {
-            what:"field", name:name, type:type, default:default, doc:doc
-        },
+            what:"field", name:name, type:type}+objif("default",default)+objif("doc",doc),
 
         // A record matches a JSON object wth some set of fields.
         // Name is ignored
@@ -127,14 +131,13 @@ local objif(key, val) = if std.type(val)=="null" then {} else {[key]:val};
             type: "object",
             properties: {[f.name]: {type: f.type} for f in fields},
             required: [f.name for f in fields],
-        },
+        }+objif("doc",doc),
 
-        
         // A sequence in JSON Schema is an array
         sequence(type):: { type:"array", items:type, },
         
         // Like record, enum does not have a name
-        enum(name, symbols):: {
-            type:"string", enum:symbols, },
+        enum(name, symbols, default=null, doc=null):: {
+            type:"string", enum:symbols}+objif("default",default)+objif("doc",doc),
     }
 }

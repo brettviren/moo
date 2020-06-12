@@ -1,9 +1,9 @@
-#ifndef {{model.namespace|replace(".","_")|upper}}_AVRO_NLJS_HPP
-#define {{model.namespace|replace(".","_")|upper}}_AVRO_NLJS_HPP
+#ifndef {{model.namespace|replace(".","_")|upper}}_{{model.name|upper}}_NLJS_HPP
+#define {{model.namespace|replace(".","_")|upper}}_{{model.name|upper}}_NLJS_HPP
 
 
 #include "json.hpp"
-#include "demo_config.hpp"
+#include "{{model.name}}_avro.hpp"
 
 namespace {{ model.namespace }} {
 

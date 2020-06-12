@@ -55,8 +55,6 @@ int main(int argc, char* argv[])
         // would be ENCODED configuration object.  But the new idea is
         // what comes next.
         std::cout << "\n\t\tinstance config: \"" << compcfg.config << "\"\n";
-
-        
     }
 
     return 0;

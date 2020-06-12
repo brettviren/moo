@@ -110,12 +110,16 @@ The set of reserved moc message type hints are:
 
 moc provides byte stream decoding for a few common types:
 
-- JSON :: the bytes stream is assumed to be a [[https://en.wikipedia.org/wiki/JSON_streaming][JSON stream]].  As it may only hold JSON format data the moc message type hint is implicitly and always ~JSON~.  The stream may consist of an admixed concatenation of JSON types.  The first frame from a JSON byte stream is the string ~JSON~ which is implicitly generated.  The second frame will contain the JSON text of the first JSON type in the stream.  This then repeats until the stream is exhausted.
+- JSON :: the bytes stream is assumed to be a [[https://en.wikipedia.org/wiki/JSON_streaming][JSON stream]].  As it may only hold JSON format data the moc message type hint is implicitly and always ~JSON~.  The stream may consist of an admixed concatenation of JSON types.  The first frame from a JSON byte stream is the string ~JSON~ which is implicitly generated.  The second frame will contain the JSON text of the first JSON type in the stream.  This then repeats until the stream is exhausted.  An trivial example of a JSON stream with a sequence of JSON objects:
 
-- SHFM :: a "size-hinted framed message" may hold arbitrary data (binary and text, including JSON) and is well suited for use with ZeroMQ or other message passing systems.  In the byte stream, a frame is prefixed with a binary value holding the size of the frame data measured in bytes.  If less than 255 the size value is stored in a single byte.  If the size is 255 or greater but less than 2^32-1 the first byte is 255 (~0xff~) and the next four bytes hold the size as a 32 bit integer.  The first frame in a message shall provide the message type hint and for hints reserved by moc, the subsequent and only other frame in the message holds the payload frame of that type.  An example SHFM message is shown next with a frame depicted as ~[size|body]~ where the ~size~ in a binary value and the ~body~ is expressed in ASCII:
+#+begin_src json
+{"greeting":"hi"}{"greeting":"bye"}
+#+end_src
+
+- SHFM :: a "size-hinted framed message" may hold arbitrary data (binary and text, including JSON) and is well suited for use with ZeroMQ or other message passing systems.  In the byte stream, a frame is prefixed with a binary value holding the size of the frame data measured in bytes.  If less than 255 the size value is stored in a single byte.  If the size is 255 or greater but less than 2^32-1 the first byte is 255 (~0xff~) and the next four bytes hold the size as a 32 bit integer.  The first frame in a message shall provide the message type hint and for hints reserved by moc, the subsequent and only other frame in the message holds the payload frame of that type.  An example SHFM message is shown next with a frame depicted as ~[ size | body ]~ where the ~size~ in a binary value and the ~body~ is expressed in ASCII:
 
 #+begin_example
-[4|JSON][8|{"a":42}]
+[ 4 | JSON ][ 8 | {"a":42} ]
 #+end_example
 
 ** Schema
@@ -123,21 +127,22 @@ moc provides byte stream decoding for a few common types:
    :CUSTOM_ID: schema
    :END:
 
+When using reserved message types, the moc library can transparently handle a choice of both the byte stream (among the supported formats) and of low-level frame data format (ie, JSON vs Avro, etc).   The producer and consumer of a moc *message stream* must honor a shared *contract* which governs the structure of the data at three semantic layers:
 
-The producer and consumer of a moc *message stream* must honor a shared *contract* (or *schema*) which governs the structure of the data.  A particular schema may span one of these possible levels of context:
+- payload :: the structure of information in given payload frame (format is handled by moc)
+- intra message :: the structure of payload frames in a message (if using custom message types, moc reserved types only have one frame).  
+- inter message :: the number, structure, order and interpretation of messages in a stream.
 
-- payload :: the structure of a given payload frame body.  
-- intra message :: the structure of payload frames in a message.  
-- inter message :: the structure of messages in a stream
+moc provides some means to rigorously define the contract, particularly as it pertains to payload structure.  This part of the contract is in the form of *schema*.  A schema is a (meta) data structure that describes the "shape" of other data structure.  There are two goals in mind for the use of a schema:
 
-moc provides a means to rigorously define schema as a (meta) data structure and with two goals in mind for the use of a schema:
+- validation :: a schema may be used to check if a given data structure, aka "object" aka *model*, obeys the contract defined by the schema.
+- generation :: a schema may be applied to a *template* in order to generate a *representation*, usually in a source code language (C++/Python) but also documentation, diagram markup language, etc. 
 
-- validation :: a schema may be used to check if a given data object (aka *model*) obeys the contract defined by the schema.
-- generation :: a schema object may be applied to a *template* in order to generate a *representation*.
+For practical reasons, we want to represent a conceptual or abstract schema in two (or more) different forms.  For example, JSON Schema vocabulary is well suited for validation schema while Avro Schema is well suited for generation schema.
 
-These two goals require different data structure.  For example, a validation schema is well represented as a data structure which itself obeys the JSON Schema while a generation schema is better represented by a data structure which itself obeys the Avro Schema.  
+We would like to avoid manually crafting and keeping consistent two (or more) separate representations.  To save us, moc provides sets of Jsonnet functions.  Each set returns fundamental schema data structure of a particular vocabulary (eg, JSON Schema or Avro schema).  A developer of a moc configuration may then write a set of high level functions parameterized by a fundamental function set and then structures in all supported schema vocabulary may be generated.
 
-To avoid developing two conceptually identical schema structures to satisfy these two forms, moc provides support for a developer to define a schema abstractly in the form of Jsonnet function calls.  These functions are parameterized on a Jsonnet object holding primitive schema defining functions.  This allows the same developer-provided functions to be called with JSON Schema primitives or with Avro Schema primitives and output the proper structure for each.
+This may seem complex but in practice it is simple as described in the example in the next section.
 
 ** Example schema
    :PROPERTIES:
@@ -273,180 +278,221 @@ When applying either of the produced schema one has to take into account the sub
 
 Inter-message schema may be (under) specified simply as an array of expected hints.   Or the same patterns described above may be extended to cover multiple messages as they are shown to cover multiple frames.  In other words, it may be schema all the way down.  
 
-* Package layout
 
+* Demos
 
-* Extensions
+moc provides a few demo uses.  
 
-- new hints to allow different payload format or 0 or more than one payload frames
-- intra-message schema when multiple payloads are allowed.  this can likely mimic inter-message schema
+** Install prerequisites
 
+The demo requires:
 
-* Blah blah
+- the ~moo~ Python command line program in ~$PATH~
+- the Avro C++ library and ~avrogencpp~ in ~$PATH~
+- ~make~, compiler, etc
 
+** Run the demo
+   :PROPERTIES:
+   :CUSTOM_ID: run-the-demo
+   :END:
 
-The working demonstration is a distributed system which decomposes into 
+The demos can be built and exercised with:
 
-- a single, general software /application/ (something with a ~main()~) which aggregates
-
-- a set of software /components/ that are provided in
-
-- dynamically loaded plugin shared libraries resulting in a number of
-
-- running /process/ instances 
-
-The application is general and has these explicit parts:
-
-- command line parsing 
-- load any plugins named on the CLI
-- instantiate a moc entry point component based on CLI arguments
-- execute moc entry point to receive application configuration
-- load additional plugins as per cfg
-- instantiate components as per cfg
-- apply component cfg on instances
-- execute instances
-
-This demo is a one-shot configuration, there is no re-config mechanism.  This may be developed as an extension.
-
-moc configuration information may exist in serialized /message/ form and in a native language (C++/python) fully typed class.  The code providing /deserializing/ methods is generated based on a moo schema defining the configuration structure.  Generated code is compiled into headers and source which the application and components may be developed against.
-
-
-
-
-
-
-* mock up
-
-Want:
-
-- define rules for validating structure expressed in JSON
-- map a structure composed values in JSON types to C++/Python class definitions
-- generate code to serialize values to C++/Python instances
-- allow for partial serializing in order to delegate serializing.
-
-Want to construct a node, eg inside ~main()~ or maybe inside some main ~Application~ object:
-
-#+begin_src c++
-  // This mock up will create and configure an instance of "Node" which
-  // whill create, configure and aggregate instances of "Port" and
-  // "Comp" (component) each of which uses some subset of the ports.
-
-  // The process is driven by a particular configuration istream.  The
-  // program may have different types of config streams and which used
-  // is determined by a meta configuration such as provided on the
-  // command line.  The CfgStreamKey categorizes the type and any
-  // additional information needed to instantiate or access a config
-  // stream.
-  CfgStreamKey cfg_stream_info = parse_cli_arg_for_cfg_stream_info();
-
-  // Resolve the key a CfgStream object.  A CfgStream provides a
-  // sequence interface.  Maybe like std::istream, std::queue, or ZeroMQ
-  // socket.
-  CfgStream& cfgstream = get_cfgstream(cfg_stream_info); 
-
-  std::vector<Node> nodes;
-  while (!cfgstream.empty()) {
-      nodes.emplace_back(cfgstream);
-  }
+#+begin_src shell :exports both :results output code :wrap "example"
+cd moc && make clean all
 #+end_src
 
-Inside the ~Node~ constructor we process the configuration stream to make ports and node components.
+#+RESULTS:
+#+begin_example
+rm -f demo demo.log demo-config.json node_avro.hpp demo_avro.hpp node_nljs.hpp demo_nljs.hpp
+moo compile -P avro node.jsonnet > node_avro.json
+avrogencpp -n moc -i node_avro.json -o node_avro.hpp
+moo compile -P avro demo.jsonnet > demo_avro.json
+avrogencpp -n moc -i demo_avro.json -o demo_avro.hpp
+moo render -P nljs node.jsonnet avro_nljs.hpp.j2 > node_nljs.hpp
+moo render -P nljs demo.jsonnet avro_nljs.hpp.j2 > demo_nljs.hpp
+g++  -ggdb3 -std=c++17 -Wall -o demo demo.cpp \
+           -I ../inc -I. -I/home/bv/opt/avro/include -L/home/bv/opt/avro/lib -lavrocpp -Wl,-rpath=/home/bv/opt/avro/lib
+moo compile --string -P demo.stream demo.jsonnet > demo-config.json
+./demo demo-config.json > demo.log
+cat demo.log
+Factory: MySource instance mysource1
+Creating new SourceComponent
+SourceComponent mysource1 configuring
+	ntosend = 10
+Factory: Node instance mynode1
+Creating new Node
+Config for moc::Node ID: "mynode1"
+	node port ID: "src"
+		link type:0 address:""
+	node comp type "MySource" instance "mysource1" wants port IDs: "src"
+		instance config: "MySource::mysource1 config string"
+Factory: MySource instance mysource1
+Have MySource instance mysource1
+Source mysource1 using ports: src
+configure done
+rm node_avro.json demo_avro.json
+#+end_example
 
-#+begin_src c++
-  // We assume the stream follows a protocol.  The stream is to consist
-  // of distinct frames and frames are grouped into messages.  A frame
-  // is read into application memory in an atomic manner.  The number of
-  // frames in a message the the interpretation of each frame may depend
-  // on previous frames in the message.
+This automatically does the following:
 
-  // We assume a message has an initial frame consisting of a string
-  // which gives the format to assume for the second frame.  Eg,
-  // ["JSON",<JSON text>].  We hide this interpretation and return a C++
-  // class that the Node constructor code knows.  More on this constructor
-  // later.
-  NodeCfg nodecfg(cfgstream);
+- generates schema objects from Jsonnet
+- applies those schema objects to generate Avro schema files
+- generates C++ classes with Avro's C++ generator
+- augments the C++ classes with functions to serialize to/from ~nlohmann::json~
+- builds a demo ~main()~ program with generated and hand-written code.
+- produces schema-compliant configuration objects as JSON stream files
+- runs the demo to process the streams using moc's C++ support code
 
-  cout << "Loading node ID: " << nodecfg.ident() << "\n";
+** Demo framework
+   :PROPERTIES:
+   :CUSTOM_ID: demo-framework
+   :END:
 
-  // A node instantiates, configures and aggregates ports.  Here, a port
-  // is assumed to be some socket with a "smart" constuction driven by
-  // the configuration.  Eg, it may perform auto discovery of peers.
-  // But, in this mock up it also represents any type of shared objects
-  // or resources that need to be constructed outside the components.
-  // Note: in this mockup, configuration supersedes ports.  We may want
-  // to have configuratoin delivered via a port in which case these
-  // patterns need to be largely refactored.  One way would be to allow
-  // a component to be a node.  Then use a top node constructed a local
-  // cfgstream to construct a component node that listens on a port to
-  // produce a configuration stream that generates one or more new nodes.
-  std::vector<Port> ports;
-  for (PortCfg portcfg: nodecfg.portdefs()) {
-      ports.emplace_back(portcfg);
-  }
-  go_online(ports);
+The demo utilizes a simple application framework called *moc node* which mocks up (really, mocks down) a full featured implementation found as [[https://brettviren.github.io/zio/node.html][ZIO node]].  It is used to provide a realistic target for configuration.  moc node differs from ZIO node in that the factory/plugin pattern is fake and no actual port initialization, discovery, auto-connect or other ZIO mechanisms are implemented.  Instead, the demo constructs via the fake factory and applies configuration merely by printing out its values.
 
-  // We may need to use ports outside the constructor and at least
-  // should keep them alive.
-  m_ports = ports;
+Nonetheless, the moc node framework is faithful to the type of configuration complexity that would be required to use ZIO node or similar application aggregation concepts.  The demo application is deconstructed into these parts:
 
-  // The Node constructor only cares about configuring any components
-  // and does so through a factory method which returns a component as
-  // an abtrace IConfigurable facet.  We assume the factory holds on to
-  // the instance.
-  for (CompCfg compcfg : nodecfg.compdefs()) {
-      // Get type name and instance identifier
-      auto tn = compcfg.type_name();
-      auto id = compcfg.ident();
-      auto& comp = factory.get<IComponent>(tn, id);
-      // Some components need ports, but the node creates them so the
-      // component says which ones they want by name (ident).
-      auto ports = get_ports(compcfg.ports());
-      comp->configure(id, cfgstream, ports);
-  }
+- node :: represents a unit of functionality to the system and is composed of *ports* and *components*
+- port :: an abstraction of a message passing socket.  It is through ports that a node, via its *components* interacts with the outside world.
+- component :: a unit of application functionality.  Components may use and share zero or more ports created by the node.
 
-  // This mockup is about configuration patterns so it omits other
-  // possible Node-level configuration items.  As a placeholder we imply
-  // that by saving the NodeCfg for use in other Node methods.
-  m_cfg = nodecfg;
+Components instances are addressed by a pair of names as strings: type or implementation name and instance name.  In C++ code, an instance is held by an abstract base class aka an interface class.  In a real framework, a factory/plugin method would be used to dynamically local code for a component from a set of shared libraries and dynamically construct and later allow lookup of instances.  The moc demos will fake that but the (implementation,instance) name pairs are still used in the configuration.
 
-  // But, suggest one possible additional configuration processing: Not
-  // all components are necessarily configurable and thus the node is
-  // given a possible superset which lists all components that are
-  // runable.
-  for (auto torun : compcfg.runnables()) {
-      m_runables.push_back(factor.get<IRunnable>(torun));
-  }
-  // later in a Node::run() we may forward the call to components.
+Given this deconstruction, any number of nodes may be created in the ~demo~ main program and in each node any number of components may be created.  Each node "makes" a number of ports, handles their (fake) bind/connect and is told which components wish to utilize which ports.  This is all driven by configuration which itself is governed by schema.
+
+** Demo details
+
+This section highlights some of the details in the code.  First
+the [[file:moc/Makefile][Makefile]] drives the entire demo and then the [[file:moc/demo.cpp][demo.cpp]] ~main()~ program.
+
+*** Makefile driver
+
+The demo uses a Makefile to automate the demo.  The source is a few Jsonnet files, a hand-written header and a hand written ~main()~.  All the rest is generated.
+
+To start, we directly compile Jsonnet structure to AVRO schema JSON and run the ~avrogencpp~ program to generate C++ header files defining C++ structs which will match our configuration objects.  We take the convention to put these generated files in ~<name>_avro.hpp~ where the name may be ~node~ for common "framework" classes and ~demo~ for application classes:
+
+#+begin_src shell :exports both :results output code :wrap "src makefile"
+grep -m1 -A4 demo:AVRO moc/Makefile
 #+end_src
 
+#+RESULTS:
+#+begin_src makefile
+# demo:AVRO schema and generate C++ 
+%_avro.json: %.jsonnet 
+	moo compile -P avro $< > $@
+%_avro.hpp: %_avro.json
+	$(AVROGENCPP) -n $(namespace) -i $< -o $@
+#+end_src
 
-We create
+Next, we directly apply another part of the Jsonnet structures via ~moo~ to a template to generate ~nlohmann::json~ (NLJS) serialization functions for the Avro classes.  
 
-- a configuration object (cfgobj) in JSON 
-- a validation object (valobj) in JSON Schema vocabulary to validate a cfgobj
-- a definition structure (defobj) in Avro Schema to produce C++ or Python types
+#+begin_src shell :exports both :results output code :wrap "src makefile"
+grep -m1 -A2 demo:NLJS moc/Makefile
+#+end_src
 
-Processing
+#+RESULTS:
+#+begin_src makefile
+# demo:NLJS generated C++ 
+%_nljs.hpp: %.jsonnet avro_nljs.hpp.j2 
+	moo render -P nljs $^ > $@
+#+end_src
 
-- a defobj is created as JSON
-- Avro generate is run to produce C++ or Python
-- a cfgobj is created as JSON
--  
+Last we show how one particular configuration may be generated.  In a real system we might keep the Jsonnet files for configuration separate from code generation, maybe managed in ~git~.  Or, some configuration information may start as Jsonnet or other forms, go into some "database" and be derived to form the JSON or SHFM streams.
 
-* Configuration store
+#+begin_src shell :exports both :results output code :wrap "src makefile"
+grep -m1 -A2 demo:config moc/Makefile
+#+end_src
 
-We want:
+#+RESULTS:
+#+begin_src makefile
+# demo:config generated configuration data
+demo-config.json: demo.jsonnet
+	moo compile --string -P demo.stream demo.jsonnet > demo-config.json
+#+end_src
 
-- to construct an application out of components dynamically driven by configuration information. 
-- Provide configuration in a way that can be progressively consumed and applied 
-- Allow for multiple sources of config, including files and messages.
-- Provide serialization to native types.
-- Do not tightly couple configuration and interpretation
+Note the use of ~--string~ which produces a JSON Stream format instead of a JSON array.
 
-The stream introduced above breaks that last one.  Eg configuration
-frames in the stream must be ordered to match how the code tries to
-apply.  In the example, depth-first ordering is required.  This is
-however a natural order for eg JSON.
+*** Mock application
 
+The file [[file:moc/demo.cpp][demo.cpp]] holds code to fake an entire software application framework and fakes several services and application level components.  Let us start in ~main()~ with creation of the configuration stream:
 
- 
+#+begin_src shell :exports both :results output code :wrap "src c++"
+grep -m1 -A3 demo:main moc/demo.cpp
+#+end_src
+
+#+RESULTS:
+#+begin_src c++
+    // demo:main
+    std::ifstream fstr(streamname);
+    moc::type_stream ts = moc::make_type_stream(fstr, streamtype);
+    do_configure(ts);
+#+end_src
+
+In a real application we might hide the details of where the bytestream comes from by placing this code in a configuration manager and have different manager for, eg files as ZeroMQ messages.  Next we see ~do_configure()~:
+
+#+begin_src shell :exports both :results output code :wrap "src c++"
+grep -m1 -A16 do_configure moc/demo.cpp
+#+end_src
+
+#+RESULTS:
+#+begin_src c++
+void do_configure(moc::type_stream& ts)
+{
+    while (true) {
+        moc::ConfigHeader ch;
+        try {
+            ch = ts.pop<moc::ConfigHeader>();
+        }
+        catch (std::runtime_error(re)) {
+            // fixme: mock: find a less dramatic way to signal end of stream
+            std::cout << "configure done\n";
+            return;
+        }
+
+        auto& ic = fake_factory<IConfigurable>(ch.impname, ch.instname);
+        ic.configure(ch.instname, ts);
+    }
+}
+#+end_src
+
+Here we see how the ~moc::type_stream~ can "retype" the underlying byte stream using the generated. Avro classes and NLJS serialization functions. 
+
+The ~do_configure()~ enacts a particular protocol for applying the configuration stream to the application.  This is an example of an *inter-message schema* described above.  It requires message stream come with messages like
+
+1. ~ConfigHeader~
+2. configuration body
+3. ~ConfigHeader~
+4. configuration body
+5. ...
+
+The ~moc::ConfigHeader~ is ultimately defined by:
+
+#+begin_src shell :exports both :results output code :wrap "src jsonnet"
+grep -m1 -A1 ConfigHeader moc/demo.jsonnet
+#+end_src
+
+#+RESULTS:
+#+begin_src jsonnet
+        local cfghdr = s.record("ConfigHeader", fields=[
+            s.field("impname", ident), s.field("instname", ident)]),
+#+end_src
+
+And, it is the  *implementation name* (~impname~) and *instance name* (~instname~) which are used by the factory method in ~demo.cpp~ to look up an appropriate instance to consume the subsequent *configuration body*.
+
+The first configuration in the demo goes to an instance of a ~SourceComponent~ named ~mysource1~.  It's not a very interest class but just not that it is configured first.  The next configurable is a ~Node~ instance.  ~Node~ is considered a "framework" level class while ~SourceComponent~ may be a class provided in a plugin library.  In ZIO a "node" would be an atomic unit "known" to the outside world via ZeroMQ sockets and Zyre discovery.  Most likely we will have one node for each executable, but there is no technical limitation.
+
+The moc demo node is useful to look at to see how it also uses the factory to get an interface to a component so that it may pass on *port* objects.  In the demo, ports are simply strings.  In equivalent ZIO code, ports hold sockets which are bind/connect via configuration.
+
+#+begin_src shell :exports both :results output code :wrap "src c++"
+grep -m1 -A3 demo:lookup moc/demo.cpp
+#+end_src
+
+#+RESULTS:
+#+begin_src c++
+             // demo:lookup
+             auto& ip = fake_factory<IPorted>(compcfg.type_name, compcfg.ident);
+             ip.set_ports(ps);
+         }
+#+end_src
+
