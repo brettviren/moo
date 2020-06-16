@@ -7,8 +7,8 @@
 
 int main()
 {
-    {{model.namespace}}::{{model.classname}} obj();
-    auto cfg = obj.default_config();
+    {{model.namespace}}::{{model.classname}} obj;
+    auto cfg = obj.default_configuration();
     std::cout << cfg << std::endl;
     obj.configure(cfg);
     

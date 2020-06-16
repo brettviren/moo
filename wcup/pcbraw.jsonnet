@@ -34,7 +34,7 @@ local components = [ {
         base: {
             capname: name,
             fullname: fullname,
-            deps: ['WireCellUtil', 'WireCellIface', 'WCT'],
+            deps: ['WireCellUtil', 'WireCellIface', 'WCT', 'JSONCPP', 'SPDLOG'],
             namespace: std.asciiLower(name),
         },
     } + { [c.classname]:$.models.base+c for c in components },

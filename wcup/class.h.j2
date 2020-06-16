@@ -7,7 +7,7 @@ namespace {{model.namespace}} {
 
 class {{model.classname}} : public WireCell::IConfigurable {
   public:
-    ~virtual {{model.classname}}();
+    virtual ~{{model.classname}}();
 
     // IConfigurable interface
     WireCell::Configuration default_configuration() const;

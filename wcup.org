@@ -1,0 +1,29 @@
+#+title: wcup - Wire-Cell User Package Generator
+
+The Wire-Cell Toolkit supports "user packages" (WCUP).  A WCUP is like
+a "vertical slice" of the main ~wire-cell-toolkit~ repository in that it
+contains a main `wscript` and a "sub-package" directory.
+
+The [[file:wcup/][wcup]] directory in moo provides templates and other support to
+generate your own WCUP starting point.
+
+* Usage
+
+#+begin_example
+  $ moo many -C ~/dev/pcbro -T wcup wcup/pcbraw.jsonnet
+  $ cd ~/dev/pcbro
+  $ git init && git add * && git commmit -am "First commit"
+  $ cp /path/to/wire-cell-toolkit/wcb .
+  $ ./wcb configure --with-wct=/path/to/wct/install [...]
+  $ ./wcb 
+#+end_example
+
+The developer may then start adding in more code and files.
+
+* Caution
+
+There is *no* protection against overwriting existing files.  ~moo~ will
+happily regenerate the initial skeleton files even if you have poured
+your heart into developing them manually.  
+
+

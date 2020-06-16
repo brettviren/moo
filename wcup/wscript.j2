@@ -7,7 +7,7 @@ APPNAME = '{{model.capname}}'
 from waflib.extras import wcb
 wcb.package_descriptions.append(("WCT", dict(
     incs=["WireCellUtil/Units.h"],
-    libs=["WireCellUtil"], mandatory=True)))
+    libs=["WireCellUtil","WireCellIface"], mandatory=True)))
 
 def options(opt):
     opt.load("wcb")
