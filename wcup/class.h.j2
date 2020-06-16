@@ -1,0 +1,20 @@
+#ifndef {{model.namespace|upper}}_{{model.classname|upper}}_H_SEEN
+#define {{model.namespace|upper}}_{{model.classname|upper}}_H_SEEN
+
+#include "WireCellIface/IConfigurable.h"
+
+namespace {{model.namespace}} {
+
+class {{model.classname}} : public WireCell::IConfigurable {
+  public:
+    ~virtual {{model.classname}}();
+
+    // IConfigurable interface
+    WireCell::Configuration default_configuration() const;
+    void configure(const WireCell::Configuration& cfg);
+
+};
+
+}
+
+#endif // {{model.namespace|upper}}_{{model.classname|upper}}_H_SEEN

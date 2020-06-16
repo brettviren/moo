@@ -1,0 +1,28 @@
+#include "{{model.fullname}}/{{model.classname}}.h"
+
+#include "WireCellIface/IConfigurable.h"
+#include "WireCellUtil/NamedFactory.h"
+#include "WireCellUtil/Logging.h"
+
+{{model.namespace}}::{{model.classname}}::~{{model.classname}}()
+{
+}
+
+
+WireCell::Configuration {{model.namespace}}::{{model.classname}}::default_configuration() const
+{
+    WireCell::Configuration cfg;       
+    cfg["param"] = "value";
+    return cfg;
+}
+
+
+void {{model.namespace}}::{{model.classname}}::configure(const WireCell::Configuration& cfg)
+{
+    auto log = WireCell::Log::logger("{{model.capname|lower}}");
+    log->info(cfg);
+};
+
+// dump example.  normally, more ifaces than just configurable
+WIRECELL_FACTORY({{model.typename}}, {{model.namespace}}::{{model.classname}},
+                 WireCell::IConfigurable)

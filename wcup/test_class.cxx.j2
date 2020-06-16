@@ -1,0 +1,17 @@
+// write lots and lots and lots and lots of tests
+
+#include "{{model.fullname}}/{{model.classname}}.h"
+#include "WireCellUtil/Testing.h"
+
+#include <iostream>
+
+int main()
+{
+    {{model.namespace}}::{{model.classname}} obj();
+    auto cfg = obj.default_config();
+    std::cout << cfg << std::endl;
+    obj.configure(cfg);
+    
+    // add more tests, use Assert().
+    return 0;
+}
