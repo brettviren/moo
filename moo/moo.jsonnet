@@ -4,6 +4,12 @@ local json_schema_version = "draft-07";
 local objif(key, val) = if std.type(val)=="null" then {} else {[key]:val};
 
 {
+    // Create an object that, in an array, may be rendered with the
+    // command "moo render-many".
+    render(model, template, filename) :: {
+        model:model, template:template, filename:filename,
+    },
+
     zmq : {
         socket : {
             // these are in intentional order

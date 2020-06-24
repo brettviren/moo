@@ -90,3 +90,24 @@ def deref_defs(ctx, defs):
             val = select_path(defs, ref, "/")
         ret[key] = deref_defs(val, defs)
     return ret
+
+
+def tla_pack(tlas, jpath):
+    '''Pack list of things like var=value or var=file.jsonnet into
+    keyword arguments suitable for passing to jsonnet.  A value is
+    guessed to be either Jsonnet code or a simple string.
+    '''
+    tla_vars = dict()
+    tla_codes = dict()
+    for one in tlas:
+        k,v = one.split("=",1)
+        if v.endswith(".jsonnet"):
+            fname = resolve(v, jpath)
+            tla_codes[k] = open(fname).read()
+        elif v[0] in '{["]}':   # inline code
+            tla_codes[k] = v;   
+        else:                   # string
+            tla_vars[k] = v
+
+    # these keywords are what jsonnet.evaluate_file() expects
+    return dict(tla_vars=tla_vars, tla_codes=tla_codes)

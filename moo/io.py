@@ -7,7 +7,7 @@ from moo.util import clean_paths, resolve, select_path
 import moo.jsonnet
 import anyconfig
 
-def load(filename, fpath=None, dpath = None):
+def load(filename, fpath=None, dpath = None, **kwds):
     '''Load a file and return its data structure.  
 
     If dpath given, return substructure at that path.
@@ -18,7 +18,7 @@ def load(filename, fpath=None, dpath = None):
     filename = resolve(filename, paths)
     
     if filename.endswith(".jsonnet"):
-        data = moo.jsonnet.load(filename, paths)
+        data = moo.jsonnet.load(filename, paths, **kwds)
     else:
         data = anyconfig.load(filename)
     if dpath:
