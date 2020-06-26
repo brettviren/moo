@@ -35,20 +35,32 @@ def cli(ctx):
               help="Output file, default is stdout")
 @click.option('-s', '--schema', type=str,
               help="JSON Schema (a file of JSON schema or a JSON Schema version)")
+@click.option("--sequence", default=False, is_flag=True,
+              help="Assume a sequence of schema and models")
 @click.option('-V', '--validator', default="jsonschema",
               type=click.Choice(["jsonschema","fastjsonschema"]),
               help="Specify which validator")
 
 @click.argument('model')
 @click.pass_context
-def cmd_validate(ctx, spath, dpath, jpath, tla, output, schema, validator, model):
+def cmd_validate(ctx, spath, dpath, jpath, tla, output,
+                 schema, sequence, validator, model):
     '''
     Validate a model against a schema
     '''
     tlas = tla_pack(tla, jpath)
     data = io.load(model, jpath, dpath, **tlas)
     sche = io.load_schema(schema, jpath, spath)
-    res = validate(data, sche, validator)
+    if not sequence:
+        data = [data]
+        sche = [sche]
+    else: assert(len(data) == len(sche))
+    res=list()
+    for m,s in zip(data,sche):
+        one = validate(m, s, validator)
+        res.append(one)
+    if not sequence:
+        res = res[0]
     text = json.dumps(res, indent=4)
     with open(output, 'wb') as fp:
         fp.write(text.encode())

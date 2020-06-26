@@ -118,7 +118,7 @@ local objif(key, val) = if std.type(val)=="null" then {} else {[key]:val};
         // constrains the string to a fixed set formats ("uri",
         // "date", etc).
         string(pattern=null, format=null):: {
-            type: "string" } + objif("patern", pattern) + objif("format", format),
+            type: "string" } + objif("pattern", pattern) + objif("format", format),
 
 
         // 
