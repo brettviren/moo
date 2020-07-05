@@ -50,12 +50,17 @@ class Context:
         '''
         Resolve a filename to absolute path searching fpath.
         '''
+        ret = None
+
         if filename.endswith('.jsonnet'):
-            return moo.util.resolve(filename, fpath or self.jpath)
-        if filename.endswith('.j2'):
-            return moo.util.resolve(filename, fpath or self.tpath)
-        # best effort
-        return moo.util.resolve(filename, fpath)
+            ret = moo.util.resolve(filename, fpath or self.jpath)
+        elif filename.endswith('.j2'):
+            ret =  moo.util.resolve(filename, fpath or self.tpath)
+        else:
+            ret = moo.util.resolve(filename, fpath or self.jpath)
+        if ret is None:
+            raise RuntimeError(f'can not resolve {filename}')
+        return ret
 
     def render(self, templ_file, model):
         '''
@@ -117,7 +122,8 @@ def resolve(ctx, filename):
 @click.option('-o', '--output', default="/dev/stdout",
               type=click.Path(exists=False, dir_okay=False, file_okay=True),
               help="Output file, default is stdout")
-@click.option('-s', '--schema', type=str,
+@click.option('-s', '--schema', required=True,
+              type=click.Path(exists=True, dir_okay=False, file_okay=True),
               help="JSON Schema to validate against.")
 @click.option("--sequence", default=False, is_flag=True,
               help="Assume a sequence of schema and models")
@@ -138,7 +144,7 @@ def cmd_validate(ctx, output, schema, sequence, validator, model):
     else: assert(len(data) == len(sche))
     res=list()
     for m,s in zip(data,sche):
-        one = validate(m, s, validator)
+        one = moo.util.validate(m, s, validator)
         res.append(one)
     if not sequence:
         res = res[0]

@@ -17,7 +17,7 @@ local objif = util.objif;
     // Process an array of types and return a top-level JSON Schema.
     // The "main" object is what the schema exposes and if not given
     // then the last in types will be used.
-    top(types, main=null) :: {
+    export(types, main=null) :: {
         ret : {
             definitions: $.defs(types),
         } + if std.type(main) == "null"
@@ -25,6 +25,8 @@ local objif = util.objif;
         else main._js,
     }.ret,
         
+    // Build a JSON schema from an application schema. 
+    build(app_schema) :: self.export(app_schema(self).types),
 
     string(name, pattern=null, format=null):: {
         _tn: name,

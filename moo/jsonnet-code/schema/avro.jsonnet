@@ -30,8 +30,12 @@ local objif = util.objif;
     // Return a string representation of the type (aka of the schema object)
     ref(type) :: type._tn,
 
-    // Return an object suitable as a top-level Avro schema.
-    top(types) :: [t._as for t in types if std.objectHas(t,'_as')],
+    // Export the internal Jsonnet representation of application
+    // defined types to native Avro schema.
+    export(types) :: [t._as for t in types if std.objectHas(t,'_as')],
+
+    // Build an Avro schema from an application schema. 
+    build(app_schema) :: self.export(app_schema(self).types),
 
     // In Avro domain, all string types are degenerate.
     string(name=null, pattern=null, format=null):: {
