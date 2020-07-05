@@ -9,8 +9,7 @@
 
 
 local re = import "re.jsonnet";
-local util = import "util.jsonnet";
-local objif = util.objif;
+local objif(key, val) = if std.type(val)=="null" then {} else {[key]:val};
 
 {
     top(types) :: {[t.name]:t.validate for t in types},
