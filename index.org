@@ -1,17 +1,11 @@
-#+title: moo and moc
-#+subtitle: Model Oriented Objects and Configuration
+#+title: moo 無
+#+subtitle: Model Oriented Objects
 #+setupfile: setup.org
 
+*moo* is a tool for managing data structures.
 
-This repository is a playground of ideas on leveraging the power of
-modeling software as data and generated code from those models.  Some
-of it is actually useful but in general it is meant to explore and
-demonstrate ideas and not intended for production (as-is).
+- [[https://github.com/brettviren/moo][code repository]] and its [[file:README.org][README]] 
 
-For some entries into what is here see:
+- [[file:moo.org][moo]] :: documentation
 
-- [[file:moc.org][moc]] :: model oriented configuration, for a design and demo how to apply moo ideas to complex application configuration problems.
 
-- [[file:moo.org][moo]] :: model oriented objects, for a more broad consideration.
-
-- [[file:README.org][README]] :: the source readme file

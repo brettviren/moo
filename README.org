@@ -2,18 +2,21 @@
 
 * Overview
 
-*moo* provides a system to model and generate code.  It walks down the
-trail blazed by ZeroMQ's [[https://github.com/zeromq/zproto][zproto]] but it does so with differing language
-choices:
+*moo* is a tool for managing data structures.  *moo* operates on:
 
-- modeling :: Jsonnet (instead of XML)
-- template :: Jinja2 (instead of GSL)
-- programming :: C++ with ~cppzmq~ (instead of C with CZMQ)
+- schema :: data structures describing the structure of data (including schema)
+
+- model :: data structure which may be validated against a schema.
+
+- templates :: a generalized document which is parameterized by a model and from which code or other types of documents may be generated.
 
 * Quick Start
 
+  After preparing a Python environment in your favorite manner:
+
   #+begin_example
-  $ waf configure build
+  $ pip install -e .
+  $ moo --help
   #+end_example
 
 * Documentation
@@ -22,3 +25,43 @@ https://brettviren.github.io/moo
 
 
 
+* TODO
+
+New style schema abstraction.
+
+ - [ ] give everything an initial "name" argument
+
+ - [ ] give everything a "doc" argument, default to null
+
+ - [ ] In Jsonnet, refer to a type via what is returned by a schema
+       function and NOT a bare string
+ 
+ - [ ] most domains require a snigle post processing so see if we
+       can get rid of objif()'s and still strip nulls quickly
+
+ - [ ] move lots of jsonnet to moo.  inc. moo.schema.{json,avro,object,...}
+
+ - [ ] documentation by user levels:
+ 
+** user levels
+ - user: write configuration object
+ - developer: write schema
+ - subsystem: write schema utility code
+ - domain: write domain schema
+ - expert: define abstract schema
+
+** Rules for abstract and domain schema
+ 
+ - not all arguments need to be used in all domains
+ 
+ - schema function return values are in general OPAQUE to caller and
+ only meaningful inside a domain schema object.
+
+ - a domain schema may provide user methods to process domain schema
+ objects into externally usable form.
+
+** other
+
+ - [ ] compose-based inheritance with a "_base" field
+ - [ ] meta-configuration + Python to generate configuration objects a'la GeGeDe
+ - [ ] Look into Avro/Python

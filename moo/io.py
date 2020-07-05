@@ -21,6 +21,8 @@ def load(filename, fpath=None, dpath = None, **kwds):
         data = moo.jsonnet.load(filename, paths, **kwds)
     else:
         data = anyconfig.load(filename)
+    if data is None:
+        raise ValueError(f'no data from {filename}')
     if dpath:
         return select_path(data, dpath)
     return data

@@ -8,19 +8,76 @@ import json
 import click
 
 import jsonschema
-from moo import jsonnet, template, io
-from moo.util import validate, resolve, deref as dereference, tla_pack
+#from moo import jsonnet, template, io
+# from moo.util import validate, resolve, deref as dereference, tla_pack
+import moo
 
+class Context:
+    '''
+    Application context collects parameters and methods common to commands.
+    '''
+    def __init__(self, spath="", dpath="", jpath=(), tpath=(), tla=()):
+        self.spath = spath
+        self.dpath = dpath
+        self.jpath = jpath
+        self.tpath = tpath
+        self.tlas = dict()
+        if tla:
+            print(tla)
+            self.tlas = moo.util.tla_pack(tla, jpath)
+
+    def load(self, filename, jpath=None, dpath=None):
+        '''
+        Load a data structure from a file.
+
+        Search jpath for file and return substructure at dpath.
+        '''
+        return moo.io.load(self.resolve(filename),
+                           jpath or self.jpath,
+                           dpath or self.dpath, **self.tlas)
+
+    def load_schema(self, schema, jpath=None, spath=None):
+        '''
+        Load a schema structure from a file or URL.  
+
+        Search jpath for file and return substructure at spath.
+        '''
+        return moo.io.load_schema(self.resolve(schema),
+                                  jpath or self.jpath,
+                                  spath or self.spath)
+
+    def resolve(self, filename, fpath=None):
+        '''
+        Resolve a filename to absolute path searching fpath.
+        '''
+        if filename.endswith('.jsonnet'):
+            return moo.util.resolve(filename, fpath or self.jpath)
+        if filename.endswith('.j2'):
+            return moo.util.resolve(filename, fpath or self.tpath)
+        # best effort
+        return moo.util.resolve(filename, fpath)
+
+    def render(self, templ_file, model):
+        '''
+        Render model against template in templ_file.
+        '''
+        templ = self.resolve(templ_file, self.tpath)
+        
+        helper = self.load(self.resolve("moo.jsonnet"), dpath = "templ")
+        return moo.template.render(templ, dict(model=model, moo=helper))
+
+    def imports(self, filename):
+        '''
+        Return list of files the given file imports
+        '''
+        filename = self.resolve(filename)
+        if filename.endswith('.jsonnet'):
+            return moo.jsonnet.imports(filename, self.jpath)
+        if filename.endswith('.j2'):
+            return moo.template.imports(filename, self.tpath)
+        raise ValueError(f'unknown file type: {filename}')
 
 @click.group()
-@click.pass_context
-def cli(ctx):
-    '''
-    moo command line interface
-    '''
-    ctx.ensure_object(dict)
-
-@cli.command("validate")
 @click.option('-S', '--spath', default="",
               help="Specify a selection path into the schema data structure")
 @click.option('-D', '--dpath', default="",
@@ -28,29 +85,53 @@ def cli(ctx):
 @click.option('-J', '--jpath', envvar='JSONNET_PATH', multiple=True,
               type=click.Path(exists=True, dir_okay=True, file_okay=False),
               help="Extra directory to find Jsonnet files")
-@click.option('--tla', multiple=True,
+@click.option('-T', '--tpath', envvar='JINJA2_PATH', multiple=True,
+              type=click.Path(exists=True, dir_okay=True, file_okay=False),
+              help="Extra directory to find Jinja2 files")
+@click.option('-A', '--tla', multiple=True,
               help="Specify a 'top-level argument' as a var=string or var=file.jsonnet")
+@click.pass_context
+def cli(ctx, spath, dpath, jpath, tpath, tla):
+    '''
+    moo command line interface
+    '''
+    ctx.obj = Context(spath, dpath, jpath, tpath, tla)
+
+
+@cli.command("resolve")
+@click.argument('filename')
+@click.pass_context
+def resolve(ctx, filename):
+    '''
+    Resolve a filename.
+    '''
+    try:
+        filename = ctx.obj.resolve(filename)
+    except ValueError:
+        click.echo(f'can not resolve {filename}')
+    else:
+        click.echo(filename)
+
+
+@cli.command("validate")
 @click.option('-o', '--output', default="/dev/stdout",
               type=click.Path(exists=False, dir_okay=False, file_okay=True),
               help="Output file, default is stdout")
 @click.option('-s', '--schema', type=str,
-              help="JSON Schema (a file of JSON schema or a JSON Schema version)")
+              help="JSON Schema to validate against.")
 @click.option("--sequence", default=False, is_flag=True,
               help="Assume a sequence of schema and models")
 @click.option('-V', '--validator', default="jsonschema",
               type=click.Choice(["jsonschema","fastjsonschema"]),
               help="Specify which validator")
-
 @click.argument('model')
 @click.pass_context
-def cmd_validate(ctx, spath, dpath, jpath, tla, output,
-                 schema, sequence, validator, model):
+def cmd_validate(ctx, output, schema, sequence, validator, model):
     '''
     Validate a model against a schema
     '''
-    tlas = tla_pack(tla, jpath)
-    data = io.load(model, jpath, dpath, **tlas)
-    sche = io.load_schema(schema, jpath, spath)
+    data = ctx.obj.load(model)
+    sche = ctx.obj.load_schema(schema)
     if not sequence:
         data = [data]
         sche = [sche]
@@ -73,13 +154,6 @@ def write(data, output, need_dump=True):
         fp.write(data.encode())
 
 @cli.command()
-@click.option('-D', '--dpath', default="",
-              help="Specify a selection path into the model data structure")
-@click.option('-J', '--jpath', envvar='JSONNET_PATH', multiple=True,
-              type=click.Path(exists=True, dir_okay=True, file_okay=False),
-              help="Extra directory to find Jsonnet files")
-@click.option('--tla', multiple=True,
-              help="Specify a 'top-level argument' as a var=string or var=file.jsonnet")
 @click.option('-m', '--multi', default="",
               help="Write multiple output files")
 @click.option('-o', '--output', default="/dev/stdout",
@@ -91,12 +165,11 @@ def write(data, output, need_dump=True):
               help="Dereference JSON Schema $ref (yes/true or select path)")
 @click.argument('model')
 @click.pass_context
-def compile(ctx, dpath, jpath, tla, multi, output, string, deref, model):
+def compile(ctx, multi, output, string, deref, model):
     '''
     Compile a model to JSON
     '''
-    tlas = tla_pack(tla, jpath)
-    data = io.load(model, jpath, dpath, **tlas)
+    data = ctx.obj.load(model)
     if deref:
         data = dereference(data, deref)
     if multi:
@@ -107,68 +180,40 @@ def compile(ctx, dpath, jpath, tla, multi, output, string, deref, model):
     else:
         write(data, output, not string)
 
-    # if string:
-    #     text = data
-    # else:
-    #     text = json.dumps(data, indent=4)
-    # with open(output, 'wb') as fp:
-    #     fp.write(text.encode())
-
 @cli.command()
-@click.option('-D', '--dpath', default="",
-              help="Specify a selection path into the model data structure")
-@click.option('-J', '--jpath', envvar='JSONNET_PATH', multiple=True,
-              type=click.Path(exists=True, dir_okay=True, file_okay=False),
-              help="Extra directory to find Jsonnet files")
-@click.option('--tla', multiple=True,
-              help="Specify a 'top-level argument' as a var=string or var=file.jsonnet")
 @click.option('-o', '--output', default="/dev/stdout",
               type=click.Path(exists=False, dir_okay=False, file_okay=True),
               help="Output file, default is stdout")
 @click.argument('model')
 @click.argument('templ')
 @click.pass_context
-def render(ctx, dpath, jpath, tla, output, model, templ):
+def render(ctx, output, model, templ):
     '''
     Render a template against a model.
     '''
-    moo = io.load("moo.jsonnet", jpath, "templ")
-    tlas = tla_pack(tla, jpath)
-    data = io.load(model, jpath, dpath, **tlas)
-    text = template.render(templ, dict(model=data, moo=moo))
+    moo = ctx.obj.load("moo.jsonnet", dpath = "templ")
+    data = ctx.obj.load(model)
+    text = ctx.obj.render(templ, data)
     with open(output, 'wb') as fp:
         fp.write(text.encode())
-
     pass
 
 @cli.command('render-many')
-@click.option('-D', '--dpath', default="",
-              help="Specify a selection path into the model data structure")
-@click.option('-J', '--jpath', envvar='JSONNET_PATH', multiple=True,
-              type=click.Path(exists=True, dir_okay=True, file_okay=False),
-              help="Extra directory to find Jsonnet files")
-@click.option('--tla', multiple=True,
-              help="Specify a 'top-level argument' as a var=string or var=file.jsonnet")
-@click.option('-T', '--tpath', envvar='JINJA2_PATH', multiple=True,
-              type=click.Path(exists=True, dir_okay=True, file_okay=False),
-              help="Extra directory to find Jinja2 files")
 @click.option('-o', '--outdir', default=".",
               type=click.Path(dir_okay=True, file_okay=False),
               help="Output directory, default is '.'")
 @click.argument('model')
 @click.pass_context
-def render_many(ctx, dpath, jpath, tla, tpath, outdir, model):
+def render_many(ctx, outdir, model):
     '''Render many files for a project.  
 
-    The model found at the data path dpath should be an array of
-    moo.render() objects.
+    The model found at the data path dpath should be a Jsonnet array
+    of moo.render() objects.
+
     '''
-    moo = io.load("moo.jsonnet", jpath, "templ")
-    tlas = tla_pack(tla, jpath)
-    data = io.load(model, jpath, dpath, **tlas)
+    data = ctx.obj.load(model)
     for one in data:
-        templ = resolve(one["template"], tpath)
-        text = template.render(templ, dict(model=one["model"], moo=moo))
+        text = ctx.obj.render(one["template"], one["model"])
         output = os.path.join(outdir, one["filename"])
         print(f"generating {output}:")
         with open(output, 'wb') as fp:
@@ -177,28 +222,17 @@ def render_many(ctx, dpath, jpath, tla, tpath, outdir, model):
 
 
 @cli.command()
-@click.option('-T', '--tpath', default="",
-              help="Specify directory path to locate templates")
-@click.option('-M', '--mpath', default="",
-              help="Specify a selection path into the model data structure")
-@click.option('-J', '--jpath', envvar='JSONNET_PATH', multiple=True,
-              type=click.Path(exists=True, dir_okay=True, file_okay=False),
-              help="Extra directory to find Jsonnet files")
-@click.option('-T', '--tla', multiple=True,
-              help="Specify a 'top-level argument' as a var=string or var=file.jsonnet")
 @click.option('-C', '--outdir', default=".",
               type=click.Path(exists=False, dir_okay=True, file_okay=False),
               help="Output directory")
 @click.argument('model')
 @click.pass_context
-def many(ctx, tpath, mpath, jpath, tla, outdir, model):
+def many(ctx, outdir, model):
     '''
     Render many files
     '''
     # fixme: break out much of this into the modules
-    moo = io.load("moo.jsonnet", jpath, "templ")
-    tlas = tla_pack(tla, jpath)
-    data = io.load(model, jpath, mpath, **tlas)
+    data = ctx.obj.load(model)
     models = data.get("models",{})
     schemas = data.get("schema",{})
     targets = data.get("targets",[])
@@ -214,44 +248,34 @@ def many(ctx, tpath, mpath, jpath, tla, outdir, model):
         fulldir=os.path.join(outdir,reldir)
         model = models[target["model"]]
         dpath = target.get("dpath","")
-        templ = resolve(templates[templname], tpath)
+        templ = ctx.obj.resolve(templates[templname])
         output = os.path.join(fulldir, fname)
         os.makedirs(fulldir, exist_ok=True)
-
-        text = template.render(templ, dict(model=model, moo=moo))
+        text = ctx.obj.render(templ, model)
         with open(output, 'wb') as fp:
             fp.write(text.encode())
         
 
 
 @cli.command()
-@click.option('-J', '--jpath', envvar='JSONNET_PATH', multiple=True,
-              type=click.Path(exists=True, dir_okay=True, file_okay=False),
-              help="Extra directory to find Jsonnet files")
-@click.option('-T', '--tpath', envvar='JINJA2_PATH', multiple=True,
-              type=click.Path(exists=True, dir_okay=True, file_okay=False),
-              help="Extra directory to find Jinja2 files")
 @click.option('-o', '--output', default="/dev/stdout",
               type=click.Path(exists=False, dir_okay=False, file_okay=True),
               help="Output file, default is stdout")
 @click.argument('filename')
 @click.pass_context
-def imports(ctx, jpath, tpath, output, filename):
+def imports(ctx, output, filename):
     '''
     Emit a list of imports required by the model
     '''
-    deps=list()
-    if filename.endswith('.jsonnet'):
-        deps = jsonnet.imports(filename, jpath)
-    if filename.endswith('.j2'):
-        deps = template.imports(filename, tpath)
+    deps = ctx.obj.imports(filename)
     text = '\n'.join(deps)
     with open(output, 'wb') as fp:
         fp.write(text.encode())
 
+    
 
 def main():
-    cli(obj=dict())
+    cli(obj=None)
 
 if '__main__' == __name__:
     main()

@@ -27,7 +27,9 @@ def try_path(path, rel):
 class ImportCallback(object):
 
     def __init__(self, paths=()):
-        self.paths = list(paths)
+        self.paths = list(paths) + [
+            os.path.join(os.path.dirname(__file__),
+                         "jsonnet-code")]
         self.found = set()
 
     def __call__(self, path, rel):
@@ -57,7 +59,7 @@ def load(fname, paths=(), **kwds):
     '''
     paths = clean_paths(paths)
     fname = resolve(fname, paths)
-    
+
     ic = ImportCallback(paths)
     text = evaluate_file(fname, import_callback = ic, **kwds)
     return json.loads(text)
@@ -73,3 +75,4 @@ def imports(fname, paths=(), **kwds):
     ret = list(ic.found)
     ret.sort()
     return ret
+

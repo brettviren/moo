@@ -14,8 +14,8 @@ def select_path(obj, path, delim='.'):
     if isinstance(path, str):
         path = path.split(delim)
     for one in path:
-        if not one:
-            break
+        if one == '':
+            continue
         try:
             one = int(one)
         except ValueError:
@@ -41,9 +41,6 @@ def clean_paths(paths):
     if cwd not in paths:
         paths.insert(0, cwd)
 
-    # fixme: moo.jsonnet library probably doesn't belong in the
-    # python source directory.
-    paths.append(os.path.join(os.path.dirname(__file__)))
     return paths
 
 def resolve(filename, paths=()):
@@ -52,10 +49,18 @@ def resolve(filename, paths=()):
 
     Return None if fail to locate file.
     '''
+    paths = list(paths)
     if not filename:
         raise ValueError("no file name provided")
     if filename.startswith('/'):
         return filename
+    if filename.endswith(".jsonnet"):
+        paths.insert(0, os.path.join(os.path.dirname(__file__),
+                                     "jsonnet-code"))
+    if filename.endswith(".j2"):
+        paths.insert(0, os.path.join(os.path.dirname(__file__),
+                                     "templates"))
+
     for maybe in clean_paths(paths):
         fp = os.path.join(maybe, filename)
         if os.path.exists(fp):
