@@ -34,8 +34,11 @@ local objif(key, val) = if std.type(val)=="null" then {} else {[key]:val};
     // defined types to native Avro schema.
     export(types) :: [t._as for t in types if std.objectHas(t,'_as')],
 
-    // Build an Avro schema from an application schema. 
-    build(app_schema) :: self.export(app_schema(self).types),
+    // Build a schema suitable for codegen from an application schema. 
+    codegen(name, app_schema, namespace=null) :: {
+        name: name,
+        types: $.export(app_schema($).types)
+    }+objif("namespace",namespace),
 
     // In Avro domain, all string types are degenerate.
     string(name=null, pattern=null, format=null):: {

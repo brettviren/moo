@@ -1,0 +1,39 @@
+#ifndef {{model.namespace|replace(".","_")|upper}}_{{model.name|upper}}_STRUCTS_HPP
+#define {{model.namespace|replace(".","_")|upper}}_{{model.name|upper}}_STRUCTS_HPP
+
+{% set string_fields = [] %}
+{% for r in model.types if r.type == "record" %}
+{% for f in r.fields if f.type == "string" %}
+{% do string_fields.append(f.name) %}
+{% endfor %}
+{% endfor %}
+{% if string_fields|length > 0 %}
+#include <string>
+{% endif %}
+
+namespace {{ model.namespace }} {
+
+    {% for t in model.types %}
+    {% if t.type == "enum" %}
+    enum class {{t.name}}: unsigned {
+        {% for sname in t.symbols %}
+        {{sname}},
+        {% endfor %}
+    };
+
+    {% endif %}
+    {% endfor %}
+    {% for t in model.types %}
+    {% if t.type == "record" %}
+    struct {{t.name}} {
+        {% for f in t.fields %}
+        {{f.type}} {{f.name}};
+        {% endfor %}
+    };
+
+    {% endif %}
+    {% endfor %}
+
+} // namespace {{model.namespace}}
+
+#endif
