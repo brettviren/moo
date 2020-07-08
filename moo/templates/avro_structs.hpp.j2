@@ -1,14 +1,24 @@
+{%- macro field_type(ft) %}
+{% if ft is mapping %}std::vector<{{ft["items"]}}>{% elif ft == "string" %}std::string{% else %}{{ ft }}{% endif %}
+{%- endmacro -%}
 #ifndef {{model.namespace|replace(".","_")|upper}}_{{model.name|upper}}_STRUCTS_HPP
 #define {{model.namespace|replace(".","_")|upper}}_{{model.name|upper}}_STRUCTS_HPP
 
 {% set string_fields = [] %}
+{% set vector_fields = [] %}
 {% for r in model.types if r.type == "record" %}
 {% for f in r.fields if f.type == "string" %}
 {% do string_fields.append(f.name) %}
 {% endfor %}
+{% for f in r.fields if f.type.type == "array" %}
+{% do vector_fields.append(f.name) %}
+{% endfor %}
 {% endfor %}
 {% if string_fields|length > 0 %}
 #include <string>
+{% endif %}
+{% if vector_fields|length > 0 %}
+#include <vector>
 {% endif %}
 
 namespace {{ model.namespace }} {
@@ -27,7 +37,7 @@ namespace {{ model.namespace }} {
     {% if t.type == "record" %}
     struct {{t.name}} {
         {% for f in t.fields %}
-        {{f.type}} {{f.name}};
+        {{ field_type(f.type) }} {{f.name}};
         {% endfor %}
     };
 
