@@ -1,5 +1,5 @@
 {%- macro field_type(ft) %}
-{% if ft is mapping %}std::vector<{{ft["items"]}}>{% elif ft == "string" %}std::string{% else %}{{ ft }}{% endif %}
+{% if ft is mapping %}std::vector<{{field_type(ft["items"])}}>{% elif ft == "string" %}std::string{% else %}{{ ft }}{% endif %}
 {%- endmacro -%}
 #ifndef {{model.namespace|replace(".","_")|upper}}_{{model.name|upper}}_STRUCTS_HPP
 #define {{model.namespace|replace(".","_")|upper}}_{{model.name|upper}}_STRUCTS_HPP
