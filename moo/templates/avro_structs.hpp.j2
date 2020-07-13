@@ -35,8 +35,9 @@ namespace {{ model.namespace }} {
     {% endfor %}
     {% for t in model.types %}
     {% if t.type == "record" %}
-    struct {{t.name}} {
-        {% for f in t.fields %}
+
+    struct {{t.name}}{%- for b in t.fields if b.name.startswith("_base_") -%}{{" :" if loop.first}} public {{b.type}} {{ "," if not loop.last }}{% endfor -%}{
+        {% for f in t.fields if not f.name.startswith("_base_") %}
         {{ field_type(f.type) }} {{f.name}};
         {% endfor %}
     };

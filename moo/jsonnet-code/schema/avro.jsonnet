@@ -61,9 +61,20 @@ local objif(key, val) = if std.type(val)=="null" then {} else {[key]:val};
         name:name, type:$.ref(type)
     } + objif("default",default) + objif("doc", doc),
 
-    record(name, fields=[], doc=null) :: {
+    // Define a record type of given name with fields.
+    //
+    // The optional 'bases' parameter gives a list of record types to
+    // be used as conceptual base classes.  These are shoehorned into
+    // Avro schema by storing them as a field with a mangled field
+    // name like:
+    // 
+    //  _base_+<lower-case-record-name>
+    record(name, fields=[], bases=[], doc=null) :: {
         _tn: name,
-        _as: { type: "record", name:name, fields:fields } + objif("doc",doc),
+        _as: { type: "record", name:name, fields:fields + [
+            // add "parents" as fields with special _base_ prefix.
+            $.field('_base_' + std.asciiLower(b._tn), b) for b in bases ]
+             } + objif("doc",doc),
     },
 
     enum(name, symbols, default=null, doc=null):: {

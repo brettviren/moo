@@ -51,7 +51,7 @@ local objif(key, val) = if std.type(val)=="null" then {} else {[key]:val};
 
     // Field is fully internal to record so does not use the same _tn/_js pattern.
     field(name, type, default=null, doc=null):: { _name:name, _type:$.ref(type)},
-    record(name, fields=[], doc=null) :: {
+    record(name, fields=[], bases=[], doc=null) :: {
         _tn: name,
         _js: {
             type: "object",
