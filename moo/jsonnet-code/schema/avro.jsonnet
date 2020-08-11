@@ -40,6 +40,11 @@ local objif(key, val) = if std.type(val)=="null" then {} else {[key]:val};
         types: $.export(app_schema($).types)
     }+objif("namespace",namespace),
 
+    // In Avro domain, boolean is just boolean
+    boolean(name=null):: {
+        _tn: "bool"
+    },
+
     // In Avro domain, all string types are degenerate.
     string(name=null, pattern=null, format=null):: {
         _tn: "string",

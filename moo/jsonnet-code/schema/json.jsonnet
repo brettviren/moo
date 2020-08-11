@@ -27,6 +27,10 @@ local objif(key, val) = if std.type(val)=="null" then {} else {[key]:val};
     // Build a JSON schema from an application schema. 
     build(app_schema) :: self.export(app_schema(self).types),
 
+    boolean(name=null) :: {
+        _tn: "boolean",
+    },
+
     string(name, pattern=null, format=null):: {
         _tn: name,
         _js: { type: "string" } + objif("pattern", pattern) + objif("format", format),

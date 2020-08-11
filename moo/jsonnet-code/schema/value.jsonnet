@@ -14,6 +14,16 @@ local objif(key, val) = if std.type(val)=="null" then {} else {[key]:val};
 {
     top(types) :: {[t.name]:t.validate for t in types},
 
+    // return a type that validates a boolean
+    boolean(name):: {
+        name: name,
+        validate:: function(val) {
+            local jtype = std.type(val),
+            assert jtype == "boolean" : 'expect boolean for "%s", got <%s>'%[name,jtype],
+            ret: val,
+        }.ret,
+    },
+
     // return a type that validates a string
     string(name, pattern=null, format=null) :: {
         name: name,
