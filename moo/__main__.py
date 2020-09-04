@@ -23,7 +23,6 @@ class Context:
         self.tpath = tpath
         self.tlas = dict()
         if tla:
-            print(tla)
             self.tlas = moo.util.tla_pack(tla, jpath)
 
     def load(self, filename, jpath=None, dpath=None):

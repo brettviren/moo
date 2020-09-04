@@ -72,4 +72,7 @@ local objif(key, val) = if std.type(val)=="null" then {} else {[key]:val};
 
     sequence(name, type):: {_tn: name, _js: { type:"array", items:$.ref(type) }},
 
+    // Anything matches an any. 
+    any(name):: {_tn: name, _js: { type: {} }},
+
 }

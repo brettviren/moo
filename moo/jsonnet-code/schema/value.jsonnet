@@ -79,4 +79,10 @@ local objif(key, val) = if std.type(val)=="null" then {} else {[key]:val};
             ret: [type(ele) for ele in val],
         }.ret
     },
+
+    // Anything is an any.
+    any(name) :: {
+        name: name,
+        validate:: function(val) val,
+    },
 }

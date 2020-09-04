@@ -1,9 +1,10 @@
 #ifndef {{model.namespace|replace(".","_")|upper}}_{{model.name|upper}}_NLJS_HPP
 #define {{model.namespace|replace(".","_")|upper}}_{{model.name|upper}}_NLJS_HPP
 
-
-#include "nlohmann/json.hpp"
-#include "{{model.name}}_structs.hpp"
+#include <nlohmann/json.hpp>
+{% set pkgincdir = model.pkgincdir+"/" if model.pkgincdir is defined else "" %}
+{% set structinc = model.structinc if model.structinc is defined else model.name +"_structs.hpp" %}
+#include "{{pkgincdir}}{{structinc}}"
 
 namespace {{ model.namespace }} {
 
@@ -36,7 +37,8 @@ namespace {{ model.namespace }} {
         from_json(j, ({{b.type}}&)obj);
         {% endfor %}
         {% for f in t.fields if not f.name.startswith("_base_") %}
-        j.at("{{f.name}}").get_to(obj.{{f.name}});    
+        if (j.contains("{{f.name}}"))
+            j.at("{{f.name}}").get_to(obj.{{f.name}});    
         {% endfor%}
     }
     {% endif %}

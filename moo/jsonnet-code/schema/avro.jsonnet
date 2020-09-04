@@ -21,8 +21,12 @@ local objif(key, val) = if std.type(val)=="null" then {} else {[key]:val};
 {
     // A lookup between dtype and avro type
     local dtypes = {               // fixme: need to flesh out
-        i4: "int",
-        i8: "long",
+        i2: "int16_t",
+        i4: "int32_t",
+        i8: "int64_t",
+        u2: "uint16_t",
+        u4: "uint32_t",
+        u8: "uint64_t",
         f4: "float",
         f8: "double",
     },
@@ -34,10 +38,13 @@ local objif(key, val) = if std.type(val)=="null" then {} else {[key]:val};
     // defined types to native Avro schema.
     export(types) :: [t._as for t in types if std.objectHas(t,'_as')],
 
+    types(app_schema) :: $.export(app_schema($).types),
+
     // Build a schema suitable for codegen from an application schema. 
     codegen(name, app_schema, namespace=null) :: {
         name: name,
-        types: $.export(app_schema($).types)
+        //types: $.export(app_schema($).types)
+        types: $.types(app_schema)
     }+objif("namespace",namespace),
 
     // In Avro domain, boolean is just boolean
@@ -87,5 +94,14 @@ local objif(key, val) = if std.type(val)=="null" then {} else {[key]:val};
         _as: { type:"enum",
                name:name,
                symbols:symbols }+objif("default",default)+objif("doc",doc)},
+
+
+    // CAVEAT: Avro does not have a concept of an "any".  If an "any"
+    // is used in a schema then the code generators from the Avro
+    // project will choke.  The intention is for a code generator to
+    // represent an "any" as eitehr a dynamic object (eg
+    // nlohmann::json), as a language-supported "any" (boost::any,
+    // std::any).  Not all representations support the typehint.
+    any(name):: { _tn: name, _as: { type:"any", name:name }},
 }
 

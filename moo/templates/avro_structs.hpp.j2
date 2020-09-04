@@ -1,11 +1,18 @@
 {%- macro field_type(ft) %}
-{% if ft is mapping %}std::vector<{{field_type(ft["items"])}}>{% elif ft == "string" %}std::string{% else %}{{ ft }}{% endif %}
+{% if ft is mapping %}std::vector<{{field_type(ft["items"])}}>{% elif ft == "string" %}std::string{% elif ft == "any"%}model.anytype{% else %}{{ ft }}{% endif %}
 {%- endmacro -%}
-#ifndef {{model.namespace|replace(".","_")|upper}}_{{model.name|upper}}_STRUCTS_HPP
-#define {{model.namespace|replace(".","_")|upper}}_{{model.name|upper}}_STRUCTS_HPP
+{% set nsmarker = model.namespace.replace(":","_").replace(".","_").upper() +"_"+ model.name.upper() + "_STRUCTS_HPP" %}
 
+#ifndef {{nsmarker}}
+#define {{nsmarker}}
+
+
+{% set any_fields = [] %}
 {% set string_fields = [] %}
 {% set vector_fields = [] %}
+{% for r in model.types if r.type == "any" %}
+{% do any_fields.append(r.name) %}
+{% endfor %}
 {% for r in model.types if r.type == "record" %}
 {% for f in r.fields if f.type == "string" %}
 {% do string_fields.append(f.name) %}
@@ -14,6 +21,9 @@
 {% do vector_fields.append(f.name) %}
 {% endfor %}
 {% endfor %}
+{% if any_fields|length > 0 %}
+{{ model.anyincludes }}
+{% endif %}
 {% if string_fields|length > 0 %}
 #include <string>
 {% endif %}
@@ -34,9 +44,15 @@ namespace {{ model.namespace }} {
     {% endif %}
     {% endfor %}
     {% for t in model.types %}
+    {% if t.type == "any" %}
+
+    using {{ t.name }} = {{ model.anytype }};
+    {% endif %}
+    {% endfor %}
+    {% for t in model.types %}
     {% if t.type == "record" %}
 
-    struct {{t.name}}{%- for b in t.fields if b.name.startswith("_base_") -%}{{" :" if loop.first}} public {{b.type}} {{ "," if not loop.last }}{% endfor -%}{
+    struct {{t.name}}{%- for b in t.fields if b.name.startswith("_base_") -%}{{" :" if loop.first}} public {{b.type}} {{ "," if not loop.last }}{% endfor %} {
         {% for f in t.fields if not f.name.startswith("_base_") %}
         {{ field_type(f.type) }} {{f.name}};
         {% endfor %}
@@ -47,4 +63,4 @@ namespace {{ model.namespace }} {
 
 } // namespace {{model.namespace}}
 
-#endif
+#endif // {{ nsmarker }}
