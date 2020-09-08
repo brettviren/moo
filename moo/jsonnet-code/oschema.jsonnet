@@ -45,10 +45,10 @@ local isr(x,r) = if std.type(x) != "null" then r;
             [if is(constraints) then "constraints"]: constraints,
         },
 
-        // A sequence, vector, array of one type.
-        sequence(name, type, doc=null)
-        :: self.type(name, "sequence", doc, [$.fqn(type)]) {
-            type: self.deps[0],
+        // A sequence, vector, array with items all of one type.
+        sequence(name, items, doc=null)
+        :: self.type(name, "sequence", doc, [$.fqn(items)]) {
+            items: self.deps[0],
         },
         
         // We do not consider a field as a type but rather a named holder
@@ -64,12 +64,12 @@ local isr(x,r) = if std.type(x) != "null" then r;
         // if applied to generating a Python class.  
         field(name, type, default=null, doc=null) :: {
             name: name,
-            type: $.fqn(type),
+            item: $.fqn(type),
             [isr(default,"default")] : default,
         },
 
         record(name, fields=[], bases=null, doc=null)
-        :: self.type(name, "record", doc, [f.type for f in fields]) {
+        :: self.type(name, "record", doc, [f.item for f in fields]) {
             fields: fields,
             [if is(bases) then "bases"]: bases,            
         },
