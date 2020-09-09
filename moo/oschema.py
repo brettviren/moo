@@ -10,7 +10,7 @@ class BaseType(object):
     def __init__(self, name=None, doc="", path=()):
         self.name=name
         self.doc=doc
-        self.path=path
+        self.path=list(path)
 
     def to_dict(self):
         return dict(name=self.name,
@@ -174,11 +174,9 @@ class Namespace(BaseType):
         self.parts[name] = ret
         return ret
 
-    _known_types = {c.__name__.lower():c for c in [Boolean, Number, String, Record, Sequence, Namespace]}
-
     def __getattr__(self, key):
         try:
-            C = self._known_types[key.lower()]
+            C = schema_class(key)
         except KeyError:
             pass
         else:
@@ -223,6 +221,12 @@ class Namespace(BaseType):
         self.parts[typ.name] = typ
         return typ
         
+    @property
+    def deps(self):
+        '''
+        Return the types used in the immediate namespace (no recursion)
+        '''
+        return [str(p) for p in self.parts.values()]
 
     def types(self, recur=False):
         '''Return array of types in namespace.  
@@ -250,6 +254,14 @@ class Namespace(BaseType):
             d[t.name] = t.to_dict()
         return d
 
+def schema_class(clsname):
+    for cls in [Boolean, Number, String, Record, Sequence, Namespace]:
+        if clsname.lower() == cls.__name__.lower():
+            return cls
+    raise ValueError(f'no such schema class: "{clsname}"')
+    
+
+
 def from_dict(d):
     '''
     Return a schema object give a dictionary representation as made from .to_dict()
@@ -258,7 +270,7 @@ def from_dict(d):
     schema = d.pop("schema")
     deps = d.pop("deps",None)   # don't care
     name = d.pop("name")
-    path = d.pop("path")
+    path = list(d.pop("path"))  # don't abuse input
 
     if schema == "namespace":
         doc = d.pop("doc","")

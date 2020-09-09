@@ -8,7 +8,7 @@
 
 - model :: data structure which may be validated against a schema.
 
-- templates :: a generalized document which is parameterized by a model and from which code or other types of documents may be generated.
+- templates :: text parameterized by schema and from which a document (eg, C++ code file) may be generated
 
 * Quick Start
 
@@ -21,47 +21,6 @@
 
 * Documentation
 
-https://brettviren.github.io/moo
+- https://brettviren.github.io/moo
 
-
-
-* TODO
-
-New style schema abstraction.
-
- - [ ] give everything an initial "name" argument
-
- - [ ] give everything a "doc" argument, default to null
-
- - [ ] In Jsonnet, refer to a type via what is returned by a schema
-       function and NOT a bare string
- 
- - [ ] most domains require a snigle post processing so see if we
-       can get rid of objif()'s and still strip nulls quickly
-
- - [ ] move lots of jsonnet to moo.  inc. moo.schema.{json,avro,object,...}
-
- - [ ] documentation by user levels:
- 
-** user levels
- - user: write configuration object
- - developer: write schema
- - subsystem: write schema utility code
- - domain: write domain schema
- - expert: define abstract schema
-
-** Rules for abstract and domain schema
- 
- - not all arguments need to be used in all domains
- 
- - schema function return values are in general OPAQUE to caller and
- only meaningful inside a domain schema object.
-
- - a domain schema may provide user methods to process domain schema
- objects into externally usable form.
-
-** other
-
- - [ ] compose-based inheritance with a "_base" field
- - [ ] meta-configuration + Python to generate configuration objects a'la GeGeDe
- - [ ] Look into Avro/Python
+- or as [[index.org]]

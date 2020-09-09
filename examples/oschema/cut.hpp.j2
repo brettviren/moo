@@ -1,0 +1,117 @@
+{% set any_fields = [] %}
+{% set enum_fields = [] %}
+{% set string_fields = [] %}
+{% set vector_fields = [] %}
+{% for r in model.types if r.type == "any" %}
+{% do any_fields.append(r.name) %}
+{% endfor %}
+{% for r in model.types if r.type == "enum" %}
+{% do enum_fields.append(r.name) %}
+{% endfor %}
+{% for r in model.types if r.type == "record" %}
+{% for f in r.fields if f.type == "string" %}
+{% do string_fields.append(f.name) %}
+{% endfor %}
+{% for f in r.fields if f.type.type == "array" %}
+{% do vector_fields.append(f.name) %}
+{% endfor %}
+{% endfor %}
+{% if any_fields|length > 0 %}
+{% for anyinc in model.any.incs %}
+#include <{{anyinc}}>
+{% endfor %}
+{% endif %}
+{% if enum_fields|length > 0 %}
+#include <map>
+{% endif %}
+{% if string_fields|length > 0 %}
+#include <string>
+{% endif %}
+{% if vector_fields|length > 0 %}
+#include <vector>
+{% endif %}
+
+{% for dep in model.meta.deps %}
+#include "{{dep.incdir}}/{{dep.name}}Structs{{dep.ext}}"
+{% endfor %}
+
+// Hand-written code may find it handy to use the codegen namespace
+// via CPP macro to insulate any changes in schema.  Short and fully
+// qualified versions:
+#ifndef {{model.meta.name|upper}}_NS 
+#define {{model.meta.name|upper}}_NS {{ model.meta.ns.split("::")[-1] }}
+#endif
+#ifndef {{model.meta.name|upper}}_FQNS
+#define {{model.meta.name|upper}}_FQNS {{ model.meta.ns }}
+#endif
+
+namespace {{ model.meta.ns }} {
+
+    {% for dep in model.meta.deps %}
+    using namespace {{dep.ns}};
+    {% endfor %}
+
+    {% for t in model.types %}
+    {% if t.type == "enum" %}
+    /// @brief {{t.doc}}
+    enum class {{t.name}}: unsigned {
+        {% for sname in t.symbols %}
+        {{sname}},
+        {% endfor %}
+    };
+    struct {{t.name}}Names {
+        {% for sname in t.symbols %}
+        static constexpr char const* {{sname}} = "{{sname}}";
+        {% endfor %}
+    };
+    /// Convert a {{t.name}} to a string.
+    {% set lname = t.name.lower() %}
+    inline
+    std::string str(const {{t.name}}& {{lname}}) {
+        const std::map<{{t.name}}, std::string> {{lname}}2s = {
+            {% for sname in t.symbols %}
+            { {{t.name}}::{{sname}}, "{{sname}}" },
+            {% endfor %}
+        };
+        auto it = {{lname}}2s.find({{lname}});
+        if (it == {{lname}}2s.end()) {
+            // fixme: replace with ERS
+            throw std::runtime_error("unknown {{t.name}} enum");
+        }
+        return it->second;
+    }
+    /// Convert a string to a {{t.name}}
+    inline
+    {{t.name}} to{{t.name}}(const std::string& {{lname}}) {
+        const std::map<std::string, {{t.name}}> s2{{lname}} = {
+            {% for sname in t.symbols %}
+            { "{{sname}}", {{t.name}}::{{sname}} },
+            {% endfor %}
+        };
+        auto it = s2{{lname}}.find({{lname}});
+        if (it == s2{{lname}}.end()) {
+            throw std::runtime_error("no {{t.name}} enum for " + {{lname}});
+        }
+        return it->second;
+    }
+
+    {% endif %}
+    {% endfor %}
+    {% for t in model.types %}
+    {% if t.type == "any" %}
+    // @brief {{t.doc}}
+    using {{ t.name }} = {{ model.any.type }};
+    {% endif %}
+    {% endfor %}
+    {% for t in model.types %}
+    {% if t.type == "record" %}
+
+    /// @brief {{t.doc}}
+    struct {{t.name}}{%- for b in t.fields if b.name.startswith("_base_") -%}{{" :" if loop.first}} public {{b.type}} {{ "," if not loop.last }}{% endfor %} {
+        {% for f in t.fields if not f.name.startswith("_base_") %}
+        {{ field_type(f.type) }} {{f.name}}{ {{ f.default }} };
+        {% endfor %}
+    };
+
+    {% endif %}
+    {% endfor %}

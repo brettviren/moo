@@ -1,0 +1,20 @@
+{%- macro field_type(ft) %}
+{% if ft is mapping %}std::vector<{{field_type(ft["items"])}}>{% elif ft == "string" %}std::string{% elif ft == "any"%}model.anytype{% else %}{{ ft }}{% endif %}
+{%- endmacro -%}
+
+{% macro declare_sequence(model, t) %}
+using {{t.name}} = {{model.lang.types.sequence}}<{{t["items"]|replace(".","::")}}>;
+{%- endmacro -%}
+{% macro declare_record(model, t) %}
+struct {{t.name}} {
+    {% for f in t.fields %}
+    {{f.item|replace(".","::")}} {{f.name}};
+    {% endfor %}
+};
+{%- endmacro -%}
+{% macro declare_string(model, t) %}
+using {{t.name}} = {{model.lang.types.string}};
+{%- endmacro -%}
+{% macro declare_number(model, t) %}
+using {{t.name}} = {{model.lang.dtypes[t.dtype]}};
+{%- endmacro -%}

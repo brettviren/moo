@@ -1,0 +1,341 @@
+#+title: Schema Objects
+#+subtitle: ~moo~ 無 ~oschema~
+#+setupfile: setup.org
+
+#+name: grep
+#+begin_src shell :var re="" :var file="/dev/null"  :var a=0 :var lang="shell" :exports none :results output code
+grep -m1 -A$a "$re" "$file"
+#+end_src
+
+* Concepts
+  :PROPERTIES:
+  :CUSTOM_ID: concepts
+  :END:
+
+
+A *schema* describes one or more *types*.  In the "oschema"
+representation, a type is represented as an finalized *object* (compared
+to other representations in moo which are functional in nature).  Each
+type can be considered an instance of a *schema class*.  The following
+schema classes are currently supported.
+
+- ~boolean~ :: a type which may take value "true" or "false"
+- ~number~ :: a numeric type of given format and size
+- ~string~ :: a character string type possibly matching some pattern or format
+- ~sequence~ :: an array or vector with elements of one type
+- ~tuple~ :: (not yet)
+- ~record~ :: a collection of named types, (eg such as a ~class~ or ~struct~)
+- ~enum~ :: a type that may take one value from a predefined, limited set of values
+- ~any~ :: a type that may take a value of any type (eg such as ~void*~, ~boost::any~, ~nlohmann::json~)
+- ~anyOf~ :: a type that may take a value of any type in a predefined, limited set of types.
+- ~namespace~ :: a collection of named types, (distinct from ~record~ to match eg C++/Python semantics)
+
+Every *type* provides a common set of *attributes* some of which are
+required and others optional:
+
+- ~name~ :: (required) type name unique to the type context (see ~path~)
+
+- ~schema~ :: (required) string identifying the schema class taken from above list
+
+- ~doc~ :: (optional, default empty) document string briefly describing the type
+
+- ~path~ :: (required, potentially empty), ordered array of names
+  representing the context of the type (eg as a C++ ~namespace~ or
+  Python module path)
+
+Some types *reference* other types.  These include instances of:
+~sequence~, ~record~, ~namespace~ and ~anyOf~.  A *type reference* is
+represented as a /fully-qualified type name/ (FQTN) which is formed as
+the period ("~.~") delimited concatenation of the elements of ~path~
+(if any) and the ~name~.  A FQTN shall not begin nor end with a period
+and there the concept of a "relative" type reference is not supported.
+
+Thus, every type exists at an absolutely determined location in a name
+hierarchy, and it carries this location with it as ~path~ + ~name~.
+Types that do so may reference another type by its ~path~ and ~name~.
+Of course, to resolve a reference the referred type must be available
+in order to match the type reference against possible ~path~ and
+~name~.
+
+
+
+* Schema
+  :PROPERTIES:
+  :CUSTOM_ID: Schema
+  :END:
+
+
+This section describes how to construct Schema in Jsonnet and in
+Python.  
+
+We will describe how to use Jsonnet to build schema in some detail in
+the next subsection.  However, it should be noted that this is a proxy
+for using *any language* which can produce the same kind of data
+structure.  ~moo~ can read in such structure in Jsonnet, JSON, XML,
+INI and YAML formats.
+
+Internally, ~moo~ represents a schema with Python objects that are
+instances of Python versions of the conceptual schema classes
+described above.  ~moo~ can build these objects by reading schema as
+data structures or a developer may "hand-wire" schema by writing
+Python code in terms of these classes.  This is described in the
+second subsection below.
+
+** Jsonnet
+   :PROPERTIES:
+   :CUSTOM_ID: schema-in-jsonnet
+   :END:
+
+
+Schema may be described easily in the [[https://jsonnet.org/][Jsonnet]] language which
+explicitly targets the domain of data structure construction.  The
+language allows for the construction to be factored into independent
+"modules" (files) so that they may be combined in various ways to meet
+different end goals.
+
+A simple example is given.  It consists of an overall schema factored
+into a ~sys~ schema and an ~app~ schema which depends on ~sys~.  In a real
+system, the ~sys~ schema may correspond to common types used by a
+variety of system applications and the ~app~ structure may correspond to
+schema relevant to one particular type of application.
+
+Here is the ~sys~ schema:
+
+#+include: examples/oschema/sys.jsonnet src jsonnet
+
+The body of this simple schema is merely the single line:
+
+#+call: grep("Count", "examples/oschema/sys.jsonnet", 0) :wrap "src jsonnet"
+
+#+RESULTS:
+#+begin_src jsonnet
+    sys.number("Count", "u4")
+#+end_src
+
+We may see a fully compiled representation in JSON format using ~moo~:
+
+#+begin_src shell :exports both :results output code :wrap "src json"
+  moo compile examples/oschema/sys.jsonnet
+#+end_src
+
+#+RESULTS:
+#+begin_src json
+[
+    {
+        "dtype": "u4",
+        "name": "Count",
+        "path": [
+            "sys"
+        ],
+        "schema": "number"
+    }
+]
+#+end_src
+
+This is thus a schema with a single type called ~Count~ which is of
+schema class ~number~ that has numeric Numpy-style type code ~dtype~
+of an unsigned integer in four bytes ~"u4"~ and is in a context
+~path~ of simply ~["sys"]~.
+
+Next we imagine one possible application schema which will use the
+~sys~ schema above.  Here it is defined in Jsonnet as:
+
+#+include: examples/oschema/app.jsonnet src jsonnet
+
+We will go through these lines of Jsonnet in order to give some
+detail.  Starting with the first few:
+
+#+call: grep("local oschema", "examples/oschema/app.jsonnet", 2) :wrap "src jsonnet"
+
+#+RESULTS:
+#+begin_src jsonnet
+local oschema = import "oschema.jsonnet";
+local sh = oschema.hier(import "sys.jsonnet");
+local as = oschema.schema("app");
+#+end_src
+
+As with ~sys~ we import the support module ~oschema.jsonnet~.  We then
+use its ~.hier()~ method to process the previously defined ~sys~
+schema which we ~import~ in place.  The ~.hier()~ method gives us a
+handy object representation of this schema where they keys of the
+object are the individual type names.  We'll see that in use next.  In
+the third line we create a new schema factory rooted in the ~["app"]~
+path.
+
+Next we go to the main, if temporary, object in this schema:
+
+#+call: grep("local hier", "examples/oschema/app.jsonnet", 7) :wrap "src jsonnet"
+
+#+RESULTS:
+#+begin_src jsonnet
+local hier = {
+    email: as.string("Email", format="email"),
+    person: as.record("Person", [
+        as.field("email",self.email),
+        as.field("counts",self.counts)
+    ]),
+    counts: as.sequence("Counts",sh.sys.Count),
+};
+#+end_src
+
+Note how ~person~ has two fields,
+~email~ and ~counts~ both of which hold a type defined elsewhere in
+our object.  In particular ~counts~ is a sequence with elements of
+type ~Count~ that is defined in our "sys" schema.
+
+It's important to understand we use this temporary ~hier~ object as a
+context to construct structure.  It's keys are not intrinsically
+meaningful but rather only ways to refer to one type in another.  
+
+In fact, finally our ~app~ schema is produced as a flat array using:
+
+#+call: grep("sort_select", "examples/oschema/app.jsonnet", 0) :wrap "src jsonnet"
+
+#+RESULTS:
+#+begin_src jsonnet
+oschema.sort_select(hier, "app")
+#+end_src
+
+This scans our temporary object ~hier~ and outputs an array holding
+only the types which are "in" the ~["app"]~ path.  The array is output
+in topological so that any dependency precedes a type that depends on
+it.  Along the way any ~.deps~ attributes, which are temporary to
+assist in sorting, are stripped.
+
+We can see the final result in full JSON glory:
+
+#+begin_src shell :exports both :results output code :wrap "src json"
+  moo compile examples/oschema/app.jsonnet
+#+end_src
+
+#+RESULTS:
+#+begin_src json
+[
+    {
+        "items": "sys.Count",
+        "name": "Counts",
+        "path": [
+            "app"
+        ],
+        "schema": "sequence"
+    },
+    {
+        "format": "email",
+        "name": "Email",
+        "path": [
+            "app"
+        ],
+        "schema": "string"
+    },
+    {
+        "fields": [
+            {
+                "item": "app.Email",
+                "name": "email"
+            },
+            {
+                "item": "app.Counts",
+                "name": "counts"
+            }
+        ],
+        "name": "Person",
+        "path": [
+            "app"
+        ],
+        "schema": "record"
+    }
+]
+#+end_src
+
+
+
+** Python
+   :PROPERTIES:
+   :CUSTOM_ID: schema-in-python
+   :END:
+
+
+~moo~ oschema may be produced as data in a variety of representations
+and formats. In addition to Jsonnet and JSON as described above, ~moo~
+supports data structures in XML, INI and YAML (for poor souls that
+think YAML is a good idea).
+
+A bare bones example of the use of ~moo~ Python to load schema as data
+into ~moo.oschema~ objects and back to data is given in:
+
+#+include: examples/oschema/round-trip.py src python
+
+A trivial hand-wired construction of the same schema using
+~moo.oschema~ Python is in:
+
+#+include: examples/oschema/hand-wired.py src python
+
+* Templates
+  :PROPERTIES:
+  :CUSTOM_ID: templates
+  :END:
+
+
+A template is applied to a "model" (some data structure) in order to
+generate some document.  So far we have talked about schema to
+describe types however when it comes to developing and applying
+templates to a model it is almost certain that a "raw" schema will not
+be sufficient as a model.  Very likely some additional conventions and
+assumptions must be satisfied in some way.  This section first
+describes method to bridge the gap between "type schema" and "model"
+and then walks through developing a template to produce a C++ header
+file holding C++ structs which correspond to types.
+
+** Models
+   :PROPERTIES:
+   :CUSTOM_ID: models
+   :END:
+
+
+Consider collecting the schema defining all types for an entire
+system.  As described above, this would be in the form of a single
+array of type objects.  Since each type holds its own path inside a
+hierarchy, one may also consider or explicitly construct a tree based
+on these paths.  With either or both views in mind, we may then ask
+questions:
+
+- How do we map this schema through templates to final generated files?  
+- How do we define generated file names and do so in a deterministic
+  enough manner so that build systems may drive the generation process?
+- What, if any, additional information might any given template need?
+
+It is clear that some transformative layer is required to adapt
+between schema and template and we will call this layer *model*.  The
+system-specific complexity in this layer may be held in Jsonnet or in
+Python but for now ~moo~ supports it in Jsonnet.
+
+
+** Example model and template
+   :PROPERTIES:
+   :CUSTOM_ID: example-model-and-template
+   :END:
+
+Here we develop
+[[file:examples/oschema/struct-model.jsonnet][struct-model.jsonnet]]
+which may then be used to, for example, generate C++ to define C++
+types corresponding to schema types or to define serialization methods
+for those structs.  However, we try to keep the model as general as
+possible.  The model is in the form of a function which takes the
+schema itself as well as other parameterizations.
+
+
+ model "structness" in order to adapt a schema to
+templates that generate code in some way to a set of types
+
+We'll use the ~sys~ and ~app~ schema developed above and create for
+each a model that is suitable to give to a template to generated C++
+types for all schema types in one ~namespace~.
+
+* Objects
+  :PROPERTIES:
+  :CUSTOM_ID: objects
+  :END:
+
+
+This section describes how to leverage schema to build a ~moo~ Python
+based system to create objects which are valid-by-construction.

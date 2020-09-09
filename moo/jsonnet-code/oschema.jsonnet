@@ -20,8 +20,21 @@ local isr(x,r) = if std.type(x) != "null" then r;
     /// Form a fully qualified type name
     fqn(type) :: std.join(".", type.path + [type.name]),
 
-    schema(ctx=[])  :: {
-        local namepath = if std.type(ctx) == "string" then std.split(ctx,'.') else ctx,
+    listify(o) :: if std.type(o) == "null" then [] else
+        if std.type(o) == "string" then std.split(o, '.') else o,
+
+    // Place type t into path p
+    place(t, p=[]) :: if std.length(p) == 0 then {[t.name]:t} else
+    {[p[0]]:$.place(t, p[1:])},
+
+    // Place types into their path/name hierachy
+    hier(types) :: std.foldl(function(p,t) std.mergePatch(p,$.place(t,t.path)), types, {}),
+
+    class_names: ["boolean", "string", "number", "sequence",
+                  "record", "enum", "any", "anyOf", "namespace"],
+
+    schema(ctx=[]) :: {
+        local namepath = $.listify(ctx),
         // Common attributes for every type.
         type(name, schema, doc=null, deps=[]) :: {
             name: name,           // local short name for the type
@@ -35,14 +48,14 @@ local isr(x,r) = if std.type(x) != "null" then r;
 
         string(name, pattern=null, format=null, doc=null)
         :: self.type(name, "string", doc) {
-            [if is(pattern) then "pattern"]: pattern,
-            [if is(format) then "format"]: format,
+            [isr(pattern,"pattern")]: pattern,
+            [isr(format,"format")]: format,
         },
 
         number(name, dtype, constraints=null, doc=null)
         :: self.type(name, "number", doc) {
             dtype: dtype,
-            [if is(constraints) then "constraints"]: constraints,
+            [isr(constraints,"constraints")]: constraints,
         },
 
         // A sequence, vector, array with items all of one type.
@@ -71,12 +84,12 @@ local isr(x,r) = if std.type(x) != "null" then r;
         record(name, fields=[], bases=null, doc=null)
         :: self.type(name, "record", doc, [f.item for f in fields]) {
             fields: fields,
-            [if is(bases) then "bases"]: bases,            
+            [isr(bases, "bases")]: bases,            
         },
 
         enum(name, symbols, default=null, doc=null)
         :: self.type(name, "enum", doc) {
-            [if is(default) then "default"]: default,
+            [isr(default, "default")]: default,
             symbols: symbols,
         },
 
@@ -87,20 +100,56 @@ local isr(x,r) = if std.type(x) != "null" then r;
         anyOf(name, types, doc=null) :: self.type(name, "anyOf", doc, types) {
             types: types,
         },
+
+        // subnamespace(name, types, subpath=null, doc=null) :: {
+        //     local fullpath = namepath + $.listify(subpath),
+        //     local mytypes = [t for t in types if $.isin(fullpath, t.path)],
+        //     local hier = {[t.name]:t for t in mytypes},
+        //     res : {
+        //         name: name, [isr(doc,"doc")]:doc,
+        //         path: fullpath,
+        //         deps: [$.fqn(t) for t in mytypes],
+        //     } + hier,
+        // }.res,
     },
     // Utility functions
 
+    namespace(name, types, path=null, doc=null) :: {
+        local fullpath = $.listify(path),
+        local mpath = fullpath + if name == "" then [] else [name],
+        local mytypes = [t for t in types if $.isin(mpath, t.path)],
+        local hier = {[t.name]:t for t in mytypes},
+        res : {
+            schema: "namespace",
+            name: name, [isr(doc,"doc")]:doc,
+            path: fullpath,
+            deps: [$.fqn(t) for t in mytypes],
+        } + hier,
+    }.res,
+
+    // Return topologically sorted and selected array of types in path.
+    sort_select(oot, path=[]):: {
+        local mpath = $.listify(path),
+        local graph = $.qualify(oot),
+        //res: [std.mergePatch(graph[k],{deps:null}) for k in $.sort(graph) if $.isin(mpath, graph[k].path)],
+        res: [graph[k] for k in $.sort(graph) if $.isin(mpath, graph[k].path)],        
+    }.res,        
+
+    // Return Ture if b is in (or under) a
+    isin(a, b) :: if std.length(a) == 0 then true else if std.length(b) == 0 then false else if b[0] != a[0] then false else $.isin(a[1:], b[1:]),
+
     // Take an object with values that are types and return one with
     // the keys produced from fully qualifying type context and name.
-    qualify(obj) :: {
-        [self.fqn(obj[k])]:obj[k]
-        for k in std.objectFields(obj)
+    qualify(oot) :: if std.type(oot) == "array" then {
+        [$.fqn(t)]:t for t in oot
+    } else {
+        [$.fqn(oot[k])]:oot[k] for k in std.objectFields(oot)
     },
     
-    // Return types used by the type as list of fqns
-    deps(type) :: type.deps,
+    // Return edges to other nodes reached from n in graph.
+    edges(graph, n) :: [d for d in graph[n].deps if std.objectHas(graph, d)],
 
     // Sort the keys of a qualified object 
-    sort :: _tsmod(edges = function(graph, n) self.deps(graph[n])).toposort,
+    sort :: _tsmod(edges = $.edges).toposort,
 
 }

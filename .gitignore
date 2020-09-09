@@ -19,3 +19,4 @@ demo_app.hpp
 demo_app.json
 demo_app_nljs.hpp
 test_demo
+latexmk-out

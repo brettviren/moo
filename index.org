@@ -2,7 +2,7 @@
 #+subtitle: Model Oriented Objects
 #+setupfile: setup.org
 
-*moo* is a tool for managing data structures.
+*moo* is a tool for managing data structures, templates, schema and generating documents.
 
 - [[https://github.com/brettviren/moo][code repository]] and its [[file:README.org][README]] 
 

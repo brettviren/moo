@@ -1,3 +1,9 @@
+{# This renders against moo/oschema #}
+{% include 'oschema.hpp.j2' %}
+
+
+
+
 {%- macro field_type(ft) %}
 {% if ft is mapping %}std::vector<{{field_type(ft["items"])}}>{% elif ft == "string" %}std::string{% elif ft == "any"%}model.anytype{% else %}{{ ft }}{% endif %}
 {%- endmacro -%}
