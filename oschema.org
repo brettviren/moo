@@ -270,72 +270,208 @@ A trivial hand-wired construction of the same schema using
 
 #+include: examples/oschema/hand-wired.py src python
 
-* Templates
+* Transforms
   :PROPERTIES:
-  :CUSTOM_ID: templates
+  :CUSTOM_ID: transforms
   :END:
 
+The main use of ~moo~ is to apply a data structure ("model") to a
+template in order to generate a file (eg, a C++ header file).  The
+template must have an understanding ("contract") of the structure of
+the model.  The "oschema" structure described here is likely not
+enough information, or not in a convenient form, for templates to be
+easily defined.  
 
-A template is applied to a "model" (some data structure) in order to
-generate some document.  So far we have talked about schema to
-describe types however when it comes to developing and applying
-templates to a model it is almost certain that a "raw" schema will not
-be sufficient as a model.  Very likely some additional conventions and
-assumptions must be satisfied in some way.  This section first
-describes method to bridge the gap between "type schema" and "model"
-and then walks through developing a template to produce a C++ header
-file holding C++ structs which correspond to types.
+We must then have means to *transform* and possibly *augment* the
+initial data structure into a *model* expected by the template and
+~moo~ supports several strategies.
 
-** Models
+** DIY
    :PROPERTIES:
-   :CUSTOM_ID: models
+   :CUSTOM_ID: diy-trans
    :END:
 
+In some cases, transformation and augmentation can may be done at the
+input data structure level (ie, in Jsonnet).  ~moo~ "supports" this in
+general by not restricting the structure of the input data.  Users are
+free to come up with their own solutions.  Typically this requires
+accepting a fluid contract between models and templates as one
+iterates both.
 
-Consider collecting the schema defining all types for an entire
-system.  As described above, this would be in the form of a single
-array of type objects.  Since each type holds its own path inside a
-hierarchy, one may also consider or explicitly construct a tree based
-on these paths.  With either or both views in mind, we may then ask
-questions:
-
-- How do we map this schema through templates to final generated files?  
-- How do we define generated file names and do so in a deterministic
-  enough manner so that build systems may drive the generation process?
-- What, if any, additional information might any given template need?
-
-It is clear that some transformative layer is required to adapt
-between schema and template and we will call this layer *model*.  The
-system-specific complexity in this layer may be held in Jsonnet or in
-Python but for now ~moo~ supports it in Jsonnet.
-
-
-** Example model and template
+** Jsonnet
    :PROPERTIES:
-   :CUSTOM_ID: example-model-and-template
+   :CUSTOM_ID: jsonnet-tla-trans
    :END:
 
-Here we develop
-[[file:examples/oschema/struct-model.jsonnet][struct-model.jsonnet]]
-which may then be used to, for example, generate C++ to define C++
-types corresponding to schema types or to define serialization methods
-for those structs.  However, we try to keep the model as general as
-possible.  The model is in the form of a function which takes the
-schema itself as well as other parameterizations.
+In the case of using Jsonnet to describe the input data structure, the
+~moo~ CLI supports the passing "top level arguments" (TLA) to the
+Jsonnet code.  This requires the Jsonnet to evaluates to a top level
+function.  
+
+This simple example shows how TLAs work:
+
+#+input: examples/oschema/tla.jsonnet src jsonnet
+
+#+begin_src shell :exports both :results output code :wrap "src json"
+  moo -A arg="hi" compile examples/oschema/tla.jsonnet
+#+end_src
+
+#+RESULTS:
+#+begin_src json
+{
+    "arg": "hi",
+    "def": "default"
+}
+#+end_src
+
+As shown, multiple TLAs may be used and default TLA values may be
+given in the Jsonnet and omitted on the CLI.  A TLA may also be
+specified as a Jsonnet file in which case the contents of that file
+will be evaluated and the resulting structure passed to the top level
+function.  Reusing the above example and the ~sys~ schema file:
+
+#+begin_src shell :exports both :results output code :wrap "src json"
+  moo -A arg=examples/oschema/sys.jsonnet compile examples/oschema/tla.jsonnet
+#+end_src
+
+#+RESULTS:
+#+begin_src json
+{
+    "arg": [
+        {
+            "deps": [],
+            "dtype": "u4",
+            "name": "Count",
+            "path": [
+                "sys"
+            ],
+            "schema": "number"
+        }
+    ],
+    "def": "default"
+}
+#+end_src
+
+Thus, with TLAs one may construct a Jsonnet file that transforms and
+augments some initial data structure. 
+
+** Python
+   :PROPERTIES:
+   :CUSTOM_ID: python-trans
+   :END:
+
+Jsonnet is a "small" language (one of its charms) and some
+transformations may be complex enough that its simplicity poses a
+limitation.  ~moo~ thus allows transformations to be defined in Python
+and this opens up the ability to form the contract between model and
+template in a more strong and object-oriented manner.
+
+To do this, the user may tell the ~moo~ CLI to apply a Python function
+to transform the input data just prior to the application of the
+template.  The function is specified as a "dot" path naming the
+function in its module.  We may use the ~moo dump~ command to
+illustrate a transformation applied to the ~app~ schema:
+
+#+begin_src shell :exports both :results output code :wrap "src json"
+  moo -J examples/oschema dump -t moo.oschema.namespacify app.jsonnet
+#+end_src
+
+#+RESULTS:
+#+begin_src json
+<Namespace "" parts:{app, Counts, Email, Person}>
+#+end_src
 
 
- model "structness" in order to adapt a schema to
-templates that generate code in some way to a set of types
+The built-in ~moo.oschema.namespacify()~ function takes an oschema
+(array of types) and places them into a top level ~namespace~ based on
+their individual ~path~ values.  The template may then rely on the
+resulting object-oriented structure.  Here is a simple example
+template that iterates over a "namespacified" schema to print out the
+contexts into a text file:
 
-We'll use the ~sys~ and ~app~ schema developed above and create for
-each a model that is suitable to give to a template to generated C++
-types for all schema types in one ~namespace~.
+#+include: examples/oschema/oo.txt.j2 example
+
+And, apply the transformed schema as a model to this template:
+
+#+begin_src shell :exports both :results output code :wrap "example"
+  moo -T examples/oschema -J examples/oschema \
+    render -t moo.oschema.namespacify \
+      app.jsonnet oo.txt.j2
+#+end_src
+
+#+RESULTS:
+#+begin_example
+Top namespace:
+<Namespace "" parts:{app}>
+
+It holds these sub-namespaces:
+<Namespace "app" parts:{Counts, Email, Person}>
+
+It holds these types
+<Sequence "app.Counts" items:sys.Count>
+<String "app.Email">
+<Record "app.Person" fields:{email, counts}>
+
+Dump model as Python data:
+{'name': '', 'schema': 'namespace', 'path': [], 'doc': '', 'app': {'name': 'app', 'schema': 'namespace', 'path': [], 'doc': '', 'Counts': {'name': 'Counts', 'schema': 'sequence', 'path': ['app'], 'doc': '', 'items': 'sys.Count'}, 'Email': {'name': 'Email', 'schema': 'string', 'path': ['app'], 'doc': '', 'pattern': None, 'format': 'email'}, 'Person': {'name': 'Person', 'schema': 'record', 'path': ['app'], 'doc': '', 'fields': [{'name': 'email', 'item': 'app.Email'}, {'name': 'counts', 'item': 'app.Counts'}]}}}
+#+end_example
+
+Another example showing a pipeline of transformations:
+
+#+begin_src shell :exports both :results output code :wrap "example"
+  moo -T examples/oschema -J examples/oschema \
+    render -t moo.oschema.typify -t moo.oschema.graph -t moo.oschema.depsort \
+      app.jsonnet ool.txt.j2
+#+end_src
+
+#+RESULTS:
+#+begin_example
+Iterate over list of types:
+<Sequence "app.Counts" items:sys.Count>
+<String "app.Email">
+<Record "app.Person" fields:{email, counts}>
+#+end_example
+
+Note the ~Person~ comes after the ~Counts~ and ~Email~ on which its
+fields depend.
+
+This example also shows that the pipeline may becomes rather complex.
+At some point, developing a composite transformation function will be
+useful to keep CLI argument list small.
+
 
 * Objects
   :PROPERTIES:
   :CUSTOM_ID: objects
   :END:
 
+Besides generating code from a schema, an object may be validated
+against a schema.  Schema may also be used to support creation of
+objects which are valid-by-construction.
 
-This section describes how to leverage schema to build a ~moo~ Python
-based system to create objects which are valid-by-construction.
+
+** Validation
+   :PROPERTIES:
+   :CUSTOM_ID: object-val
+   :END:
+
+The ~moo.oschema~ schema classes produce type instances which provide
+snippets of [[https://json-schema.org/understanding-json-schema/index.html][JSON Schema]].  Type instances are also ~callable~ objects.
+When called on a value, it will be validated against the type's
+schema.
+
+- [ ] use with ~moo~ with a schema document
+- [ ] use with ~moo.oschema~ 
+
+
+** Construction
+   :PROPERTIES:
+   :CUSTOM_ID: object-ctor
+   :END:
+
+Type instances of the ~moo.oschema~ schema classes provide validating
+factories. 
+
+- [ ] some examples
+
+

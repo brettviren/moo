@@ -6,6 +6,7 @@ import os
 import sys
 import json
 import click
+import importlib
 
 import jsonschema
 #from moo import jsonnet, template, io
@@ -44,6 +45,38 @@ class Context:
         return moo.io.load_schema(self.resolve(schema),
                                   jpath or self.jpath,
                                   spath or self.spath)
+
+
+    def transform(self, model, transform):
+        '''Transform a model
+
+        The transform may be a single transform or a sequence of
+        transforms.  As a sequence it represents a pipeline.  First
+        transform is applied to model and its result is passed into
+        the second, etc.
+
+        A transform may be a string which will be interpreted as a
+        Python "dot" path to a function in its module.  Otherwise it
+        is assumed to already be a callable which takes and returns a
+        model.
+
+        '''
+        from collections.abc import Sequence
+        if not transform:
+            return model
+        if not isinstance(transform, Sequence):
+            transform = [transform]
+        for t in transform:
+            if isinstance(t, str):
+                parts = t.rsplit(".",1)
+                if len(parts) != 2:
+                    raise RuntimeError("transfor should be a Python '.' path to a function")
+                mod = importlib.import_module(parts[0])
+                t = getattr(mod, parts[1])
+            model = t(model)
+        return model
+        
+
 
     def resolve(self, filename, fpath=None):
         '''
@@ -107,7 +140,7 @@ def cli(ctx, spath, dpath, jpath, tpath, tla):
 @click.pass_context
 def resolve(ctx, filename):
     '''
-    Resolve a filename.
+    Resolve a filename as moo would internally.
     '''
     try:
         filename = ctx.obj.resolve(filename)
@@ -158,6 +191,7 @@ def write(data, output, need_dump=True):
     with open(output, 'wb') as fp:
         fp.write(data.encode())
 
+
 @cli.command()
 @click.option('-m', '--multi', default="",
               help="Write multiple output files")
@@ -189,15 +223,36 @@ def compile(ctx, multi, output, string, deref, model):
 @click.option('-o', '--output', default="/dev/stdout",
               type=click.Path(exists=False, dir_okay=False, file_okay=True),
               help="Output file, default is stdout")
+@click.option('-t', '--transform', multiple=True, type = str,
+              help="Python code path to transform model data prior to template application")
+@click.argument('model')
+@click.pass_context
+def dump(ctx, output, transform, model):
+    '''
+    Like render but print model that would be sent to the template
+    '''
+    moo = ctx.obj.load("moo.jsonnet", dpath = "templ")
+    data = ctx.obj.load(model)
+    data = ctx.obj.transform(data, transform)
+    print(repr(data))
+
+
+@cli.command()
+@click.option('-o', '--output', default="/dev/stdout",
+              type=click.Path(exists=False, dir_okay=False, file_okay=True),
+              help="Output file, default is stdout")
+@click.option('-t', '--transform', multiple=True, type = str,
+              help="Python code path to transform model data prior to template application")
 @click.argument('model')
 @click.argument('templ')
 @click.pass_context
-def render(ctx, output, model, templ):
+def render(ctx, output, transform, model, templ):
     '''
     Render a template against a model.
     '''
     moo = ctx.obj.load("moo.jsonnet", dpath = "templ")
     data = ctx.obj.load(model)
+    data = ctx.obj.transform(data, transform)
     text = ctx.obj.render(templ, data)
     with open(output, 'wb') as fp:
         fp.write(text.encode())
@@ -218,7 +273,8 @@ def render_many(ctx, outdir, model):
     '''
     data = ctx.obj.load(model)
     for one in data:
-        text = ctx.obj.render(one["template"], one["model"])
+        data = ctx.obj.transform(one["model"], one.get("transform", None))
+        text = ctx.obj.render(one["template"], data)
         output = os.path.join(outdir, one["filename"])
         print(f"generating {output}:")
         with open(output, 'wb') as fp:
@@ -226,39 +282,39 @@ def render_many(ctx, outdir, model):
         
 
 
-@cli.command()
-@click.option('-C', '--outdir', default=".",
-              type=click.Path(exists=False, dir_okay=True, file_okay=False),
-              help="Output directory")
-@click.argument('model')
-@click.pass_context
-def many(ctx, outdir, model):
-    '''
-    Render many files
-    '''
-    # fixme: break out much of this into the modules
-    data = ctx.obj.load(model)
-    models = data.get("models",{})
-    schemas = data.get("schema",{})
-    targets = data.get("targets",[])
-    templates = data.get("templates",{})
-    for target in targets:
-        templname = target["template"]
-        path = target["path"]
-        # fixme: if schema given check model.dpath against it
-        schema = target["schema"]
-        print (f'generating file "{path}" with template "{templname}" using model of type "{schema}"')
-        reldir=os.path.dirname(path)
-        fname = os.path.basename(path)
-        fulldir=os.path.join(outdir,reldir)
-        model = models[target["model"]]
-        dpath = target.get("dpath","")
-        templ = ctx.obj.resolve(templates[templname])
-        output = os.path.join(fulldir, fname)
-        os.makedirs(fulldir, exist_ok=True)
-        text = ctx.obj.render(templ, model)
-        with open(output, 'wb') as fp:
-            fp.write(text.encode())
+# @cli.command()
+# @click.option('-C', '--outdir', default=".",
+#               type=click.Path(exists=False, dir_okay=True, file_okay=False),
+#               help="Output directory")
+# @click.argument('model')
+# @click.pass_context
+# def many(ctx, outdir, model):
+#     '''
+#     Render many files
+#     '''
+#     # fixme: break out much of this into the modules
+#     data = ctx.obj.load(model)
+#     models = data.get("models",{})
+#     schemas = data.get("schema",{})
+#     targets = data.get("targets",[])
+#     templates = data.get("templates",{})
+#     for target in targets:
+#         templname = target["template"]
+#         path = target["path"]
+#         # fixme: if schema given check model.dpath against it
+#         schema = target["schema"]
+#         print (f'generating file "{path}" with template "{templname}" using model of type "{schema}"')
+#         reldir=os.path.dirname(path)
+#         fname = os.path.basename(path)
+#         fulldir=os.path.join(outdir,reldir)
+#         model = models[target["model"]]
+#         dpath = target.get("dpath","")
+#         templ = ctx.obj.resolve(templates[templname])
+#         output = os.path.join(fulldir, fname)
+#         os.makedirs(fulldir, exist_ok=True)
+#         text = ctx.obj.render(templ, model)
+#         with open(output, 'wb') as fp:
+#             fp.write(text.encode())
         
 
 

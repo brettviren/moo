@@ -1,16 +1,45 @@
 #!/usr/bin/env python3
 
+import numpy
+import jsonschema
+
+
+def validate(value, schema):
+    jsonschema.validate(value, schema,
+                        format_checker=jsonschema.draft7_format_checker)
+    return value
+
+
+# this holds all known types
+known_types = dict()
+
+
 # it would be nice to use typing.NamedTuple but wanting a base type
 # puts the kibosh on that.
 class BaseType(object):
-    name=None
-    doc=""
-    path=()
+    name = None
+    doc = ""
+    path = ()
 
     def __init__(self, name=None, doc="", path=()):
-        self.name=name
-        self.doc=doc
-        self.path=list(path)
+        self.name = name
+        self.doc = doc
+        self.path = [p for p in path if p]
+        known_types[self.fqn] = self
+
+    @property
+    def deps(self):
+        return []
+
+    @property
+    def fqnp(self):
+        ret = list(self.path)
+        ret += [self.name] if self.name else []
+        return ret
+
+    @property
+    def fqn(self):
+        return '.'.join(self.fqnp)
 
     def to_dict(self):
         return dict(name=self.name,
@@ -19,52 +48,97 @@ class BaseType(object):
                     doc=self.doc)
 
     def __str__(self):
-        return ".".join(self.path+[self.name])
+        return self.fqn
 
     def __repr__(self):
-        return '<%s "%s">' %(self.__class__.__name__, str(self))
-    
+        return '<%s "%s">' % (self.__class__.__name__, str(self))
+
+    def __call__(self, val):
+        'Return validated value or raise exception'
+        ValueError("BaseType called")
+
     @property
     def schema(self):
         return self.__class__.__name__.lower()
 
+
 class Boolean(BaseType):
     'A Boolean type'
 
+    js = dict(type="boolean")
+
+    def __call__(self, val):
+        if isinstance(val, str):
+            if val.lower() in ["true", "yes", "on"]:
+                return True
+            if val.lower() in ["false", "no", "off"]:
+                return False
+            raise ValueError(f'unknown boolean string: "{val}"')
+        if val:
+            return True
+        return False
+
+
 class Number(BaseType):
     'A number type'
-    dtype: "i4"
+    dtype = "i4"
 
     def __init__(self, name=None, dtype='i4', doc="", path=()):
-        super().__init__(name,doc,path)
+        super().__init__(name, doc, path)
         self.dtype = dtype
 
     def to_dict(self):
         d = super().to_dict()
         d.update(dtype=self.dtype)
         return d
-    
+
+    @property
+    def js(self):
+        dtype = numpy.dtype(self.dtype)
+        if dtype.kind == 'f':
+            return dict(type="number")
+        return dict(type="integer")
+
+    def __call__(self, val):
+        validate(val, self.js)
+        return numpy.dtype(self.dtype).type(val)
+
+
 class String(BaseType):
     'A string type'
+
     pattern = None
     format = None
 
     def __init__(self, name=None, pattern=None, format=None, doc="", path=()):
-        super().__init__(name,doc,path)
-        self.pattern=pattern
-        self.format=format
+        super().__init__(name, doc, path)
+        self.pattern = pattern
+        self.format = format
 
     def to_dict(self):
         d = super().to_dict()
         d.update(pattern=self.pattern, format=self.format)
         return d
 
+    @property
+    def js(self):
+        ret = dict(type="string")
+        if self.format:
+            ret["format"] = self.format
+        if self.pattern:
+            ret["pattern"] = self.pattern
+        return ret
+
+    def __call__(self, val):
+        validate(val, self.js)
+        return val
+
 class Sequence(BaseType):
     'A sequence/array/vector type of one type'
     items = None
 
     def __init__(self, name=None, items=None, doc="", path=()):
-        super().__init__(name,doc,path)
+        super().__init__(name, doc, path)
         self.items = str(items)
 
     @property
@@ -78,6 +152,17 @@ class Sequence(BaseType):
         d = super().to_dict()
         d.update(items = self.items)
         return d
+
+    @property
+    def js(self):
+        items = known_types[self.items]
+        return dict(type="array", items=items.js)
+
+    def __call__(self, val):
+        validate(val, self.js)
+        items = known_types[self.items]
+        return [items(v) for v in val]
+
 
 class Field(object):
     'A field is NOT a type'
@@ -97,9 +182,13 @@ class Field(object):
 
     def __repr__(self):
         return '<Field "%s" %s [%s]>' % (self.name, self.item, self.default)
-    
+
+    def __call__(self, val):
+        item = known_types[self.item]
+        return item(val)
+
 class Record(BaseType):
-    'A thing with fields like a struct or a class'
+    'A thing with named/typed fields like a struct or a class'
     fields = ()
 
     def __init__(self, name=None, fields=None, doc="", path=()):
@@ -125,6 +214,37 @@ class Record(BaseType):
                 return f
         raise KeyError(f'no such field: {key}')
 
+    @property
+    def js(self):
+        fjs = dict()
+        for field in self.fields:
+            item = known_types[field.item]
+            fjs[field.name] = item.js
+        return dict(type="object", properties=fjs)
+
+    def __call__(self, *args, **fields):
+        val = dict()
+        val.update(*args, **fields)
+        validate(val, self.js)
+        ret = dict()
+        for field in self.fields:
+            ret[field.name] = field(val[field.name])
+        return ret
+
+
+def isin(me, you):
+    '''
+    Return True if path "you" begins with "me"
+    '''
+    if not me:
+        return True         # I am top namespace
+    if not you:
+        return False        # I am more specific
+    if me[0] != you[0]:
+        return False        # We diverge
+    return isin(me[0], you[0])
+
+
 class Namespace(BaseType):
 
     def __init__(self, name=None, path=(), doc="", **parts):
@@ -147,7 +267,7 @@ class Namespace(BaseType):
         '''
         Normalize a key into this namespace.
 
-        A key may be a sequence or a dot-deliminated string.  
+        A key may be a sequence or a dot-deliminated string.
 
         Result is a dot-delim string relative to this namespace.
         '''
@@ -159,17 +279,16 @@ class Namespace(BaseType):
         return key
 
     def __getitem__(self, key):
-        key = self.normalize(key)        
+        key = self.normalize(key)
         path = key.split(".")
         got = self.parts[path.pop(0)]
         if not path:
             return got
-        return got['.'.join(path)] # sub-namespace
-        
+        return got['.'.join(path)]  # sub-namespace
 
     def _make(self, cls, name, *args, **kwds):
-        if not "path" in kwds:
-            kwds["path"] = self.path+[self.name]
+        if "path" not in kwds:
+            kwds["path"] = self.fqnp
         ret = cls(name, *args, **kwds)
         self.parts[name] = ret
         return ret
@@ -196,7 +315,7 @@ class Namespace(BaseType):
         if first in self.parts:
             ns = self.parts[first]
         else:
-            ns = Namespace(first, self.path + [self.name])
+            ns = Namespace(first, self.fqnp)
             self.parts[first] = ns
         for sp in subpath:
             ns = ns.namespace(sp)
@@ -206,9 +325,7 @@ class Namespace(BaseType):
         '''
         Return true if type is in this namespace or a subnamespace
         '''
-        me = self.path + [self.name]
-        n = len(typ.path)
-        return n >= len(me) and typ.path == me[:n]
+        return isin(self.fqnp, typ.path)
 
     def add(self, typ):
         '''
@@ -216,9 +333,9 @@ class Namespace(BaseType):
         '''
         if not self.isin(typ):
             raise ValueError("Not in %r: %r" % (self, typ))
-        subpath = self.normalize(str(typ))
-        ns = self.subnamespace(subpath)
-        self.parts[typ.name] = typ
+        path = self.normalize(typ.path)
+        ns = self.subnamespace(path)
+        ns.parts[typ.name] = typ
         return typ
         
     @property
@@ -228,8 +345,18 @@ class Namespace(BaseType):
         '''
         return [str(p) for p in self.parts.values()]
 
+    def subns(self, recur=False):
+        '''Return array of namespaces in this namespace'''
+        ret = []
+        for t in self.parts.values():
+            if t.schema == "namespace":
+                ret.append(t)
+                if recur:
+                    ret += t.subns(True)
+        return ret
+
     def types(self, recur=False):
-        '''Return array of types in namespace.  
+        '''Return array of non-namespace types in namespace.  
 
         Sub-namespaces are not considered types by themselves but if
         recur==True descend into any sub-namespaces and include their
@@ -238,7 +365,7 @@ class Namespace(BaseType):
         '''
         ret = []
         for n,t in self.parts.items():
-            if "namespace" == t.schema():
+            if "namespace" == t.schema:
                 if recur:
                     ret += t.types(True)
             else:
@@ -258,7 +385,7 @@ def schema_class(clsname):
     for cls in [Boolean, Number, String, Record, Sequence, Namespace]:
         if clsname.lower() == cls.__name__.lower():
             return cls
-    raise ValueError(f'no such schema class: "{clsname}"')
+    raise KeyError(f'no such schema class: "{clsname}"')
     
 
 
@@ -299,8 +426,7 @@ def graph(types):
     '''
     ret = dict()
     for t in types:
-        path = '.'.join(t.path + [t.name])
-        ret[path] = t
+        ret[t.fqn] = t
     return ret
 
 def toposort(graph):
@@ -316,6 +442,9 @@ def toposort(graph):
     nodes = list(graph.keys())
 
     def visit(node):
+        if node not in graph:
+            return
+
         mark = marks.get(node, None)
         if mark == "perm":
             return
@@ -330,14 +459,43 @@ def toposort(graph):
         ret.append(node)
 
     while nodes:
-        n = nodes.pop(0)
-        visit(n)
+        visit(nodes.pop(0))
         nodes = [n for n in nodes if n not in marks]
 
-    return ret;
-        
-def test():
+    return ret
 
+
+def typify(data):
+    '''
+    Return an array of schema class type objects from array of data structures.
+
+    This simply calls from_dict() on each.
+    '''
+    return [from_dict(d) for d in data]
+
+
+def depsort(g):
+    '''Given graph g, return dependency-sorted array of its types.'''
+    return [g[n] for n in toposort(g)]
+
+
+def namespacify(data):
+    '''Turn array of type data structures into in a namespace hiearchy of
+    schema objects based on their paths.
+
+    This is suitable for use with CLI:
+
+        moo [...] render -t moo.oschema.namespacify [...]
+
+    '''
+    top = Namespace("")
+    for d in data:
+        typ = from_dict(d)
+        top.add(typ)
+    return top
+
+
+def test():
     top = Namespace("top")
 
     base = top.namespace("base")
@@ -353,6 +511,7 @@ def test():
         ])
 
     return top
+
 
 def test2():
 
