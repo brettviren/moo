@@ -4,7 +4,7 @@
 
 * Installation
 
-Moo is a Python package
+Moo is a Python package and installs in the "usual Python way"
 
 #+begin_example
   $ pip install -e .

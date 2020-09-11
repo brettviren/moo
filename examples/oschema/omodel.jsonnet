@@ -7,6 +7,10 @@ function(os, path) {
 
     // Select out the types "in" this namespace
     types: [t for t in os if oschema.isin(self.path, t.path)],
+
+    // Reference full type by its FQN
+    byref: {[oschema.fqn(t)]:t for t in $.types},
+
     // Collect types by their schema class name
     byscn: {[tn]:[oschema.fqn(t) for t in $.types if t.schema == tn]
                    for tn in oschema.class_names},

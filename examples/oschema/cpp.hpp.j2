@@ -23,6 +23,13 @@ using {{t.name}} = {{model.lang.dtypes[t.dtype]}};
 {% macro declare_any(model, t) %}
 using {{t.name}} = {{model.lang.types.any}};
 {%- endmacro -%}
+{% macro declare_enum(model, t) %}
+enum class {{t.name}}: unsigned {
+    {% for sname in t.symbols %}
+    {{sname}},
+    {% endfor %}
+}
+{%- endmacro -%}
 
 {% macro ns(model) %}
 namespace {{ "::".join(model.path) }}

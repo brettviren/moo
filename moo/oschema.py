@@ -241,6 +241,17 @@ class Any(BaseType):
         return val
 
 
+class Enum(BaseType):
+
+    def __init__(self, name=None, symbols=(), doc="", path=()):
+        super().__init__(name, doc, path)
+        self.symbols = symbols
+
+    @property
+    def js(self):
+        return dict(type="string", enum=self.symbols)
+
+
 def isin(me, you):
     '''
     Return True if path "you" begins with "me"
@@ -391,7 +402,7 @@ class Namespace(BaseType):
         return d
 
 def schema_class(clsname):
-    for cls in [Boolean, Number, String, Record, Sequence, Any, Namespace]:
+    for cls in [Boolean, Number, String, Record, Sequence, Any, Enum, Namespace]:
         if clsname.lower() == cls.__name__.lower():
             return cls
     raise KeyError(f'no such schema class: "{clsname}"')
