@@ -2,13 +2,12 @@
 /*
  * This file is 100% generated.  Any manual edits will likely be lost.
  */
-{% set nsmarker = "_".join(model.path).upper() + "_STRUCTS_HPP" %}
-{% set ns = "::".join(model.path) %}
-#ifndef {{nsmarker}}
-#define {{nsmarker}}
+{% set tcname = "Structs" %}
+#ifndef {{cpp.headerguard(model, tcname)}}
+#define {{cpp.headerguard(model, tcname)}}
 
-{% for ep in model.extpaths %}
-#include "{{ep}}/Structs.hpp"
+{% for ep in model.extrefs %}
+#include "{{ep}}/{{tcname}}.hpp"
 {% endfor %}
 
 {% for schema, typeref in model.byscn.items() %}
@@ -17,13 +16,13 @@
 {% endfor %}{% endif %}
 {% endfor %}
 
-namespace {{ ns }} {
+{{ cpp.ns(model) }} {
 
     {% for t in model.types %}
+    // @brief {{ t.doc }}
     {{ cpp["declare_"+t.schema](model, t)|indent }}
+
     {% endfor %}
+} // {{ cpp.ns(model) }}
 
-
-} // namespace {{ ns }}
-
-#endif // {{ nsmarker }}
+#endif // {{cpp.headerguard(model, tcname)}}

@@ -1,0 +1,15 @@
+Top namespace:
+{{model.__repr__()}}
+
+It holds these sub-namespaces:
+{% for one in model.subns(True) %}
+{{one.__repr__()}}
+{% endfor %}
+
+It holds these types
+{% for one in model.types(True) %}
+{{one.__repr__()}}
+{% endfor %}
+
+Dump model as Python data:
+{{model.to_dict()}}

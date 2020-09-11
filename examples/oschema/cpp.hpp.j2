@@ -8,7 +8,9 @@ using {{t.name}} = {{model.lang.types.sequence}}<{{t["items"]|replace(".","::")}
 {% macro declare_record(model, t) %}
 struct {{t.name}} {
     {% for f in t.fields %}
-    {{f.item|replace(".","::")}} {{f.name}};
+
+    // @brief {{f.doc}}
+    {{f.item|replace(model.nspre,"")|replace(".","::")}} {{f.name}};
     {% endfor %}
 };
 {%- endmacro -%}
@@ -17,4 +19,14 @@ using {{t.name}} = {{model.lang.types.string}};
 {%- endmacro -%}
 {% macro declare_number(model, t) %}
 using {{t.name}} = {{model.lang.dtypes[t.dtype]}};
+{%- endmacro -%}
+{% macro declare_any(model, t) %}
+using {{t.name}} = {{model.lang.types.any}};
+{%- endmacro -%}
+
+{% macro ns(model) %}
+namespace {{ "::".join(model.path) }}
+{%- endmacro -%}
+{% macro headerguard(model, what) %}
+{{ "_".join(model.path).upper() + "_" + what.upper() + "_HPP" }}
 {%- endmacro -%}

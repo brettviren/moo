@@ -1,4 +1,7 @@
 #+title: wcup - Wire-Cell User Package Generator
+#+setupfile: setup.org
+
+* Introduction
 
 The Wire-Cell Toolkit supports "user packages" (WCUP).  A WCUP is like
 a "vertical slice" of the main ~wire-cell-toolkit~ repository in that it

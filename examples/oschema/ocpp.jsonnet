@@ -1,5 +1,6 @@
-// moo support for C++ language templates.
-// FIXME: this must follow the same structure as other eg, one for Python.
+// some C++ specific helpers for templates.
+// Suggested use:
+//   moo -g '/lang:ocpp.jsonnet' [...]
 {
     types: {            // type conversion between schema and C++
         string: "std::string",
@@ -17,6 +18,7 @@
         f8: "double",
     },
     imports: {          // ie, the ... in #include <...>
+        sequence: ["vector"],
         string: ["string"],
         anyof: ["variant"],
         any: ["nlohman/json.hpp"],

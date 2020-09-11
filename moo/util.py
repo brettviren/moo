@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 
 import os
+import importlib
+import jsonpointer
 
 def select_path(obj, path, delim='.'):
     '''Select out a part of obj structure based on a path.
@@ -116,3 +118,87 @@ def tla_pack(tlas, jpath):
 
     # these keywords are what jsonnet.evaluate_file() expects
     return dict(tla_vars=tla_vars, tla_codes=tla_codes)
+
+def transform(model, transforms):
+    '''Transform a model
+
+    The transform may be a single transform or a sequence of
+    transforms.  As a sequence it represents a pipeline.  First
+    transform is applied to model and its result is passed into
+    the second, etc.
+
+    A transform may be a string or a callable.  If a callable, it is
+    applied as-is.
+
+    If the transform is a string it is interpreted as:
+
+        [<prefix>:][<modmeth>[|<modmeth>|...]]
+
+    The <prefix> is a JSON Pointer into the model and if not given
+    refers to the entire model.  For details about JSON Pointer see
+    https://tools.ietf.org/html/rfc6901
+
+    The <modmeth> is a dotted-path of modules with a final leaf that
+    is a function.  The modules must be available and the function
+    must take a single argument, which is the model (or pointed
+    portion if <prefix>) is used and the function must return a stat
+    strucutre.
+
+    If multiple <modmeth> are provided, separated by a pipe ("|"), the
+    output of one provides the input to the next.
+
+    An example which applies three consecutive transforms to the first
+    element of a "types" array.
+
+        /types/0:moo.oschema.typify|moo.oschema.graph|moo.schema.namespacify
+
+    If a pipeline gets much longer, best to provide it in a Python module.
+
+    '''
+    from collections.abc import Sequence
+    if not transforms:
+        return model
+    if not isinstance(transforms, Sequence):
+        transforms = [transforms]
+    for t in transforms:
+        if isinstance(t, str):
+            t = transform_parse(t)
+        model = t(model)
+    return model
+
+
+def graft(model, pointer, branch):
+    if not pointer:
+        return branch
+    return jsonpointer.set_pointer(model, pointer, branch)
+
+
+def parse_ptr_spec(text):
+    parts = text.split(":",1)
+    if len(parts) == 2:
+        return parts
+    return "", parts[0]
+
+
+def transform_parse(tspec):
+    '''
+    Parse transform spec.  See @ref tranform() for details
+    '''
+    ptr, tspec = parse_ptr_spec(tspec)
+
+    meths = list()
+    for modmeth in tspec.split("|"):
+        parts = modmeth.rsplit(".", 1)
+        if len(parts) != 2:
+            raise RuntimeError("transform should a '.' path to a function")
+        mod = importlib.import_module(parts[0])
+        meth = getattr(mod, parts[1])
+        meths.append(meth)
+
+    def trans(model):
+        branch = jsonpointer.resolve_pointer(model, ptr)
+        for meth in meths:
+            branch = meth(branch)
+        model = graft(model, ptr, branch)
+        return model
+    return trans

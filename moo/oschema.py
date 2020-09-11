@@ -232,6 +232,15 @@ class Record(BaseType):
         return ret
 
 
+class Any(BaseType):
+
+    js = dict()
+
+    def __call__(self, val):
+        validate(val, self.js)
+        return val
+
+
 def isin(me, you):
     '''
     Return True if path "you" begins with "me"
@@ -382,11 +391,10 @@ class Namespace(BaseType):
         return d
 
 def schema_class(clsname):
-    for cls in [Boolean, Number, String, Record, Sequence, Namespace]:
+    for cls in [Boolean, Number, String, Record, Sequence, Any, Namespace]:
         if clsname.lower() == cls.__name__.lower():
             return cls
     raise KeyError(f'no such schema class: "{clsname}"')
-    
 
 
 def from_dict(d):
@@ -395,17 +403,17 @@ def from_dict(d):
     '''
     d = dict(d)
     schema = d.pop("schema")
-    deps = d.pop("deps",None)   # don't care
+    d.pop("deps", None)         # don't care
     name = d.pop("name")
     path = list(d.pop("path"))  # don't abuse input
 
     if schema == "namespace":
-        doc = d.pop("doc","")
+        doc = d.pop("doc", "")
         parts = dict()
-        for n,p in d.items():   # rest of d is parts
+        for n, p in d.items():   # rest of d is parts
             parts[n] = from_dict(p)
         return Namespace(name, path, doc, **parts)
-    
+
     # otherwise make a namespace to hold the building of the type
     if path:
         nsname = path.pop(-1)
@@ -414,10 +422,11 @@ def from_dict(d):
         ns = Namespace("")
     meth = getattr(ns, schema)
     if schema == "record":      # little help
-        fields = [Field(**f) for f in d.pop("fields",[])]
+        fields = [Field(**f) for f in d.pop("fields", [])]
         d["fields"] = fields
-        
-    return meth(name, **d)
+
+    ret = meth(name, **d)
+    return ret
 
 
 def graph(types):
@@ -489,8 +498,8 @@ def namespacify(data):
 
     '''
     top = Namespace("")
-    for d in data:
-        typ = from_dict(d)
+    for dat in data:
+        typ = from_dict(dat)
         top.add(typ)
     return top
 

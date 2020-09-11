@@ -1,0 +1,5 @@
+#+title: Functional Schema
+#+subtitle: moo 無 fschema
+#+setupfile: setup.org
+
+An initial attempt.  Maybe not worth documenting.

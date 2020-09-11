@@ -6,6 +6,8 @@
 
 - [[https://github.com/brettviren/moo][code repository]] and its [[file:README.org][README]] 
 
-- [[file:moo.org][moo]] :: documentation
+- Main entry to [[file:moo.org][moo documentation]]
+
+  - [[file:oschema.org][Most interesting part]]
 
 

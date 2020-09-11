@@ -1,0 +1,53 @@
+#+title: moo 無
+#+subtitle: Model Oriented Objects
+#+setupfile: setup.org
+
+* Installation
+
+Moo is a Python package
+
+#+begin_example
+  $ pip install -e .
+  $ moo --help
+#+end_example
+
+* What does ~moo~ do?
+
+~moo~ provides a command line program, Python module, Jsonnet modules
+and other supporting files to assist in developing and processing data
+structures and particularly those interpreted as schema.
+
+With ~moo~ you can develop schema in Jsonnet, Python or various other
+languages.  You can transform this schema between different
+representations and you can load schema from a representation and
+apply it to a template in order to generate a document such as new
+code.
+
+In addition, ~moo~ can be used to generate Python classes from schema
+which may be used to help create objects which are
+/valid-by-construction/ against the original schema.
+
+* How do I use ~moo~?
+
+At it's core, ~moo~ focuses on data structure processing and thus
+attempts to be agnostic about the interpretation of the data
+structures.  For particular interpretation as schema, ~moo~ provides
+some specialized functionality.  Even withing that context the
+user/developer may invent their own paradigm(s).
+
+Some examples of paradigms are included with ~moo~.  In particular see:
+
+- [[file:oschema.org][Object Schema]] which defines a specific "meta schema" for an object
+  representation of types that loosely follows (and is somewhat
+  compatible with) that used JSON Schema and by Avro schema.
+
+- [[file:fschema.org][Functional Schema]] defines schema in a functional paradigm using
+  abstract object of methods and a family of "domain" implementations.
+
+- [[file:wcup.org][Wire-Cell User Package generator]] defines a small paradigm to produce
+  a skeleton for an entire "user package" based on the Wire-Cell
+  toolkit.
+
+
+
+

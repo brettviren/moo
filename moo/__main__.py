@@ -3,21 +3,19 @@
 Main CLI to moo
 '''
 import os
-import sys
 import json
 import click
-import importlib
-
-import jsonschema
-#from moo import jsonnet, template, io
-# from moo.util import validate, resolve, deref as dereference, tla_pack
 import moo
+from pprint import pprint
+
 
 class Context:
     '''
     Application context collects parameters and methods common to commands.
     '''
-    def __init__(self, spath="", dpath="", jpath=(), tpath=(), tla=()):
+    def __init__(self, spath="", dpath="", jpath=(), tpath=(),
+                 tla=(), transform=(), graft=()):
+
         self.spath = spath
         self.dpath = dpath
         self.jpath = jpath
@@ -25,6 +23,13 @@ class Context:
         self.tlas = dict()
         if tla:
             self.tlas = moo.util.tla_pack(tla, jpath)
+        self.transforms = transform
+        self.grafts = graft
+
+    def just_load(self, filename, jpath=None, dpath=None):
+        return moo.io.load(self.resolve(filename),
+                           jpath or self.jpath,
+                           dpath or self.dpath, **self.tlas)
 
     def load(self, filename, jpath=None, dpath=None):
         '''
@@ -32,13 +37,14 @@ class Context:
 
         Search jpath for file and return substructure at dpath.
         '''
-        return moo.io.load(self.resolve(filename),
-                           jpath or self.jpath,
-                           dpath or self.dpath, **self.tlas)
+        model = self.just_load(filename, jpath, dpath)
+        model = self.graft(model)
+        model = self.transform(model)
+        return model
 
     def load_schema(self, schema, jpath=None, spath=None):
         '''
-        Load a schema structure from a file or URL.  
+        Load a schema structure from a file or URL.
 
         Search jpath for file and return substructure at spath.
         '''
@@ -46,37 +52,19 @@ class Context:
                                   jpath or self.jpath,
                                   spath or self.spath)
 
-
-    def transform(self, model, transform):
-        '''Transform a model
-
-        The transform may be a single transform or a sequence of
-        transforms.  As a sequence it represents a pipeline.  First
-        transform is applied to model and its result is passed into
-        the second, etc.
-
-        A transform may be a string which will be interpreted as a
-        Python "dot" path to a function in its module.  Otherwise it
-        is assumed to already be a callable which takes and returns a
-        model.
-
-        '''
-        from collections.abc import Sequence
-        if not transform:
-            return model
-        if not isinstance(transform, Sequence):
-            transform = [transform]
-        for t in transform:
-            if isinstance(t, str):
-                parts = t.rsplit(".",1)
-                if len(parts) != 2:
-                    raise RuntimeError("transfor should be a Python '.' path to a function")
-                mod = importlib.import_module(parts[0])
-                t = getattr(mod, parts[1])
-            model = t(model)
+    def graft(self, model):
+        'Apply any grafts to the model'
+        for g in self.grafts:
+            ptr, fname = moo.util.parse_ptr_spec(g)
+            data = self.just_load(fname)
+            model = moo.util.graft(model, ptr, data)
         return model
-        
 
+    def transform(self, model):
+        'Transform a model'
+        if self.transforms:
+            model = moo.util.transform(model, self.transforms)
+        return model
 
     def resolve(self, filename, fpath=None):
         '''
@@ -87,7 +75,7 @@ class Context:
         if filename.endswith('.jsonnet'):
             ret = moo.util.resolve(filename, fpath or self.jpath)
         elif filename.endswith('.j2'):
-            ret =  moo.util.resolve(filename, fpath or self.tpath)
+            ret = moo.util.resolve(filename, fpath or self.tpath)
         else:
             ret = moo.util.resolve(filename, fpath or self.jpath)
         if ret is None:
@@ -99,8 +87,8 @@ class Context:
         Render model against template in templ_file.
         '''
         templ = self.resolve(templ_file, self.tpath)
-        
-        helper = self.load(self.resolve("moo.jsonnet"), dpath = "templ")
+
+        helper = self.just_load("moo.jsonnet", dpath="templ")
         return moo.template.render(templ, dict(model=model, moo=helper))
 
     def imports(self, filename):
@@ -127,12 +115,16 @@ class Context:
               help="Extra directory to find Jinja2 files")
 @click.option('-A', '--tla', multiple=True,
               help="Specify a 'top-level argument' as a var=string or var=file.jsonnet")
+@click.option('-g', '--graft', multiple=True, type=str,
+              help="Graft structure into a model")
+@click.option('-t', '--transform', multiple=True, type=str,
+              help="Specify a model transform")
 @click.pass_context
-def cli(ctx, spath, dpath, jpath, tpath, tla):
+def cli(ctx, spath, dpath, jpath, tpath, tla, graft, transform):
     '''
     moo command line interface
     '''
-    ctx.obj = Context(spath, dpath, jpath, tpath, tla)
+    ctx.obj = Context(spath, dpath, jpath, tpath, tla, transform, graft)
 
 
 @cli.command("resolve")
@@ -173,9 +165,10 @@ def cmd_validate(ctx, output, schema, sequence, validator, model):
     if not sequence:
         data = [data]
         sche = [sche]
-    else: assert(len(data) == len(sche))
-    res=list()
-    for m,s in zip(data,sche):
+    else:
+        assert(len(data) == len(sche))
+    res = list()
+    for m, s in zip(data, sche):
         one = moo.util.validate(m, s, validator)
         res.append(one)
     if not sequence:
@@ -200,63 +193,70 @@ def write(data, output, need_dump=True):
               help="Output file, default is stdout")
 @click.option('--string/--no-string', '-S/ ', default=False,
               help="Treat output as string not JSON")
-@click.option('--deref', default=None,
-              help="Dereference JSON Schema $ref (yes/true or select path)")
 @click.argument('model')
 @click.pass_context
-def compile(ctx, multi, output, string, deref, model):
+def compile(ctx, multi, output, string, model):
     '''
     Compile a model to JSON
     '''
     data = ctx.obj.load(model)
-    if deref:
-        data = dereference(data, deref)
     if multi:
         os.makedirs(multi, exist_ok=True)
-        for output, dat in data.items():
-            output = os.path.join(multi, output)
-            write(dat, output, not string)
+        for one, dat in data.items():
+            one = os.path.join(multi, one)
+            write(dat, one, not string)
     else:
         write(data, output, not string)
 
+
 @cli.command()
 @click.option('-o', '--output', default="/dev/stdout",
               type=click.Path(exists=False, dir_okay=False, file_okay=True),
               help="Output file, default is stdout")
-@click.option('-t', '--transform', multiple=True, type = str,
-              help="Python code path to transform model data prior to template application")
+@click.option('-f', '--format', default='repr',
+              type=click.Choice(['repr', 'pretty', 'plain', 'types']),
+              help="Output format")
 @click.argument('model')
 @click.pass_context
-def dump(ctx, output, transform, model):
+def dump(ctx, output, format, model):
     '''
     Like render but print model that would be sent to the template
     '''
-    moo = ctx.obj.load("moo.jsonnet", dpath = "templ")
     data = ctx.obj.load(model)
-    data = ctx.obj.transform(data, transform)
-    print(repr(data))
+    if format == 'repr':
+        print(repr(data))
+    elif format == 'pretty':
+        pprint(data)
+    elif format == 'types':
+        if isinstance(data, list):
+            for one in data:
+                print(type(one))
+        elif isinstance(data, dict):
+            for k, v in data.items():
+                print(k, type(v))
+        else:
+            print(type(data))
+    else:
+        print(data)
 
 
 @cli.command()
 @click.option('-o', '--output', default="/dev/stdout",
               type=click.Path(exists=False, dir_okay=False, file_okay=True),
               help="Output file, default is stdout")
-@click.option('-t', '--transform', multiple=True, type = str,
-              help="Python code path to transform model data prior to template application")
 @click.argument('model')
 @click.argument('templ')
 @click.pass_context
-def render(ctx, output, transform, model, templ):
+def render(ctx, output, model, templ):
     '''
     Render a template against a model.
     '''
-    moo = ctx.obj.load("moo.jsonnet", dpath = "templ")
     data = ctx.obj.load(model)
-    data = ctx.obj.transform(data, transform)
     text = ctx.obj.render(templ, data)
     with open(output, 'wb') as fp:
         fp.write(text.encode())
     pass
+
 
 @cli.command('render-many')
 @click.option('-o', '--outdir', default=".",
@@ -265,7 +265,7 @@ def render(ctx, output, transform, model, templ):
 @click.argument('model')
 @click.pass_context
 def render_many(ctx, outdir, model):
-    '''Render many files for a project.  
+    '''Render many files for a project.
 
     The model found at the data path dpath should be a Jsonnet array
     of moo.render() objects.
@@ -279,7 +279,7 @@ def render_many(ctx, outdir, model):
         print(f"generating {output}:")
         with open(output, 'wb') as fp:
             fp.write(text.encode())
-        
+
 
 
 # @cli.command()

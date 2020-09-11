@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2020-09-11 Fri 13:23 -->
+<!-- 2020-09-11 Fri 13:21 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>moo 無</title>
@@ -257,23 +257,89 @@ for the JavaScript code in this tag.
 <br />
 <span class="subtitle">Model Oriented Objects</span>
 </h1>
+<div id="table-of-contents">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents">
+<ul>
+<li><a href="#org61ba4b8">Installation</a></li>
+<li><a href="#org239153a">What does <code>moo</code> do?</a></li>
+<li><a href="#orgb24739e">How do I use <code>moo</code>?</a></li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-org61ba4b8" class="outline-2">
+<h2 id="org61ba4b8">Installation</h2>
+<div class="outline-text-2" id="text-org61ba4b8">
 <p>
-<b>moo</b> is a tool for managing data structures, templates, schema and generating documents.
+Moo is a Python package
+</p>
+
+<pre class="example">
+$ pip install -e .
+$ moo --help
+</pre>
+</div>
+</div>
+
+<div id="outline-container-org239153a" class="outline-2">
+<h2 id="org239153a">What does <code>moo</code> do?</h2>
+<div class="outline-text-2" id="text-org239153a">
+<p>
+<code>moo</code> provides a command line program, Python module, Jsonnet modules
+and other supporting files to assist in developing and processing data
+structures and particularly those interpreted as schema.
+</p>
+
+<p>
+With <code>moo</code> you can develop schema in Jsonnet, Python or various other
+languages.  You can transform this schema between different
+representations and you can load schema from a representation and
+apply it to a template in order to generate a document such as new
+code.
+</p>
+
+<p>
+In addition, <code>moo</code> can be used to generate Python classes from schema
+which may be used to help create objects which are
+<i>valid-by-construction</i> against the original schema.
+</p>
+</div>
+</div>
+
+<div id="outline-container-orgb24739e" class="outline-2">
+<h2 id="orgb24739e">How do I use <code>moo</code>?</h2>
+<div class="outline-text-2" id="text-orgb24739e">
+<p>
+At it's core, <code>moo</code> focuses on data structure processing and thus
+attempts to be agnostic about the interpretation of the data
+structures.  For particular interpretation as schema, <code>moo</code> provides
+some specialized functionality.  Even withing that context the
+user/developer may invent their own paradigm(s).
+</p>
+
+<p>
+Some examples of paradigms are included with <code>moo</code>.  In particular see:
 </p>
 
 <ul class="org-ul">
-<li><a href="https://github.com/brettviren/moo">code repository</a> and its <a href="README.html">README</a></li>
+<li><a href="oschema.html">Object Schema</a> which defines a specific "meta schema" for an object
+representation of types that loosely follows (and is somewhat
+compatible with) that used JSON Schema and by Avro schema.</li>
 
-<li>Main entry to <a href="moo.html">moo documentation</a>
+<li><a href="fschema.html">Functional Schema</a> defines schema in a functional paradigm using
+abstract object of methods and a family of "domain" implementations.</li>
 
-<ul class="org-ul">
-<li><a href="oschema.html">Most interesting part</a></li>
-</ul></li>
+<li><a href="wcup.html">Wire-Cell User Package generator</a> defines a small paradigm to produce
+a skeleton for an entire "user package" based on the Wire-Cell
+toolkit.</li>
 </ul>
+</div>
+</div>
 </div>
 <div id="postamble" class="status">
 <p class="author">Author: Brett Viren</p>
-<p class="date">Created: 2020-09-11 Fri 13:23</p>
+<p class="date">Created: 2020-09-11 Fri 13:21</p>
 <p class="validation"><a href="http://validator.w3.org/check?uri=referer">Validate</a></p>
 </div>
 </body>

@@ -372,72 +372,285 @@ template.  The function is specified as a "dot" path naming the
 function in its module.  We may use the ~moo dump~ command to
 illustrate a transformation applied to the ~app~ schema:
 
-#+begin_src shell :exports both :results output code :wrap "src json"
-  moo -J examples/oschema dump -t moo.oschema.namespacify app.jsonnet
-#+end_src
-
-#+RESULTS:
-#+begin_src json
-<Namespace "" parts:{app, Counts, Email, Person}>
-#+end_src
-
-
-The built-in ~moo.oschema.namespacify()~ function takes an oschema
-(array of types) and places them into a top level ~namespace~ based on
-their individual ~path~ values.  The template may then rely on the
-resulting object-oriented structure.  Here is a simple example
-template that iterates over a "namespacified" schema to print out the
-contexts into a text file:
-
-#+include: examples/oschema/oo.txt.j2 example
-
-And, apply the transformed schema as a model to this template:
-
 #+begin_src shell :exports both :results output code :wrap "example"
-  moo -T examples/oschema -J examples/oschema \
-    render -t moo.oschema.namespacify \
-      app.jsonnet oo.txt.j2
+  moo -J examples/oschema -t moo.oschema.typify dump -f pretty app.jsonnet
 #+end_src
 
 #+RESULTS:
 #+begin_example
-Top namespace:
-<Namespace "" parts:{app}>
-
-It holds these sub-namespaces:
-<Namespace "app" parts:{Counts, Email, Person}>
-
-It holds these types
-<Sequence "app.Counts" items:sys.Count>
-<String "app.Email">
-<Record "app.Person" fields:{email, counts}>
-
-Dump model as Python data:
-{'name': '', 'schema': 'namespace', 'path': [], 'doc': '', 'app': {'name': 'app', 'schema': 'namespace', 'path': [], 'doc': '', 'Counts': {'name': 'Counts', 'schema': 'sequence', 'path': ['app'], 'doc': '', 'items': 'sys.Count'}, 'Email': {'name': 'Email', 'schema': 'string', 'path': ['app'], 'doc': '', 'pattern': None, 'format': 'email'}, 'Person': {'name': 'Person', 'schema': 'record', 'path': ['app'], 'doc': '', 'fields': [{'name': 'email', 'item': 'app.Email'}, {'name': 'counts', 'item': 'app.Counts'}]}}}
+[<Any "app.Affiliation">,
+ <Sequence "app.Counts" items:sys.Count>,
+ <String "app.Email">,
+ <Record "app.Person" fields:{email, counts, affil}>]
 #+end_example
 
-Another example showing a pipeline of transformations:
+The built-in ~moo.oschema.typify()~ function illustrated here takes an
+oschema (array of types) and constructs instances of Python versions
+of the oschema schema classes which provide additional functionality.
+The template may then rely on the resulting object-oriented structure.
+
+We may also pipeline transformations.  Here is an example that will
+use the output of ~typify()~, form a graph from the type reference
+dependencies, and perform a [[https://en.wikipedia.org/wiki/Topological_sorting][topological sort]] to produce an array which
+are ordered from least dependent to most.
 
 #+begin_src shell :exports both :results output code :wrap "example"
   moo -T examples/oschema -J examples/oschema \
-    render -t moo.oschema.typify -t moo.oschema.graph -t moo.oschema.depsort \
-      app.jsonnet ool.txt.j2
+      -t 'moo.oschema.typify|moo.oschema.graph|moo.oschema.depsort' \
+        render app.jsonnet ool.txt.j2
 #+end_src
 
 #+RESULTS:
 #+begin_example
 Iterate over list of types:
+<Any "app.Affiliation">
 <Sequence "app.Counts" items:sys.Count>
 <String "app.Email">
-<Record "app.Person" fields:{email, counts}>
+<Record "app.Person" fields:{email, counts, affil}>
 #+end_example
 
-Note the ~Person~ comes after the ~Counts~ and ~Email~ on which its
-fields depend.
+Note the ~Person~ type comes after the types that it refers to in its fields.
 
-This example also shows that the pipeline may becomes rather complex.
-At some point, developing a composite transformation function will be
-useful to keep CLI argument list small.
+This example also implies that a pipeline of transformations may
+becomes rather complex.  At some point, developing a composite
+transformation function in Python and referring to it on the ~moo~ CLI
+may be useful to keep the command argument list small.
+
+
+* Models and Templates
+  :PROPERTIES:
+  :CUSTOM_ID: m-and-c
+  :END:
+
+
+Some trivial templates were introduced above in order to dump out some
+of the information in their models.  Here we develop two "real"
+templates
+
+- ~ostructs.hpp.j2~ :: generate a C++ header a defining a C++ ~namespace~
+  scope and holding definition of a C++ ~struct~ type for each type
+  instance of the schema class ~record~ with a ~path~ in that scope.
+
+- ~onljs.hpp.j2~ :: for each C++ ~struct~ defined above, produce functions
+  that will allow the ~struct~ to participate in ~nlohmann::json~ (nljs)
+  based serialization.
+
+We want the development process to be a vehicle to achieve these goals:
+
+- [ ] Provide an example "oschema" array of types as one Jsonnet file.
+- [ ] Apply ~moo~ transforms to produce a dependency-ordered array of ~moo.schema~ instances.
+- [ ] Define a model-template contract and develop both ~ostructs~ and ~onljs~ against it.
+- [ ] Automate and ensconce any complex bits into ~moo~ Python, Jsonnet or Jinja support code.
+
+Some features of the resulting generated code that are desired:
+
+- [ ] A reference to a type should not include ~namespace~ qualification
+  when that type is defined in the same ~namespace~ as the referees is
+  used.  Ie, use only ~Person~ and not ~app::Person~ when referring to the
+  type from inside ~namespace app~.  This is purely for code looks.
+- [ ] A leading ~namespace~ must be specified and only types in that
+  ~namespace~ defined.  
+- [ ] Any type references outside that ~namespace~ must be satisfied at
+  the C++ level with a suitable ~#include~.  The *template will assume* a
+  convention to map ~namespace~ (aka oschema ~path~) to include files.
+
+** ~omodel~ Model
+   :PROPERTIES:
+   :CUSTOM_ID: omodel
+   :END:
+
+The ~omodel~ contract is embodied in this Jsonnet file:
+
+#+include: examples/oschema/omodel.jsonnet src jsonnet
+
+The top-level arguments are described below.  What is produced is an
+object (ie, an instance of the model) with these attributes:
+
+- ~path~ :: the ~namespace~ path scope to focus on as a list/array
+- ~nspre~ :: ~namespace~ prefix with trailing dot
+- ~types~ :: array of type data structures which are in scope
+- ~byscn~ :: references to types collected by schema class
+- ~extref~ :: list of references to types outside the scope
+
+Top-level arguments
+
+- ~os~ :: bring in the ~oschema~ array
+- ~path~ :: the ~namespace~ path with which select a branch on the full schema tree
+
+We can test out some TLAs and test that the model compiles using the ~moo~ CLI:
+
+#+begin_example
+  moo -T examples/oschema -J examples/oschema \
+    -A os=app.jsonnet -A path=app \
+       compile omodel.jsonnet
+#+end_example
+
+We want to apply a transform to the ~types~ attribute and can test that with:
+
+#+begin_src shell :exports both :results output code :wrap "src python"
+  moo -T examples/oschema -J examples/oschema \
+    -A os=app.jsonnet -A path=app \
+    -t '/types:moo.oschema.typify|moo.oschema.graph|moo.oschema.depsort' \
+       dump -f pretty omodel.jsonnet
+#+end_src
+
+#+RESULTS:
+#+begin_src python
+{'byscn': {'any': ['app.Affiliation'],
+           'anyOf': [],
+           'boolean': [],
+           'enum': [],
+           'namespace': [],
+           'number': [],
+           'record': ['app.Person'],
+           'sequence': ['app.Counts'],
+           'string': ['app.Email']},
+ 'extrefs': ['sys'],
+ 'nspre': 'app.',
+ 'path': ['app'],
+ 'types': [<Any "app.Affiliation">,
+           <Sequence "app.Counts" items:sys.Count>,
+           <String "app.Email">,
+           <Record "app.Person" fields:{email, counts, affil}>]}
+#+end_src
+
+We are almost ready to turn to the template but one last detail is
+needed.  As we will find there are some utilities that will simplify
+developing the template and which are specific to the target-language
+(eg C++) and which the rest of the model does not depend.  We will
+bring these in as a model "graft".
+
+
+#+begin_src shell :exports both :results output code :wrap "src python"
+  moo -g '/lang:ocpp.jsonnet' \
+      -T examples/oschema -J examples/oschema \
+      -A os=app.jsonnet -A path=app \
+      -t '/types:moo.oschema.typify|moo.oschema.graph|moo.oschema.depsort' \
+      dump -f pretty omodel.jsonnet
+#+end_src
+
+#+RESULTS:
+#+begin_src python
+{'byscn': {'any': ['app.Affiliation'],
+           'anyOf': [],
+           'boolean': [],
+           'enum': [],
+           'namespace': [],
+           'number': [],
+           'record': ['app.Person'],
+           'sequence': ['app.Counts'],
+           'string': ['app.Email']},
+ 'extrefs': ['sys'],
+ 'lang': {'dtypes': {'f4': 'float',
+                     'f8': 'double',
+                     'i2': 'int16_t',
+                     'i4': 'int32_t',
+                     'i8': 'int64_t',
+                     'u2': 'uint16_t',
+                     'u4': 'uint32_t',
+                     'u8': 'uint64_t'},
+          'imports': {'any': ['nlohman/json.hpp'],
+                      'anyof': ['variant'],
+                      'sequence': ['vector'],
+                      'string': ['string']},
+          'types': {'any': 'nlohman::json',
+                    'sequence': 'std::vector',
+                    'string': 'std::string'}},
+ 'nspre': 'app.',
+ 'path': ['app'],
+ 'types': [<Any "app.Affiliation">,
+           <Sequence "app.Counts" items:sys.Count>,
+           <String "app.Email">,
+           <Record "app.Person" fields:{email, counts, affil}>]}
+#+end_src
+
+If you squint at that dump you'll find the ~lang~ attribute added.
+
+These CLI are getting rather long and we may add bits to make that easier but let's now move to the template.
+
+
+
+** ~ostructs~ Template
+   :PROPERTIES:
+   :CUSTOM_ID: ostruct
+   :END:
+
+The [[file:examples/oschema/ostructs.hpp.j2][ostructs.hpp.j2]] template file gets applied to the ~omodel~ to
+produce a C++ header file defining a ~struct~ for each ~record~ instance
+in the model and any supporting types via a ~using~ type alias.  It also
+uses the ~extref~ info to ~#include~ any required external headers that
+themselves are also generated from other parts of the overall schema.
+
+Take particular note that this ~#include~ pattern *bakes in a specific
+mapping* from a type's ~path~ array to file locations.  For the resulting
+C++ code to compile, this pattern must of course actually be honored
+in some way.  This may be done manually by properly placing the
+generated files according to this mapping or, better, be automatically
+assured via a build system.  Future work may generate this file-system
+level assurance itself from schema.  For now, we must simply be careful.
+
+Finally, note that the grafting of ~ocpp.jsonnet~ selects a particular
+mapping from schema class names to their C++ equivalents.  Eg,
+~nlohman::json~ for ~any~.  If we wished to generate code using a
+different mapping, such as ~boost::any~ for ~any~ we would need to modify
+or fork this grafted data structure while the rest of the structure
+may be left as-is.
+
+We can finally generate code by changing the above CLI call from ~dump~
+to ~render~ and adding the template file name.
+
+#+begin_src shell :exports both :results output code :wrap "src c++"
+  moo -g '/lang:ocpp.jsonnet' \
+      -T examples/oschema -J examples/oschema \
+      -A os=app.jsonnet -A path=app \
+      -t '/types:moo.oschema.typify|moo.oschema.graph|moo.oschema.depsort' \
+      render omodel.jsonnet ostructs.hpp.j2
+#+end_src
+
+#+RESULTS:
+#+begin_src c++
+/*
+ ,* This file is 100% generated.  Any manual edits will likely be lost.
+ ,*/
+#ifndef APP_STRUCTS_HPP
+#define APP_STRUCTS_HPP
+
+#include "sys/Structs.hpp"
+
+#include <nlohman/json.hpp>
+#include <vector>
+#include <string>
+
+namespace app {
+
+    // @brief An associated object of any type
+    using Affiliation = nlohman::json;
+
+    // @brief All the counts
+    using Counts = std::vector<sys::Count>;
+
+    // @brief Electronic mail address
+    using Email = std::string;
+
+    // @brief Describe everything there is to know about an individual human
+    struct Person {
+
+        // @brief E-mail address
+        Email email;
+
+        // @brief Count of some things
+        Counts counts;
+
+        // @brief Some affiliation
+        Affiliation affil;
+    };
+
+
+} // namespace app
+
+#endif // APP_STRUCTS_HPP
+#+end_src
+
 
 
 * Objects
@@ -473,5 +686,4 @@ Type instances of the ~moo.oschema~ schema classes provide validating
 factories. 
 
 - [ ] some examples
-
 

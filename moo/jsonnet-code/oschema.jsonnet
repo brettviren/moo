@@ -17,6 +17,12 @@ local is(x) = std.type(x) != "null";
 local isr(x,r) = if std.type(x) != "null" then r;
 
 {
+    // Return the leading part of a dotpath p with the leaf removed
+    basepath(p) :: {
+        local np = std.split(p, "."),
+        res: std.join(".",np[:std.length(np)-1])
+    }.res,
+
     /// Form a fully qualified type name
     fqn(type) :: std.join(".", type.path + [type.name]),
 
@@ -79,6 +85,7 @@ local isr(x,r) = if std.type(x) != "null" then r;
             name: name,
             item: $.fqn(type),
             [isr(default,"default")] : default,
+            [isr(doc,"doc")]: doc,
         },
 
         record(name, fields=[], bases=null, doc=null)
@@ -94,7 +101,7 @@ local isr(x,r) = if std.type(x) != "null" then r;
         },
 
         // This may translate into, eg boost::any or nlohmann::json
-        any(name, doc=null) :: self.type(name, "any", doc) { },
+        any(name, doc=null) :: self.type(name, "any", doc),
 
         // This may tranlate into, eg std::variant
         anyOf(name, types, doc=null) :: self.type(name, "anyOf", doc, types) {
