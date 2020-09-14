@@ -28,7 +28,7 @@ enum class {{t.name}}: unsigned {
     {% for sname in t.symbols %}
     {{sname}},
     {% endfor %}
-}
+};
 {%- endmacro -%}
 
 {% macro ns(model) %}

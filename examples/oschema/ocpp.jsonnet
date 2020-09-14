@@ -4,7 +4,7 @@
 {
     types: {            // type conversion between schema and C++
         string: "std::string",
-        any: "nlohman::json",
+        any: "nlohmann::json",
         sequence: "std::vector"
     },
     dtypes: {
@@ -21,6 +21,6 @@
         sequence: ["vector"],
         string: ["string"],
         anyof: ["variant"],
-        any: ["nlohman/json.hpp"],
+        any: ["nlohmann/json.hpp"],
     }
 }

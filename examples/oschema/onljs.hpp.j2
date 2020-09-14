@@ -9,7 +9,8 @@
 #ifndef {{cpp.headerguard(model, tcname)}}
 #define {{cpp.headerguard(model, tcname)}}
 
-#include "{{"".join(model.path)}}/Structs.hpp"
+
+#include "{{model.relpath|replace(".","/")}}/Structs.hpp"
 
 {% for ep in model.extrefs %}
 #include "{{ep}}/{{tcname}}.hpp"
@@ -19,7 +20,7 @@
 
 {{ cpp.ns(model) }} {
 
-    using data_t = nlhomann::json;
+    using data_t = nlohmann::json;
 
     {% for fqn in model.byscn.enum %}
     {% set e = model.byref[fqn] %}
@@ -48,8 +49,12 @@
         from_json(j, ({{b.type}}&)obj);
         {% endfor %}
         {% for f in r.fields if not f.name.startswith("_base_") %}
+        {% if f.item in model.byscn.any %}
+        obj.{{f.name}} = j.at("{{f.name}}");
+        {% else %}
         if (j.contains("{{f.name}}"))
             j.at("{{f.name}}").get_to(obj.{{f.name}});    
+        {% endif %}
         {% endfor%}
     }
     {% endfor %}

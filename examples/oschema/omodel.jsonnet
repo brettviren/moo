@@ -1,14 +1,21 @@
 local oschema = import "oschema.jsonnet";
 
-function(os, path) {
+function(os, path, ctxpath) {
     // The path/namespace this model "lives" in
     path: oschema.listify(path),
-    nspre: std.join('.', self.path) + '.',
+    nspre: oschema.prepath(self.path),
 
-    // Select out the types "in" this namespace
+    // The path/namespace this model is assumed to be in.  It should
+    // be a leading part of the path
+    ctxpath: oschema.listify(ctxpath),
+    ctxpre: oschema.prepath(self.ctxpath),
+
+    relpath: oschema.relpath(self.path, self.ctxpath),
+
+    // Select out the types "in" this namespace.
     types: [t for t in os if oschema.isin(self.path, t.path)],
 
-    // Reference full type by its FQN
+    // Reference full type by its FQN.
     byref: {[oschema.fqn(t)]:t for t in $.types},
 
     // Collect types by their schema class name

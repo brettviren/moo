@@ -409,7 +409,8 @@ Iterate over list of types:
 <Any "app.Affiliation">
 <Sequence "app.Counts" items:sys.Count>
 <String "app.Email">
-<Record "app.Person" fields:{email, counts, affil}>
+<Enum "app.MBTI">
+<Record "app.Person" fields:{email, counts, affil, mbti}>
 #+end_example
 
 Note the ~Person~ type comes after the types that it refers to in its

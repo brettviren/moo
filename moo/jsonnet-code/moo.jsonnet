@@ -1,17 +1,17 @@
+local oschema = import "oschema.jsonnet";
+local re = import "schema/re.jsonnet";
+
 {
+    // See oschema.org for explanation.
+    oschema: oschema,
 
-    // Provided domain schema for functional-schema based construction
-    fschema: {
-        re: import "schema/re.jsonnet",
-        avro: import "schema/avro.jsonnet",
-        json: import "schema/json.jsonnet",
-        value: import "schema/value.jsonnet",
-    },
-    // keep this alias for now so existing schema doesn't break
-    schema : self.fschema,
+    // A bunch of regular expressions matching common patterns.  A
+    // pattern may be provided to a String schema as the "pattern"
+    // attribute.
+    re: re,
 
-    // Support for templates.  This is provided as object named "moo"
-    // in a template context.
+    // Support structure for templates.  This is provided as object
+    // named "moo" in a template context.
     templ: {
     },
 
@@ -20,4 +20,18 @@
     render(model, template, filename) :: {
         model:model, template:template, filename:filename,
     },
+
+
+
+    // Obsolete paradigm where schema is defined through function
+    // calls on an abstract schema object.
+    fschema: {
+        re: re,
+        avro: import "schema/avro.jsonnet",
+        json: import "schema/json.jsonnet",
+        value: import "schema/value.jsonnet",
+    },
+    // keep this alias for now so existing schema doesn't break
+    schema : self.fschema,
+    
 }

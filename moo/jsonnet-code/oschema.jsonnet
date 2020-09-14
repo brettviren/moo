@@ -19,9 +19,24 @@ local isr(x,r) = if std.type(x) != "null" then r;
 {
     // Return the leading part of a dotpath p with the leaf removed
     basepath(p) :: {
-        local np = std.split(p, "."),
+        local np = $.listify(p),
         res: std.join(".",np[:std.length(np)-1])
     }.res,
+
+    // Return trailing part of path p with path b removed
+    relpath(p, b) :: {
+        local np = $.listify(p),
+        local bp = $.listify(b),
+        // note, "in" is kind of reversed here.  bp must be a prefix of np
+        assert $.isin(bp, np),
+        res: std.join(".",np[std.length(bp):])
+    }.res,
+
+    // If path array p is not empty join it with delim and add a delim at end
+    prepath(p, delim=".") :: 
+    if std.length(p) == 0 then "" else std.join(delim, p) + delim,
+
+
 
     /// Form a fully qualified type name
     fqn(type) :: std.join(".", type.path + [type.name]),
@@ -142,7 +157,7 @@ local isr(x,r) = if std.type(x) != "null" then r;
         res: [graph[k] for k in $.sort(graph) if $.isin(mpath, graph[k].path)],        
     }.res,        
 
-    // Return Ture if b is in (or under) a
+    // Return True if b is in (or under) a
     isin(a, b) :: if std.length(a) == 0 then true else if std.length(b) == 0 then false else if b[0] != a[0] then false else $.isin(a[1:], b[1:]),
 
     // Take an object with values that are types and return one with
