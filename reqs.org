@@ -1,0 +1,100 @@
+#+title: DUNE Requirements Management
+#+subtitle: ~moo~ 無 ~reqs~
+#+setupfile: setup.org
+
+* Introduction
+  :PROPERTIES:
+  :CUSTOM_ID: intro
+  :END:
+
+
+This is a cryptic example of ~moo~ unless you happen to be a DUNE
+collaborator and many details are omitted.
+
+For the next big document we will make some changes in how we manage
+reqs.  The definitive reqs info will reside in a set of plain-text
+file managed in a Git repository.  These files will follow a simple
+syntax based.  From these definitive files we will produce
+spreadsheets, LaTeX tables for includes to documents and possibly
+other formats
+
+Each "domain" will be responsible for one file that contains the list
+of the reqs relevant to their area of DUNE.  Each req will be provided
+as a set of named attributes and their values:
+
+- specification :: a terse, preferably numeric statement that provides
+  the constraint of the req.
+
+- label :: a short word uniquely identifying the req in the context of
+  the domain.
+
+- description :: a brief explanation needed as background or to
+  otherwise understand the specification.
+
+- rationale :: a brief justification for the existence and particular
+  constraint given in the specification.
+
+- validation :: a word or phrase naming the method that the
+  specification may be validated.
+
+Each attribute name shall be exactly as typed here and each value
+shall be short, informative text possibly interspersed with markup
+functions as described below.
+
+* Syntax
+  :PROPERTIES:
+  :CUSTOM_ID: syntax
+  :END:
+
+
+In the most plain form, a record would look like this example:
+
+#+begin_src jsonnet
+{
+    label: "DAQ-readout",
+    description: "The DAQ shall be able to accept the continuous data stream from the TPC and Photon detector.",
+    specification: "1.5 TB/s per single phase detector module",
+    goal: "",
+    rationale: "Specification from TPC and PDS electronics",
+    validation: "ProtoDUNE",
+}
+#+end_src
+
+The full list of reqs is simply a comma-separated concatenation of
+each req.
+
+#+begin_src jsonnet
+[
+{ /* ... */ },
+{ /* ... */ },
+]
+#+end_src
+
+** Markup
+   :PROPERTIES:
+   :CUSTOM_ID: markup
+   :END:
+
+
+Here, describe using markup where special formatting is required.
+
+* Templates
+  :PROPERTIES:
+  :CUSTOM_ID: templates
+  :END:
+
+
+Tour of the available templates
+
+- latex tables
+- csv files 
+
+* Processing
+  :PROPERTIES:
+  :CUSTOM_ID: processing
+  :END:
+
+
+- how to generate spreadsheets, latex
+- how to integrate into build system
+
