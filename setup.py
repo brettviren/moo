@@ -16,6 +16,7 @@ setuptools.setup(
         "anyconfig",
         "jsonschema",
         "fastjsonschema",
+        "jsonpointer",
 #        "transitions",
     ],
     entry_points = dict(
