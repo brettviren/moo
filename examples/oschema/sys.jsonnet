@@ -1,6 +1,6 @@
 // examples/oschema/sys.jsonnet
-local oschema = import "oschema.jsonnet";
-local sys = oschema.schema("sys");
-oschema.sort_select([
+local moo = import "moo.jsonnet";
+local sys = moo.oschema.schema("sys");
+moo.oschema.sort_select([
     sys.number("Count", "u4")
 ])

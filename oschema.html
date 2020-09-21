@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2020-09-11 Fri 15:03 -->
+<!-- 2020-09-21 Mon 14:05 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Schema Objects</title>
@@ -405,9 +405,9 @@ Here is the <code>sys</code> schema:
 
 <div class="org-src-container">
 <pre class="src src-jsonnet"><span style="color: #73d216;">// examples/oschema/sys.jsonnet</span>
-<span style="color: #b4fa70;">local</span> oschema = <span style="color: #b4fa70;">import</span> <span style="color: #e9b96e;">"oschema.jsonnet"</span>;
-<span style="color: #b4fa70;">local</span> sys = oschema.schema(<span style="color: #e9b96e;">"sys"</span>);
-oschema.sort_select([
+<span style="color: #b4fa70;">local</span> moo = <span style="color: #b4fa70;">import</span> <span style="color: #e9b96e;">"moo.jsonnet"</span>;
+<span style="color: #b4fa70;">local</span> sys = moo.oschema.schema(<span style="color: #e9b96e;">"sys"</span>);
+moo.oschema.sort_select([
     sys.number(<span style="color: #e9b96e;">"Count"</span>, <span style="color: #e9b96e;">"u4"</span>)
 ])
 </pre>
@@ -460,10 +460,13 @@ Next we imagine one possible application schema which will use the
 
 <div class="org-src-container">
 <pre class="src src-jsonnet"><span style="color: #73d216;">// examples/oschema/app.jsonnet</span>
-<span style="color: #b4fa70;">local</span> oschema = <span style="color: #b4fa70;">import</span> <span style="color: #e9b96e;">"oschema.jsonnet"</span>;
-<span style="color: #b4fa70;">local</span> sh = oschema.hier(<span style="color: #b4fa70;">import</span> <span style="color: #e9b96e;">"sys.jsonnet"</span>);
-<span style="color: #b4fa70;">local</span> as = oschema.schema(<span style="color: #e9b96e;">"app"</span>);
+<span style="color: #b4fa70;">local</span> moo = <span style="color: #b4fa70;">import</span> <span style="color: #e9b96e;">"moo.jsonnet"</span>;
+<span style="color: #b4fa70;">local</span> sh = moo.oschema.hier(<span style="color: #b4fa70;">import</span> <span style="color: #e9b96e;">"sys.jsonnet"</span>);
+<span style="color: #b4fa70;">local</span> as = moo.oschema.schema(<span style="color: #e9b96e;">"app"</span>);
 <span style="color: #b4fa70;">local</span> hier = {
+    counts: as.sequence(<span style="color: #e9b96e;">"Counts"</span>,sh.sys.Count,
+                        doc=<span style="color: #e9b96e;">"All the counts"</span>),
+
     email: as.string(<span style="color: #e9b96e;">"Email"</span>, format=<span style="color: #e9b96e;">"email"</span>,
                     doc=<span style="color: #e9b96e;">"Electronic mail address"</span>),
     affil: as.any(<span style="color: #e9b96e;">"Affiliation"</span>,
@@ -482,10 +485,8 @@ Next we imagine one possible application schema which will use the
         as.field(<span style="color: #e9b96e;">"mbti"</span>, <span style="color: #b4fa70;">self</span>.mbti,
                  doc=<span style="color: #e9b96e;">"Personality"</span>),
     ], doc=<span style="color: #e9b96e;">"Describe everything there is to know about an individual human"</span>),
-    counts: as.sequence(<span style="color: #e9b96e;">"Counts"</span>,sh.sys.Count,
-                        doc=<span style="color: #e9b96e;">"All the counts"</span>),
 };
-oschema.sort_select(hier, <span style="color: #e9b96e;">"app"</span>)
+moo.oschema.sort_select(hier, <span style="color: #e9b96e;">"app"</span>)
 </pre>
 </div>
 
@@ -495,15 +496,15 @@ detail.  Starting with the first few:
 </p>
 
 <div class="org-src-container">
-<pre class="src src-jsonnet"><span style="color: #b4fa70;">local</span> oschema = <span style="color: #b4fa70;">import</span> <span style="color: #e9b96e;">"oschema.jsonnet"</span>;
-<span style="color: #b4fa70;">local</span> sh = oschema.hier(<span style="color: #b4fa70;">import</span> <span style="color: #e9b96e;">"sys.jsonnet"</span>);
-<span style="color: #b4fa70;">local</span> as = oschema.schema(<span style="color: #e9b96e;">"app"</span>);
+<pre class="src src-jsonnet"><span style="color: #b4fa70;">local</span> moo = <span style="color: #b4fa70;">import</span> <span style="color: #e9b96e;">"moo.jsonnet"</span>;
+<span style="color: #b4fa70;">local</span> sh = moo.oschema.hier(<span style="color: #b4fa70;">import</span> <span style="color: #e9b96e;">"sys.jsonnet"</span>);
+<span style="color: #b4fa70;">local</span> as = moo.oschema.schema(<span style="color: #e9b96e;">"app"</span>);
 </pre>
 </div>
 
 <p>
-As with <code>sys</code> we import the support module <code>oschema.jsonnet</code>.  We then
-use its <code>.hier()</code> method to process the previously defined <code>sys</code>
+As with <code>sys</code> we import the support module <code>moo.jsonnet</code>.  We then
+use <code>moo.oschema.hier()</code> method to process the previously defined <code>sys</code>
 schema which we <code>import</code> in place.  The <code>.hier()</code> method gives us a
 handy object representation of this schema where they keys of the
 object are the individual type names.  We'll see that in use next.  In
@@ -512,40 +513,31 @@ path.
 </p>
 
 <p>
-Next we go to the main, if temporary, object in this schema:
+Next, let's jump to the definition of the <code>Person</code> type which begins with:
 </p>
 
 <div class="org-src-container">
-<pre class="src src-jsonnet"><span style="color: #b4fa70;">local</span> hier = {
-    email: as.string(<span style="color: #e9b96e;">"Email"</span>, format=<span style="color: #e9b96e;">"email"</span>,
-                    doc=<span style="color: #e9b96e;">"Electronic mail address"</span>),
-    affil: as.any(<span style="color: #e9b96e;">"Affiliation"</span>,
-                  doc=<span style="color: #e9b96e;">"An associated object of any type"</span>),
-    mbti: as.enum(<span style="color: #e9b96e;">"MBTI"</span>,[<span style="color: #e9b96e;">"introversion"</span>,<span style="color: #e9b96e;">"extroversion"</span>,
-                          <span style="color: #e9b96e;">"sensing"</span>,<span style="color: #e9b96e;">"intuition"</span>,
-                          <span style="color: #e9b96e;">"thinking"</span>,<span style="color: #e9b96e;">"feeling"</span>,
+<pre class="src src-jsonnet">person: as.record(<span style="color: #e9b96e;">"Person"</span>, [
+    as.field(<span style="color: #e9b96e;">"email"</span>,<span style="color: #b4fa70;">self</span>.email,
+             doc=<span style="color: #e9b96e;">"E-mail address"</span>),
 </pre>
 </div>
 
 <p>
-Note how <code>person</code> has two fields,
-<code>email</code> and <code>counts</code> both of which hold a type defined elsewhere in
-our object.  In particular <code>counts</code> is a sequence with elements of
-type <code>Count</code> that is defined in our "sys" schema.
+You will note that <code>Person</code> is defined as a value of a <code>person:</code> key in a
+containing object and that the type refers to other types by their own
+key (eg <code>self.email</code>).  It is to provide these references that we build
+our types in a temporary object even though the ultimate output (as
+we'll see) is a topologically sorted array of types.
 </p>
 
 <p>
-It's important to understand we use this temporary <code>hier</code> object as a
-context to construct structure.  It's keys are not intrinsically
-meaningful but rather only ways to refer to one type in another.  
-</p>
-
-<p>
-In fact, finally our <code>app</code> schema is produced as a flat array using:
+And, in fact, finally our <code>app</code> schema is produced as a flat array
+using:
 </p>
 
 <div class="org-src-container">
-<pre class="src src-jsonnet">oschema.sort_select(hier, <span style="color: #e9b96e;">"app"</span>)
+<pre class="src src-jsonnet">moo.oschema.sort_select(hier, <span style="color: #e9b96e;">"app"</span>)
 </pre>
 </div>
 
@@ -553,8 +545,7 @@ In fact, finally our <code>app</code> schema is produced as a flat array using:
 This scans our temporary object <code>hier</code> and outputs an array holding
 only the types which are "in" the <code>["app"]</code> path.  The array is output
 in topological so that any dependency precedes a type that depends on
-it.  Along the way any <code>.deps</code> attributes, which are temporary to
-assist in sorting, are stripped.
+it. 
 </p>
 
 <p>
@@ -930,15 +921,22 @@ The <code>omodel</code> contract is embodied in this Jsonnet file:
 <div class="org-src-container">
 <pre class="src src-jsonnet"><span style="color: #b4fa70;">local</span> oschema = <span style="color: #b4fa70;">import</span> <span style="color: #e9b96e;">"oschema.jsonnet"</span>;
 
-<span style="color: #b4fa70;">function</span>(os, path) {
+<span style="color: #b4fa70;">function</span>(os, path, ctxpath=[]) {
     <span style="color: #73d216;">// The path/namespace this model "lives" in</span>
     path: oschema.listify(path),
-    nspre: std.join(<span style="color: #e9b96e;">'.'</span>, <span style="color: #b4fa70;">self</span>.path) + <span style="color: #e9b96e;">'.'</span>,
+    nspre: oschema.prepath(<span style="color: #b4fa70;">self</span>.path),
 
-    <span style="color: #73d216;">// Select out the types "in" this namespace</span>
+    <span style="color: #73d216;">// The path/namespace this model is assumed to be in.  It should</span>
+    <span style="color: #73d216;">// be a leading part of the path</span>
+    ctxpath: oschema.listify(ctxpath),
+    ctxpre: oschema.prepath(<span style="color: #b4fa70;">self</span>.ctxpath),
+
+    relpath: oschema.relpath(<span style="color: #b4fa70;">self</span>.path, <span style="color: #b4fa70;">self</span>.ctxpath),
+
+    <span style="color: #73d216;">// Select out the types "in" this namespace.</span>
     types: [t <span style="color: #b4fa70;">for</span> t <span style="color: #b4fa70;">in</span> os <span style="color: #b4fa70;">if</span> oschema.isin(<span style="color: #b4fa70;">self</span>.path, t.path)],
 
-    <span style="color: #73d216;">// Reference full type by its FQN</span>
+    <span style="color: #73d216;">// Reference full type by its FQN.</span>
     byref: {[oschema.fqn(t)]:t <span style="color: #b4fa70;">for</span> t <span style="color: #b4fa70;">in</span> $.types},
 
     <span style="color: #73d216;">// Collect types by their schema class name</span>
@@ -980,7 +978,7 @@ We can test out some TLAs and test that the model compiles using the <code>moo</
 </p>
 
 <div class="org-src-container">
-<pre class="src src-shell">moo -T examples/oschema -J examples/oschema <span style="color: #e9b96e;">\</span>
+<pre class="src src-shell">moo -J examples/oschema <span style="color: #e9b96e;">\</span>
   -A <span style="color: #fcaf3e;">os</span>=<span style="color: #e9b96e;">'app.jsonnet'</span> -A <span style="color: #fcaf3e;">path</span>=<span style="color: #e9b96e;">'app'</span> <span style="color: #e9b96e;">\</span>
      compile omodel.jsonnet
 </pre>
@@ -994,7 +992,7 @@ showing the output until the next example CLI.
 
 
 <div class="org-src-container">
-<pre class="src src-shell">moo -T examples/oschema -J examples/oschema <span style="color: #e9b96e;">\</span>
+<pre class="src src-shell">moo -J examples/oschema <span style="color: #e9b96e;">\</span>
   -A <span style="color: #fcaf3e;">os</span>=<span style="color: #e9b96e;">'app.jsonnet'</span> -A <span style="color: #fcaf3e;">path</span>=<span style="color: #e9b96e;">'app'</span> <span style="color: #e9b96e;">\</span>
   -t <span style="color: #e9b96e;">'/types:moo.oschema.typify|moo.oschema.graph|moo.oschema.depsort'</span> <span style="color: #e9b96e;">\</span>
      dump -f pretty omodel.jsonnet
@@ -1012,7 +1010,7 @@ bring these in as a model "graft".
 
 <div class="org-src-container">
 <pre class="src src-shell">moo -g <span style="color: #e9b96e;">'/lang:ocpp.jsonnet'</span> <span style="color: #e9b96e;">\</span>
-    -T examples/oschema -J examples/oschema <span style="color: #e9b96e;">\</span>
+    -J examples/oschema <span style="color: #e9b96e;">\</span>
     -A <span style="color: #fcaf3e;">os</span>=<span style="color: #e9b96e;">'app.jsonnet'</span> -A <span style="color: #fcaf3e;">path</span>=<span style="color: #e9b96e;">'app'</span> <span style="color: #e9b96e;">\</span>
     -t <span style="color: #e9b96e;">'/types:moo.oschema.typify|moo.oschema.graph|moo.oschema.depsort'</span> <span style="color: #e9b96e;">\</span>
     dump -f pretty omodel.jsonnet
@@ -1079,6 +1077,8 @@ bring these in as a model "graft".
            <span style="color: #e9b96e;">'record'</span>: [<span style="color: #e9b96e;">'app.Person'</span>],
            <span style="color: #e9b96e;">'sequence'</span>: [<span style="color: #e9b96e;">'app.Counts'</span>],
            <span style="color: #e9b96e;">'string'</span>: [<span style="color: #e9b96e;">'app.Email'</span>]},
+ <span style="color: #e9b96e;">'ctxpath'</span>: [],
+ <span style="color: #e9b96e;">'ctxpre'</span>: <span style="color: #e9b96e;">''</span>,
  <span style="color: #e9b96e;">'extrefs'</span>: [<span style="color: #e9b96e;">'sys'</span>],
  <span style="color: #e9b96e;">'lang'</span>: {<span style="color: #e9b96e;">'dtypes'</span>: {<span style="color: #e9b96e;">'f4'</span>: <span style="color: #e9b96e;">'float'</span>,
                      <span style="color: #e9b96e;">'f8'</span>: <span style="color: #e9b96e;">'double'</span>,
@@ -1088,15 +1088,16 @@ bring these in as a model "graft".
                      <span style="color: #e9b96e;">'u2'</span>: <span style="color: #e9b96e;">'uint16_t'</span>,
                      <span style="color: #e9b96e;">'u4'</span>: <span style="color: #e9b96e;">'uint32_t'</span>,
                      <span style="color: #e9b96e;">'u8'</span>: <span style="color: #e9b96e;">'uint64_t'</span>},
-          <span style="color: #e9b96e;">'imports'</span>: {<span style="color: #e9b96e;">'any'</span>: [<span style="color: #e9b96e;">'nlohman/json.hpp'</span>],
+          <span style="color: #e9b96e;">'imports'</span>: {<span style="color: #e9b96e;">'any'</span>: [<span style="color: #e9b96e;">'nlohmann/json.hpp'</span>],
                       <span style="color: #e9b96e;">'anyof'</span>: [<span style="color: #e9b96e;">'variant'</span>],
                       <span style="color: #e9b96e;">'sequence'</span>: [<span style="color: #e9b96e;">'vector'</span>],
                       <span style="color: #e9b96e;">'string'</span>: [<span style="color: #e9b96e;">'string'</span>]},
-          <span style="color: #e9b96e;">'types'</span>: {<span style="color: #e9b96e;">'any'</span>: <span style="color: #e9b96e;">'nlohman::json'</span>,
+          <span style="color: #e9b96e;">'types'</span>: {<span style="color: #e9b96e;">'any'</span>: <span style="color: #e9b96e;">'nlohmann::json'</span>,
                     <span style="color: #e9b96e;">'sequence'</span>: <span style="color: #e9b96e;">'std::vector'</span>,
                     <span style="color: #e9b96e;">'string'</span>: <span style="color: #e9b96e;">'std::string'</span>}},
  <span style="color: #e9b96e;">'nspre'</span>: <span style="color: #e9b96e;">'app.'</span>,
  <span style="color: #e9b96e;">'path'</span>: [<span style="color: #e9b96e;">'app'</span>],
+ <span style="color: #e9b96e;">'relpath'</span>: <span style="color: #e9b96e;">'app'</span>,
  <span style="color: #e9b96e;">'types'</span>: [&lt;Any <span style="color: #e9b96e;">"app.Affiliation"</span>&gt;,
            &lt;Sequence <span style="color: #e9b96e;">"app.Counts"</span> items:sys.Count&gt;,
            &lt;String <span style="color: #e9b96e;">"app.Email"</span>&gt;,
@@ -1154,7 +1155,7 @@ to <code>render</code> and adding the template file name.
 
 <div class="org-src-container">
 <pre class="src src-shell">moo -g <span style="color: #e9b96e;">'/lang:ocpp.jsonnet'</span> <span style="color: #e9b96e;">\</span>
-    -T examples/oschema -J examples/oschema <span style="color: #e9b96e;">\</span>
+    -J examples/oschema <span style="color: #e9b96e;">\</span>
     -A <span style="color: #fcaf3e;">os</span>=<span style="color: #e9b96e;">'app.jsonnet'</span> -A <span style="color: #fcaf3e;">path</span>=<span style="color: #e9b96e;">'app'</span> <span style="color: #e9b96e;">\</span>
     -t <span style="color: #e9b96e;">'/types:moo.oschema.typify|moo.oschema.graph|moo.oschema.depsort'</span> <span style="color: #e9b96e;">\</span>
     render omodel.jsonnet ostructs.hpp.j2
@@ -1173,14 +1174,14 @@ to <code>render</code> and adding the template file name.
 
 <span style="color: #e090d7;">#include</span> <span style="color: #e9b96e;">"sys/Structs.hpp"</span>
 
-<span style="color: #e090d7;">#include</span> <span style="color: #e9b96e;">&lt;nlohman/json.hpp&gt;</span>
+<span style="color: #e090d7;">#include</span> <span style="color: #e9b96e;">&lt;nlohmann/json.hpp&gt;</span>
 <span style="color: #e090d7;">#include</span> <span style="color: #e9b96e;">&lt;vector&gt;</span>
 <span style="color: #e090d7;">#include</span> <span style="color: #e9b96e;">&lt;string&gt;</span>
 
 <span style="color: #b4fa70;">namespace</span> <span style="color: #e9b2e3;">app</span> {
 
     <span style="color: #73d216;">// </span><span style="color: #73d216;">@brief An associated object of any type</span>
-    <span style="color: #b4fa70;">using</span> <span style="color: #8cc4ff;">Affiliation</span> = <span style="color: #e9b2e3;">nlohman</span>::json;
+    <span style="color: #b4fa70;">using</span> <span style="color: #8cc4ff;">Affiliation</span> = <span style="color: #e9b2e3;">nlohmann</span>::json;
 
     <span style="color: #73d216;">// </span><span style="color: #73d216;">@brief All the counts</span>
     <span style="color: #b4fa70;">using</span> <span style="color: #8cc4ff;">Counts</span> = <span style="color: #e9b2e3;">std</span>::<span style="color: #8cc4ff;">vector</span>&lt;<span style="color: #e9b2e3;">sys</span>::Count&gt;;
@@ -1198,7 +1199,7 @@ to <code>render</code> and adding the template file name.
         <span style="color: #fcaf3e;">feeling</span>,
         <span style="color: #fcaf3e;">judging</span>,
         <span style="color: #fcaf3e;">perceiving</span>,
-    }
+    };
 
     <span style="color: #73d216;">// </span><span style="color: #73d216;">@brief Describe everything there is to know about an individual human</span>
     <span style="color: #b4fa70;">struct</span> <span style="color: #8cc4ff;">Person</span> {
@@ -1230,7 +1231,7 @@ model.
 
 <div class="org-src-container">
 <pre class="src src-shell">moo -g <span style="color: #e9b96e;">'/lang:ocpp.jsonnet'</span> <span style="color: #e9b96e;">\</span>
-    -T examples/oschema -J examples/oschema <span style="color: #e9b96e;">\</span>
+    -J examples/oschema <span style="color: #e9b96e;">\</span>
     -A <span style="color: #fcaf3e;">os</span>=<span style="color: #e9b96e;">'app.jsonnet'</span> -A <span style="color: #fcaf3e;">path</span>=<span style="color: #e9b96e;">'app'</span> <span style="color: #e9b96e;">\</span>
     -t <span style="color: #e9b96e;">'/types:moo.oschema.typify|moo.oschema.graph|moo.oschema.depsort'</span> <span style="color: #e9b96e;">\</span>
     render omodel.jsonnet onljs.hpp.j2
@@ -1247,6 +1248,7 @@ model.
 <span style="color: #e090d7;">#if</span><span style="color: #e090d7;">n</span><span style="color: #e090d7;">def</span> APP_NLJS_HPP
 <span style="color: #e090d7;">#define</span> <span style="color: #fcaf3e;">APP_NLJS_HPP</span>
 
+
 <span style="color: #e090d7;">#include</span> <span style="color: #e9b96e;">"app/Structs.hpp"</span>
 
 <span style="color: #e090d7;">#include</span> <span style="color: #e9b96e;">"sys/Nljs.hpp"</span>
@@ -1255,7 +1257,7 @@ model.
 
 <span style="color: #b4fa70;">namespace</span> <span style="color: #e9b2e3;">app</span> {
 
-    <span style="color: #b4fa70;">using</span> <span style="color: #8cc4ff;">data_t</span> = <span style="color: #e9b2e3;">nlhomann</span>::json;
+    <span style="color: #b4fa70;">using</span> <span style="color: #8cc4ff;">data_t</span> = <span style="color: #e9b2e3;">nlohmann</span>::json;
 
     NLOHMANN_JSON_SERIALIZE_ENUM( MBTI, {
             { <span style="color: #e9b2e3;">app</span>::<span style="color: #e9b2e3;">MBTI</span>::introversion, <span style="color: #e9b96e;">"introversion"</span> },
@@ -1281,8 +1283,7 @@ model.
             j.at(<span style="color: #e9b96e;">"email"</span>).get_to(obj.email);    
         <span style="color: #b4fa70;">if</span> (j.contains(<span style="color: #e9b96e;">"counts"</span>))
             j.at(<span style="color: #e9b96e;">"counts"</span>).get_to(obj.counts);    
-        <span style="color: #b4fa70;">if</span> (j.contains(<span style="color: #e9b96e;">"affil"</span>))
-            j.at(<span style="color: #e9b96e;">"affil"</span>).get_to(obj.affil);    
+        obj.affil = j.at(<span style="color: #e9b96e;">"affil"</span>);
         <span style="color: #b4fa70;">if</span> (j.contains(<span style="color: #e9b96e;">"mbti"</span>))
             j.at(<span style="color: #e9b96e;">"mbti"</span>).get_to(obj.mbti);    
     }
@@ -1346,7 +1347,7 @@ factories.
 </div>
 <div id="postamble" class="status">
 <p class="author">Author: Brett Viren</p>
-<p class="date">Created: 2020-09-11 Fri 15:03</p>
+<p class="date">Created: 2020-09-21 Mon 14:05</p>
 <p class="validation"><a href="http://validator.w3.org/check?uri=referer">Validate</a></p>
 </div>
 </body>

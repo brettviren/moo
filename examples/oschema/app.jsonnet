@@ -1,8 +1,11 @@
 // examples/oschema/app.jsonnet
-local oschema = import "oschema.jsonnet";
-local sh = oschema.hier(import "sys.jsonnet");
-local as = oschema.schema("app");
+local moo = import "moo.jsonnet";
+local sh = moo.oschema.hier(import "sys.jsonnet");
+local as = moo.oschema.schema("app");
 local hier = {
+    counts: as.sequence("Counts",sh.sys.Count,
+                        doc="All the counts"),
+
     email: as.string("Email", format="email",
                     doc="Electronic mail address"),
     affil: as.any("Affiliation",
@@ -21,10 +24,8 @@ local hier = {
         as.field("mbti", self.mbti,
                  doc="Personality"),
     ], doc="Describe everything there is to know about an individual human"),
-    counts: as.sequence("Counts",sh.sys.Count,
-                        doc="All the counts"),
 };
-oschema.sort_select(hier, "app")
+moo.oschema.sort_select(hier, "app")
 
 
 

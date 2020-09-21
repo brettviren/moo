@@ -122,6 +122,7 @@ We may see a fully compiled representation in JSON format using ~moo~:
 #+begin_src json
 [
     {
+        "deps": [],
         "dtype": "u4",
         "name": "Count",
         "path": [
@@ -145,62 +146,54 @@ Next we imagine one possible application schema which will use the
 We will go through these lines of Jsonnet in order to give some
 detail.  Starting with the first few:
 
-#+call: grep("local oschema", "examples/oschema/app.jsonnet", 2) :wrap "src jsonnet"
+#+call: grep("local moo", "examples/oschema/app.jsonnet", 2) :wrap "src jsonnet"
 
 #+RESULTS:
 #+begin_src jsonnet
-local oschema = import "oschema.jsonnet";
-local sh = oschema.hier(import "sys.jsonnet");
-local as = oschema.schema("app");
+local moo = import "moo.jsonnet";
+local sh = moo.oschema.hier(import "sys.jsonnet");
+local as = moo.oschema.schema("app");
 #+end_src
 
-As with ~sys~ we import the support module ~oschema.jsonnet~.  We then
-use its ~.hier()~ method to process the previously defined ~sys~
+As with ~sys~ we import the support module ~moo.jsonnet~.  We then
+use ~moo.oschema.hier()~ method to process the previously defined ~sys~
 schema which we ~import~ in place.  The ~.hier()~ method gives us a
 handy object representation of this schema where they keys of the
 object are the individual type names.  We'll see that in use next.  In
 the third line we create a new schema factory rooted in the ~["app"]~
 path.
 
-Next we go to the main, if temporary, object in this schema:
+Next, let's jump to the definition of the ~Person~ type which begins with:
 
-#+call: grep("local hier", "examples/oschema/app.jsonnet", 7) :wrap "src jsonnet"
+#+call: grep("person:", "examples/oschema/app.jsonnet", 2) :wrap "src jsonnet"
 
 #+RESULTS:
 #+begin_src jsonnet
-local hier = {
-    email: as.string("Email", format="email"),
     person: as.record("Person", [
-        as.field("email",self.email),
-        as.field("counts",self.counts)
-    ]),
-    counts: as.sequence("Counts",sh.sys.Count),
-};
+        as.field("email",self.email,
+                 doc="E-mail address"),
 #+end_src
 
-Note how ~person~ has two fields,
-~email~ and ~counts~ both of which hold a type defined elsewhere in
-our object.  In particular ~counts~ is a sequence with elements of
-type ~Count~ that is defined in our "sys" schema.
+You will note that ~Person~ is defined as a value of a ~person:~ key in a
+containing object and that the type refers to other types by their own
+key (eg ~self.email~).  It is to provide these references that we build
+our types in a temporary object even though the ultimate output (as
+we'll see) is a topologically sorted array of types.
 
-It's important to understand we use this temporary ~hier~ object as a
-context to construct structure.  It's keys are not intrinsically
-meaningful but rather only ways to refer to one type in another.  
-
-In fact, finally our ~app~ schema is produced as a flat array using:
+And, in fact, finally our ~app~ schema is produced as a flat array
+using:
 
 #+call: grep("sort_select", "examples/oschema/app.jsonnet", 0) :wrap "src jsonnet"
 
 #+RESULTS:
 #+begin_src jsonnet
-oschema.sort_select(hier, "app")
+moo.oschema.sort_select(hier, "app")
 #+end_src
 
 This scans our temporary object ~hier~ and outputs an array holding
 only the types which are "in" the ~["app"]~ path.  The array is output
 in topological so that any dependency precedes a type that depends on
-it.  Along the way any ~.deps~ attributes, which are temporary to
-assist in sorting, are stripped.
+it. 
 
 We can see the final result in full JSON glory:
 
@@ -212,6 +205,19 @@ We can see the final result in full JSON glory:
 #+begin_src json
 [
     {
+        "deps": [],
+        "doc": "An associated object of any type",
+        "name": "Affiliation",
+        "path": [
+            "app"
+        ],
+        "schema": "any"
+    },
+    {
+        "deps": [
+            "sys.Count"
+        ],
+        "doc": "All the counts",
         "items": "sys.Count",
         "name": "Counts",
         "path": [
@@ -220,6 +226,8 @@ We can see the final result in full JSON glory:
         "schema": "sequence"
     },
     {
+        "deps": [],
+        "doc": "Electronic mail address",
         "format": "email",
         "name": "Email",
         "path": [
@@ -228,14 +236,51 @@ We can see the final result in full JSON glory:
         "schema": "string"
     },
     {
+        "deps": [],
+        "name": "MBTI",
+        "path": [
+            "app"
+        ],
+        "schema": "enum",
+        "symbols": [
+            "introversion",
+            "extroversion",
+            "sensing",
+            "intuition",
+            "thinking",
+            "feeling",
+            "judging",
+            "perceiving"
+        ]
+    },
+    {
+        "deps": [
+            "app.Email",
+            "app.Counts",
+            "app.Affiliation",
+            "app.MBTI"
+        ],
+        "doc": "Describe everything there is to know about an individual human",
         "fields": [
             {
+                "doc": "E-mail address",
                 "item": "app.Email",
                 "name": "email"
             },
             {
+                "doc": "Count of some things",
                 "item": "app.Counts",
                 "name": "counts"
+            },
+            {
+                "doc": "Some affiliation",
+                "item": "app.Affiliation",
+                "name": "affil"
+            },
+            {
+                "doc": "Personality",
+                "item": "app.MBTI",
+                "name": "mbti"
             }
         ],
         "name": "Person",
@@ -381,7 +426,8 @@ illustrate a transformation applied to the ~app~ schema:
 [<Any "app.Affiliation">,
  <Sequence "app.Counts" items:sys.Count>,
  <String "app.Email">,
- <Record "app.Person" fields:{email, counts, affil}>]
+ <Enum "app.MBTI">,
+ <Record "app.Person" fields:{email, counts, affil, mbti}>]
 #+end_example
 
 The built-in ~moo.oschema.typify()~ function illustrated here converts a
@@ -454,7 +500,7 @@ But, before developing the templates we first define a contract or
 
 The ~omodel~ contract is embodied in this Jsonnet file:
 
-#+include: examples/oschema/omodel.jsonnet src jsonnet
+#+include: moo/jsonnet-code/omodel.jsonnet src jsonnet
 
 The top-level arguments are described below.  What is produced is an
 object (ie, an instance of the model) with these attributes:
@@ -474,7 +520,7 @@ Top-level arguments
 We can test out some TLAs and test that the model compiles using the ~moo~ CLI:
 
 #+begin_src shell :exports code :results none
-  moo -T examples/oschema -J examples/oschema \
+  moo -J examples/oschema \
     -A os='app.jsonnet' -A path='app' \
        compile omodel.jsonnet
 #+end_src
@@ -485,7 +531,7 @@ showing the output until the next example CLI.
 
 
 #+begin_src shell :exports code :results none
-  moo -T examples/oschema -J examples/oschema \
+  moo -J examples/oschema \
     -A os='app.jsonnet' -A path='app' \
     -t '/types:moo.oschema.typify|moo.oschema.graph|moo.oschema.depsort' \
        dump -f pretty omodel.jsonnet
@@ -500,7 +546,7 @@ bring these in as a model "graft".
 
 #+begin_src shell :exports both :results output code :wrap "src python"
   moo -g '/lang:ocpp.jsonnet' \
-      -T examples/oschema -J examples/oschema \
+      -J examples/oschema \
       -A os='app.jsonnet' -A path='app' \
       -t '/types:moo.oschema.typify|moo.oschema.graph|moo.oschema.depsort' \
       dump -f pretty omodel.jsonnet
@@ -508,15 +554,67 @@ bring these in as a model "graft".
 
 #+RESULTS:
 #+begin_src python
-{'byscn': {'any': ['app.Affiliation'],
+{'byref': {'app.Affiliation': {'deps': [],
+                               'doc': 'An associated object of any type',
+                               'name': 'Affiliation',
+                               'path': ['app'],
+                               'schema': 'any'},
+           'app.Counts': {'deps': ['sys.Count'],
+                          'doc': 'All the counts',
+                          'items': 'sys.Count',
+                          'name': 'Counts',
+                          'path': ['app'],
+                          'schema': 'sequence'},
+           'app.Email': {'deps': [],
+                         'doc': 'Electronic mail address',
+                         'format': 'email',
+                         'name': 'Email',
+                         'path': ['app'],
+                         'schema': 'string'},
+           'app.MBTI': {'deps': [],
+                        'name': 'MBTI',
+                        'path': ['app'],
+                        'schema': 'enum',
+                        'symbols': ['introversion',
+                                    'extroversion',
+                                    'sensing',
+                                    'intuition',
+                                    'thinking',
+                                    'feeling',
+                                    'judging',
+                                    'perceiving']},
+           'app.Person': {'deps': ['app.Email',
+                                   'app.Counts',
+                                   'app.Affiliation',
+                                   'app.MBTI'],
+                          'doc': 'Describe everything there is to know about '
+                                 'an individual human',
+                          'fields': [{'doc': 'E-mail address',
+                                      'item': 'app.Email',
+                                      'name': 'email'},
+                                     {'doc': 'Count of some things',
+                                      'item': 'app.Counts',
+                                      'name': 'counts'},
+                                     {'doc': 'Some affiliation',
+                                      'item': 'app.Affiliation',
+                                      'name': 'affil'},
+                                     {'doc': 'Personality',
+                                      'item': 'app.MBTI',
+                                      'name': 'mbti'}],
+                          'name': 'Person',
+                          'path': ['app'],
+                          'schema': 'record'}},
+ 'byscn': {'any': ['app.Affiliation'],
            'anyOf': [],
            'boolean': [],
-           'enum': [],
+           'enum': ['app.MBTI'],
            'namespace': [],
            'number': [],
            'record': ['app.Person'],
            'sequence': ['app.Counts'],
            'string': ['app.Email']},
+ 'ctxpath': [],
+ 'ctxpre': '',
  'extrefs': ['sys'],
  'lang': {'dtypes': {'f4': 'float',
                      'f8': 'double',
@@ -526,19 +624,21 @@ bring these in as a model "graft".
                      'u2': 'uint16_t',
                      'u4': 'uint32_t',
                      'u8': 'uint64_t'},
-          'imports': {'any': ['nlohman/json.hpp'],
+          'imports': {'any': ['nlohmann/json.hpp'],
                       'anyof': ['variant'],
                       'sequence': ['vector'],
                       'string': ['string']},
-          'types': {'any': 'nlohman::json',
+          'types': {'any': 'nlohmann::json',
                     'sequence': 'std::vector',
                     'string': 'std::string'}},
  'nspre': 'app.',
  'path': ['app'],
+ 'relpath': 'app',
  'types': [<Any "app.Affiliation">,
            <Sequence "app.Counts" items:sys.Count>,
            <String "app.Email">,
-           <Record "app.Person" fields:{email, counts, affil}>]}
+           <Enum "app.MBTI">,
+           <Record "app.Person" fields:{email, counts, affil, mbti}>]}
 #+end_src
 
 If you squint at that dump you'll find the ~lang~ attribute added.
@@ -578,7 +678,7 @@ to ~render~ and adding the template file name.
 
 #+begin_src shell :exports both :results output code :wrap "src c++"
   moo -g '/lang:ocpp.jsonnet' \
-      -T examples/oschema -J examples/oschema \
+      -J examples/oschema \
       -A os='app.jsonnet' -A path='app' \
       -t '/types:moo.oschema.typify|moo.oschema.graph|moo.oschema.depsort' \
       render omodel.jsonnet ostructs.hpp.j2
@@ -597,14 +697,14 @@ to ~render~ and adding the template file name.
 
 #include "sys/Structs.hpp"
 
-#include <nlohman/json.hpp>
+#include <nlohmann/json.hpp>
 #include <vector>
 #include <string>
 
 namespace app {
 
     // @brief An associated object of any type
-    using Affiliation = nlohman::json;
+    using Affiliation = nlohmann::json;
 
     // @brief All the counts
     using Counts = std::vector<sys::Count>;
@@ -622,7 +722,7 @@ namespace app {
         feeling,
         judging,
         perceiving,
-    }
+    };
 
     // @brief Describe everything there is to know about an individual human
     struct Person {
@@ -651,7 +751,7 @@ model.
 
 #+begin_src shell :exports both :results output code :wrap "src c++"
   moo -g '/lang:ocpp.jsonnet' \
-      -T examples/oschema -J examples/oschema \
+      -J examples/oschema \
       -A os='app.jsonnet' -A path='app' \
       -t '/types:moo.oschema.typify|moo.oschema.graph|moo.oschema.depsort' \
       render omodel.jsonnet onljs.hpp.j2
@@ -668,6 +768,7 @@ model.
 #ifndef APP_NLJS_HPP
 #define APP_NLJS_HPP
 
+
 #include "app/Structs.hpp"
 
 #include "sys/Nljs.hpp"
@@ -676,7 +777,7 @@ model.
 
 namespace app {
 
-    using data_t = nlhomann::json;
+    using data_t = nlohmann::json;
 
     NLOHMANN_JSON_SERIALIZE_ENUM( MBTI, {
             { app::MBTI::introversion, "introversion" },
@@ -702,8 +803,7 @@ namespace app {
             j.at("email").get_to(obj.email);    
         if (j.contains("counts"))
             j.at("counts").get_to(obj.counts);    
-        if (j.contains("affil"))
-            j.at("affil").get_to(obj.affil);    
+        obj.affil = j.at("affil");
         if (j.contains("mbti"))
             j.at("mbti").get_to(obj.mbti);    
     }

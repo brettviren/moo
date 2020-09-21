@@ -1,6 +1,6 @@
 local oschema = import "oschema.jsonnet";
 
-function(os, path, ctxpath) {
+function(os, path, ctxpath=[]) {
     // The path/namespace this model "lives" in
     path: oschema.listify(path),
     nspre: oschema.prepath(self.path),
