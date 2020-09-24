@@ -1,0 +1,25 @@
+{#
+
+This template is simply to dump an existing spreadsheet saved as a csv
+in to a Jsonnet format to see how it looks in the flesh.
+
+  moo render -o DUNE-SP-req-spec-DAQ-23jul-b.jsonnet \
+    DUNE-SP-req-spec-DAQ-23jul-b.csv dumpdicts.jsonnet
+
+-#}
+{# map output keys to input keys #}
+{% set trans=dict(label="Label",
+                  description="Primary Text",
+                  specification="Value (LaTeX)",
+                  goal="Goal",
+                  rationale="Rationale (brief)",
+                  validation="Validation (brief)") %}
+[
+{% for one in model %}
+{
+{% for k,v in trans.items() %}
+    {{k}}: "{{ one[trans[k]] }}",
+{% endfor %}
+},
+{% endfor %}
+]

@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2020-06-12 Fri 16:46 -->
+<!-- 2020-09-24 Thu 12:15 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>moo - model oriented objects</title>
@@ -244,44 +244,51 @@ for the JavaScript code in this tag.
 <div id="content">
 <h1 class="title">moo - model oriented objects</h1>
 
-<div id="outline-container-orgf150ed0" class="outline-2">
-<h2 id="orgf150ed0"><span class="section-number-2">1</span> Overview</h2>
+<div id="outline-container-orge0f4121" class="outline-2">
+<h2 id="orge0f4121"><span class="section-number-2">1</span> Overview</h2>
 <div class="outline-text-2" id="text-1">
 <p>
-<b>moo</b> provides a system to model and generate code.  It walks down the
-trail blazed by ZeroMQ's <a href="https://github.com/zeromq/zproto">zproto</a> but it does so with differing language
-choices:
+<b>moo</b> is a tool for managing data structures.  <b>moo</b> operates on:
 </p>
 
 <dl class="org-dl">
-<dt>modeling</dt><dd>Jsonnet (instead of XML)</dd>
-<dt>template</dt><dd>Jinja2 (instead of GSL)</dd>
-<dt>programming</dt><dd>C++ with <code>cppzmq</code> (instead of C with CZMQ)</dd>
+<dt>schema</dt><dd>data structures describing the structure of data (including schema)</dd>
+
+<dt>model</dt><dd>data structure which may be validated against a schema.</dd>
+
+<dt>templates</dt><dd>text parameterized by schema and from which a document (eg, C++ code file) may be generated</dd>
 </dl>
 </div>
 </div>
 
-<div id="outline-container-org6bc432e" class="outline-2">
-<h2 id="org6bc432e"><span class="section-number-2">2</span> Quick Start</h2>
+<div id="outline-container-org952bc32" class="outline-2">
+<h2 id="org952bc32"><span class="section-number-2">2</span> Quick Start</h2>
 <div class="outline-text-2" id="text-2">
+<p>
+After preparing a Python environment in your favorite manner:
+</p>
+
 <pre class="example">
-$ waf configure build
+$ pip install -e .
+$ moo --help
 </pre>
 </div>
 </div>
 
-<div id="outline-container-orge3c4149" class="outline-2">
-<h2 id="orge3c4149"><span class="section-number-2">3</span> Documentation</h2>
+<div id="outline-container-orgdbcaeeb" class="outline-2">
+<h2 id="orgdbcaeeb"><span class="section-number-2">3</span> Documentation</h2>
 <div class="outline-text-2" id="text-3">
-<p>
-<a href="https://brettviren.github.io/moo">https://brettviren.github.io/moo</a>
-</p>
+<ul class="org-ul">
+<li><a href="https://brettviren.github.io/moo">https://brettviren.github.io/moo</a></li>
+
+<li>or as <a href="index.html">index.html</a></li>
+</ul>
 </div>
 </div>
 </div>
 <div id="postamble" class="status">
 <p class="author">Author: BV</p>
-<p class="date">Created: 2020-06-12 Fri 16:46</p>
+<p class="date">Created: 2020-09-24 Thu 12:15</p>
 <p class="validation"><a href="http://validator.w3.org/check?uri=referer">Validate</a></p>
 </div>
 </body>

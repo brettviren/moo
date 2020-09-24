@@ -23,4 +23,4 @@
 
 - https://brettviren.github.io/moo
 
-- or as [[index.org]]
+- or as [[file:index.org]]
