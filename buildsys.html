@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2020-09-24 Thu 12:19 -->
+<!-- 2020-09-24 Thu 13:38 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>moo 無 build</title>
@@ -270,17 +270,17 @@ for the JavaScript code in this tag.
 <li><a href="#inputs">Inputs</a></li>
 <li><a href="#outputs">Outputs</a>
 <ul>
-<li><a href="#orga6fa956"><code>imports</code></a></li>
-<li><a href="#org9716bb7"><code>compile</code></a></li>
-<li><a href="#org31e3008"><code>render</code></a></li>
+<li><a href="#orgd6ac8c0"><code>imports</code></a></li>
+<li><a href="#org238f3f1"><code>compile</code></a></li>
+<li><a href="#org59ab78b"><code>render</code></a></li>
 </ul>
 </li>
 <li><a href="#examples">Examples</a>
 <ul>
 <li><a href="#waf">Waf</a>
 <ul>
-<li><a href="#org7b94866">cmd</a></li>
-<li><a href="#org6f23fb6">mod</a></li>
+<li><a href="#orgb40277f">cmd</a></li>
+<li><a href="#org91609af">mod</a></li>
 </ul>
 </li>
 <li><a href="#make">Make</a></li>
@@ -498,9 +498,9 @@ output files.
 </p>
 </div>
 
-<div id="outline-container-orga6fa956" class="outline-3">
-<h3 id="orga6fa956"><code>imports</code></h3>
-<div class="outline-text-3" id="text-orga6fa956">
+<div id="outline-container-orgd6ac8c0" class="outline-3">
+<h3 id="orgd6ac8c0"><code>imports</code></h3>
+<div class="outline-text-3" id="text-orgd6ac8c0">
 <p>
 The <code>moo</code> command <code>imports</code> is provided to help discover intermediate
 dependency files which have been imported through Jsonnet's or Jinja's
@@ -540,9 +540,9 @@ By default, <code>moo</code> will print the result to standard output.  The <cod
 </div>
 </div>
 
-<div id="outline-container-org9716bb7" class="outline-3">
-<h3 id="org9716bb7"><code>compile</code></h3>
-<div class="outline-text-3" id="text-org9716bb7">
+<div id="outline-container-org238f3f1" class="outline-3">
+<h3 id="org238f3f1"><code>compile</code></h3>
+<div class="outline-text-3" id="text-org238f3f1">
 <p>
 <code>moo compile</code> will take a model in Jsonnet or other format and output
 JSON.  This takes the same main options as <code>render</code> (next) and so is a
@@ -559,9 +559,9 @@ production.  It should only be employed if needed.
 </div>
 </div>
 
-<div id="outline-container-org31e3008" class="outline-3">
-<h3 id="org31e3008"><code>render</code></h3>
-<div class="outline-text-3" id="text-org31e3008">
+<div id="outline-container-org59ab78b" class="outline-3">
+<h3 id="org59ab78b"><code>render</code></h3>
+<div class="outline-text-3" id="text-org59ab78b">
 <p>
 The main goal of <code>moo</code> is to generate code and this is the main command
 do perform that.  Like <code>compile</code> (and <code>imports</code>) it prints the result to
@@ -596,9 +596,9 @@ Python module.
 </p>
 </div>
 
-<div id="outline-container-org7b94866" class="outline-4">
-<h4 id="org7b94866">cmd</h4>
-<div class="outline-text-4" id="text-org7b94866">
+<div id="outline-container-orgb40277f" class="outline-4">
+<h4 id="orgb40277f">cmd</h4>
+<div class="outline-text-4" id="text-orgb40277f">
 <p>
 The Waf project in <a href="buildsys/waf/cmd/">buildsys/waf/cmd/</a> provides an example of using <code>moo</code>
 as a command line program.  It uses <code>moo render</code> to apply a model to a
@@ -608,7 +608,44 @@ through Jsonnet <code>import</code> mechanism and so <code>moo import</code> is 
 </p>
 
 <p>
-Here is an example of exercising the build.  We do an initial build.
+Here is the <code>wscript</code> file:
+</p>
+
+<div class="org-src-container">
+<pre class="src src-python"><span style="color: #73d216;">#</span><span style="color: #73d216;">!/usr/bin/env waf</span>
+<span style="color: #e9b96e;">'''</span>
+<span style="color: #e9b96e;">An example waf wscript file for exercising moo as a command</span>
+<span style="color: #e9b96e;">'''</span>
+
+<span style="color: #b4fa70;">from</span> subprocess <span style="color: #b4fa70;">import</span> check_output
+<span style="color: #b4fa70;">from</span> waflib.Utils <span style="color: #b4fa70;">import</span> subst_vars
+
+<span style="color: #b4fa70;">def</span> <span style="color: #fce94f;">configure</span>(cfg):
+    cfg.find_program(<span style="color: #e9b96e;">'moo'</span>, var=<span style="color: #e9b96e;">'MOO'</span>, mandatory=<span style="color: #e9b2e3;">True</span>)
+
+<span style="color: #b4fa70;">def</span> <span style="color: #fce94f;">import_scanner</span>(task):
+    <span style="color: #fcaf3e;">deps</span> = []
+    <span style="color: #b4fa70;">for</span> node <span style="color: #b4fa70;">in</span> task.inputs:
+        <span style="color: #fcaf3e;">cmd</span> = <span style="color: #e9b96e;">"${MOO} imports %s"</span> % node.abspath()
+        <span style="color: #fcaf3e;">cmd</span> = subst_vars(cmd, task.env)
+        <span style="color: #73d216;">#</span><span style="color: #73d216;">out = task.exec_command(cmd)</span>
+        <span style="color: #fcaf3e;">out</span> = check_output(cmd.split()).decode()
+        <span style="color: #fcaf3e;">deps</span> += out.split(<span style="color: #e9b96e;">"\n"</span>)
+
+    <span style="color: #fcaf3e;">deps</span> = [task.generator.bld.path.find_or_declare(d) <span style="color: #b4fa70;">for</span> d <span style="color: #b4fa70;">in</span> deps <span style="color: #b4fa70;">if</span> d]
+    <span style="color: #b4fa70;">print</span>(deps)
+    <span style="color: #b4fa70;">return</span> (deps, [])
+
+<span style="color: #b4fa70;">def</span> <span style="color: #fce94f;">build</span>(bld):
+    bld(rule=<span style="color: #e9b96e;">"${MOO} render -o ${TGT} ${SRC}"</span>,
+        source=<span style="color: #e9b96e;">"model.jsonnet dump.txt.j2"</span>,
+        target=<span style="color: #e9b96e;">"model-dump.txt"</span>,
+        scan=import_scanner)
+</pre>
+</div>
+
+<p>
+Here is the "cmd" example being exercising.  We do an initial build.
 A second rebuild is a no-op.  We then edit an intermediate file and
 rebuild and notice that indeed the change is noticed.
 </p>
@@ -640,13 +677,13 @@ Waf: Entering directory `/home/bv/dev/moo/buildsys/waf/cmd/build'
 [/home/bv/dev/moo/buildsys/waf/cmd/sub.jsonnet, /home/bv/dev/moo/buildsys/waf/cmd/sub/sub.jsonnet]
 [1/1] Processing model-dump.txt: model.jsonnet dump.txt.j2 -&gt; build/model-dump.txt
 Waf: Leaving directory `/home/bv/dev/moo/buildsys/waf/cmd/build'
-'build' finished successfully (0.780s)
+'build' finished successfully (0.787s)
 
 second build, no rebuild
 
 Waf: Entering directory `/home/bv/dev/moo/buildsys/waf/cmd/build'
 Waf: Leaving directory `/home/bv/dev/moo/buildsys/waf/cmd/build'
-'build' finished successfully (0.016s)
+'build' finished successfully (0.015s)
 
 modify intermediate dependency, see it rebuild
 
@@ -654,19 +691,73 @@ Waf: Entering directory `/home/bv/dev/moo/buildsys/waf/cmd/build'
 [/home/bv/dev/moo/buildsys/waf/cmd/sub.jsonnet, /home/bv/dev/moo/buildsys/waf/cmd/sub/sub.jsonnet]
 [1/1] Processing model-dump.txt: model.jsonnet dump.txt.j2 -&gt; build/model-dump.txt
 Waf: Leaving directory `/home/bv/dev/moo/buildsys/waf/cmd/build'
-'build' finished successfully (0.780s)
+'build' finished successfully (0.787s)
 </pre>
 </div>
 </div>
 
-<div id="outline-container-org6f23fb6" class="outline-4">
-<h4 id="org6f23fb6">mod</h4>
-<div class="outline-text-4" id="text-org6f23fb6">
+<div id="outline-container-org91609af" class="outline-4">
+<h4 id="org91609af">mod</h4>
+<div class="outline-text-4" id="text-org91609af">
 <p>
 The second example works the same but instead of calling <code>moo</code> as a CLI
 program, the Python module is used.  In principle, this can be better
 performing but it does require Waf is called with a version of Python
 that is new enough to support <code>moo</code>.
+</p>
+
+<p>
+Here is the <code>wscript</code> file for the "mod" example:
+</p>
+
+<div class="org-src-container">
+<pre class="src src-python"><span style="color: #73d216;">#</span><span style="color: #73d216;">!/usr/bin/env waf</span>
+<span style="color: #e9b96e;">'''</span>
+<span style="color: #e9b96e;">An example waf wscript file for exercising moo as a Python module</span>
+
+<span style="color: #e9b96e;">This should be improved by turning the moo parts into a Waf tool!</span>
+<span style="color: #e9b96e;">'''</span>
+
+
+
+<span style="color: #b4fa70;">import</span> moo
+
+<span style="color: #b4fa70;">def</span> <span style="color: #fce94f;">import_scanner</span>(task):
+    <span style="color: #fcaf3e;">srcdir</span> = task.generator.bld.path.abspath()
+    <span style="color: #fcaf3e;">deps</span> = []
+    <span style="color: #b4fa70;">for</span> node <span style="color: #b4fa70;">in</span> task.inputs:
+        <span style="color: #fcaf3e;">deps</span> += moo.imports(node.abspath(), srcdir)
+    <span style="color: #fcaf3e;">deps</span> = [task.generator.bld.path.find_or_declare(d) <span style="color: #b4fa70;">for</span> d <span style="color: #b4fa70;">in</span> deps <span style="color: #b4fa70;">if</span> d]
+    <span style="color: #b4fa70;">print</span>(deps)
+    <span style="color: #b4fa70;">return</span> (deps, [])
+
+
+<span style="color: #b4fa70;">def</span> <span style="color: #fce94f;">render</span>(task):
+    <span style="color: #e9b96e;">"${MOO} render -o ${TGT} ${SRC}"</span>,
+    <span style="color: #fcaf3e;">srcdir</span> = task.generator.bld.path.abspath()
+    <span style="color: #fcaf3e;">out</span> = task.outputs[0]
+    <span style="color: #fcaf3e;">model</span> = moo.io.load(task.inputs[0].abspath())
+    <span style="color: #fcaf3e;">templ</span> = task.inputs[1].abspath()
+
+    <span style="color: #73d216;"># </span><span style="color: #73d216;">keep compatibility with moo render</span>
+    <span style="color: #fcaf3e;">helper</span> = moo.io.load(moo.util.resolve(<span style="color: #e9b96e;">"moo.jsonnet"</span>))
+    out.write(moo.template.render(templ, <span style="color: #e090d7;">dict</span>(model=model, moo=helper)))
+
+
+<span style="color: #b4fa70;">def</span> <span style="color: #fce94f;">configure</span>(cfg):
+    <span style="color: #b4fa70;">pass</span>
+
+
+<span style="color: #b4fa70;">def</span> <span style="color: #fce94f;">build</span>(bld):
+    bld(rule=render,
+        source=<span style="color: #e9b96e;">"model.jsonnet dump.txt.j2"</span>,
+        target=<span style="color: #e9b96e;">"model-dump.txt"</span>,
+        scan=import_scanner)
+</pre>
+</div>
+
+<p>
+And, here is it being exercised:
 </p>
 
 <div class="org-src-container">
@@ -687,7 +778,7 @@ waf
 'distclean' finished successfully (0.002s)
 Setting top to                           : /home/bv/dev/moo/buildsys/waf/mod 
 Setting out to                           : /home/bv/dev/moo/buildsys/waf/mod/build 
-'configure' finished successfully (0.002s)
+'configure' finished successfully (0.003s)
 
 first build
 
@@ -695,13 +786,13 @@ Waf: Entering directory `/home/bv/dev/moo/buildsys/waf/mod/build'
 [/home/bv/dev/moo/buildsys/waf/mod/sub.jsonnet, /home/bv/dev/moo/buildsys/waf/mod/sub/sub.jsonnet]
 [1/1] Processing model-dump.txt: model.jsonnet dump.txt.j2 -&gt; build/model-dump.txt
 Waf: Leaving directory `/home/bv/dev/moo/buildsys/waf/mod/build'
-'build' finished successfully (0.241s)
+'build' finished successfully (0.248s)
 
 second build, no rebuild
 
 Waf: Entering directory `/home/bv/dev/moo/buildsys/waf/mod/build'
 Waf: Leaving directory `/home/bv/dev/moo/buildsys/waf/mod/build'
-'build' finished successfully (0.017s)
+'build' finished successfully (0.014s)
 
 modify intermediate dependency, see it rebuild
 
@@ -709,7 +800,7 @@ Waf: Entering directory `/home/bv/dev/moo/buildsys/waf/mod/build'
 [/home/bv/dev/moo/buildsys/waf/mod/sub.jsonnet, /home/bv/dev/moo/buildsys/waf/mod/sub/sub.jsonnet]
 [1/1] Processing model-dump.txt: model.jsonnet dump.txt.j2 -&gt; build/model-dump.txt
 Waf: Leaving directory `/home/bv/dev/moo/buildsys/waf/mod/build'
-'build' finished successfully (0.250s)
+'build' finished successfully (0.248s)
 </pre>
 </div>
 </div>
@@ -721,19 +812,138 @@ Waf: Leaving directory `/home/bv/dev/moo/buildsys/waf/mod/build'
 <div id="outline-container-make" class="outline-3">
 <h3 id="make">Make</h3>
 <div class="outline-text-3" id="text-make">
+<p>
+Ah, venerable <code>make</code>.  This example currently does not capture
+intermediate dependencies.  Contributions/fixes welcome.
+</p>
+
+
+<p>
+The <code>Makefile</code>:
+</p>
+
+<div class="org-src-container">
+<pre class="src src-makefile"><span style="color: #fce94f;">model-dump.txt</span> : model.jsonnet dump.txt.j2 
+        moo render -o <span style="color: #fce94f;">$</span><span style="color: #e9b2e3;">@</span> $<span style="color: #e9b2e3;">^</span>
+<span style="color: #fce94f;">clean</span>:
+        rm -f model-dump.txt
+</pre>
+</div>
+
+<p>
+And it getting exercised:
+</p>
+
+<div class="org-src-container">
+<pre class="src src-shell"><span style="color: #e090d7;">cd</span> buildsys/make
+make clean
+sed -i <span style="color: #e9b96e;">'s/fortran/FORTRAN/'</span> sub/sub.jsonnet
+make
+<span style="color: #e090d7;">echo</span> -e <span style="color: #e9b96e;">'\nNext we edit the intermediate files and note no rebuild\n'</span>
+sed -i <span style="color: #e9b96e;">'s/FORTRAN/fortran/'</span> sub/sub.jsonnet
+make
+<span style="color: #e090d7;">echo</span> -e <span style="color: #e9b96e;">'\nIn any case, first build gave us:\n'</span>
+ls -l model-dump.txt
+cat model-dump.txt
+
+</pre>
+</div>
+
+<pre class="example">
+rm -f model-dump.txt
+moo render -o model-dump.txt model.jsonnet dump.txt.j2
+
+Next we edit the intermediate files and note no rebuild
+
+make: 'model-dump.txt' is up to date.
+
+In any case, first build gave us:
+
+-rw-rw-r-- 1 bv bv 93 Sep 24 13:38 model-dump.txt
+sub = {'a': 1, 'b': 2, 'c': 'hello'}
+subsub = {'a': 1, 'b': 2, 'c': 'hello', 'd': 'FORTRAN'}
+</pre>
 </div>
 </div>
+
 
 <div id="outline-container-cmake" class="outline-3">
 <h3 id="cmake">CMake</h3>
 <div class="outline-text-3" id="text-cmake">
+<p>
+This section describes one way to integrate <code>moo</code> with a CMake-based
+build.  My primary suggestion here is to stay as far away from CMake
+as you possibly can.  
+</p>
+
+<p>
+But, if shackled to CMake, keep in mind this example likely does not
+follow best CMake practices (as I don't know them nor willing to
+ingest the CMake mess to learn them).  In particular, unlike the above
+examples, there is no attempt to somehow tie in intermediate
+dependencies.  Contributions/fixes welcome.
+</p>
+
+<p>
+The <code>CMakeLists.txt</code> file:
+</p>
+
+<div class="org-src-container">
+<pre class="src src-cmake"><span style="color: #fce94f;">project</span>(<span style="color: #e9b96e;">"moo-buildsys-cmake"</span>)
+<span style="color: #fce94f;">cmake_minimum_required</span>(VERSION 3.17) <span style="color: #73d216;"># older may also work</span>
+<span style="color: #fce94f;">add_custom_target</span>(ModelDump
+  COMMAND moo -T ${<span style="color: #fcaf3e;">CMAKE_SOURCE_DIR</span>} -M ${<span style="color: #fcaf3e;">CMAKE_SOURCE_DIR</span>} render -o model-dump.txt model.jsonnet dump.txt.j2
+  )
+</pre>
+</div>
+
+<p>
+And it getting exercised:
+</p>
+
+<div class="org-src-container">
+<pre class="src src-shell"><span style="color: #e090d7;">cd</span> buildsys/cmake
+rm -rf build
+mkdir build
+<span style="color: #e090d7;">cd</span> build
+cmake ..
+make ModelDump
+ls -l model-dump.txt
+cat model-dump.txt
+</pre>
+</div>
+
+<pre class="example">
+-- The C compiler identification is GNU 7.5.0
+-- The CXX compiler identification is GNU 7.5.0
+-- Check for working C compiler: /usr/bin/cc
+-- Check for working C compiler: /usr/bin/cc - works
+-- Detecting C compiler ABI info
+-- Detecting C compiler ABI info - done
+-- Detecting C compile features
+-- Detecting C compile features - done
+-- Check for working CXX compiler: /usr/bin/c++
+-- Check for working CXX compiler: /usr/bin/c++ - works
+-- Detecting CXX compiler ABI info
+-- Detecting CXX compiler ABI info - done
+-- Detecting CXX compile features
+-- Detecting CXX compile features - done
+-- Configuring done
+-- Generating done
+-- Build files have been written to: /home/bv/dev/moo/buildsys/cmake/build
+Scanning dependencies of target ModelDump
+Built target ModelDump
+-rw-rw-r-- 1 bv bv 93 Sep 24 13:38 model-dump.txt
+sub = {'a': 1, 'b': 2, 'c': 'hello'}
+subsub = {'a': 1, 'b': 2, 'c': 'hello', 'd': 'fortran'}
+</pre>
 </div>
 </div>
 </div>
 </div>
 <div id="postamble" class="status">
 <p class="author">Author: Brett Viren</p>
-<p class="date">Created: 2020-09-24 Thu 12:19</p>
+<p class="date">Created: 2020-09-24 Thu 13:38</p>
 <p class="validation"><a href="http://validator.w3.org/check?uri=referer">Validate</a></p>
 </div>
 </body>

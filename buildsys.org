@@ -244,7 +244,11 @@ simple template that merely dumps the data.  The model is composed
 through Jsonnet ~import~ mechanism and so ~moo import~ is also as a Waf
 /scanner/ to determine intermediate dependencies.
 
-Here is an example of exercising the build.  We do an initial build.
+Here is the ~wscript~ file:
+
+#+include: buildsys/waf/cmd/wscript src python
+
+Here is the "cmd" example being exercising.  We do an initial build.
 A second rebuild is a no-op.  We then edit an intermediate file and
 rebuild and notice that indeed the change is noticed.
 
@@ -299,6 +303,12 @@ program, the Python module is used.  In principle, this can be better
 performing but it does require Waf is called with a version of Python
 that is new enough to support ~moo~.
 
+Here is the ~wscript~ file for the "mod" example:
+
+#+include: buildsys/waf/mod/wscript src python
+
+And, here is it being exercised:
+
 #+begin_src shell :exports both :results output code :wrap "example"
   cd buildsys/waf/mod/
   waf distclean configure 
@@ -350,8 +360,101 @@ Waf: Leaving directory `/home/bv/dev/moo/buildsys/waf/mod/build'
    :CUSTOM_ID: make
    :END:
 
+Ah, venerable ~make~.  This example currently does not capture
+intermediate dependencies.  Contributions/fixes welcome.
+
+
+The ~Makefile~:
+
+#+include: buildsys/make/Makefile src makefile
+
+And it getting exercised:
+
+#+begin_src shell :exports both :results output code :wrap "example"
+  cd buildsys/make
+  make clean
+  sed -i 's/fortran/FORTRAN/' sub/sub.jsonnet
+  make
+  echo -e '\nNext we edit the intermediate files and note no rebuild\n'
+  sed -i 's/FORTRAN/fortran/' sub/sub.jsonnet
+  make
+  echo -e '\nIn any case, first build gave us:\n'
+  ls -l model-dump.txt
+  cat model-dump.txt
+
+#+end_src
+
+#+RESULTS:
+#+begin_example
+rm -f model-dump.txt
+moo render -o model-dump.txt model.jsonnet dump.txt.j2
+
+Next we edit the intermediate files and note no rebuild
+
+make: 'model-dump.txt' is up to date.
+
+In any case, first build gave us:
+
+-rw-rw-r-- 1 bv bv 93 Sep 24 13:37 model-dump.txt
+sub = {'a': 1, 'b': 2, 'c': 'hello'}
+subsub = {'a': 1, 'b': 2, 'c': 'hello', 'd': 'FORTRAN'}
+#+end_example
+
+
 ** CMake
    :PROPERTIES:
    :CUSTOM_ID: cmake
    :END:
 
+This section describes one way to integrate ~moo~ with a CMake-based
+build.  My primary suggestion here is to stay as far away from CMake
+as you possibly can.  
+
+But, if shackled to CMake, keep in mind this example likely does not
+follow best CMake practices (as I don't know them nor willing to
+ingest the CMake mess to learn them).  In particular, unlike the above
+examples, there is no attempt to somehow tie in intermediate
+dependencies.  Contributions/fixes welcome.
+
+The ~CMakeLists.txt~ file:
+
+#+include: buildsys/cmake/CMakeLists.txt src cmake
+
+And it getting exercised:
+
+#+begin_src shell :exports both :results output code :wrap "example"
+  cd buildsys/cmake
+  rm -rf build
+  mkdir build
+  cd build
+  cmake ..
+  make ModelDump
+  ls -l model-dump.txt
+  cat model-dump.txt
+#+end_src
+
+#+RESULTS:
+#+begin_example
+-- The C compiler identification is GNU 7.5.0
+-- The CXX compiler identification is GNU 7.5.0
+-- Check for working C compiler: /usr/bin/cc
+-- Check for working C compiler: /usr/bin/cc - works
+-- Detecting C compiler ABI info
+-- Detecting C compiler ABI info - done
+-- Detecting C compile features
+-- Detecting C compile features - done
+-- Check for working CXX compiler: /usr/bin/c++
+-- Check for working CXX compiler: /usr/bin/c++ - works
+-- Detecting CXX compiler ABI info
+-- Detecting CXX compiler ABI info - done
+-- Detecting CXX compile features
+-- Detecting CXX compile features - done
+-- Configuring done
+-- Generating done
+-- Build files have been written to: /home/bv/dev/moo/buildsys/cmake/build
+Scanning dependencies of target ModelDump
+Built target ModelDump
+-rw-rw-r-- 1 bv bv 93 Sep 24 12:43 model-dump.txt
+sub = {'a': 1, 'b': 2, 'c': 'hello'}
+subsub = {'a': 1, 'b': 2, 'c': 'hello', 'd': 'fortran'}
+#+end_example
