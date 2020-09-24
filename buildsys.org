@@ -218,7 +218,7 @@ standard output but can also write to an explicit file given with the
   moo render -o output.hpp model.jsonnet template.hpp.j2
 #+end_example
 
-* Example integration
+* Examples
   :PROPERTIES:
   :CUSTOM_ID: examples
   :END:

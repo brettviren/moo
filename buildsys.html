@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2020-09-24 Thu 10:15 -->
+<!-- 2020-09-24 Thu 12:19 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>moo 無 build</title>
@@ -270,16 +270,21 @@ for the JavaScript code in this tag.
 <li><a href="#inputs">Inputs</a></li>
 <li><a href="#outputs">Outputs</a>
 <ul>
-<li><a href="#org56bd07d"><code>imports</code></a></li>
-<li><a href="#orgabdb8cc"><code>compile</code></a></li>
-<li><a href="#orgb9c9c38"><code>render</code></a></li>
+<li><a href="#orga6fa956"><code>imports</code></a></li>
+<li><a href="#org9716bb7"><code>compile</code></a></li>
+<li><a href="#org31e3008"><code>render</code></a></li>
 </ul>
 </li>
-<li><a href="#org63f5cdf">Example integrations</a>
+<li><a href="#examples">Examples</a>
 <ul>
-<li><a href="#org613323e">Waf</a></li>
-<li><a href="#org0fc5c18">Make</a></li>
-<li><a href="#orge8a90fa">CMake</a></li>
+<li><a href="#waf">Waf</a>
+<ul>
+<li><a href="#org7b94866">cmd</a></li>
+<li><a href="#org6f23fb6">mod</a></li>
+</ul>
+</li>
+<li><a href="#make">Make</a></li>
+<li><a href="#cmake">CMake</a></li>
 </ul>
 </li>
 </ul>
@@ -421,9 +426,9 @@ For example, prepare three models where <code>a.jsonnet</code> is a function and
 </p>
 
 <div class="org-src-container">
-<pre class="src src-shell"><span style="color: #e090d7;">echo</span> <span style="color: #e9b96e;">'function(a=42) {x:a}'</span> &gt; a.jsonnet
-<span style="color: #e090d7;">echo</span> <span style="color: #e9b96e;">'{b:69}'</span> &gt; b.jsonnet
-<span style="color: #e090d7;">echo</span> <span style="color: #e9b96e;">'{c:"hello"}'</span> &gt; c.jsonnet
+<pre class="src src-shell"><span style="color: #e090d7;">echo</span> <span style="color: #e9b96e;">'function(a=42) {x:a}'</span> &gt; buildsys/a.jsonnet
+<span style="color: #e090d7;">echo</span> <span style="color: #e9b96e;">'{b:69}'</span> &gt; buildsys/b.jsonnet
+<span style="color: #e090d7;">echo</span> <span style="color: #e9b96e;">'{c:"hello"}'</span> &gt; buildsys/c.jsonnet
 </pre>
 </div>
 
@@ -432,7 +437,7 @@ Here is an example of grafting:
 </p>
 
 <div class="org-src-container">
-<pre class="src src-shell">moo -g /greetings:c.jsonnet compile b.jsonnet
+<pre class="src src-shell">moo -g /greetings:buildsys/c.jsonnet compile buildsys/b.jsonnet
 </pre>
 </div>
 
@@ -446,16 +451,21 @@ Here is an example of grafting:
 </pre>
 
 <p>
-Here is an example of inject model <code>b</code> via TLA:
+Here is an example of inject model <code>b</code> via TLA where <code>b</code> is found via a
+model search path set by <code>-M</code>.
 </p>
 
 <div class="org-src-container">
-<pre class="src src-shell">moo -A <span style="color: #fcaf3e;">a</span>=b.jsonnet compile a.jsonnet
+<pre class="src src-shell">moo -M buildsys -A <span style="color: #fcaf3e;">a</span>=b.jsonnet compile buildsys/a.jsonnet
 </pre>
 </div>
 
 <pre class="example">
-
+{
+    "x": {
+        "b": 69
+    }
+}
 </pre>
 
 <p>
@@ -463,12 +473,16 @@ Here is an example where we supply the injected data as a literal representation
 </p>
 
 <div class="org-src-container">
-<pre class="src src-shell">moo -A <span style="color: #fcaf3e;">a</span>=<span style="color: #e9b96e;">'{name:"moo"}'</span> compile a.jsonnet
+<pre class="src src-shell">moo -A <span style="color: #fcaf3e;">a</span>=<span style="color: #e9b96e;">'{name:"moo"}'</span> compile buildsys/a.jsonnet
 </pre>
 </div>
 
 <pre class="example">
-
+{
+    "x": {
+        "name": "moo"
+    }
+}
 </pre>
 </div>
 </div>
@@ -484,9 +498,9 @@ output files.
 </p>
 </div>
 
-<div id="outline-container-org56bd07d" class="outline-3">
-<h3 id="org56bd07d"><code>imports</code></h3>
-<div class="outline-text-3" id="text-org56bd07d">
+<div id="outline-container-orga6fa956" class="outline-3">
+<h3 id="orga6fa956"><code>imports</code></h3>
+<div class="outline-text-3" id="text-orga6fa956">
 <p>
 The <code>moo</code> command <code>imports</code> is provided to help discover intermediate
 dependency files which have been imported through Jsonnet's or Jinja's
@@ -501,18 +515,18 @@ the implicit dependencies:
 </p>
 
 <div class="org-src-container">
-<pre class="src src-shell"><span style="color: #e090d7;">echo</span> <span style="color: #e9b96e;">'local a = import "b.jsonnet"; a'</span> &gt; top.jsonnet
-<span style="color: #e090d7;">echo</span> <span style="color: #e9b96e;">'{b:69}'</span> &gt; b.jsonnet
+<pre class="src src-shell"><span style="color: #e090d7;">echo</span> <span style="color: #e9b96e;">'local a = import "b.jsonnet"; a'</span> &gt; buildsys/top.jsonnet
+<span style="color: #e090d7;">echo</span> <span style="color: #e9b96e;">'{b:69}'</span> &gt; buildsys/b.jsonnet
 </pre>
 </div>
 
 <div class="org-src-container">
-<pre class="src src-shell">moo imports top.jsonnet
+<pre class="src src-shell">moo imports buildsys/top.jsonnet
 </pre>
 </div>
 
 <pre class="example">
-/home/bv/dev/moo/b.jsonnet
+/home/bv/dev/moo/buildsys/b.jsonnet
 </pre>
 
 <p>
@@ -526,9 +540,9 @@ By default, <code>moo</code> will print the result to standard output.  The <cod
 </div>
 </div>
 
-<div id="outline-container-orgabdb8cc" class="outline-3">
-<h3 id="orgabdb8cc"><code>compile</code></h3>
-<div class="outline-text-3" id="text-orgabdb8cc">
+<div id="outline-container-org9716bb7" class="outline-3">
+<h3 id="org9716bb7"><code>compile</code></h3>
+<div class="outline-text-3" id="text-org9716bb7">
 <p>
 <code>moo compile</code> will take a model in Jsonnet or other format and output
 JSON.  This takes the same main options as <code>render</code> (next) and so is a
@@ -545,9 +559,9 @@ production.  It should only be employed if needed.
 </div>
 </div>
 
-<div id="outline-container-orgb9c9c38" class="outline-3">
-<h3 id="orgb9c9c38"><code>render</code></h3>
-<div class="outline-text-3" id="text-orgb9c9c38">
+<div id="outline-container-org31e3008" class="outline-3">
+<h3 id="org31e3008"><code>render</code></h3>
+<div class="outline-text-3" id="text-org31e3008">
 <p>
 The main goal of <code>moo</code> is to generate code and this is the main command
 do perform that.  Like <code>compile</code> (and <code>imports</code>) it prints the result to
@@ -562,30 +576,164 @@ moo render -o output.hpp model.jsonnet template.hpp.j2
 </div>
 </div>
 
-<div id="outline-container-org63f5cdf" class="outline-2">
-<h2 id="org63f5cdf">Example integrations</h2>
-<div class="outline-text-2" id="text-org63f5cdf">
+<div id="outline-container-examples" class="outline-2">
+<h2 id="examples">Examples</h2>
+<div class="outline-text-2" id="text-examples">
 <p>
-tbd
+This section gives a tour of some playground style integration of <code>moo</code>
+into various build systems.
 </p>
 </div>
 
-<div id="outline-container-org613323e" class="outline-3">
-<h3 id="org613323e">Waf</h3>
+<div id="outline-container-waf" class="outline-3">
+<h3 id="waf">Waf</h3>
+<div class="outline-text-3" id="text-waf">
+<p>
+Both Waf and <code>moo</code> is implemented in Python and that gives the
+developers options in how to integrate <code>moo</code> into their Waf-based build
+system.  One may either call <code>moo</code> as a CLI program or use it as a
+Python module.
+</p>
 </div>
 
-<div id="outline-container-org0fc5c18" class="outline-3">
-<h3 id="org0fc5c18">Make</h3>
+<div id="outline-container-org7b94866" class="outline-4">
+<h4 id="org7b94866">cmd</h4>
+<div class="outline-text-4" id="text-org7b94866">
+<p>
+The Waf project in <a href="buildsys/waf/cmd/">buildsys/waf/cmd/</a> provides an example of using <code>moo</code>
+as a command line program.  It uses <code>moo render</code> to apply a model to a
+simple template that merely dumps the data.  The model is composed
+through Jsonnet <code>import</code> mechanism and so <code>moo import</code> is also as a Waf
+<i>scanner</i> to determine intermediate dependencies.
+</p>
+
+<p>
+Here is an example of exercising the build.  We do an initial build.
+A second rebuild is a no-op.  We then edit an intermediate file and
+rebuild and notice that indeed the change is noticed.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-shell"><span style="color: #e090d7;">cd</span> buildsys/waf/cmd/
+waf distclean configure 
+sed -i <span style="color: #e9b96e;">'s/fortran/FORTRAN/'</span> sub/sub.jsonnet
+<span style="color: #e090d7;">echo</span> -e <span style="color: #e9b96e;">"\nfirst build\n"</span>
+waf
+<span style="color: #e090d7;">echo</span> -e <span style="color: #e9b96e;">"\nsecond build, no rebuild\n"</span>
+waf
+<span style="color: #e090d7;">echo</span> -e <span style="color: #e9b96e;">"\nmodify intermediate dependency, see it rebuild\n"</span>
+sed -i <span style="color: #e9b96e;">'s/FORTRAN/fortran/'</span> sub/sub.jsonnet
+waf
+</pre>
 </div>
 
-<div id="outline-container-orge8a90fa" class="outline-3">
-<h3 id="orge8a90fa">CMake</h3>
+<pre class="example">
+'distclean' finished successfully (0.002s)
+Setting top to                           : /home/bv/dev/moo/buildsys/waf/cmd 
+Setting out to                           : /home/bv/dev/moo/buildsys/waf/cmd/build 
+Checking for program 'moo'               : /home/bv/dev/moo/.direnv/python-venv-3.8.0/bin/moo 
+'configure' finished successfully (0.003s)
+
+first build
+
+Waf: Entering directory `/home/bv/dev/moo/buildsys/waf/cmd/build'
+[/home/bv/dev/moo/buildsys/waf/cmd/sub.jsonnet, /home/bv/dev/moo/buildsys/waf/cmd/sub/sub.jsonnet]
+[1/1] Processing model-dump.txt: model.jsonnet dump.txt.j2 -&gt; build/model-dump.txt
+Waf: Leaving directory `/home/bv/dev/moo/buildsys/waf/cmd/build'
+'build' finished successfully (0.780s)
+
+second build, no rebuild
+
+Waf: Entering directory `/home/bv/dev/moo/buildsys/waf/cmd/build'
+Waf: Leaving directory `/home/bv/dev/moo/buildsys/waf/cmd/build'
+'build' finished successfully (0.016s)
+
+modify intermediate dependency, see it rebuild
+
+Waf: Entering directory `/home/bv/dev/moo/buildsys/waf/cmd/build'
+[/home/bv/dev/moo/buildsys/waf/cmd/sub.jsonnet, /home/bv/dev/moo/buildsys/waf/cmd/sub/sub.jsonnet]
+[1/1] Processing model-dump.txt: model.jsonnet dump.txt.j2 -&gt; build/model-dump.txt
+Waf: Leaving directory `/home/bv/dev/moo/buildsys/waf/cmd/build'
+'build' finished successfully (0.780s)
+</pre>
+</div>
+</div>
+
+<div id="outline-container-org6f23fb6" class="outline-4">
+<h4 id="org6f23fb6">mod</h4>
+<div class="outline-text-4" id="text-org6f23fb6">
+<p>
+The second example works the same but instead of calling <code>moo</code> as a CLI
+program, the Python module is used.  In principle, this can be better
+performing but it does require Waf is called with a version of Python
+that is new enough to support <code>moo</code>.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-shell"><span style="color: #e090d7;">cd</span> buildsys/waf/mod/
+waf distclean configure 
+sed -i <span style="color: #e9b96e;">'s/fortran/FORTRAN/'</span> sub/sub.jsonnet
+<span style="color: #e090d7;">echo</span> -e <span style="color: #e9b96e;">"\nfirst build\n"</span>
+waf
+<span style="color: #e090d7;">echo</span> -e <span style="color: #e9b96e;">"\nsecond build, no rebuild\n"</span>
+waf
+<span style="color: #e090d7;">echo</span> -e <span style="color: #e9b96e;">"\nmodify intermediate dependency, see it rebuild\n"</span>
+sed -i <span style="color: #e9b96e;">'s/FORTRAN/fortran/'</span> sub/sub.jsonnet
+waf
+</pre>
+</div>
+
+<pre class="example">
+'distclean' finished successfully (0.002s)
+Setting top to                           : /home/bv/dev/moo/buildsys/waf/mod 
+Setting out to                           : /home/bv/dev/moo/buildsys/waf/mod/build 
+'configure' finished successfully (0.002s)
+
+first build
+
+Waf: Entering directory `/home/bv/dev/moo/buildsys/waf/mod/build'
+[/home/bv/dev/moo/buildsys/waf/mod/sub.jsonnet, /home/bv/dev/moo/buildsys/waf/mod/sub/sub.jsonnet]
+[1/1] Processing model-dump.txt: model.jsonnet dump.txt.j2 -&gt; build/model-dump.txt
+Waf: Leaving directory `/home/bv/dev/moo/buildsys/waf/mod/build'
+'build' finished successfully (0.241s)
+
+second build, no rebuild
+
+Waf: Entering directory `/home/bv/dev/moo/buildsys/waf/mod/build'
+Waf: Leaving directory `/home/bv/dev/moo/buildsys/waf/mod/build'
+'build' finished successfully (0.017s)
+
+modify intermediate dependency, see it rebuild
+
+Waf: Entering directory `/home/bv/dev/moo/buildsys/waf/mod/build'
+[/home/bv/dev/moo/buildsys/waf/mod/sub.jsonnet, /home/bv/dev/moo/buildsys/waf/mod/sub/sub.jsonnet]
+[1/1] Processing model-dump.txt: model.jsonnet dump.txt.j2 -&gt; build/model-dump.txt
+Waf: Leaving directory `/home/bv/dev/moo/buildsys/waf/mod/build'
+'build' finished successfully (0.250s)
+</pre>
+</div>
+</div>
+</div>
+
+
+
+
+<div id="outline-container-make" class="outline-3">
+<h3 id="make">Make</h3>
+<div class="outline-text-3" id="text-make">
+</div>
+</div>
+
+<div id="outline-container-cmake" class="outline-3">
+<h3 id="cmake">CMake</h3>
+<div class="outline-text-3" id="text-cmake">
+</div>
 </div>
 </div>
 </div>
 <div id="postamble" class="status">
 <p class="author">Author: Brett Viren</p>
-<p class="date">Created: 2020-09-24 Thu 10:15</p>
+<p class="date">Created: 2020-09-24 Thu 12:19</p>
 <p class="validation"><a href="http://validator.w3.org/check?uri=referer">Validate</a></p>
 </div>
 </body>
