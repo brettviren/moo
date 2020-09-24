@@ -1,0 +1,30 @@
+#!/usr/bin/env waf
+'''
+An example waf wscript file for exercising moo as a command
+'''
+
+from subprocess import check_output
+from waflib.Utils import subst_vars
+
+def configure(cfg):
+    cfg.find_program('moo', var='MOO', mandatory=True)
+
+def import_scanner(task):
+    deps = []
+    for node in task.inputs:
+        cmd = "${MOO} imports %s" % node.abspath()
+        cmd = subst_vars(cmd, task.env)
+        #out = task.exec_command(cmd)
+        out = check_output(cmd.split()).decode()
+        deps += out.split("\n")
+
+    deps = [task.generator.bld.path.find_or_declare(d) for d in deps if d]
+    print(deps)
+    return (deps, [])
+
+def build(bld):
+    bld(rule="${MOO} render -o ${TGT} ${SRC}",
+        source="model.jsonnet dump.txt.j2",
+        target="model-dump.txt",
+        scan=import_scanner)
+    

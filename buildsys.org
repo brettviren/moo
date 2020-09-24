@@ -1,0 +1,357 @@
+#+title: moo 無 build
+#+subtitle: Building Software Packages with ~moo~
+#+setupfile: setup.org
+
+* Introduction
+  :PROPERTIES:
+  :CUSTOM_ID: intro
+  :END:
+
+One of the primary use for ~moo~ is to generate code.  It can greatly
+simply production of code which follows some sort of meta-programming
+patterns.  Typically a software package will have a portion that must
+still be developed manually.  Although ~moo~ has been used to generate
+[[file:wcup.org][full]] packages, in most cases it is expected that ~moo~ will generate
+just a portion of a package and that this generation will be
+integrated into the native package build system.  This note gives
+guidance on how that is done.
+
+** Manual codegen
+   :PROPERTIES:
+   :CUSTOM_ID: manual
+   :END:
+
+A reasonable solution is to simply run ~moo~ manually, or partly
+automated via a shell script.  Arrange for the generated files to be
+placed in the source areas and then commit the results.
+
+Pros:
+
+- requires ~moo~ only at develop time, not build (nor run) time.
+- easy to implement
+- (manually) assures correct build dependencies
+- generated code can be placed alongside hand-made code which assists in browsing/understanding of the code base
+- building the project is decoupled from development occurring in ~moo~ itself or in templates provided by ~moo~ that are used by the project
+
+Cons:
+
+- a developer can change a local template or model and forget to regenerate (though presumably, this is caught as a matter-of-course).
+
+** Build integration
+   :PROPERTIES:
+   :CUSTOM_ID: integrated
+   :END:
+
+Another reasonable solution is to run ~moo~ commands as part of the
+native build of the package.  From the point of view of developing a
+build system, ~moo~ is seen as a *compiler*.  
+
+While ~g++~ may convert C++ files to ~.o~ object files, ~moo~ converts ~.j2~
+and ~.jsonnet~ files into ~.hpp~, ~.cpp~, etc files (which then themselves
+must go on to be further compiled.  Thus, ~moo~ commands must be
+*inserted* into the build graph that the build system (Waf, CMake, etc)
+creates in a novel manner.  
+
+Depending on the build system, one may find examples of this pattern
+to mimic by looking for use of ~m4~, the processing of ~.in~ files or the
+CPP.  Though, be aware that some build systems have special support
+for this kind of compiling which may not be easily mimicked.
+
+The "pros" and "cons" are largely reversed from the manual option with the following exceptions:
+
+- correct build dependencies may be assured, given a quality build system
+- generated code may be placed in or outside the source area
+
+The rest of this document gives information to help build system
+developers understand how to fit ~moo~ into their system.  It focuses on
+what input and output files with which ~moo~ may interact as most build
+systems use a file-based dependency graph.
+
+* Inputs
+  :PROPERTIES:
+  :CUSTOM_ID: inputs
+  :END:
+
+
+~moo~ takes as input two types of files, "templates" and "models" (data).
+
+- templates :: these files conventionally have a "double extension" such as ~.hpp.j2~.  The first (~.hpp~) signifies the target file extension and the second (~.j2~) identifies the file as being marked up with Jinja2 templates.  The first part is free, while some ~moo~ functionality is sensitive to the trailing ~.j2~.
+
+- models :: these files may be provided in many different formats.  The format used for ~moo~ examples and which is recommended is ~.jsonnet~.  But ~moo~ also supports the consumption of ~.json~, ~.xml~, ~.ini~, ~.yaml~, ~.csv~ and others.
+
+~moo~ can be given these files via an absolute or relative path.  If a
+relative path is given then ~moo~ will check for the file in list of
+given absolute "search paths".  Template and model search paths are
+specified independently via command line arguments:
+
+#+begin_example
+  $ moo -M /path/to/models -M /path/to/more/models \
+        -T /path/to/templates -T /path/to/more/templates \
+        render a/relative/model.jsonnet /an/absolute/template.xyz.j2
+#+end_example
+
+One may also set these search paths by setting ~MOO_MODEL_PATH~ and ~MOO_TEMPLATE_PATH~ environment variables.
+
+Besides explicit input files provided as ~moo~ command arguments (as
+above example) ~moo~ may also receive inputs via two other channels:
+
+- graft :: ~moo~ can augment the model with additional data structure provided from a secondary model file.  The grafted data structure may be provided in Jsonnet format or any other supported input format file.
+
+- tla :: ~moo~ accepts and may pass top-level arguments (TLA) to a model which is itself a Jsonnet function (here is one case where only Jsonnet may be used).  The TLA may provide directly a data structure or may name a file to load (and this file may be Jsonnet or any supported input format).
+
+For example, prepare three models where ~a.jsonnet~ is a function and the other two are simple objects.
+
+#+begin_src shell :exports code :results none
+  echo 'function(a=42) {x:a}' > buildsys/a.jsonnet
+  echo '{b:69}' > buildsys/b.jsonnet
+  echo '{c:"hello"}' > buildsys/c.jsonnet
+#+end_src
+
+Here is an example of grafting:
+
+#+begin_src shell :exports both :results output code :wrap "example"
+  moo -g /greetings:buildsys/c.jsonnet compile buildsys/b.jsonnet
+#+end_src
+
+#+RESULTS:
+#+begin_example
+{
+    "b": 69,
+    "greetings": {
+        "c": "hello"
+    }
+}
+#+end_example
+
+Here is an example of inject model ~b~ via TLA where ~b~ is found via a
+model search path set by ~-M~.
+
+#+begin_src shell :exports both :results output code :wrap "example"
+  moo -M buildsys -A a=b.jsonnet compile buildsys/a.jsonnet
+#+end_src
+
+#+RESULTS:
+#+begin_example
+{
+    "x": {
+        "b": 69
+    }
+}
+#+end_example
+
+Here is an example where we supply the injected data as a literal representation:
+
+#+begin_src shell :exports both :results output code :wrap "example"
+  moo -A a='{name:"moo"}' compile buildsys/a.jsonnet
+#+end_src
+
+#+RESULTS:
+#+begin_example
+{
+    "x": {
+        "name": "moo"
+    }
+}
+#+end_example
+
+
+* Outputs
+  :PROPERTIES:
+  :CUSTOM_ID: outputs
+  :END:
+
+
+~moo~ has several commands and each produce specific output.  Here we
+give a tour of the commands relevant to a build system and their
+output files.
+
+** ~imports~
+
+The ~moo~ command ~imports~ is provided to help discover intermediate
+dependency files which have been imported through Jsonnet's or Jinja's
+file inclusion mechanisms.  This is analogous to CPP's ~-M~ option to
+produce ~.d~ files for ~make~.
+
+Here is an example of how a build system may call ~moo~ to "scan" a
+Jsonnet file so that the build dependency graph may properly insert
+the implicit dependencies:
+
+#+begin_src shell :exports code :results none
+  echo 'local a = import "b.jsonnet"; a' > buildsys/top.jsonnet
+  echo '{b:69}' > buildsys/b.jsonnet
+#+end_src
+
+#+begin_src shell :exports both :results output code :wrap "example"
+  moo imports buildsys/top.jsonnet
+#+end_src
+
+#+RESULTS:
+#+begin_example
+/home/bv/dev/moo/buildsys/b.jsonnet
+#+end_example
+
+A Jinja template file can be scanned similarly.  If ending in ~.j2~ it
+will be assumed to be such.
+
+By default, ~moo~ will print the result to standard output.  The ~-o~ option to ~imports~ can be provided to output to a specific file.
+
+** ~compile~
+
+~moo compile~ will take a model in Jsonnet or other format and output
+JSON.  This takes the same main options as ~render~ (next) and so is a
+way test the intermediate result of grafting and/or applying TLAs or
+simply providing a common file type from a variety of supported input
+types.  
+
+A build system may choose to explicitly expose this intermediate
+representation but that must come at a cost of more file I/O and file
+production.  It should only be employed if needed.
+
+** ~render~
+
+The main goal of ~moo~ is to generate code and this is the main command
+do perform that.  Like ~compile~ (and ~imports~) it prints the result to
+standard output but can also write to an explicit file given with the
+~-o~ command option.  A minimal example to show the command line is:
+
+#+begin_example
+  moo render -o output.hpp model.jsonnet template.hpp.j2
+#+end_example
+
+* Example integration
+  :PROPERTIES:
+  :CUSTOM_ID: examples
+  :END:
+
+This section gives a tour of some playground style integration of ~moo~
+into various build systems.
+
+** Waf
+   :PROPERTIES:
+   :CUSTOM_ID: waf
+   :END:
+
+Both Waf and ~moo~ is implemented in Python and that gives the
+developers options in how to integrate ~moo~ into their Waf-based build
+system.  One may either call ~moo~ as a CLI program or use it as a
+Python module.
+
+*** cmd
+
+The Waf project in [[file:buildsys/waf/cmd/][buildsys/waf/cmd/]] provides an example of using ~moo~
+as a command line program.  It uses ~moo render~ to apply a model to a
+simple template that merely dumps the data.  The model is composed
+through Jsonnet ~import~ mechanism and so ~moo import~ is also as a Waf
+/scanner/ to determine intermediate dependencies.
+
+Here is an example of exercising the build.  We do an initial build.
+A second rebuild is a no-op.  We then edit an intermediate file and
+rebuild and notice that indeed the change is noticed.
+
+#+begin_src shell :exports both :results output code :wrap "example"
+  cd buildsys/waf/cmd/
+  waf distclean configure 
+  sed -i 's/fortran/FORTRAN/' sub/sub.jsonnet
+  echo -e "\nfirst build\n"
+  waf
+  echo -e "\nsecond build, no rebuild\n"
+  waf
+  echo -e "\nmodify intermediate dependency, see it rebuild\n"
+  sed -i 's/FORTRAN/fortran/' sub/sub.jsonnet
+  waf
+#+end_src
+
+#+RESULTS:
+#+begin_example
+'distclean' finished successfully (0.002s)
+Setting top to                           : /home/bv/dev/moo/buildsys/waf/cmd 
+Setting out to                           : /home/bv/dev/moo/buildsys/waf/cmd/build 
+Checking for program 'moo'               : /home/bv/dev/moo/.direnv/python-venv-3.8.0/bin/moo 
+'configure' finished successfully (0.002s)
+
+first build
+
+Waf: Entering directory `/home/bv/dev/moo/buildsys/waf/cmd/build'
+[/home/bv/dev/moo/buildsys/waf/cmd/sub.jsonnet, /home/bv/dev/moo/buildsys/waf/cmd/sub/sub.jsonnet]
+[1/1] Processing model-dump.txt: model.jsonnet dump.txt.j2 -> build/model-dump.txt
+Waf: Leaving directory `/home/bv/dev/moo/buildsys/waf/cmd/build'
+'build' finished successfully (0.805s)
+
+second build, no rebuild
+
+Waf: Entering directory `/home/bv/dev/moo/buildsys/waf/cmd/build'
+Waf: Leaving directory `/home/bv/dev/moo/buildsys/waf/cmd/build'
+'build' finished successfully (0.014s)
+
+modify intermediate dependency, see it rebuild
+
+Waf: Entering directory `/home/bv/dev/moo/buildsys/waf/cmd/build'
+[/home/bv/dev/moo/buildsys/waf/cmd/sub.jsonnet, /home/bv/dev/moo/buildsys/waf/cmd/sub/sub.jsonnet]
+[1/1] Processing model-dump.txt: model.jsonnet dump.txt.j2 -> build/model-dump.txt
+Waf: Leaving directory `/home/bv/dev/moo/buildsys/waf/cmd/build'
+'build' finished successfully (0.786s)
+#+end_example
+
+*** mod
+
+The second example works the same but instead of calling ~moo~ as a CLI
+program, the Python module is used.  In principle, this can be better
+performing but it does require Waf is called with a version of Python
+that is new enough to support ~moo~.
+
+#+begin_src shell :exports both :results output code :wrap "example"
+  cd buildsys/waf/mod/
+  waf distclean configure 
+  sed -i 's/fortran/FORTRAN/' sub/sub.jsonnet
+  echo -e "\nfirst build\n"
+  waf
+  echo -e "\nsecond build, no rebuild\n"
+  waf
+  echo -e "\nmodify intermediate dependency, see it rebuild\n"
+  sed -i 's/FORTRAN/fortran/' sub/sub.jsonnet
+  waf
+#+end_src
+
+#+RESULTS:
+#+begin_example
+'distclean' finished successfully (0.002s)
+Setting top to                           : /home/bv/dev/moo/buildsys/waf/mod 
+Setting out to                           : /home/bv/dev/moo/buildsys/waf/mod/build 
+'configure' finished successfully (0.002s)
+
+first build
+
+Waf: Entering directory `/home/bv/dev/moo/buildsys/waf/mod/build'
+[/home/bv/dev/moo/buildsys/waf/mod/sub.jsonnet, /home/bv/dev/moo/buildsys/waf/mod/sub/sub.jsonnet]
+[1/1] Processing model-dump.txt: model.jsonnet dump.txt.j2 -> build/model-dump.txt
+Waf: Leaving directory `/home/bv/dev/moo/buildsys/waf/mod/build'
+'build' finished successfully (0.247s)
+
+second build, no rebuild
+
+Waf: Entering directory `/home/bv/dev/moo/buildsys/waf/mod/build'
+Waf: Leaving directory `/home/bv/dev/moo/buildsys/waf/mod/build'
+'build' finished successfully (0.012s)
+
+modify intermediate dependency, see it rebuild
+
+Waf: Entering directory `/home/bv/dev/moo/buildsys/waf/mod/build'
+[/home/bv/dev/moo/buildsys/waf/mod/sub.jsonnet, /home/bv/dev/moo/buildsys/waf/mod/sub/sub.jsonnet]
+[1/1] Processing model-dump.txt: model.jsonnet dump.txt.j2 -> build/model-dump.txt
+Waf: Leaving directory `/home/bv/dev/moo/buildsys/waf/mod/build'
+'build' finished successfully (0.248s)
+#+end_example
+
+
+
+
+** Make
+   :PROPERTIES:
+   :CUSTOM_ID: make
+   :END:
+
+** CMake
+   :PROPERTIES:
+   :CUSTOM_ID: cmake
+   :END:
+

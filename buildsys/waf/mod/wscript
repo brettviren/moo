@@ -1,0 +1,43 @@
+#!/usr/bin/env waf
+'''
+An example waf wscript file for exercising moo as a Python module
+
+This should be improved by turning the moo parts into a Waf tool!
+'''
+
+
+
+import moo
+
+def import_scanner(task):
+    srcdir = task.generator.bld.path.abspath()
+    deps = []
+    for node in task.inputs:
+        deps += moo.imports(node.abspath(), srcdir)
+    deps = [task.generator.bld.path.find_or_declare(d) for d in deps if d]
+    print(deps)
+    return (deps, [])
+
+
+def render(task):
+    "${MOO} render -o ${TGT} ${SRC}",
+    srcdir = task.generator.bld.path.abspath()
+    out = task.outputs[0]
+    model = moo.io.load(task.inputs[0].abspath())
+    templ = task.inputs[1].abspath()
+
+    # keep compatibility with moo render
+    helper = moo.io.load(moo.util.resolve("moo.jsonnet"))
+    out.write(moo.template.render(templ, dict(model=model, moo=helper)))
+
+
+def configure(cfg):
+    pass
+
+
+def build(bld):
+    bld(rule=render,
+        source="model.jsonnet dump.txt.j2",
+        target="model-dump.txt",
+        scan=import_scanner)
+    

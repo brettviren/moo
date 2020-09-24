@@ -20,3 +20,6 @@ demo_app.json
 demo_app_nljs.hpp
 test_demo
 latexmk-out
+auto
+cut*
+junk*

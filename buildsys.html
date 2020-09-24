@@ -1,0 +1,592 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+<!-- 2020-09-24 Thu 10:15 -->
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>moo 無 build</title>
+<meta name="generator" content="Org mode" />
+<meta name="author" content="Brett Viren" />
+<style type="text/css">
+ <!--/*--><![CDATA[/*><!--*/
+  .title  { text-align: center;
+             margin-bottom: .2em; }
+  .subtitle { text-align: center;
+              font-size: medium;
+              font-weight: bold;
+              margin-top:0; }
+  .todo   { font-family: monospace; color: red; }
+  .done   { font-family: monospace; color: green; }
+  .priority { font-family: monospace; color: orange; }
+  .tag    { background-color: #eee; font-family: monospace;
+            padding: 2px; font-size: 80%; font-weight: normal; }
+  .timestamp { color: #bebebe; }
+  .timestamp-kwd { color: #5f9ea0; }
+  .org-right  { margin-left: auto; margin-right: 0px;  text-align: right; }
+  .org-left   { margin-left: 0px;  margin-right: auto; text-align: left; }
+  .org-center { margin-left: auto; margin-right: auto; text-align: center; }
+  .underline { text-decoration: underline; }
+  #postamble p, #preamble p { font-size: 90%; margin: .2em; }
+  p.verse { margin-left: 3%; }
+  pre {
+    border: 1px solid #ccc;
+    box-shadow: 3px 3px 3px #eee;
+    padding: 8pt;
+    font-family: monospace;
+    overflow: auto;
+    margin: 1.2em;
+  }
+  pre.src {
+    position: relative;
+    overflow: visible;
+    padding-top: 1.2em;
+  }
+  pre.src:before {
+    display: none;
+    position: absolute;
+    background-color: white;
+    top: -10px;
+    right: 10px;
+    padding: 3px;
+    border: 1px solid black;
+  }
+  pre.src:hover:before { display: inline;}
+  /* Languages per Org manual */
+  pre.src-asymptote:before { content: 'Asymptote'; }
+  pre.src-awk:before { content: 'Awk'; }
+  pre.src-C:before { content: 'C'; }
+  /* pre.src-C++ doesn't work in CSS */
+  pre.src-clojure:before { content: 'Clojure'; }
+  pre.src-css:before { content: 'CSS'; }
+  pre.src-D:before { content: 'D'; }
+  pre.src-ditaa:before { content: 'ditaa'; }
+  pre.src-dot:before { content: 'Graphviz'; }
+  pre.src-calc:before { content: 'Emacs Calc'; }
+  pre.src-emacs-lisp:before { content: 'Emacs Lisp'; }
+  pre.src-fortran:before { content: 'Fortran'; }
+  pre.src-gnuplot:before { content: 'gnuplot'; }
+  pre.src-haskell:before { content: 'Haskell'; }
+  pre.src-hledger:before { content: 'hledger'; }
+  pre.src-java:before { content: 'Java'; }
+  pre.src-js:before { content: 'Javascript'; }
+  pre.src-latex:before { content: 'LaTeX'; }
+  pre.src-ledger:before { content: 'Ledger'; }
+  pre.src-lisp:before { content: 'Lisp'; }
+  pre.src-lilypond:before { content: 'Lilypond'; }
+  pre.src-lua:before { content: 'Lua'; }
+  pre.src-matlab:before { content: 'MATLAB'; }
+  pre.src-mscgen:before { content: 'Mscgen'; }
+  pre.src-ocaml:before { content: 'Objective Caml'; }
+  pre.src-octave:before { content: 'Octave'; }
+  pre.src-org:before { content: 'Org mode'; }
+  pre.src-oz:before { content: 'OZ'; }
+  pre.src-plantuml:before { content: 'Plantuml'; }
+  pre.src-processing:before { content: 'Processing.js'; }
+  pre.src-python:before { content: 'Python'; }
+  pre.src-R:before { content: 'R'; }
+  pre.src-ruby:before { content: 'Ruby'; }
+  pre.src-sass:before { content: 'Sass'; }
+  pre.src-scheme:before { content: 'Scheme'; }
+  pre.src-screen:before { content: 'Gnu Screen'; }
+  pre.src-sed:before { content: 'Sed'; }
+  pre.src-sh:before { content: 'shell'; }
+  pre.src-sql:before { content: 'SQL'; }
+  pre.src-sqlite:before { content: 'SQLite'; }
+  /* additional languages in org.el's org-babel-load-languages alist */
+  pre.src-forth:before { content: 'Forth'; }
+  pre.src-io:before { content: 'IO'; }
+  pre.src-J:before { content: 'J'; }
+  pre.src-makefile:before { content: 'Makefile'; }
+  pre.src-maxima:before { content: 'Maxima'; }
+  pre.src-perl:before { content: 'Perl'; }
+  pre.src-picolisp:before { content: 'Pico Lisp'; }
+  pre.src-scala:before { content: 'Scala'; }
+  pre.src-shell:before { content: 'Shell Script'; }
+  pre.src-ebnf2ps:before { content: 'ebfn2ps'; }
+  /* additional language identifiers per "defun org-babel-execute"
+       in ob-*.el */
+  pre.src-cpp:before  { content: 'C++'; }
+  pre.src-abc:before  { content: 'ABC'; }
+  pre.src-coq:before  { content: 'Coq'; }
+  pre.src-groovy:before  { content: 'Groovy'; }
+  /* additional language identifiers from org-babel-shell-names in
+     ob-shell.el: ob-shell is the only babel language using a lambda to put
+     the execution function name together. */
+  pre.src-bash:before  { content: 'bash'; }
+  pre.src-csh:before  { content: 'csh'; }
+  pre.src-ash:before  { content: 'ash'; }
+  pre.src-dash:before  { content: 'dash'; }
+  pre.src-ksh:before  { content: 'ksh'; }
+  pre.src-mksh:before  { content: 'mksh'; }
+  pre.src-posh:before  { content: 'posh'; }
+  /* Additional Emacs modes also supported by the LaTeX listings package */
+  pre.src-ada:before { content: 'Ada'; }
+  pre.src-asm:before { content: 'Assembler'; }
+  pre.src-caml:before { content: 'Caml'; }
+  pre.src-delphi:before { content: 'Delphi'; }
+  pre.src-html:before { content: 'HTML'; }
+  pre.src-idl:before { content: 'IDL'; }
+  pre.src-mercury:before { content: 'Mercury'; }
+  pre.src-metapost:before { content: 'MetaPost'; }
+  pre.src-modula-2:before { content: 'Modula-2'; }
+  pre.src-pascal:before { content: 'Pascal'; }
+  pre.src-ps:before { content: 'PostScript'; }
+  pre.src-prolog:before { content: 'Prolog'; }
+  pre.src-simula:before { content: 'Simula'; }
+  pre.src-tcl:before { content: 'tcl'; }
+  pre.src-tex:before { content: 'TeX'; }
+  pre.src-plain-tex:before { content: 'Plain TeX'; }
+  pre.src-verilog:before { content: 'Verilog'; }
+  pre.src-vhdl:before { content: 'VHDL'; }
+  pre.src-xml:before { content: 'XML'; }
+  pre.src-nxml:before { content: 'XML'; }
+  /* add a generic configuration mode; LaTeX export needs an additional
+     (add-to-list 'org-latex-listings-langs '(conf " ")) in .emacs */
+  pre.src-conf:before { content: 'Configuration File'; }
+
+  table { border-collapse:collapse; }
+  caption.t-above { caption-side: top; }
+  caption.t-bottom { caption-side: bottom; }
+  td, th { vertical-align:top;  }
+  th.org-right  { text-align: center;  }
+  th.org-left   { text-align: center;   }
+  th.org-center { text-align: center; }
+  td.org-right  { text-align: right;  }
+  td.org-left   { text-align: left;   }
+  td.org-center { text-align: center; }
+  dt { font-weight: bold; }
+  .footpara { display: inline; }
+  .footdef  { margin-bottom: 1em; }
+  .figure { padding: 1em; }
+  .figure p { text-align: center; }
+  .equation-container {
+    display: table;
+    text-align: center;
+    width: 100%;
+  }
+  .equation {
+    vertical-align: middle;
+  }
+  .equation-label {
+    display: table-cell;
+    text-align: right;
+    vertical-align: middle;
+  }
+  .inlinetask {
+    padding: 10px;
+    border: 2px solid gray;
+    margin: 10px;
+    background: #ffffcc;
+  }
+  #org-div-home-and-up
+   { text-align: right; font-size: 70%; white-space: nowrap; }
+  textarea { overflow-x: auto; }
+  .linenr { font-size: smaller }
+  .code-highlighted { background-color: #ffff00; }
+  .org-info-js_info-navigation { border-style: none; }
+  #org-info-js_console-label
+    { font-size: 10px; font-weight: bold; white-space: nowrap; }
+  .org-info-js_search-highlight
+    { background-color: #ffff00; color: #000000; font-weight: bold; }
+  .org-svg { width: 90%; }
+  /*]]>*/-->
+</style>
+<link rel="stylesheet" type="text/css" href="export/styles/darksun/css/htmlize.css"/>
+<link rel="stylesheet" type="text/css" href="export/styles/darksun/css/darksun.css"/>
+<link rel="stylesheet" type="text/css" href="export/styles/darksun/css/hideshow.css"/>
+<script type="text/javascript" src="export/styles/darksun/js/jquery-1.11.0.min.js"></script>
+<script type="text/javascript" src="export/styles/darksun/js/jquery-ui-1.10.2.min.js"></script>
+<script type="text/javascript" src="export/styles/darksun/js/jquery.localscroll-min.js"></script>
+<script type="text/javascript" src="export/styles/darksun/js/jquery.scrollTo-1.4.3.1-min.js"></script>
+<script type="text/javascript" src="export/styles/darksun/js/jquery.zclip.min.js"></script>
+<script type="text/javascript" src="export/styles/darksun/js/darksun.js"></script>
+<script type="text/javascript" src="export/styles/darksun/js/hideshow.js"></script>
+<script type="text/javascript" src="export/styles/lib/js/jquery.stickytableheaders.min.js"></script>
+<script type="text/javascript">
+/*
+@licstart  The following is the entire license notice for the
+JavaScript code in this tag.
+
+Copyright (C) 2012-2020 Free Software Foundation, Inc.
+
+The JavaScript code in this tag is free software: you can
+redistribute it and/or modify it under the terms of the GNU
+General Public License (GNU GPL) as published by the Free Software
+Foundation, either version 3 of the License, or (at your option)
+any later version.  The code is distributed WITHOUT ANY WARRANTY;
+without even the implied warranty of MERCHANTABILITY or FITNESS
+FOR A PARTICULAR PURPOSE.  See the GNU GPL for more details.
+
+As additional permission under GNU GPL version 3 section 7, you
+may distribute non-source (e.g., minimized or compacted) forms of
+that code without the copy of the GNU GPL normally required by
+section 4, provided you include this license notice and a URL
+through which recipients can access the Corresponding Source.
+
+
+@licend  The above is the entire license notice
+for the JavaScript code in this tag.
+*/
+<!--/*--><![CDATA[/*><!--*/
+ function CodeHighlightOn(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(null != target) {
+     elem.cacheClassElem = elem.className;
+     elem.cacheClassTarget = target.className;
+     target.className = "code-highlighted";
+     elem.className   = "code-highlighted";
+   }
+ }
+ function CodeHighlightOff(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(elem.cacheClassElem)
+     elem.className = elem.cacheClassElem;
+   if(elem.cacheClassTarget)
+     target.className = elem.cacheClassTarget;
+ }
+/*]]>*///-->
+</script>
+</head>
+<body>
+<div id="content">
+<h1 class="title">moo 無 build
+<br />
+<span class="subtitle">Building Software Packages with <code>moo</code></span>
+</h1>
+<div id="table-of-contents">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents">
+<ul>
+<li><a href="#intro">Introduction</a>
+<ul>
+<li><a href="#manual">Manual codegen</a></li>
+<li><a href="#integrated">Build integration</a></li>
+</ul>
+</li>
+<li><a href="#inputs">Inputs</a></li>
+<li><a href="#outputs">Outputs</a>
+<ul>
+<li><a href="#org56bd07d"><code>imports</code></a></li>
+<li><a href="#orgabdb8cc"><code>compile</code></a></li>
+<li><a href="#orgb9c9c38"><code>render</code></a></li>
+</ul>
+</li>
+<li><a href="#org63f5cdf">Example integrations</a>
+<ul>
+<li><a href="#org613323e">Waf</a></li>
+<li><a href="#org0fc5c18">Make</a></li>
+<li><a href="#orge8a90fa">CMake</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-intro" class="outline-2">
+<h2 id="intro">Introduction</h2>
+<div class="outline-text-2" id="text-intro">
+<p>
+One of the primary use for <code>moo</code> is to generate code.  It can greatly
+simply production of code which follows some sort of meta-programming
+patterns.  Typically a software package will have a portion that must
+still be developed manually.  Although <code>moo</code> has been used to generate
+<a href="wcup.html">full</a> packages, in most cases it is expected that <code>moo</code> will generate
+just a portion of a package and that this generation will be
+integrated into the native package build system.  This note gives
+guidance on how that is done.
+</p>
+</div>
+
+<div id="outline-container-manual" class="outline-3">
+<h3 id="manual">Manual codegen</h3>
+<div class="outline-text-3" id="text-manual">
+<p>
+A reasonable solution is to simply run <code>moo</code> manually, or partly
+automated via a shell script.  Arrange for the generated files to be
+placed in the source areas and then commit the results.
+</p>
+
+<p>
+Pros:
+</p>
+
+<ul class="org-ul">
+<li>requires <code>moo</code> only at develop time, not build (nor run) time.</li>
+<li>easy to implement</li>
+<li>(manually) assures correct build dependencies</li>
+<li>generated code can be placed alongside hand-made code which assists in browsing/understanding of the code base</li>
+<li>building the project is decoupled from development occurring in <code>moo</code> itself or in templates provided by <code>moo</code> that are used by the project</li>
+</ul>
+
+<p>
+Cons:
+</p>
+
+<ul class="org-ul">
+<li>a developer can change a local template or model and forget to regenerate (though presumably, this is caught as a matter-of-course).</li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-integrated" class="outline-3">
+<h3 id="integrated">Build integration</h3>
+<div class="outline-text-3" id="text-integrated">
+<p>
+Another reasonable solution is to run <code>moo</code> commands as part of the
+native build of the package.  From the point of view of developing a
+build system, <code>moo</code> is seen as a <b>compiler</b>.  
+</p>
+
+<p>
+While <code>g++</code> may convert C++ files to <code>.o</code> object files, <code>moo</code> converts <code>.j2</code>
+and <code>.jsonnet</code> files into <code>.hpp</code>, <code>.cpp</code>, etc files (which then themselves
+must go on to be further compiled.  Thus, <code>moo</code> commands must be
+<b>inserted</b> into the build graph that the build system (Waf, CMake, etc)
+creates in a novel manner.  
+</p>
+
+<p>
+Depending on the build system, one may find examples of this pattern
+to mimic by looking for use of <code>m4</code>, the processing of <code>.in</code> files or the
+CPP.  Though, be aware that some build systems have special support
+for this kind of compiling which may not be easily mimicked.
+</p>
+
+<p>
+The "pros" and "cons" are largely reversed from the manual option with the following exceptions:
+</p>
+
+<ul class="org-ul">
+<li>correct build dependencies may be assured, given a quality build system</li>
+<li>generated code may be placed in or outside the source area</li>
+</ul>
+
+<p>
+The rest of this document gives information to help build system
+developers understand how to fit <code>moo</code> into their system.  It focuses on
+what input and output files with which <code>moo</code> may interact as most build
+systems use a file-based dependency graph.
+</p>
+</div>
+</div>
+</div>
+
+<div id="outline-container-inputs" class="outline-2">
+<h2 id="inputs">Inputs</h2>
+<div class="outline-text-2" id="text-inputs">
+<p>
+<code>moo</code> takes as input two types of files, "templates" and "models" (data).
+</p>
+
+<dl class="org-dl">
+<dt>templates</dt><dd>these files conventionally have a "double extension" such as <code>.hpp.j2</code>.  The first (<code>.hpp</code>) signifies the target file extension and the second (<code>.j2</code>) identifies the file as being marked up with Jinja2 templates.  The first part is free, while some <code>moo</code> functionality is sensitive to the trailing <code>.j2</code>.</dd>
+
+<dt>models</dt><dd>these files may be provided in many different formats.  The format used for <code>moo</code> examples and which is recommended is <code>.jsonnet</code>.  But <code>moo</code> also supports the consumption of <code>.json</code>, <code>.xml</code>, <code>.ini</code>, <code>.yaml</code>, <code>.csv</code> and others.</dd>
+</dl>
+
+<p>
+<code>moo</code> can be given these files via an absolute or relative path.  If a
+relative path is given then <code>moo</code> will check for the file in list of
+given absolute "search paths".  Template and model search paths are
+specified independently via command line arguments:
+</p>
+
+<pre class="example">
+$ moo -M /path/to/models -M /path/to/more/models \
+      -T /path/to/templates -T /path/to/more/templates \
+      render a/relative/model.jsonnet /an/absolute/template.xyz.j2
+</pre>
+
+<p>
+One may also set these search paths by setting <code>MOO_MODEL_PATH</code> and <code>MOO_TEMPLATE_PATH</code> environment variables.
+</p>
+
+<p>
+Besides explicit input files provided as <code>moo</code> command arguments (as
+above example) <code>moo</code> may also receive inputs via two other channels:
+</p>
+
+<dl class="org-dl">
+<dt>graft</dt><dd><code>moo</code> can augment the model with additional data structure provided from a secondary model file.  The grafted data structure may be provided in Jsonnet format or any other supported input format file.</dd>
+
+<dt>tla</dt><dd><code>moo</code> accepts and may pass top-level arguments (TLA) to a model which is itself a Jsonnet function (here is one case where only Jsonnet may be used).  The TLA may provide directly a data structure or may name a file to load (and this file may be Jsonnet or any supported input format).</dd>
+</dl>
+
+<p>
+For example, prepare three models where <code>a.jsonnet</code> is a function and the other two are simple objects.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-shell"><span style="color: #e090d7;">echo</span> <span style="color: #e9b96e;">'function(a=42) {x:a}'</span> &gt; a.jsonnet
+<span style="color: #e090d7;">echo</span> <span style="color: #e9b96e;">'{b:69}'</span> &gt; b.jsonnet
+<span style="color: #e090d7;">echo</span> <span style="color: #e9b96e;">'{c:"hello"}'</span> &gt; c.jsonnet
+</pre>
+</div>
+
+<p>
+Here is an example of grafting:
+</p>
+
+<div class="org-src-container">
+<pre class="src src-shell">moo -g /greetings:c.jsonnet compile b.jsonnet
+</pre>
+</div>
+
+<pre class="example">
+{
+    "b": 69,
+    "greetings": {
+        "c": "hello"
+    }
+}
+</pre>
+
+<p>
+Here is an example of inject model <code>b</code> via TLA:
+</p>
+
+<div class="org-src-container">
+<pre class="src src-shell">moo -A <span style="color: #fcaf3e;">a</span>=b.jsonnet compile a.jsonnet
+</pre>
+</div>
+
+<pre class="example">
+
+</pre>
+
+<p>
+Here is an example where we supply the injected data as a literal representation:
+</p>
+
+<div class="org-src-container">
+<pre class="src src-shell">moo -A <span style="color: #fcaf3e;">a</span>=<span style="color: #e9b96e;">'{name:"moo"}'</span> compile a.jsonnet
+</pre>
+</div>
+
+<pre class="example">
+
+</pre>
+</div>
+</div>
+
+
+<div id="outline-container-outputs" class="outline-2">
+<h2 id="outputs">Outputs</h2>
+<div class="outline-text-2" id="text-outputs">
+<p>
+<code>moo</code> has several commands and each produce specific output.  Here we
+give a tour of the commands relevant to a build system and their
+output files.
+</p>
+</div>
+
+<div id="outline-container-org56bd07d" class="outline-3">
+<h3 id="org56bd07d"><code>imports</code></h3>
+<div class="outline-text-3" id="text-org56bd07d">
+<p>
+The <code>moo</code> command <code>imports</code> is provided to help discover intermediate
+dependency files which have been imported through Jsonnet's or Jinja's
+file inclusion mechanisms.  This is analogous to CPP's <code>-M</code> option to
+produce <code>.d</code> files for <code>make</code>.
+</p>
+
+<p>
+Here is an example of how a build system may call <code>moo</code> to "scan" a
+Jsonnet file so that the build dependency graph may properly insert
+the implicit dependencies:
+</p>
+
+<div class="org-src-container">
+<pre class="src src-shell"><span style="color: #e090d7;">echo</span> <span style="color: #e9b96e;">'local a = import "b.jsonnet"; a'</span> &gt; top.jsonnet
+<span style="color: #e090d7;">echo</span> <span style="color: #e9b96e;">'{b:69}'</span> &gt; b.jsonnet
+</pre>
+</div>
+
+<div class="org-src-container">
+<pre class="src src-shell">moo imports top.jsonnet
+</pre>
+</div>
+
+<pre class="example">
+/home/bv/dev/moo/b.jsonnet
+</pre>
+
+<p>
+A Jinja template file can be scanned similarly.  If ending in <code>.j2</code> it
+will be assumed to be such.
+</p>
+
+<p>
+By default, <code>moo</code> will print the result to standard output.  The <code>-o</code> option to <code>imports</code> can be provided to output to a specific file.
+</p>
+</div>
+</div>
+
+<div id="outline-container-orgabdb8cc" class="outline-3">
+<h3 id="orgabdb8cc"><code>compile</code></h3>
+<div class="outline-text-3" id="text-orgabdb8cc">
+<p>
+<code>moo compile</code> will take a model in Jsonnet or other format and output
+JSON.  This takes the same main options as <code>render</code> (next) and so is a
+way test the intermediate result of grafting and/or applying TLAs or
+simply providing a common file type from a variety of supported input
+types.  
+</p>
+
+<p>
+A build system may choose to explicitly expose this intermediate
+representation but that must come at a cost of more file I/O and file
+production.  It should only be employed if needed.
+</p>
+</div>
+</div>
+
+<div id="outline-container-orgb9c9c38" class="outline-3">
+<h3 id="orgb9c9c38"><code>render</code></h3>
+<div class="outline-text-3" id="text-orgb9c9c38">
+<p>
+The main goal of <code>moo</code> is to generate code and this is the main command
+do perform that.  Like <code>compile</code> (and <code>imports</code>) it prints the result to
+standard output but can also write to an explicit file given with the
+<code>-o</code> command option.  A minimal example to show the command line is:
+</p>
+
+<pre class="example">
+moo render -o output.hpp model.jsonnet template.hpp.j2
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org63f5cdf" class="outline-2">
+<h2 id="org63f5cdf">Example integrations</h2>
+<div class="outline-text-2" id="text-org63f5cdf">
+<p>
+tbd
+</p>
+</div>
+
+<div id="outline-container-org613323e" class="outline-3">
+<h3 id="org613323e">Waf</h3>
+</div>
+
+<div id="outline-container-org0fc5c18" class="outline-3">
+<h3 id="org0fc5c18">Make</h3>
+</div>
+
+<div id="outline-container-orge8a90fa" class="outline-3">
+<h3 id="orge8a90fa">CMake</h3>
+</div>
+</div>
+</div>
+<div id="postamble" class="status">
+<p class="author">Author: Brett Viren</p>
+<p class="date">Created: 2020-09-24 Thu 10:15</p>
+<p class="validation"><a href="http://validator.w3.org/check?uri=referer">Validate</a></p>
+</div>
+</body>
+</html>

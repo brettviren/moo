@@ -9,6 +9,7 @@
 #ifndef {{cpp.headerguard(model, tcname)}}
 #define {{cpp.headerguard(model, tcname)}}
 
+#include <cstdint>
 {% for ep in model.extrefs %}
 #include "{{ep}}/{{tcname}}.hpp"
 {% endfor %}

@@ -418,7 +418,7 @@ function in its module.  We may use the ~moo dump~ command to
 illustrate a transformation applied to the ~app~ schema:
 
 #+begin_src shell :exports both :results output code :wrap "example"
-  moo -J examples/oschema -t moo.oschema.typify dump -f pretty app.jsonnet
+  moo -M examples/oschema -t moo.oschema.typify dump -f pretty app.jsonnet
 #+end_src
 
 #+RESULTS:
@@ -444,7 +444,7 @@ dependencies, and perform a [[https://en.wikipedia.org/wiki/Topological_sorting]
 are ordered from least dependent to most.  
 
 #+begin_src shell :exports both :results output code :wrap "example"
-  moo -T examples/oschema -J examples/oschema \
+  moo -T examples/oschema -M examples/oschema \
       -t 'moo.oschema.typify|moo.oschema.graph|moo.oschema.depsort' \
         render app.jsonnet ool.txt.j2
 #+end_src
@@ -520,7 +520,7 @@ Top-level arguments
 We can test out some TLAs and test that the model compiles using the ~moo~ CLI:
 
 #+begin_src shell :exports code :results none
-  moo -J examples/oschema \
+  moo -M examples/oschema \
     -A os='app.jsonnet' -A path='app' \
        compile omodel.jsonnet
 #+end_src
@@ -531,7 +531,7 @@ showing the output until the next example CLI.
 
 
 #+begin_src shell :exports code :results none
-  moo -J examples/oschema \
+  moo -M examples/oschema \
     -A os='app.jsonnet' -A path='app' \
     -t '/types:moo.oschema.typify|moo.oschema.graph|moo.oschema.depsort' \
        dump -f pretty omodel.jsonnet
@@ -546,7 +546,7 @@ bring these in as a model "graft".
 
 #+begin_src shell :exports both :results output code :wrap "src python"
   moo -g '/lang:ocpp.jsonnet' \
-      -J examples/oschema \
+      -M examples/oschema \
       -A os='app.jsonnet' -A path='app' \
       -t '/types:moo.oschema.typify|moo.oschema.graph|moo.oschema.depsort' \
       dump -f pretty omodel.jsonnet
@@ -678,7 +678,7 @@ to ~render~ and adding the template file name.
 
 #+begin_src shell :exports both :results output code :wrap "src c++"
   moo -g '/lang:ocpp.jsonnet' \
-      -J examples/oschema \
+      -M examples/oschema \
       -A os='app.jsonnet' -A path='app' \
       -t '/types:moo.oschema.typify|moo.oschema.graph|moo.oschema.depsort' \
       render omodel.jsonnet ostructs.hpp.j2
@@ -751,7 +751,7 @@ model.
 
 #+begin_src shell :exports both :results output code :wrap "src c++"
   moo -g '/lang:ocpp.jsonnet' \
-      -J examples/oschema \
+      -M examples/oschema \
       -A os='app.jsonnet' -A path='app' \
       -t '/types:moo.oschema.typify|moo.oschema.graph|moo.oschema.depsort' \
       render omodel.jsonnet onljs.hpp.j2

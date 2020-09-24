@@ -13,44 +13,34 @@ class Context:
     '''
     Application context collects parameters and methods common to commands.
     '''
-    def __init__(self, spath="", dpath="", jpath=(), tpath=(),
+    def __init__(self, dpath="", mpath=(), tpath=(),
                  tla=(), transform=(), graft=()):
 
-        self.spath = spath
         self.dpath = dpath
-        self.jpath = jpath
+        self.mpath = mpath
         self.tpath = tpath
         self.tlas = dict()
         if tla:
-            self.tlas = moo.util.tla_pack(tla, jpath)
+            self.tlas = moo.util.tla_pack(tla, mpath)
         self.transforms = transform
         self.grafts = graft
 
-    def just_load(self, filename, jpath=None, dpath=None):
+    def just_load(self, filename, mpath=None, dpath=None):
         return moo.io.load(self.resolve(filename),
-                           jpath or self.jpath,
+                           mpath or self.mpath,
                            dpath or self.dpath, **self.tlas)
 
-    def load(self, filename, jpath=None, dpath=None):
+    def load(self, filename, mpath=None, dpath=None):
         '''
         Load a data structure from a file.
 
-        Search jpath for file and return substructure at dpath.
+        Search mpath for file and return substructure at dpath.
         '''
-        model = self.just_load(filename, jpath, dpath)
+        model = self.just_load(filename, mpath, dpath)
         model = self.graft(model)
         model = self.transform(model)
         return model
 
-    def load_schema(self, schema, jpath=None, spath=None):
-        '''
-        Load a schema structure from a file or URL.
-
-        Search jpath for file and return substructure at spath.
-        '''
-        return moo.io.load_schema(self.resolve(schema),
-                                  jpath or self.jpath,
-                                  spath or self.spath)
 
     def graft(self, model):
         'Apply any grafts to the model'
@@ -73,11 +63,11 @@ class Context:
         ret = None
 
         if filename.endswith('.jsonnet'):
-            ret = moo.util.resolve(filename, fpath or self.jpath)
+            ret = moo.util.resolve(filename, fpath or self.mpath)
         elif filename.endswith('.j2'):
             ret = moo.util.resolve(filename, fpath or self.tpath)
         else:
-            ret = moo.util.resolve(filename, fpath or self.jpath)
+            ret = moo.util.resolve(filename, fpath or self.mpath)
         if ret is None:
             raise RuntimeError(f'can not resolve {filename}')
         return ret
@@ -96,35 +86,29 @@ class Context:
         Return list of files the given file imports
         '''
         filename = self.resolve(filename)
-        if filename.endswith('.jsonnet'):
-            return moo.jsonnet.imports(filename, self.jpath)
-        if filename.endswith('.j2'):
-            return moo.template.imports(filename, self.tpath)
-        raise ValueError(f'unknown file type: {filename}')
+        return moo.imports(filename, self.mpath+self.tpath)
 
 @click.group()
-@click.option('-S', '--spath', default="",
-              help="Specify a selection path into the schema data structure")
 @click.option('-D', '--dpath', default="",
               help="Specify a selection path into the model data structure")
-@click.option('-J', '--jpath', envvar='JSONNET_PATH', multiple=True,
+@click.option('-M', '--mpath', envvar='MOO_MODEL_PATH', multiple=True,
               type=click.Path(exists=True, dir_okay=True, file_okay=False),
-              help="Extra directory to find Jsonnet files")
-@click.option('-T', '--tpath', envvar='JINJA2_PATH', multiple=True,
+              help="Add directory to model file search paths")
+@click.option('-T', '--tpath', envvar='MOO_TEMPLATE_PATH', multiple=True,
               type=click.Path(exists=True, dir_okay=True, file_okay=False),
-              help="Extra directory to find Jinja2 files")
+              help="Add directory to template file search paths")
 @click.option('-A', '--tla', multiple=True,
-              help="Specify a 'top-level argument' as a var=string or var=file.jsonnet")
+              help="Specify a 'top-level argument' to a functional model as a var=string or var=file.jsonnet")
 @click.option('-g', '--graft', multiple=True, type=str,
-              help="Graft structure into a model")
+              help="Graft a data structure given in a model file into the model in the form: /json/ptr:file.jsonnet")
 @click.option('-t', '--transform', multiple=True, type=str,
               help="Specify a model transform")
 @click.pass_context
-def cli(ctx, spath, dpath, jpath, tpath, tla, graft, transform):
+def cli(ctx, dpath, mpath, tpath, tla, graft, transform):
     '''
     moo command line interface
     '''
-    ctx.obj = Context(spath, dpath, jpath, tpath, tla, transform, graft)
+    ctx.obj = Context(dpath, mpath, tpath, tla, transform, graft)
 
 
 @cli.command("resolve")
@@ -146,6 +130,8 @@ def resolve(ctx, filename):
 @click.option('-o', '--output', default="/dev/stdout",
               type=click.Path(exists=False, dir_okay=False, file_okay=True),
               help="Output file, default is stdout")
+@click.option('-S', '--spath', default="",
+              help="Specify a search path to find validation schema")
 @click.option('-s', '--schema', required=True,
               type=click.Path(exists=True, dir_okay=False, file_okay=True),
               help="JSON Schema to validate against.")
@@ -156,12 +142,14 @@ def resolve(ctx, filename):
               help="Specify which validator")
 @click.argument('model')
 @click.pass_context
-def cmd_validate(ctx, output, schema, sequence, validator, model):
+def cmd_validate(ctx, output, spath, schema, sequence, validator, model):
     '''
     Validate a model against a schema
     '''
     data = ctx.obj.load(model)
-    sche = ctx.obj.load_schema(schema)
+    sche = moo.io.load_schema(ctx.obj.resolve(schema),
+                              ctx.obj.mpath, ctx.obj.spath)
+
     if not sequence:
         data = [data]
         sche = [sche]
