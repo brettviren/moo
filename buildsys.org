@@ -407,20 +407,15 @@ subsub = {'a': 1, 'b': 2, 'c': 'hello', 'd': 'FORTRAN'}
    :END:
 
 This section describes one way to integrate ~moo~ with a CMake-based
-build.  My primary suggestion here is to stay as far away from CMake
-as you possibly can.  
-
-But, if shackled to CMake, keep in mind this example likely does not
-follow best CMake practices (as I don't know them nor willing to
-ingest the CMake mess to learn them).  In particular, unlike the above
-examples, there is no attempt to somehow tie in intermediate
-dependencies.  Contributions/fixes welcome.
+build.  It shows what one must do to insert a code generator into the
+build graph in a way that respects intermediate dependencies using ~moo
+imports~ like the [[Waf]] examples.
 
 The ~CMakeLists.txt~ file:
 
 #+include: buildsys/cmake/CMakeLists.txt src cmake
 
-And it getting exercised:
+Here it is getting exercised:
 
 #+begin_src shell :exports both :results output code :wrap "example"
   cd buildsys/cmake
@@ -428,9 +423,20 @@ And it getting exercised:
   mkdir build
   cd build
   cmake ..
+
+  echo -e '\nDo initial build\n'  
+  sed -i 's/fortran/FORTRAN/' ../sub/sub.jsonnet
   make ModelDump
-  ls -l model-dump.txt
-  cat model-dump.txt
+  ls -l --full-time model-dump.txt
+
+  echo -e '\nNext we edit the intermediate files and notice a rebuild\n'
+  sed -i 's/FORTRAN/fortran/' ../sub/sub.jsonnet
+  make ModelDump
+  ls -l --full-time model-dump.txt
+
+  echo -e '\nDo do a second build build, output is not rebuilt\n'  
+  make ModelDump
+  ls -l --full-time model-dump.txt
 #+end_src
 
 #+RESULTS:
@@ -452,9 +458,22 @@ And it getting exercised:
 -- Configuring done
 -- Generating done
 -- Build files have been written to: /home/bv/dev/moo/buildsys/cmake/build
+
+Do initial build
+
 Scanning dependencies of target ModelDump
-Built target ModelDump
--rw-rw-r-- 1 bv bv 93 Sep 24 12:43 model-dump.txt
-sub = {'a': 1, 'b': 2, 'c': 'hello'}
-subsub = {'a': 1, 'b': 2, 'c': 'hello', 'd': 'fortran'}
+[100%] Generating model-dump.txt
+[100%] Built target ModelDump
+-rw-rw-r-- 1 bv bv 93 2020-09-25 11:09:23.497558245 -0400 model-dump.txt
+
+Next we edit the intermediate files and notice a rebuild
+
+[100%] Generating model-dump.txt
+[100%] Built target ModelDump
+-rw-rw-r-- 1 bv bv 93 2020-09-25 11:09:23.885548220 -0400 model-dump.txt
+
+Do do a second build build, output is not rebuilt
+
+[100%] Built target ModelDump
+-rw-rw-r-- 1 bv bv 93 2020-09-25 11:09:23.885548220 -0400 model-dump.txt
 #+end_example
