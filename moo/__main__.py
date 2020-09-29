@@ -146,9 +146,8 @@ def cmd_validate(ctx, output, spath, schema, sequence, validator, model):
     '''
     Validate a model against a schema
     '''
-    data = ctx.obj.load(model)
-    sche = moo.io.load_schema(ctx.obj.resolve(schema),
-                              ctx.obj.mpath, ctx.obj.spath)
+    data = ctx.obj.load(model, ctx.obj.dpath)
+    sche = moo.io.load_schema(ctx.obj.resolve(schema), spath)
 
     if not sequence:
         data = [data]

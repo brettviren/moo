@@ -56,7 +56,7 @@ local isr(x,r) = if std.type(x) != "null" then r;
 
     schema(ctx=[]) :: {
         local namepath = $.listify(ctx),
-        // Common attributes for every type.
+        // Set common attributes for every type, call as self.type(...)
         type(name, schema, doc=null, deps=[]) :: {
             name: name,           // local short name for the type
             path: namepath,       // the context path (ie, namespace)
@@ -118,10 +118,24 @@ local isr(x,r) = if std.type(x) != "null" then r;
         // This may translate into, eg boost::any or nlohmann::json
         any(name, doc=null) :: self.type(name, "any", doc),
 
-        // This may tranlate into, eg std::variant
-        anyOf(name, types, doc=null) :: self.type(name, "anyOf", doc, types) {
-            types: types,
+        // parameterize across {any,all,one}Of
+        xxxOf(sname, name, types, doc=null)
+        :: self.type(name, sname, doc, [$.fqn(t) for t in types]) {
+            types: self.deps,
         },
+        // anyOf type lets any of the listed type be acceptable.  This
+        // is mostly for validation but could be mapped to code as a
+        // simple union type with some hope / external mechanism to
+        // restrict which of the subset of types may actually be accessed.
+        anyOf(name, types, doc=null) :: self.xxxOf("anyOf", name, types, doc),
+        // allOf type requires that every type is consistent.  This is
+        // mostly used for validation but could be mapped as a simple
+        // union type.
+        allOf(name, types, doc=null) :: self.xxxOf("allOf", name, types, doc),
+        // oneOf type requires that exactly one type is acceptable.
+        // This is mostly used for validatino but could be mapped to
+        // code as a tagged union type (eg std::variant<>).
+        oneOf(name, types, doc=null) :: self.xxxOf("oneOf", name, types, doc),
 
         // subnamespace(name, types, subpath=null, doc=null) :: {
         //     local fullpath = namepath + $.listify(subpath),

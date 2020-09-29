@@ -1,9 +1,12 @@
 local oschema = import "oschema.jsonnet";
+local jschema = import "jschema.jsonnet";
 local re = import "schema/re.jsonnet";
 
 {
     // See oschema.org for explanation.
     oschema: oschema,
+    // Make JSON Schema from oschema types
+    jschema: jschema,
 
     // A bunch of regular expressions matching common patterns.  A
     // pattern may be provided to a String schema as the "pattern"

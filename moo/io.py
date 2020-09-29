@@ -29,17 +29,17 @@ def load(filename, fpath=(), dpath = None, **kwds):
         return select_path(data, dpath)
     return data
 
-def load_schema(uri, fpath, spath):
+def load_schema(uri, fpath, dpath = None):
     '''Return a schema data structure.
 
-    If uri can be loacated as a file in fpath, load it and apply spath reduction.
+    If uri can be loacated as a file in fpath, load it and apply dpath reduction.
     O.w. test it as being a specifier of a JSON Schema.
     '''
     if not uri:
         return {"$ref":"https://json-schema.org/draft-07/schema"}
     try:
         fname = resolve(uri, fpath)
-        return load(uri, fpath, spath)
+        return load(uri, fpath, dpath)
     except ValueError:
         pass
     if uri.startswith("http"):  # any URL

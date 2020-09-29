@@ -822,9 +822,19 @@ namespace app {
   :CUSTOM_ID: objects
   :END:
 
-Besides generating code from a schema, an object may be validated
-against a schema.  Schema may also be used to support creation of
-objects which are valid-by-construction.
+Besides generating code from a schema, data objects may be constructed
+with the help of and validated against schema.
+
+** Construction
+   :PROPERTIES:
+   :CUSTOM_ID: object-ctor
+   :END:
+
+A goal is to provide comprehensive object editors which are directed
+by schema.  When such editors are implemented as Python they may use
+~moo.ogen~ module to produce Python classes that correspond to ~moo~
+object schema.
+
 
 
 ** Validation
@@ -841,13 +851,4 @@ schema.
 - [ ] use with ~moo.oschema~ 
 
 
-** Construction
-   :PROPERTIES:
-   :CUSTOM_ID: object-ctor
-   :END:
-
-Type instances of the ~moo.oschema~ schema classes provide validating
-factories. 
-
-- [ ] some examples
 
