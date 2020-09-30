@@ -293,17 +293,10 @@ We can see the final result in full JSON glory:
 #+end_src
 
 
-
 ** Python
    :PROPERTIES:
    :CUSTOM_ID: schema-in-python
    :END:
-
-
-~moo~ oschema may be produced as data in a variety of representations
-and formats. In addition to Jsonnet and JSON as described above, ~moo~
-supports data structures in XML, INI and YAML (for poor souls that
-think YAML is a good idea).
 
 A bare bones example of the use of ~moo~ Python to load schema as data
 into ~moo.oschema~ objects and back to data is given in:
@@ -314,6 +307,19 @@ A trivial hand-wired construction of the same schema using
 ~moo.oschema~ Python is in:
 
 #+include: examples/oschema/hand-wired.py src python
+
+** Other
+   :PROPERTIES:
+   :CUSTOM_ID: other
+   :END:
+
+~moo~ oschema provides support for construction of schema in Jsonnet and
+Python languages only.  However, the user may produce schema in any
+manner desired so long as the resulting data structure is represented
+by one of the many input file formats supported by ~moo~.  In addition
+to Jsonnet and JSON as described above, ~moo~ supports data structures
+in XML, INI and YAML.
+
 
 * Transforms
   :PROPERTIES:
