@@ -477,3 +477,8 @@ Do do a second build build, output is not rebuilt
 [100%] Built target ModelDump
 -rw-rw-r-- 1 bv bv 93 2020-09-25 11:09:23.885548220 -0400 model-dump.txt
 #+end_example
+
+** TODO Caveats
+
+As-is, implicit dependencies are only given to CMake at configuration
+time.  [[https://github.com/CLIUtils/CLI11/blob/438eabe5f8d91a3f12ce6c53afd1236b990798ae/CMakeLists.txt#L231-L264][Here is an example]] to emulate.

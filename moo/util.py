@@ -1,7 +1,9 @@
 #!/usr/bin/env python3
 
 import os
+import moo
 import importlib
+import json
 import jsonpointer
 
 def select_path(obj, path, delim='.'):
@@ -108,9 +110,18 @@ def tla_pack(tlas, jpath):
     tla_codes = dict()
     for one in tlas:
         k,v = one.split("=",1)
-        if v.endswith(".jsonnet"):
-            fname = resolve(v, jpath)
-            tla_codes[k] = open(fname).read()
+
+
+        chunks = v.split(".")
+        if len(chunks) > 1:
+            ext = chunks[-1]
+            if ext in [".jsonnet", ".json"]:
+                fname = resolve(v, jpath)
+                tla_codes[k] = open(fname).read()
+            elif ext in moo.known_extensions:
+                v = moo.io.load(v, jpath)
+                tla_codes[k] = json.dumps(v)
+
         elif v[0] in '{["]}':   # inline code
             tla_codes[k] = v;   
         else:                   # string

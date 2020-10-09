@@ -77,7 +77,6 @@ class Context:
         Render model against template in templ_file.
         '''
         templ = self.resolve(templ_file, self.tpath)
-
         helper = self.just_load("moo.jsonnet", dpath="templ")
         return moo.template.render(templ, dict(model=model, moo=helper))
 

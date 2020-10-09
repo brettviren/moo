@@ -21,6 +21,8 @@ def load(filename, fpath=(), dpath = None, **kwds):
         data = moo.jsonnet.load(filename, paths, **kwds)
     elif filename.endswith(".csv"):
         data = moo.csv.load(filename, paths, **kwds)
+    elif filename.endswith(".xls") or filename.endswith(".xlsx"):
+        data = moo.xls.load(filename, paths, **kwds)
     else:
         data = anyconfig.load(filename)
     if data is None:
