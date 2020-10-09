@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2020-09-25 Fri 11:12 -->
+<!-- 2020-10-09 Fri 15:48 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>moo 無 build</title>
@@ -270,21 +270,22 @@ for the JavaScript code in this tag.
 <li><a href="#inputs">Inputs</a></li>
 <li><a href="#outputs">Outputs</a>
 <ul>
-<li><a href="#orgfb57ec5"><code>imports</code></a></li>
-<li><a href="#orgaf71e5d"><code>compile</code></a></li>
-<li><a href="#org42eb5df"><code>render</code></a></li>
+<li><a href="#orga3c62ca"><code>imports</code></a></li>
+<li><a href="#org5b4abed"><code>compile</code></a></li>
+<li><a href="#org19cb3e3"><code>render</code></a></li>
 </ul>
 </li>
 <li><a href="#examples">Examples</a>
 <ul>
 <li><a href="#waf">Waf</a>
 <ul>
-<li><a href="#org287f078">cmd</a></li>
-<li><a href="#org6fb0649">mod</a></li>
+<li><a href="#orgc3aec05">cmd</a></li>
+<li><a href="#org052d95a">mod</a></li>
 </ul>
 </li>
 <li><a href="#make">Make</a></li>
 <li><a href="#cmake">CMake</a></li>
+<li><a href="#orgeee1801"><span class="todo TODO">TODO</span> Caveats</a></li>
 </ul>
 </li>
 </ul>
@@ -498,9 +499,9 @@ output files.
 </p>
 </div>
 
-<div id="outline-container-orgfb57ec5" class="outline-3">
-<h3 id="orgfb57ec5"><code>imports</code></h3>
-<div class="outline-text-3" id="text-orgfb57ec5">
+<div id="outline-container-orga3c62ca" class="outline-3">
+<h3 id="orga3c62ca"><code>imports</code></h3>
+<div class="outline-text-3" id="text-orga3c62ca">
 <p>
 The <code>moo</code> command <code>imports</code> is provided to help discover intermediate
 dependency files which have been imported through Jsonnet's or Jinja's
@@ -540,9 +541,9 @@ By default, <code>moo</code> will print the result to standard output.  The <cod
 </div>
 </div>
 
-<div id="outline-container-orgaf71e5d" class="outline-3">
-<h3 id="orgaf71e5d"><code>compile</code></h3>
-<div class="outline-text-3" id="text-orgaf71e5d">
+<div id="outline-container-org5b4abed" class="outline-3">
+<h3 id="org5b4abed"><code>compile</code></h3>
+<div class="outline-text-3" id="text-org5b4abed">
 <p>
 <code>moo compile</code> will take a model in Jsonnet or other format and output
 JSON.  This takes the same main options as <code>render</code> (next) and so is a
@@ -559,9 +560,9 @@ production.  It should only be employed if needed.
 </div>
 </div>
 
-<div id="outline-container-org42eb5df" class="outline-3">
-<h3 id="org42eb5df"><code>render</code></h3>
-<div class="outline-text-3" id="text-org42eb5df">
+<div id="outline-container-org19cb3e3" class="outline-3">
+<h3 id="org19cb3e3"><code>render</code></h3>
+<div class="outline-text-3" id="text-org19cb3e3">
 <p>
 The main goal of <code>moo</code> is to generate code and this is the main command
 do perform that.  Like <code>compile</code> (and <code>imports</code>) it prints the result to
@@ -596,9 +597,9 @@ Python module.
 </p>
 </div>
 
-<div id="outline-container-org287f078" class="outline-4">
-<h4 id="org287f078">cmd</h4>
-<div class="outline-text-4" id="text-org287f078">
+<div id="outline-container-orgc3aec05" class="outline-4">
+<h4 id="orgc3aec05">cmd</h4>
+<div class="outline-text-4" id="text-orgc3aec05">
 <p>
 The Waf project in <a href="buildsys/waf/cmd/">buildsys/waf/cmd/</a> provides an example of using <code>moo</code>
 as a command line program.  It uses <code>moo render</code> to apply a model to a
@@ -665,40 +666,14 @@ waf
 </div>
 
 <pre class="example">
-'distclean' finished successfully (0.002s)
-Setting top to                           : /home/bv/dev/moo/buildsys/waf/cmd 
-Setting out to                           : /home/bv/dev/moo/buildsys/waf/cmd/build 
-Checking for program 'moo'               : /home/bv/dev/moo/.direnv/python-venv-3.8.0/bin/moo 
-'configure' finished successfully (0.002s)
 
-first build
-
-Waf: Entering directory `/home/bv/dev/moo/buildsys/waf/cmd/build'
-[/home/bv/dev/moo/buildsys/waf/cmd/sub.jsonnet, /home/bv/dev/moo/buildsys/waf/cmd/sub/sub.jsonnet]
-[1/1] Processing model-dump.txt: model.jsonnet dump.txt.j2 -&gt; build/model-dump.txt
-Waf: Leaving directory `/home/bv/dev/moo/buildsys/waf/cmd/build'
-'build' finished successfully (0.780s)
-
-second build, no rebuild
-
-Waf: Entering directory `/home/bv/dev/moo/buildsys/waf/cmd/build'
-Waf: Leaving directory `/home/bv/dev/moo/buildsys/waf/cmd/build'
-'build' finished successfully (0.017s)
-
-modify intermediate dependency, see it rebuild
-
-Waf: Entering directory `/home/bv/dev/moo/buildsys/waf/cmd/build'
-[/home/bv/dev/moo/buildsys/waf/cmd/sub.jsonnet, /home/bv/dev/moo/buildsys/waf/cmd/sub/sub.jsonnet]
-[1/1] Processing model-dump.txt: model.jsonnet dump.txt.j2 -&gt; build/model-dump.txt
-Waf: Leaving directory `/home/bv/dev/moo/buildsys/waf/cmd/build'
-'build' finished successfully (0.784s)
 </pre>
 </div>
 </div>
 
-<div id="outline-container-org6fb0649" class="outline-4">
-<h4 id="org6fb0649">mod</h4>
-<div class="outline-text-4" id="text-org6fb0649">
+<div id="outline-container-org052d95a" class="outline-4">
+<h4 id="org052d95a">mod</h4>
+<div class="outline-text-4" id="text-org052d95a">
 <p>
 The second example works the same but instead of calling <code>moo</code> as a CLI
 program, the Python module is used.  In principle, this can be better
@@ -775,32 +750,7 @@ waf
 </div>
 
 <pre class="example">
-'distclean' finished successfully (0.002s)
-Setting top to                           : /home/bv/dev/moo/buildsys/waf/mod 
-Setting out to                           : /home/bv/dev/moo/buildsys/waf/mod/build 
-'configure' finished successfully (0.002s)
 
-first build
-
-Waf: Entering directory `/home/bv/dev/moo/buildsys/waf/mod/build'
-[/home/bv/dev/moo/buildsys/waf/mod/sub.jsonnet, /home/bv/dev/moo/buildsys/waf/mod/sub/sub.jsonnet]
-[1/1] Processing model-dump.txt: model.jsonnet dump.txt.j2 -&gt; build/model-dump.txt
-Waf: Leaving directory `/home/bv/dev/moo/buildsys/waf/mod/build'
-'build' finished successfully (0.244s)
-
-second build, no rebuild
-
-Waf: Entering directory `/home/bv/dev/moo/buildsys/waf/mod/build'
-Waf: Leaving directory `/home/bv/dev/moo/buildsys/waf/mod/build'
-'build' finished successfully (0.020s)
-
-modify intermediate dependency, see it rebuild
-
-Waf: Entering directory `/home/bv/dev/moo/buildsys/waf/mod/build'
-[/home/bv/dev/moo/buildsys/waf/mod/sub.jsonnet, /home/bv/dev/moo/buildsys/waf/mod/sub/sub.jsonnet]
-[1/1] Processing model-dump.txt: model.jsonnet dump.txt.j2 -&gt; build/model-dump.txt
-Waf: Leaving directory `/home/bv/dev/moo/buildsys/waf/mod/build'
-'build' finished successfully (0.247s)
 </pre>
 </div>
 </div>
@@ -859,7 +809,7 @@ make: 'model-dump.txt' is up to date.
 
 In any case, first build gave us:
 
--rw-rw-r-- 1 bv bv 93 Sep 25 11:12 model-dump.txt
+-rw-rw-r-- 1 bv bv 93 Oct  9 15:48 model-dump.txt
 sub = {'a': 1, 'b': 2, 'c': 'hello'}
 subsub = {'a': 1, 'b': 2, 'c': 'hello', 'd': 'FORTRAN'}
 </pre>
@@ -883,7 +833,9 @@ The <code>CMakeLists.txt</code> file:
 
 <div class="org-src-container">
 <pre class="src src-cmake"><span style="color: #fce94f;">project</span>(<span style="color: #e9b96e;">"moo-buildsys-cmake"</span>)
-<span style="color: #fce94f;">cmake_minimum_required</span>(VERSION 3.17) <span style="color: #73d216;"># older may also work</span>
+<span style="color: #fce94f;">cmake_minimum_required</span>(VERSION 3.4...3.17) <span style="color: #73d216;"># older may also work</span>
+
+<span style="color: #73d216;"># fixme: find_package(moo)</span>
 
 <span style="color: #fce94f;">execute_process</span>(
   COMMAND moo -T ${<span style="color: #fcaf3e;">CMAKE_SOURCE_DIR</span>} -M ${<span style="color: #fcaf3e;">CMAKE_SOURCE_DIR</span>} imports model.jsonnet
@@ -904,7 +856,8 @@ The <code>CMakeLists.txt</code> file:
   DEPENDS model.jsonnet dump.txt.j2 ${<span style="color: #fcaf3e;">MODEL_DEPENDENCIES</span>}
   COMMENT <span style="color: #e9b96e;">"Generating model-dump.txt"</span>
 )
-<span style="color: #fce94f;">add_custom_target</span>(ModelDump DEPENDS model-dump.txt)
+<span style="color: #fce94f;">add_custom_target</span>(ModelDump ALL
+  DEPENDS model-dump.txt)
 
 <span style="color: #fce94f;">message</span>(<span style="color: #e9b96e;">"implicit dependencies: ${</span><span style="color: #fcaf3e;">MODEL_DEPENDENCIES</span><span style="color: #e9b96e;">}"</span>)
 </pre>
@@ -917,23 +870,34 @@ Here it is getting exercised:
 <div class="org-src-container">
 <pre class="src src-shell"><span style="color: #e090d7;">cd</span> buildsys/cmake
 rm -rf build
-mkdir build
-<span style="color: #e090d7;">cd</span> build
-cmake ..
+<span style="color: #e090d7;">echo</span> <span style="color: #e9b96e;">'{a:1,b:2,c:"hello"}'</span> &gt; sub.jsonnet
+cmake -B build -S .
 
 <span style="color: #e090d7;">echo</span> -e <span style="color: #e9b96e;">'\nDo initial build\n'</span>  
-sed -i <span style="color: #e9b96e;">'s/fortran/FORTRAN/'</span> ../sub/sub.jsonnet
-make ModelDump
-ls -l --full-time model-dump.txt
+sed -i <span style="color: #e9b96e;">'s/fortran/FORTRAN/'</span> sub/sub.jsonnet
+cmake --build build
+ls -l --full-time build/model-dump.txt
 
 <span style="color: #e090d7;">echo</span> -e <span style="color: #e9b96e;">'\nNext we edit the intermediate files and notice a rebuild\n'</span>
-sed -i <span style="color: #e9b96e;">'s/FORTRAN/fortran/'</span> ../sub/sub.jsonnet
-make ModelDump
-ls -l --full-time model-dump.txt
+sed -i <span style="color: #e9b96e;">'s/FORTRAN/fortran/'</span> sub/sub.jsonnet
+cmake --build build
+ls -l --full-time build/model-dump.txt
 
-<span style="color: #e090d7;">echo</span> -e <span style="color: #e9b96e;">'\nDo do a second build build, output is not rebuilt\n'</span>  
-make ModelDump
-ls -l --full-time model-dump.txt
+<span style="color: #e090d7;">echo</span> -e <span style="color: #e9b96e;">'\nDo do a second build, output is not rebuilt\n'</span>  
+cmake --build build
+ls -l --full-time build/model-dump.txt
+
+<span style="color: #e090d7;">echo</span> -e <span style="color: #e9b96e;">'\nAdd new implicit dependency, which should cause a rebuild\n'</span>  
+<span style="color: #e090d7;">echo</span> -e <span style="color: #e9b96e;">'local ss = import "sub/sub2.jsonnet";\nss'</span> &gt; sub.jsonnet
+<span style="color: #e090d7;">echo</span> <span style="color: #e9b96e;">'{a:1,b:2,c:"hello"}'</span> &gt; sub/sub2.jsonnet
+cmake --build build
+ls -l --full-time build/model-dump.txt
+
+<span style="color: #e090d7;">echo</span> -e <span style="color: #e9b96e;">'\nUpdate new implicit dependency, which will be missed(?)\n'</span>  
+<span style="color: #e090d7;">echo</span> <span style="color: #e9b96e;">'{a:1,b:2,c:"see me"}'</span> &gt; sub/sub2.jsonnet
+cmake --build build
+ls -l --full-time build/model-dump.txt
+
 </pre>
 </div>
 
@@ -961,26 +925,52 @@ Do initial build
 Scanning dependencies of target ModelDump
 [100%] Generating model-dump.txt
 [100%] Built target ModelDump
--rw-rw-r-- 1 bv bv 93 2020-09-25 11:12:54.420115861 -0400 model-dump.txt
+-rw-rw-r-- 1 bv bv 93 2020-10-09 15:48:20.719220516 -0400 build/model-dump.txt
 
 Next we edit the intermediate files and notice a rebuild
 
 [100%] Generating model-dump.txt
 [100%] Built target ModelDump
--rw-rw-r-- 1 bv bv 93 2020-09-25 11:12:54.796106170 -0400 model-dump.txt
+-rw-rw-r-- 1 bv bv 93 2020-10-09 15:48:21.311204950 -0400 build/model-dump.txt
 
-Do do a second build build, output is not rebuilt
+Do do a second build, output is not rebuilt
 
 [100%] Built target ModelDump
--rw-rw-r-- 1 bv bv 93 2020-09-25 11:12:54.796106170 -0400 model-dump.txt
+-rw-rw-r-- 1 bv bv 93 2020-10-09 15:48:21.311204950 -0400 build/model-dump.txt
+
+Add new implicit dependency, which should cause a rebuild
+
+[100%] Generating model-dump.txt
+[100%] Built target ModelDump
+-rw-rw-r-- 1 bv bv 93 2020-10-09 15:48:21.931188648 -0400 build/model-dump.txt
+
+Update new implicit dependency, which will be missed(?)
+
+[100%] Built target ModelDump
+-rw-rw-r-- 1 bv bv 93 2020-10-09 15:48:21.931188648 -0400 build/model-dump.txt
 </pre>
+</div>
+</div>
+
+
+
+<div id="outline-container-orgeee1801" class="outline-3">
+<h3 id="orgeee1801"><span class="todo TODO">TODO</span> Caveats</h3>
+<div class="outline-text-3" id="text-orgeee1801">
+<p>
+As-is, implicit dependencies are only given to CMake at configuration
+time.  In the above test, adding a new implicit dependency is okay
+because doing so modifies an existing known file.  But changing the
+contents of that new implicit dependency does not result in a correct
+rebuild.
+</p>
 </div>
 </div>
 </div>
 </div>
 <div id="postamble" class="status">
 <p class="author">Author: Brett Viren</p>
-<p class="date">Created: 2020-09-25 Fri 11:12</p>
+<p class="date">Created: 2020-10-09 Fri 15:48</p>
 <p class="validation"><a href="http://validator.w3.org/check?uri=referer">Validate</a></p>
 </div>
 </body>

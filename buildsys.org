@@ -475,32 +475,37 @@ Do initial build
 Scanning dependencies of target ModelDump
 [100%] Generating model-dump.txt
 [100%] Built target ModelDump
--rw-rw-r-- 1 bv bv 93 2020-10-09 15:10:24.514909014 -0400 build/model-dump.txt
+-rw-rw-r-- 1 bv bv 93 2020-10-09 15:47:52.167971243 -0400 build/model-dump.txt
 
 Next we edit the intermediate files and notice a rebuild
 
 [100%] Generating model-dump.txt
 [100%] Built target ModelDump
--rw-rw-r-- 1 bv bv 93 2020-10-09 15:10:25.106893352 -0400 build/model-dump.txt
+-rw-rw-r-- 1 bv bv 93 2020-10-09 15:47:52.763955573 -0400 build/model-dump.txt
 
 Do do a second build, output is not rebuilt
 
 [100%] Built target ModelDump
--rw-rw-r-- 1 bv bv 93 2020-10-09 15:10:25.106893352 -0400 build/model-dump.txt
+-rw-rw-r-- 1 bv bv 93 2020-10-09 15:47:52.763955573 -0400 build/model-dump.txt
 
 Add new implicit dependency, which should cause a rebuild
 
 [100%] Generating model-dump.txt
 [100%] Built target ModelDump
--rw-rw-r-- 1 bv bv 93 2020-10-09 15:10:25.722877057 -0400 build/model-dump.txt
+-rw-rw-r-- 1 bv bv 93 2020-10-09 15:47:53.395938956 -0400 build/model-dump.txt
 
 Update new implicit dependency, which will be missed(?)
 
 [100%] Built target ModelDump
--rw-rw-r-- 1 bv bv 93 2020-10-09 15:10:25.722877057 -0400 build/model-dump.txt
+-rw-rw-r-- 1 bv bv 93 2020-10-09 15:47:53.395938956 -0400 build/model-dump.txt
 #+end_example
+
+
 
 ** TODO Caveats
 
 As-is, implicit dependencies are only given to CMake at configuration
-time.  [[https://github.com/CLIUtils/CLI11/blob/438eabe5f8d91a3f12ce6c53afd1236b990798ae/CMakeLists.txt#L231-L264][Here is an example]] to emulate.
+time.  In the above test, adding a new implicit dependency is okay
+because doing so modifies an existing known file.  But changing the
+contents of that new implicit dependency does not result in a correct
+rebuild.
