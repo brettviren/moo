@@ -420,23 +420,34 @@ Here it is getting exercised:
 #+begin_src shell :exports both :results output code :wrap "example"
   cd buildsys/cmake
   rm -rf build
-  mkdir build
-  cd build
-  cmake ..
+  echo '{a:1,b:2,c:"hello"}' > sub.jsonnet
+  cmake -B build -S .
 
   echo -e '\nDo initial build\n'  
-  sed -i 's/fortran/FORTRAN/' ../sub/sub.jsonnet
-  make ModelDump
-  ls -l --full-time model-dump.txt
+  sed -i 's/fortran/FORTRAN/' sub/sub.jsonnet
+  cmake --build build
+  ls -l --full-time build/model-dump.txt
 
   echo -e '\nNext we edit the intermediate files and notice a rebuild\n'
-  sed -i 's/FORTRAN/fortran/' ../sub/sub.jsonnet
-  make ModelDump
-  ls -l --full-time model-dump.txt
+  sed -i 's/FORTRAN/fortran/' sub/sub.jsonnet
+  cmake --build build
+  ls -l --full-time build/model-dump.txt
 
-  echo -e '\nDo do a second build build, output is not rebuilt\n'  
-  make ModelDump
-  ls -l --full-time model-dump.txt
+  echo -e '\nDo do a second build, output is not rebuilt\n'  
+  cmake --build build
+  ls -l --full-time build/model-dump.txt
+
+  echo -e '\nAdd new implicit dependency, which should cause a rebuild\n'  
+  echo -e 'local ss = import "sub/sub2.jsonnet";\nss' > sub.jsonnet
+  echo '{a:1,b:2,c:"hello"}' > sub/sub2.jsonnet
+  cmake --build build
+  ls -l --full-time build/model-dump.txt
+
+  echo -e '\nUpdate new implicit dependency, which will be missed(?)\n'  
+  echo '{a:1,b:2,c:"see me"}' > sub/sub2.jsonnet
+  cmake --build build
+  ls -l --full-time build/model-dump.txt
+
 #+end_src
 
 #+RESULTS:
@@ -464,18 +475,29 @@ Do initial build
 Scanning dependencies of target ModelDump
 [100%] Generating model-dump.txt
 [100%] Built target ModelDump
--rw-rw-r-- 1 bv bv 93 2020-09-25 11:09:23.497558245 -0400 model-dump.txt
+-rw-rw-r-- 1 bv bv 93 2020-10-09 15:10:24.514909014 -0400 build/model-dump.txt
 
 Next we edit the intermediate files and notice a rebuild
 
 [100%] Generating model-dump.txt
 [100%] Built target ModelDump
--rw-rw-r-- 1 bv bv 93 2020-09-25 11:09:23.885548220 -0400 model-dump.txt
+-rw-rw-r-- 1 bv bv 93 2020-10-09 15:10:25.106893352 -0400 build/model-dump.txt
 
-Do do a second build build, output is not rebuilt
+Do do a second build, output is not rebuilt
 
 [100%] Built target ModelDump
--rw-rw-r-- 1 bv bv 93 2020-09-25 11:09:23.885548220 -0400 model-dump.txt
+-rw-rw-r-- 1 bv bv 93 2020-10-09 15:10:25.106893352 -0400 build/model-dump.txt
+
+Add new implicit dependency, which should cause a rebuild
+
+[100%] Generating model-dump.txt
+[100%] Built target ModelDump
+-rw-rw-r-- 1 bv bv 93 2020-10-09 15:10:25.722877057 -0400 build/model-dump.txt
+
+Update new implicit dependency, which will be missed(?)
+
+[100%] Built target ModelDump
+-rw-rw-r-- 1 bv bv 93 2020-10-09 15:10:25.722877057 -0400 build/model-dump.txt
 #+end_example
 
 ** TODO Caveats

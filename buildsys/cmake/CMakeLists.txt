@@ -1,5 +1,7 @@
 project("moo-buildsys-cmake")
-cmake_minimum_required(VERSION 3.17) # older may also work
+cmake_minimum_required(VERSION 3.4...3.17) # older may also work
+
+# fixme: find_package(moo)
 
 execute_process(
   COMMAND moo -T ${CMAKE_SOURCE_DIR} -M ${CMAKE_SOURCE_DIR} imports model.jsonnet
@@ -20,6 +22,7 @@ add_custom_command(
   DEPENDS model.jsonnet dump.txt.j2 ${MODEL_DEPENDENCIES}
   COMMENT "Generating model-dump.txt"
 )
-add_custom_target(ModelDump DEPENDS model-dump.txt)
+add_custom_target(ModelDump ALL
+  DEPENDS model-dump.txt)
 
 message("implicit dependencies: ${MODEL_DEPENDENCIES}")
