@@ -6,6 +6,7 @@ import importlib
 import json
 import jsonpointer
 
+
 def select_path(obj, path, delim='.'):
     '''Select out a part of obj structure based on a path.
 
@@ -28,16 +29,24 @@ def select_path(obj, path, delim='.'):
 
     return obj
 
-def validate(model, schema, validator):
+
+def validate(model, schema, validator="jsonschema"):
+    'Validate model against schema with validator'
     if validator == "jsonschema":
-        from jsonschema import validate
-        return validate(instance=model, schema=schema)
+        from jsonschema import validate as js_validate
+        from jsonschema import draft7_format_checker
+        return js_validate(instance=model, schema=schema,
+                           format_checker=draft7_format_checker)
     if validator == "fastjsonschema":
-        from fastjsonschema import validate
-        return validate(schema, model)
+        from fastjsonschema import validate as fjs_validate
+        return fjs_validate(schema, model)
     raise ValueError(f"unknown validator: {validator}")
 
+
 def clean_paths(paths):
+    '''Return list of paths made absolute with cwd as first.
+
+    Input may be :-separated string or list'''
     if isinstance(paths, str):
         paths = paths.split(":")
     paths = [os.path.realpath(p) for p in paths]
@@ -46,6 +55,7 @@ def clean_paths(paths):
         paths.insert(0, cwd)
 
     return paths
+
 
 def resolve(filename, paths=()):
     '''
@@ -71,13 +81,14 @@ def resolve(filename, paths=()):
             return fp
     raise ValueError(f"file not found: {filename}")
 
-def deref(data, path=None):
-    defs = data.pop("definitions")
-    data = deref_defs(data, defs)
-    if path in ("yes", "true"):
-        return data
-    return select_path(data, path)
-    
+
+# def deref(data, path=None):
+#     defs = data.pop("definitions")
+#     data = deref_defs(data, defs)
+#     if path in ("yes", "true"):
+#         return data
+#     return select_path(data, path)
+
 
 def deref_defs(ctx, defs):
     '''
@@ -130,6 +141,7 @@ def tla_pack(tlas, jpath):
     # these keywords are what jsonnet.evaluate_file() expects
     return dict(tla_vars=tla_vars, tla_codes=tla_codes)
 
+
 def transform(model, transforms):
     '''Transform a model
 
@@ -179,12 +191,21 @@ def transform(model, transforms):
 
 
 def graft(model, pointer, branch):
+    '''Add branch to model at pointer.
+
+    Note, pointer must have already support in model.  Ie, there is no
+    'mkdir'.
+
+    '''
     if not pointer:
         return branch
     return jsonpointer.set_pointer(model, pointer, branch)
 
 
 def parse_ptr_spec(text):
+    '''
+    Parse pointer spec as used by CLI
+    '''
     parts = text.split(":",1)
     if len(parts) == 2:
         return parts

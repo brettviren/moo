@@ -85,17 +85,19 @@ local isr(x,r) = if std.type(x) != "null" then r;
             items: self.deps[0],
         },
         
-        // We do not consider a field as a type but rather a named holder
-        // of a type and an optional default value.  The value should be a
-        // literal representation.  Eg, if the type is string like the
-        // default value should be like '"foo"'.  A number may be
-        // specified like '6.9' or may be a JSON 6.9 but the latter may
-        // suffer representation round-off.  Fields of type record are
-        // allowed but any defaults will be very specific to the codegen
-        // target language and thus may lead to the schema not being
-        // generic.  Eg, '{1,"foo",6.9}' may be a valid initialization
-        // list for codgen targetting a C++ struct but will utterly fail
-        // if applied to generating a Python class.  
+        // We do not consider a field as a type but rather a named
+        // holder of a type and an optional default value.  The
+        // default value should be a literal representation in JSON.
+        // Eg, if the type is string like the default value should be
+        // like '"foo"'.  A number may be specified like '6.9' or may
+        // be a JSON 6.9 but the latter may suffer representation
+        // round-off.  Fields with default values may be considered
+        // optional.  Fields of type record are allowed but any
+        // defaults will be very specific to the codegen target
+        // language and thus may lead to the schema not being generic.
+        // Eg, '{1,"foo",6.9}' may be a valid initialization list for
+        // codgen targetting a C++ struct but will utterly fail if
+        // applied to generating a Python class.
         field(name, type, default=null, doc=null) :: {
             name: name,
             item: $.fqn(type),
