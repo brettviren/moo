@@ -1,4 +1,6 @@
+import os
 import pytest
+import moo
 from moo.ogen import TypeBuilder
 
 
@@ -60,7 +62,7 @@ def test_type_builder():
 
     from a.b import Stuff
     somestuff = Stuff(tf=TF(True), many=somebs, email="foo@example.com",
-                      fruit1="orange")
+                      age=42, fruit1="orange")
     print(somestuff)
     sspod = somestuff.pod()
     print(sspod)
@@ -69,3 +71,16 @@ def test_type_builder():
     
     ## uncomment to make pytest spit out prints
     # assert False
+
+
+
+def _test_load():
+    here = os.path.dirname(__file__)
+    types = moo.io.load(os.path.join(here, "test-ogen-oschema.jsonnet") )
+    tb = TypeBuilder()
+    for one in types:
+        tb.make(**one)
+    tb.promote_all()
+    from app import Person
+    p = Person()
+    print(p.pod())

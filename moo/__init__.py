@@ -2,7 +2,7 @@ import moo.jsonnet
 import moo.template
 import moo.util
 import moo.io
-import moo.csv
+import moo.csvio
 
 known_extensions = ["jsonnet", "json", "csv", "xml", "yaml", "ini"]
 try:

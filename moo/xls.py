@@ -11,7 +11,7 @@ def load(filename, paths, **kwds):
     Each object is a row with keys associated to columns, and named
     based on first non-empty row.
 
-    Note, follows the same pattern as moo.csv.load().
+    Note, follows the same pattern as moo.csvio.load().
     '''
 
     wb = load_workbook(filename)

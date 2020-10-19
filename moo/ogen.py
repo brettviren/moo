@@ -7,8 +7,8 @@ structure may be translated into POD and eventually into JSON
 
 import re
 import sys
-from importlib import import_module
-from types import ModuleType
+from moo.modutil import resolve, module_at
+from collections.abc import Mapping
 
 from jsonschema import validate as js_validate
 from jsonschema import draft7_format_checker
@@ -137,14 +137,18 @@ def update_record(have, want):
 def wash_record(types, ost, *args, **kwds):
     name = ost["name"]
     if not any([args, kwds]):
-        raise ValueError(f'no mapping provided for {name}')
+        raise ValueError(f'no mapping nor fields provided for record {name}')
     thing = dict()
     if args:
-        thing.update(args[0])
+        if isinstance(args[0], Mapping):
+            thing.update(args[0])
+        elif ismatchedtype(args[0], ost):
+            thing.update(args[0].pod())
     if kwds:
         thing.update(kwds)
     fields = ost["fields"]
     out = dict()
+    missed = list()
     for field in fields:
         fname = field['name']
         item_type = types[field['item']]
@@ -155,8 +159,12 @@ def wash_record(types, ost, *args, **kwds):
                 fval = item_type(field["default"])
             else:
                 fval = item_type()
-
+                print(f'default {fname} = {fval}')
+                if fval is None:
+                    missed.append(fname)
         out[fname] = item_type(fval)
+    if missed:
+        raise ValueError(f'record {name} missing fields: {missed}')
     return out
 
 
@@ -173,35 +181,6 @@ def wash_any(types, ost, *args, **kwds):
     'Should never be called'
     raise ValueError('illegal any setting for {name}'.format(**ost))
 
-
-def resolve(tref):
-    '''Resolve dot-path type reference to type.'''
-    mpath = tref.split(".")
-    tname = mpath.pop()
-    mod = import_module(".".join(mpath))
-    return getattr(mod, tname)
-
-
-def module_at(path):
-    'Return module found by path, attaching/creating module path as needed'
-    if isinstance(path, str):
-        path = path.split(".")
-
-    loc = []
-    mod = None
-    last_mod = None
-    for p in path:
-        loc.append(p)
-        dot = '.'.join(loc)
-        try:
-            mod = import_module(dot)
-        except ModuleNotFoundError:
-            mod = ModuleType(p)
-            sys.modules[dot] = mod
-        if last_mod:
-            setattr(last_mod, p, mod)
-        last_mod = mod
-    return mod
 
 
 def promote(sctype):
@@ -268,7 +247,6 @@ class TypeBuilder:
         self._types[fullpath] = typ
         return typ
 
-
 # fixme: give additional methods to make sequence and records act like
 # list and dict.
 
@@ -276,3 +254,4 @@ class TypeBuilder:
 # anyOf
 # allOf
 # oneOf
+
