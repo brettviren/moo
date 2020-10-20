@@ -99,21 +99,30 @@ local isr(x,r) = if std.type(x) != "null" then r;
         // codgen targetting a C++ struct but will utterly fail if
         // applied to generating a Python class.
         field(name, type, default=null, doc=null) :: {
-            name: name,
-            item: $.fqn(type),
-            [isr(default,"default")] : default,
-            [isr(doc,"doc")]: doc,
-        },
+            local defres = if std.type(default) == "null" && std.objectHas(type,"default") then type.default else default,
+            res: {
+                name: name,
+                item: $.fqn(type),
+                [isr(defres,"default")] : defres,
+                [isr(doc,"doc")]: doc,
+            }
+        }.res,
 
+        // A record is a collection of fields.  It may have a zero or
+        // more "base" records.
         record(name, fields=[], bases=null, doc=null)
         :: self.type(name, "record", doc, [f.item for f in fields]) {
             fields: fields,
             [isr(bases, "bases")]: bases,            
         },
 
+        // Make an enumerated list type.  A default must be in the
+        // list of symbols.  If omitted, the first in the list is default.
         enum(name, symbols, default=null, doc=null)
         :: self.type(name, "enum", doc) {
-            [isr(default, "default")]: default,
+            local defres = if std.type(default) == "null" then symbols[0] else default,
+            assert std.length(std.find(defres, symbols)) > 0,
+            default: defres,
             symbols: symbols,
         },
 
