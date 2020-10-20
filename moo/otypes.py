@@ -8,50 +8,58 @@ data in a form sustable for use as schema instance data.
 
 '''
 
-import numpy
-from moo.modutil import resolve, module_at
+from abc import ABC, abstractmethod
+from moo.modutil import module_at
 
-class BaseType:
-    pass
+
+class BaseType(ABC):
+    'Base of all Python oschema types'
+
+    @abstractmethod
+    def pod(self):
+        'Return value as plain old data'
+        pass
+
+    @abstractmethod
+    def update(self, val, *args, **kwds):
+        'Update self with new value'
+        pass
+
 
 class Record(BaseType):
     '''
     The oschema record class in Python
     '''
 
-    _name = None
     _value = dict()
     _fields = ()
 
-    def update(self, *args, **kwds):
-        """
-        Update this record.
-        """
-        val = dict()
-        if args and args[0] is not None:
-            inst = args[0]
-            if isinstance(inst, dict):
-                val.update(**inst)
-            elif self.isme(val):
-                val.update(**inst.pod())
-            else:
-                raise ValueError("illegal instance for record type %s"%self._name)
-        val.update(**kwds)
-        for f in self._fields:
-            fval = val.get(f, None)
-            if fval is None:
-                continue
-            setattr(self, f, fval)  # validates
+    def pod(self):
+        'Return record as a dictionary of POD attributes'
+        return {k: getattr(self, k) for k in self._fields}
+
 
     def __repr__(self):
-        return '<record %s, fields: {%s}>' % (self._name, ','.join(self._fields))
+        return '<record %s, fields: {%s}>' % \
+            (self.__class__.__name__, ', '.join(self._fields))
+
 
 def record_code(**ost):
     'Make a record type'
     ost.setdefault("doc", "")
     fields = ost['fields']
-    field_name_list = ','.join(['"{name}"'.format(**f) for f in fields])
-    field_args_fwd = ','.join(['{name}={name}'.format(**f) for f in fields])
+    ost['field_name_list'] = ', '.join(['"{name}"'.format(**f) for f in fields])
+    ost['field_args_fwd'] = ', '.join(['{name}={name}'.format(**f) for f in fields])
+    field_arg_list = list()
+    for field in fields:
+        d = field.get("default",None)
+        if isinstance(d, str):
+            d = '"%s"' % d
+        field['default'] = d
+        one = '{name}:{item} = {default}'.format(**field)
+        field_arg_list.append(one)
+    ost['field_arg_list'] = ', '.join(field_arg_list)
+
 
     klass = '''
 class {name}(Record):
@@ -61,27 +69,36 @@ class {name}(Record):
     {doc}
     """
     _fields = ({field_name_list},)
-    _name = "{name}"
-
-    def isme(self, val):
-        return isinstance(val, {name})
-'''.format(field_name_list=field_name_list, **ost)
-
-    field_list = list()
-    for field in fields:
-        field.setdefault('default')
-        one = '{name}:{item} = {default}'.format(**field)
-        field_list.append(one)
+'''.format(**ost)
 
     init = '''
-    def __init__(self, inst=None, {field_list}):
+    def __init__(self, *args, {field_arg_list}):
         """
-        Create a record type {name}.
+        Create a {name} record type
         """
         self._value = dict()
-        self.update(inst, {field_args_fwd})
-'''.format(field_list=','.join(field_list),
-           field_args_fwd=field_args_fwd, **ost)
+        self.update(*args, {field_args_fwd})
+'''.format(**ost)
+
+    update = '''
+    def update(self, *args, **kwds):
+        """
+        Update record {name}.
+        """
+        val = dict()
+        if args:
+            inst = args[0]
+            if isinstance(inst, dict):
+                val.update(**inst)
+            elif isinstance(val, {name}):
+                val.update(**inst.pod())
+            else:
+                raise ValueError("illegal instance for record type {name}")
+        val.update(**kwds)
+        for fkey in self._fields:
+            if fkey in kwds and kwds[fkey] is not None:
+                setattr(self, fkey, kwds[fkey])
+'''.format(**ost)
 
     acc = list()
     for field in fields:
@@ -95,7 +112,7 @@ class {name}(Record):
         self._value["{name}"] = {item}(value)
 '''.format(**field)
         acc.append(one)
-    code = '\n'.join([klass, init] + acc)
+    code = '\n'.join([klass, init, update] + acc)
     return code
 
 
@@ -111,7 +128,9 @@ class Sequence(BaseType):
     def __init__(self, val):
         self.update(val)
 
+
 def sequence_code(**ost):
+    'Return code for a sequence type'
     ost.setdefault("doc", "")
     klass = '''
 class {name}(Sequence):
@@ -137,7 +156,6 @@ class String(BaseType):
     '''
     The oschema string class
     '''
-    _name = None
     _value = None
 
     def __init__(self, val):
@@ -148,11 +166,11 @@ class String(BaseType):
 
     def __repr__(self):
         if self._value is None:
-            return '<string %s: None>'%self._name
+            return '<string %s: None>' % self.__class__.__name__
         pod = self.pod()
         if len(pod) > 10:
             pod = pod[:10] + "..."
-        return '<string %s: %s>' % (self._name, pod)
+        return '<string %s: %s>' % (self.__class__.__name__, pod)
 
 
 def string_code(**ost):
@@ -179,7 +197,7 @@ class {name}(String):
         if not isinstance(val, str):
             raise ValueError('illegal type for string {name}: %s'%(type(val),))
 '''
-    schema=dict(type="string")
+    schema = dict(type="string")
     if ost["pattern"] or ost["format"]:
         if ost["pattern"]:
             schema["pattern"] = ost["pattern"]
@@ -198,7 +216,6 @@ class {name}(String):
     klass += '''
         self._value = val
 '''
-        
     return klass.format(jsschema=schema, **ost)
 
 
@@ -206,7 +223,6 @@ class Boolean(BaseType):
     '''
     The oschema boolean class
     '''
-    _name = None
     _value = None
 
     def __init__(self, val):
@@ -219,8 +235,8 @@ class Boolean(BaseType):
 
     def __repr__(self):
         if self._value is None:
-            return '<boolean %s: None>' % self._name
-        return '<boolean %s: %s>' % (self._name, self.pod())
+            return '<boolean %s: None>' % self.__class__.__name__
+        return '<boolean %s: %s>' % (self.__class__.__name__, self.pod())
 
 
 def boolean_code(**ost):
@@ -232,8 +248,6 @@ class {name}(Boolean):
     A {name} boolean
     {doc}
     """
-
-    _name = "{name}"
 
     def update(self, val):
         if isinstance(val, {name}):
@@ -253,7 +267,6 @@ class {name}(Boolean):
                 return
             raise ValueError('illegal {name} boolean string value: %s' % (val,))
         raise ValueError('illegal {name} boolean value: %r' % (val,))
-    
 '''.format(**ost)
     return klass
 
@@ -264,7 +277,6 @@ class Number(BaseType):
     '''
 
     _value = None
-    _name = None
 
     def __init__(self, val):
         self.update(val)
@@ -274,8 +286,8 @@ class Number(BaseType):
 
     def __repr__(self):
         if self._value is None:
-            return '<number %s: None>' % self._name
-        return '<number %s: %s>' % (self._name, self.pod())
+            return '<number %s: None>' % self.__class__.__name__
+        return '<number %s: %s>' % (self.__class__.__name__, self.pod())
 
 
 def number_code(**ost):
@@ -285,10 +297,10 @@ class {name}(Number):
     """
     A number type {name}
     """
-    _name = "{name}"
 
     def intern(self, val):
         # fixme: add numeric constraints here
+        import numpy
         self._value = numpy.array(val, "{dtype}")
 
     def update(self, val):
@@ -321,7 +333,7 @@ class Enum(BaseType):
 
 def enum_code(**ost):
     'Make an enum type'
-    ost.setdefault("doc","")
+    ost.setdefault("doc", "")
     klass = '''
 class {name}(Enum):
     """
@@ -368,13 +380,15 @@ class Any(BaseType):
             raise ValueError("any type is unset")
         return self._value.pod()
 
+
 def any_code(**ost):
-    ost.setdefault("doc","")
+    'Return code for an any type'
+    ost.setdefault("doc", "")
 
     klass = '''
 class {name}(Any):
     """
-    The any type {name}.  
+    The any type {name}.
 
     Can hold any oschema type except Any types that are not {name}.
 
@@ -385,7 +399,7 @@ class {name}(Any):
         if self._value is None:
             return '<any {name}: None>'
         return "<any {name}: %s>" % (self._value,)
-        
+
 
     def update(self, val):
         if isinstance(val, {name}):
@@ -399,6 +413,7 @@ class {name}(Any):
         raise ValueError("any type {name} requires oschema type")
 '''.format(**ost)
     return klass
+
 
 def get_deps(deps=None, **ost):
     '''
@@ -422,21 +437,34 @@ def deps_code(**ost):
     deps = set()
     for dep in get_deps(**ost):
         if "." in dep:
-            path, klass = dep.rsplit('.', 1)
+            path, _ = dep.rsplit('.', 1)
             deps.add(f'import {path}')
     deps = list(deps)
     deps.sort()
     return '\n'.join(deps)
 
 
+def make_source(**ost):
+    '''
+    Return source code for Python type corresponding to oschema type.
+    '''
+    coder = globals()["{schema}_code".format(**ost)]
+    return deps_code(**ost) + coder(**ost)
+
+
+def make_code(**ost):
+    '''
+    Return compiled code for Python type corresponding to oschema type.
+    '''
+    code = make_source(**ost)
+    return compile(code, "<{schema} {name}>".format(**ost), 'exec')
+
+
 def make_type(**ost):
     '''
     Make a Python type from the oschema.
     '''
-    code = deps_code(**ost)
-    coder = globals()["{schema}_code".format(**ost)]
-    code += coder(**ost)
-    #print(code)
+    code = make_code(**ost)
     exec(code, globals())
     class_name = ost["name"]
     klass = globals()[class_name]
@@ -445,18 +473,5 @@ def make_type(**ost):
         mod = module_at(path)
         setattr(mod, class_name, klass)
         klass.__module__ = mod.__name__
-        #print(path,mod,klass)
+        # print(path,mod,klass)
     return klass
-
-def test():
-    make_type(name="Age", doc="An age in years", schema="number", dtype='i4', path='a.b')
-    from a.b import Age
-    a42 = Age(42)
-    print(Age, a42)
-    a43 = Age(a42)
-
-    make_type(name="Person", doc="A record for a person", schema="record", path='a.b',
-              fields=[dict(name="age", item="a.b.Age", default=42)])
-    from a.b import Person
-    print(Person, Person(age=a42))
-
