@@ -59,10 +59,13 @@ def test_with_schema():
     p = Person()
     with pytest.raises(ValueError):
         p.email = "this should fail"
-    with pytest.raises(KeyError):
+    with pytest.raises(AttributeError):
         p.email
     p.email = "brett.viren@gmail.com"
-    p.update(counts=(100, 101, 102))
+    assert p.email == "brett.viren@gmail.com"
+    p.update(counts=[100, 101, 102])
+    print(p.counts)
+    assert p.counts is not None
     # An Any must be set with a schema type or the same type of Any
     with pytest.raises(ValueError):
         p.update(affil="bv@bnl.gov")
