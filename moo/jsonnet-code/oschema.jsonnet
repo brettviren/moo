@@ -85,24 +85,25 @@ local isr(x,r) = if std.type(x) != "null" then r;
             items: self.deps[0],
         },
         
-        // We do not consider a field as a type but rather a named
-        // holder of a type and an optional default value.  The
-        // default value should be a literal representation in JSON.
-        // Eg, if the type is string like the default value should be
-        // like '"foo"'.  A number may be specified like '6.9' or may
-        // be a JSON 6.9 but the latter may suffer representation
-        // round-off.  Fields with default values may be considered
-        // optional.  Fields of type record are allowed but any
-        // defaults will be very specific to the codegen target
-        // language and thus may lead to the schema not being generic.
-        // Eg, '{1,"foo",6.9}' may be a valid initialization list for
-        // codgen targetting a C++ struct but will utterly fail if
-        // applied to generating a Python class.
-        field(name, type, default=null, doc=null) :: {
+        // A field provides an attribute for a record.  We do not
+        // consider a field itself as a type but rather a holder of a
+        // name, a type an (optional) default value and an optional
+        // marker.  Some rules for fields:
+        //
+        // - the "default" should be provided as literal JSON data
+        // which is consistent with the schema for the type of the
+        // field.  Eg, a string is "hi", a number is 42, a field which
+        // is itself a record is a JSON object.
+        //
+        // - if "optional" is set to true then targets may accept a
+        // record lacking this field.  By default, a field is
+        // required.
+        field(name, type, default=null, optional=null, doc=null) :: {
             local defres = if std.type(default) == "null" && std.objectHas(type,"default") then type.default else default,
             res: {
                 name: name,
                 item: $.fqn(type),
+                [isr(optional,"optional")]: optional,
                 [isr(defres,"default")] : defres,
                 [isr(doc,"doc")]: doc,
             }

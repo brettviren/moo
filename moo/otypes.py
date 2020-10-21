@@ -12,6 +12,13 @@ from abc import ABC, abstractmethod
 from moo.modutil import module_at
 
 
+def fullpath(**kwds):
+    path = kwds['path']
+    if isinstance(path, str):
+        path = path.split('.')
+    return '.'.join(path + [kwds['name']])
+
+
 class BaseType(ABC):
     'Base of all Python oschema types'
 
@@ -36,6 +43,8 @@ class Record(BaseType):
 
     def pod(self):
         'Return record as a dictionary of POD attributes'
+        ret = dict()
+
         return {k: getattr(self, k) for k in self._fields}
 
 
@@ -47,14 +56,15 @@ class Record(BaseType):
 def record_code(**ost):
     'Make a record type'
     ost.setdefault("doc", "")
+    ost['fullpathname'] = fullpath(**ost)
     fields = ost['fields']
     ost['field_name_list'] = ', '.join(['"{name}"'.format(**f) for f in fields])
     ost['field_args_fwd'] = ', '.join(['{name}={name}'.format(**f) for f in fields])
     field_arg_list = list()
     for field in fields:
-        d = field.get("default",None)
-        if isinstance(d, str):
-            d = '"%s"' % d
+        d = field.get("default", None)
+        # if isinstance(d, str):
+        #     d = '"%s"' % d
         field['default'] = d
         one = '{name}:{item} = {default}'.format(**field)
         field_arg_list.append(one)
@@ -69,6 +79,8 @@ class {name}(Record):
     {doc}
     """
     _fields = ({field_name_list},)
+    _defaults = {
+
 '''.format(**ost)
 
     init = '''
@@ -77,7 +89,10 @@ class {name}(Record):
         Create a {name} record type
         """
         self._value = dict()
-        self.update(*args, {field_args_fwd})
+        # first set defaults enced in init kwdargs
+        self.update({field_args_fwd})
+        if args:
+            self.update(*args)
 '''.format(**ost)
 
     update = '''
@@ -90,29 +105,43 @@ class {name}(Record):
             inst = args[0]
             if isinstance(inst, dict):
                 val.update(**inst)
-            elif isinstance(val, {name}):
+            elif isinstance(inst, {name}):
                 val.update(**inst.pod())
             else:
                 raise ValueError("illegal instance for record type {name}")
         val.update(**kwds)
         for fkey in self._fields:
-            if fkey in kwds and kwds[fkey] is not None:
-                setattr(self, fkey, kwds[fkey])
+            if fkey in val and val[fkey] is not None:
+                setattr(self, fkey, val[fkey])
 '''.format(**ost)
+
+    pod = '''
+    def pod(self):
+        """
+        Return plain old data representation of a {name} record
+        """
+        ret = dict()'''
+    for field in fields:
+        field.setdefault("default", "None")
+        field.setdefault("optional", "False")
+        pod += '''
+        ret["{name}"] = self._value.get("{name}", {default})
+        if ret["{name}"] is None and not {optional}:
+            raise ValueError("required field unset: {name}")'''
 
     acc = list()
     for field in fields:
         one = '''
     @property
     def {name}(self):
-        return self._value["{name}"]
+        return self._value["{name}"].pod()
 
     @{name}.setter
     def {name}(self, value):
         self._value["{name}"] = {item}(value)
 '''.format(**field)
         acc.append(one)
-    code = '\n'.join([klass, init, update] + acc)
+    code = '\n'.join([klass, init, update, pod] + acc)
     return code
 
 
@@ -147,10 +176,11 @@ class {name}(Sequence):
         Update a {name} with another {name} or a sequence compatible with {items}
         """
         if isinstance(val, {name}):
-            val = [one.pod() for one in val]
+            val = val._value
         self._value = [{items}(one) for one in val]
 '''.format(**ost)
     return klass
+
 
 class String(BaseType):
     '''
@@ -357,7 +387,7 @@ class {name}(Enum):
             self._value = "{default}"
             return
         if isinstance(val, str):
-            ind = self._symbols.index(val.lower())
+            ind = self._symbols.index(val)
             self._value = self._symbols[ind]
             return
         raise ValueError("unknown value for enum {name}: %r"%(val,))
@@ -473,5 +503,4 @@ def make_type(**ost):
         mod = module_at(path)
         setattr(mod, class_name, klass)
         klass.__module__ = mod.__name__
-        # print(path,mod,klass)
     return klass

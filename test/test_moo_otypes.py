@@ -9,18 +9,37 @@ import pytest
 
 def test_junk():
     'Test various stuff about moo.otypes'
-    Age = moo.otypes.make_type(name="Age", doc="An age in years", schema="number",
-                               dtype='i4', path='a.b')
-    a42 = Age(42)
-    print(Age, a42)
-    a43 = Age(a42)
-    del a43
+    Age = moo.otypes.make_type(
+        name="Age", doc="An age in years",
+        schema="number", dtype='i4', path='a.b')
+    a40 = Age(40)
+    print(Age, a40)
+    a41 = Age(a40)
+    a41.update(41)
 
-    Person = moo.otypes.make_type(name="Person", doc="A record for a person",
-                                  schema="record", path='a.b',
-                                  fields=[dict(name="age", item="a.b.Age", default=42)])
-    person = Person(age=a42)
+    Person = moo.otypes.make_type(
+        name="Person", doc="A record for a person",
+        schema="record", path='a.b',
+        fields=[dict(name="age", item="a.b.Age", default=42)])
+    person = Person(age=a40)
+    assert isinstance(person, Person)
+    import a.b
+    assert isinstance(person, a.b.Person)
     print(Person, person)
+
+    print("make a p2 from", person.pod())
+    p2 = Person(person)
+    assert(p2.age == 40)
+    p2.age = 43
+    assert(p2.age == 43)
+
+    People = moo.otypes.make_type(
+        name="People", code="A collection or Person items",
+        schema="sequence", path="a.b", items='a.b.Person')
+    print("p2:", p2.pod())
+
+    pp = People([Person(age=12), Person(age=24)])
+    print("pp:", pp.pod())
 
 
 def test_with_schema():

@@ -28,7 +28,7 @@ def module_at(path):
             mod = ModuleType(p)
             mod.__name__ = dot
             sys.modules[dot] = mod
-            print(f'adding module {mod} at {dot}')
+            #print(f'adding module {mod} at {dot}')
         if last_mod:
             setattr(last_mod, p, mod)
         last_mod = mod
