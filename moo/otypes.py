@@ -65,6 +65,8 @@ def classify(source, **ost):
 
 class BaseType(ABC):
 
+    _value = None
+
     # Monkey patched by concrete type
     _ost = None
 
@@ -73,7 +75,7 @@ class BaseType(ABC):
         'Return value as plain old data'
 
     @abstractmethod
-    def update(self, val, *args, **kwds):
+    def update(self, *args, **kwds):
         'Update self with new value'
 
     @property
@@ -154,7 +156,7 @@ class Record(BaseType):
     @property
     def fields(self):
         'Return mapping of field name to field dict'
-        return {one['name']:one for one in self._ost['fields']}
+        return {one['name']: one for one in self._ost['fields']}
 
     def _from_dict(self, mapping):
         fields = self.fields
@@ -171,7 +173,9 @@ class Record(BaseType):
                 if optional:
                     continue
             if fval is None:    # 3rd strike
-                continue        # generous in what we accept, strict in what we produce
+                # generous in what we accept, strict in what we produce
+                continue
+
             # intern as type
             item = get_type(field['item'])
             self._value[fname] = item(fval)
@@ -210,15 +214,15 @@ def record_class(**ost):
     '''
     Make and return a type corresponding to record object schema type.
     '''
-    ost.setdefault("doc","")
+    ost.setdefault("doc", "")
     fields = ost['fields']
     more = dict(
-        field_name_list = ', '.join(['"{name}"'.format(**f) for f in fields]),
-        field_args_fwd = ', '.join(['{name}={name}'.format(**f) for f in fields]))
+        field_name_list=', '.join(['"{name}"'.format(**f) for f in fields]),
+        field_args_fwd=', '.join(['{name}={name}'.format(**f) for f in fields]))
     field_arg_list = list()
     for field in fields:
         field = dict(field)
-        field['default'] = field_default_value(field.get('default',None),
+        field['default'] = field_default_value(field.get('default', None),
                                                field['item'])
         field.setdefault("optional", False)
         one = '{name}:{item} = {default}'.format(**field)
@@ -235,8 +239,6 @@ class {name}(Record):
 
     {doc}
     """
-
-    _value = None
 
     def __init__(self, *args, {field_arg_list}):
         """
@@ -278,17 +280,16 @@ class Sequence(BaseType):
     def pod(self):
         'Return value as plain old data'
         return [one.pod() for one in self._value]
-        
-    def update(self, *args, **kwds):
+
+    def update(self, val):
         'Update self with new value'
-        for arg in args:
-            if isinstance(arg, str):
-                self._from_string(arg)
-            elif isinstance(arg, self.__class__):
-                self._from_list(arg._value)
-            else:
-                self._from_list(arg)
-                
+        if isinstance(val, str):
+            self._from_string(arg)
+        elif isinstance(val, self.__class__):
+            self._from_list(val._value)
+        else:
+            self._from_list(val)
+
     def _from_string(self, string):
         if not string:
             raise ValueError("attempt to set sequence %s from empty string" %
@@ -309,7 +310,7 @@ def sequence_class(**ost):
     '''
     Make and return a type corresponding to sequence object schema type.
     '''
-    ost.setdefault("doc","")
+    ost.setdefault("doc", "")
     class_source = '''
 class {name}(Sequence):
     """
@@ -317,14 +318,12 @@ class {name}(Sequence):
     {doc}
     """
 
-    _value = None
-
-    def __init__(self, *args):
+    def __init__(self, val):
         """
         Create a sequence type of {name}
         """
         self._value = list()
-        self.update(*args)
+        self.update(val)
 '''.format(**ost)
     return classify(class_source, **ost)
 
@@ -343,10 +342,13 @@ class String(BaseType):
         return '<string %s: %s>' % (self.__class__.__name__, pod)
 
     def pod(self):
-        'Return value as plain old data'
+        'Return string schema type value as plain old data'
         return self._value
 
-    def update(self, val):
+    def update(self, val: str):
+        '''
+        Update string schema type with a string like val.
+        '''
         cname = self.__class__.__name__
         if isinstance(val, self.__class__):
             self._value = val.pod()
@@ -366,8 +368,9 @@ class String(BaseType):
             js_validate(instance=val, schema=schema,
                         format_checker=draft7_format_checker)
         except ValidationError as verr:
-            raise ValueError('format mismatch for string {cname}') from verr
+            raise ValueError(f'format mismatch for string {cname}') from verr
         self._value = val
+
 
 def string_class(**ost):
     '''
@@ -385,8 +388,6 @@ class {name}(String):
 
     {doc}
     """
-
-    _value = None
 
     def __init__(self, val:str):
         """
@@ -408,27 +409,32 @@ class Boolean(BaseType):
         return '<boolean %s: %s>' % (self.__class__.__name__, self.pod())
 
     def pod(self):
+        'Return boolean schema class type as plain old data'
         if self._value is None:
             raise ValueError("boolean is unset")
         return True if self._value else False
 
     def update(self, val):
+        'Update boolean schema class type new boolean like value'
         cname = self.__class__.__name__
         if isinstance(val, self.__class__):
             self._value = self.pod()
-        elif isinstance(val, bool):
+            return
+        if isinstance(val, bool):
             self._value = val
-        elif isinstance(val, int):
+            return
+        if isinstance(val, int):
             self._value = False if val == 0 else True
-        elif isinstance(val, str):
+            return
+        if isinstance(val, str):
             if val.lower() in ("yes", "true", "on"):
                 self._value = True
             elif val.lower() in ("no", "false", "off"):
                 self._value = False
-            raise ValueError(f'illegal {name} boolean string value: {val}')
-        raise ValueError(f'illegal {name} boolean type: {type(val)}')
+            raise ValueError(f'illegal {cname} boolean string value: {val}')
+        raise ValueError(f'illegal {cname} boolean type: {type(val)}')
 
-                
+
 def boolean_class(**ost):
     '''
     Make and return a type corresponding to boolean object schema type.
@@ -440,8 +446,6 @@ class {name}(Boolean):
     A {name} boolean type.
     {doc}
     """
-
-    _value = None
 
     def __init__(self, val:bool):
         """
@@ -465,7 +469,7 @@ class Number(BaseType):
     def pod(self):
         if self._value is None:
             raise ValueError("number %s is unset" % self.__class__.__name__)
-        return self._value
+        return self._value.item()
 
     def update(self, val):
         if type(val) in (int, float, str):
@@ -474,7 +478,8 @@ class Number(BaseType):
         if isinstance(val, self.__class__):
             self._value = val.pod()
             return
-        raise ValueError(f'illegal {name} number type: {type(val)}')
+        cname = self.__class__.__name__
+        raise ValueError(f'illegal {cname} number type: {type(val)}')
 
 
 def number_class(**ost):
@@ -488,8 +493,6 @@ class {name}(Number):
     A number type {name} dtype {dtype}
     {doc}
     """
-
-    _value = None
 
     def __init__(self, val):
         """
@@ -516,7 +519,7 @@ class Enum(BaseType):
             raise ValueError("enum %s is unset" % self.__class__.__name__)
         return self._value
 
-    def update(self, val:str):
+    def update(self, val: str = None):
         if isinstance(val, self.__class__):
             self._value = val.pod()
             return
@@ -544,7 +547,7 @@ class {name}(Enum):
     """
     _value = "{default}"
 
-    def __init__(self, val):
+    def __init__(self, val: str = None):
         """
         Create a enum type {name}.
         """
@@ -561,7 +564,7 @@ class Any(BaseType):
     def __repr__(self):
         cname = self.ost['name']
         if self._value is None:
-            return f'<any {name}: None>'
+            return f'<any {cname}: None>'
         return f"<any {cname}: {type(self._value)}>"
 
     def pod(self):
@@ -593,8 +596,6 @@ class {name}(Any):
     An any type {name}.
     {doc}
     """
-
-    _value = None
 
     def __init__(self, val):
         """
