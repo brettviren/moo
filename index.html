@@ -3,10 +3,10 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2020-09-24 Thu 12:17 -->
+<!-- 2020-10-23 Fri 12:42 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>moo 無</title>
+<title>moo 無 model oriented objects</title>
 <meta name="generator" content="Org mode" />
 <meta name="author" content="Brett Viren" />
 <style type="text/css">
@@ -253,20 +253,121 @@ for the JavaScript code in this tag.
 </head>
 <body>
 <div id="content">
-<h1 class="title">moo 無
+<h1 class="title">moo 無 model oriented objects
 <br />
 <span class="subtitle">Model Oriented Objects</span>
 </h1>
+<div id="table-of-contents">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents">
+<ul>
+<li><a href="#overview">Overview</a></li>
+<li><a href="#version">Version</a></li>
+<li><a href="#install">Installation</a></li>
+<li><a href="#punt">Quick start</a></li>
+<li><a href="#docs">Documentation</a></li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-overview" class="outline-2">
+<h2 id="overview">Overview</h2>
+<div class="outline-text-2" id="text-overview">
 <p>
-<b>moo</b> is a tool for managing data structures, templates, schema and generating documents.
+<b>moo</b> is a tool for managing data structures.  <b>moo</b> operates on:
 </p>
 
+<dl class="org-dl">
+<dt>schema</dt><dd>data structures describing the structure of data (including schema).</dd>
+
+<dt>model</dt><dd>data structure matching schema to a template.</dd>
+
+<dt>templates</dt><dd>marked up text in some target format which is parameterized by a model and from which a document (eg, C++ code file) may be generated.</dd>
+
+<dt>codegen</dt><dd>generated artifacts</dd>
+</dl>
+</div>
+</div>
+
+<div id="outline-container-version" class="outline-2">
+<h2 id="version">Version</h2>
+<div class="outline-text-2" id="text-version">
+<p>
+The current <b>moo</b> version is
+</p>
+
+<div class="org-src-container">
+<pre class="src src-shell">moo version
+</pre>
+</div>
+
+<pre class="example">
+0.1.0
+</pre>
+</div>
+</div>
+
+
+
+<div id="outline-container-install" class="outline-2">
+<h2 id="install">Installation</h2>
+<div class="outline-text-2" id="text-install">
+<p>
+<b>moo</b> requires Python, probably at least 3.8 and installs in to your
+favorite Python environment in the usual ways.
+</p>
+
+<pre class="example">
+$ pip install git+git://github.com/brettviren/moo.git#egg=moo
+</pre>
+
+<p>
+Or, to work on the code
+</p>
+
+<pre class="example">
+$ git clone https://github.com/brettviren/moo.git
+$ cd moo
+$ pip install -e .
+</pre>
+
+<p>
+PyPI install is still t.b.d.
+</p>
+</div>
+</div>
+
+<div id="outline-container-punt" class="outline-2">
+<h2 id="punt">Quick start</h2>
+<div class="outline-text-2" id="text-punt">
+<p>
+The <b>moo</b> command line interface provides various commands and online
+help:
+</p>
+
+<pre class="example">
+$ moo --help
+</pre>
+
+<p>
+See documentation section for details.
+</p>
+</div>
+</div>
+
+<div id="outline-container-docs" class="outline-2">
+<h2 id="docs">Documentation</h2>
+<div class="outline-text-2" id="text-docs">
 <ul class="org-ul">
+<li><a href="https://brettviren.github.io/moo">https://brettviren.github.io/moo</a></li>
+
 <li><a href="https://github.com/brettviren/moo">code repository</a> and its <a href="README.html">README</a></li>
 
 <li><a href="moo.html">moo high level documentation</a></li>
 
 <li><a href="oschema.html">moo object schema paradigm</a></li>
+
+<li><a href="otypes.html">moo object types</a></li>
 
 <li><a href="buildsys.html">moo and build systems</a></li>
 
@@ -275,9 +376,11 @@ for the JavaScript code in this tag.
 <li><a href="reqs.html">moo for LaTeX and spreadsheet generator</a></li>
 </ul>
 </div>
+</div>
+</div>
 <div id="postamble" class="status">
 <p class="author">Author: Brett Viren</p>
-<p class="date">Created: 2020-09-24 Thu 12:17</p>
+<p class="date">Created: 2020-10-23 Fri 12:42</p>
 <p class="validation"><a href="http://validator.w3.org/check?uri=referer">Validate</a></p>
 </div>
 </body>

@@ -1,0 +1,66 @@
+/*
+ * This file is 100% generated.  Any manual edits will likely be lost.
+ */
+{% set nsmarker = model.meta.ns.replace(":","_").replace(".","_").upper() + "_NLJS_HPP" %}
+#ifndef {{ nsmarker }}
+#define {{ nsmarker }}
+
+#include "{{model.meta.incdir}}/{{model.meta.name}}Structs{{model.meta.ext}}"
+{% for dep in model.meta.deps %}
+#include "{{dep.incdir}}/{{dep.name}}Nljs{{dep.ext}}"
+{% endfor %}
+
+#include <nlohmann/json.hpp>
+
+{% set any_fields = [] %}
+{% for r in model.types if r.type == "any" %}
+{% do any_fields.append(r.name) %}
+{% endfor %}
+
+namespace {{ model.meta.ns }} {
+
+    using json = nlohmann::json;
+
+    {% for t in model.types %}
+    {% if t.type == "enum" %}
+    NLOHMANN_JSON_SERIALIZE_ENUM( {{t.name}}, {
+            {% for sname in t.symbols %}
+            { {{model.meta.ns}}::{{t.name}}::{{sname}}, "{{sname}}" },
+            {% endfor %}
+        })
+    {% endif %}
+    {% endfor %}
+
+    {% for t in model.types %}
+    {% if t.type == "record" %}
+    // Converters for {{t.name}}
+    // {{t.doc}}
+    inline void to_json(json& j, const {{t.name}}& obj) {
+        {% for b in t.fields if b.name.startswith("_base_") %}
+        to_json(j, (const {{b.type}}&)obj);
+        {% endfor %}
+        {% for f in t.fields if not f.name.startswith("_base_") %}
+        j["{{f.name}}"] = obj.{{f.name}};
+        {% endfor%}
+    }
+    inline void from_json(const json& j, {{t.name}}& obj) {
+        {% for b in t.fields if b.name.startswith("_base_") %}
+        from_json(j, ({{b.type}}&)obj);
+        {% endfor %}
+        {% for f in t.fields if not f.name.startswith("_base_") %}
+        if (j.contains("{{f.name}}")) {
+            {% if f.type in any_fields %}
+            obj.{{f.name}} = j.at("{{f.name}}");
+            {% else %}
+            j.at("{{f.name}}").get_to(obj.{{f.name}});
+            {% endif %}
+        }
+        {% endfor%}
+    }
+    {% endif %}
+    {% endfor %}
+
+
+} // namespace {{ model.meta.ns }}
+
+#endif // {{ nsmarker }}

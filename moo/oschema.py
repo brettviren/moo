@@ -243,9 +243,12 @@ class Any(BaseType):
 
 class Enum(BaseType):
 
-    def __init__(self, name=None, symbols=(), doc="", path=()):
+    def __init__(self, name=None, symbols=(), default=None, doc="", path=()):
         super().__init__(name, doc, path)
         self.symbols = symbols
+        if default is None:
+            default = symbols[0]
+        self.default = default
 
     @property
     def js(self):

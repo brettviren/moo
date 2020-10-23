@@ -267,33 +267,6 @@ rebuild and notice that indeed the change is noticed.
 
 #+RESULTS:
 #+begin_example
-'distclean' finished successfully (0.002s)
-Setting top to                           : /home/bv/dev/moo/buildsys/waf/cmd 
-Setting out to                           : /home/bv/dev/moo/buildsys/waf/cmd/build 
-Checking for program 'moo'               : /home/bv/dev/moo/.direnv/python-venv-3.8.0/bin/moo 
-'configure' finished successfully (0.002s)
-
-first build
-
-Waf: Entering directory `/home/bv/dev/moo/buildsys/waf/cmd/build'
-[/home/bv/dev/moo/buildsys/waf/cmd/sub.jsonnet, /home/bv/dev/moo/buildsys/waf/cmd/sub/sub.jsonnet]
-[1/1] Processing model-dump.txt: model.jsonnet dump.txt.j2 -> build/model-dump.txt
-Waf: Leaving directory `/home/bv/dev/moo/buildsys/waf/cmd/build'
-'build' finished successfully (0.805s)
-
-second build, no rebuild
-
-Waf: Entering directory `/home/bv/dev/moo/buildsys/waf/cmd/build'
-Waf: Leaving directory `/home/bv/dev/moo/buildsys/waf/cmd/build'
-'build' finished successfully (0.014s)
-
-modify intermediate dependency, see it rebuild
-
-Waf: Entering directory `/home/bv/dev/moo/buildsys/waf/cmd/build'
-[/home/bv/dev/moo/buildsys/waf/cmd/sub.jsonnet, /home/bv/dev/moo/buildsys/waf/cmd/sub/sub.jsonnet]
-[1/1] Processing model-dump.txt: model.jsonnet dump.txt.j2 -> build/model-dump.txt
-Waf: Leaving directory `/home/bv/dev/moo/buildsys/waf/cmd/build'
-'build' finished successfully (0.786s)
 #+end_example
 
 *** mod
@@ -475,34 +448,34 @@ Do initial build
 Scanning dependencies of target ModelDump
 [100%] Generating model-dump.txt
 [100%] Built target ModelDump
--rw-rw-r-- 1 bv bv 93 2020-10-09 15:47:52.167971243 -0400 build/model-dump.txt
+-rw-rw-r-- 1 bv bv 93 2020-10-23 12:24:56.059227482 -0400 build/model-dump.txt
 
 Next we edit the intermediate files and notice a rebuild
 
 [100%] Generating model-dump.txt
 [100%] Built target ModelDump
--rw-rw-r-- 1 bv bv 93 2020-10-09 15:47:52.763955573 -0400 build/model-dump.txt
+-rw-rw-r-- 1 bv bv 93 2020-10-23 12:24:56.663218888 -0400 build/model-dump.txt
 
 Do do a second build, output is not rebuilt
 
 [100%] Built target ModelDump
--rw-rw-r-- 1 bv bv 93 2020-10-09 15:47:52.763955573 -0400 build/model-dump.txt
+-rw-rw-r-- 1 bv bv 93 2020-10-23 12:24:56.663218888 -0400 build/model-dump.txt
 
 Add new implicit dependency, which should cause a rebuild
 
 [100%] Generating model-dump.txt
 [100%] Built target ModelDump
--rw-rw-r-- 1 bv bv 93 2020-10-09 15:47:53.395938956 -0400 build/model-dump.txt
+-rw-rw-r-- 1 bv bv 93 2020-10-23 12:24:57.311209669 -0400 build/model-dump.txt
 
 Update new implicit dependency, which will be missed(?)
 
 [100%] Built target ModelDump
--rw-rw-r-- 1 bv bv 93 2020-10-09 15:47:53.395938956 -0400 build/model-dump.txt
+-rw-rw-r-- 1 bv bv 93 2020-10-23 12:24:57.311209669 -0400 build/model-dump.txt
 #+end_example
 
 
 
-** TODO Caveats
+*** TODO Caveats
 
 As-is, implicit dependencies are only given to CMake at configuration
 time.  In the above test, adding a new implicit dependency is okay

@@ -1,26 +1,95 @@
-#+title: moo - model oriented objects
+#+title:  moo 無 model oriented objects
+#+EXPORT_FILE_NAME: index.html
+#+subtitle: Model Oriented Objects
+#+setupfile: setup.org
 
 * Overview
+  :PROPERTIES:
+  :CUSTOM_ID: overview
+  :END:
 
 *moo* is a tool for managing data structures.  *moo* operates on:
 
-- schema :: data structures describing the structure of data (including schema)
+- schema :: data structures describing the structure of data (including schema).
 
-- model :: data structure which may be validated against a schema.
+- model :: data structure matching schema to a template.
 
-- templates :: text parameterized by schema and from which a document (eg, C++ code file) may be generated
+- templates :: marked up text in some target format which is parameterized by a model and from which a document (eg, C++ code file) may be generated.
 
-* Quick Start
+- codegen :: generated artifacts
 
-  After preparing a Python environment in your favorite manner:
+* Version
+  :PROPERTIES:
+  :CUSTOM_ID: version
+  :END:
 
-  #+begin_example
+The current *moo* version is
+
+#+begin_src shell :exports both :results output code :wrap "example"
+  moo version
+#+end_src
+
+#+RESULTS:
+#+begin_example
+0.1.0
+#+end_example
+
+
+
+* Installation
+  :PROPERTIES:
+  :CUSTOM_ID: install
+  :END:
+
+*moo* requires Python, probably at least 3.8 and installs in to your
+favorite Python environment in the usual ways.
+
+#+begin_example
+  $ pip install git+git://github.com/brettviren/moo.git#egg=moo
+#+end_example
+
+Or, to work on the code
+
+#+begin_example
+  $ git clone https://github.com/brettviren/moo.git
+  $ cd moo
   $ pip install -e .
+#+end_example
+
+PyPI install is still t.b.d.
+
+* Quick start
+  :PROPERTIES:
+  :CUSTOM_ID: punt
+  :END:
+
+The *moo* command line interface provides various commands and online
+help:
+
+#+begin_example
   $ moo --help
-  #+end_example
+#+end_example
+
+See documentation section for details.
 
 * Documentation
+  :PROPERTIES:
+  :CUSTOM_ID: docs
+  :END:
 
 - https://brettviren.github.io/moo
 
-- or as [[file:index.org]]
+- [[https://github.com/brettviren/moo][code repository]] and its [[file:README.org][README]] 
+
+- [[file:moo.org][moo high level documentation]]
+
+- [[file:oschema.org][moo object schema paradigm]]
+
+- [[file:otypes.org][moo object types]]
+
+- [[file:buildsys.org][moo and build systems]]
+
+- [[file:wcup.org][moo as Wire-Cell user package generator]]
+
+- [[file:reqs.org][moo for LaTeX and spreadsheet generator]]
+

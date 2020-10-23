@@ -1,0 +1,84 @@
+/*
+ * This file is 100% generated.  Any manual edits will likely be lost.
+ */
+{% set nsmarker = model.meta.ns.replace(":","_").replace(".","_").upper() + "_FSM_HPP" %}
+#ifndef {{nsmarker}}
+#define {{nsmarker}}
+
+#include "appfwk/Issues.hpp"
+#include <boost/msm/front/state_machine_def.hpp>
+#include <nlohmann/json.hpp>
+
+#include "{{model.meta.incdir}}/{{model.meta.name}}Nljs{{model.meta.ext}}"
+
+#include <nlohmann/json.hpp>
+
+namespace {{ model.meta.ns }} {
+
+    /** @brief Abstract MSM front end for {{model.meta.name}}
+     *
+     * Inherit from this class:
+     *
+     *     class MyFE : public {{ model.meta.ns }}::FE;
+     *
+     * Implement the action methods.
+     *
+     * Then to use do:
+     * 
+     * #include <boost/msm/back/state_machine.hpp>
+     * using MyFSM = boost::msm::back::state_machine<MyFE>;
+     *
+     *     MyFSM sm;
+     *     auto met = obj.get<MyEventType>();
+     *     sm.process_event(met);
+     *
+     * Or, to automatically handle the re-typing:
+     *
+     *     {{ model.meta.ns }}::process(sm, obj);
+     *
+     */
+    struct FE : public boost::msm::front::state_machine_def<FE> {
+
+        using object_t = nlohmann::json;
+
+        /// FSM States:
+        {% for state in model.fsm.states %}
+        /// {{state.doc}}
+        struct {{state.name}} : public boost::msm::front::state<> {};
+        {% endfor %}
+
+        using initial_state = {{model.fsm.initial}};
+
+        /// FSM Actions:
+        {% for act in model.fsm.actions %}
+        virtual void {{act.name}}(const {{act.evt}}& evt) = 0;
+        {% endfor %}
+
+        // clang-format off
+        struct transition_table: boost::mpl::vector<
+        {% for t in model.fsm.tt %}
+            a_row<{{"%12s"|format(t.ini.name)}}, {{"%12s"|format(t.evt)}}, {{"%12s"|format(t.fin.name)}}, &FE::{{t.act}}>{{"," if not loop.last}}
+        {% endfor %}
+            > {};
+        // clang-format on
+    };
+
+    /// Inject an typed event derived from the object.
+    template<class BE>
+    void process(BE& be, nlohmann::json obj) {
+        auto o = obj.get<Command>();
+        std::string msg = "\nprocess: " + str(o.id) + "\n" + o.data.dump(4);
+        ERS_INFO(msg);
+        switch (o.id) {
+            {% for evt in model.fsm.events %}
+            case Id::{{"%-8s"|format(evt|lower)}}: be.process_event({{evt}}{o}); break;
+            {% endfor %}
+            default:
+                throw SchemaError(ERS_HERE, "unknown command type");
+                break;
+        }
+    }
+
+} // namespace {{model.meta.ns}}
+
+#endif // {{ nsmarker }}

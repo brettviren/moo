@@ -3,16 +3,3 @@
 #+setupfile: setup.org
 
 *moo* is a tool for managing data structures, templates, schema and generating documents.
-
-- [[https://github.com/brettviren/moo][code repository]] and its [[file:README.org][README]] 
-
-- [[file:moo.org][moo high level documentation]]
-
-- [[file:oschema.org][moo object schema paradigm]]
-
-- [[file:buildsys.org][moo and build systems]]
-
-- [[file:wcup.org][moo as Wire-Cell user package generator]]
-
-- [[file:reqs.org][moo for LaTeX and spreadsheet generator]]
-

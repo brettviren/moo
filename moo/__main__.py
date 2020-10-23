@@ -43,7 +43,6 @@ class Context:
         model = self.transform(model)
         return model
 
-
     def graft(self, model):
         'Apply any grafts to the model'
         for g in self.grafts:
@@ -154,7 +153,7 @@ def cmd_validate(ctx, output, spath, schema, sequence, validator, model):
         data = [data]
         sche = [sche]
     else:
-        assert(len(data) == len(sche))
+        assert len(data) == len(sche)
     res = list()
     for m, s in zip(data, sche):
         one = moo.util.validate(m, s, validator)
@@ -166,14 +165,15 @@ def cmd_validate(ctx, output, spath, schema, sequence, validator, model):
         fp.write(text.encode())
 
 
-def write(data, output, need_dump=True):
+def writeit(data, output, need_dump=True):
+    'Helper for compileit'
     if need_dump:
         data = json.dumps(data, indent=4)
     with open(output, 'wb') as fp:
         fp.write(data.encode())
 
 
-@cli.command()
+@cli.command("compile")
 @click.option('-m', '--multi', default="",
               help="Write multiple output files")
 @click.option('-o', '--output', default="/dev/stdout",
@@ -183,7 +183,7 @@ def write(data, output, need_dump=True):
               help="Treat output as string not JSON")
 @click.argument('model')
 @click.pass_context
-def compile(ctx, multi, output, string, model):
+def compileit(ctx, multi, output, string, model):
     '''
     Compile a model to JSON
     '''
@@ -192,9 +192,9 @@ def compile(ctx, multi, output, string, model):
         os.makedirs(multi, exist_ok=True)
         for one, dat in data.items():
             one = os.path.join(multi, one)
-            write(dat, one, not string)
+            writeit(dat, one, not string)
     else:
-        write(data, output, not string)
+        writeit(data, output, not string)
 
 
 @cli.command()
@@ -220,8 +220,8 @@ def dump(ctx, output, format, model):
             for one in data:
                 print(type(one))
         elif isinstance(data, dict):
-            for k, v in data.items():
-                print(k, type(v))
+            for key, val in data.items():
+                print(key, type(val))
         else:
             print(type(data))
     else:
@@ -243,7 +243,7 @@ def render(ctx, output, model, templ):
     text = ctx.obj.render(templ, data)
     with open(output, 'wb') as fp:
         fp.write(text.encode())
-    pass
+
 
 
 @cli.command('render-many')
@@ -269,46 +269,9 @@ def render_many(ctx, outdir, model):
             fp.write(text.encode())
 
 
-
-# @cli.command()
-# @click.option('-C', '--outdir', default=".",
-#               type=click.Path(exists=False, dir_okay=True, file_okay=False),
-#               help="Output directory")
-# @click.argument('model')
-# @click.pass_context
-# def many(ctx, outdir, model):
-#     '''
-#     Render many files
-#     '''
-#     # fixme: break out much of this into the modules
-#     data = ctx.obj.load(model)
-#     models = data.get("models",{})
-#     schemas = data.get("schema",{})
-#     targets = data.get("targets",[])
-#     templates = data.get("templates",{})
-#     for target in targets:
-#         templname = target["template"]
-#         path = target["path"]
-#         # fixme: if schema given check model.dpath against it
-#         schema = target["schema"]
-#         print (f'generating file "{path}" with template "{templname}" using model of type "{schema}"')
-#         reldir=os.path.dirname(path)
-#         fname = os.path.basename(path)
-#         fulldir=os.path.join(outdir,reldir)
-#         model = models[target["model"]]
-#         dpath = target.get("dpath","")
-#         templ = ctx.obj.resolve(templates[templname])
-#         output = os.path.join(fulldir, fname)
-#         os.makedirs(fulldir, exist_ok=True)
-#         text = ctx.obj.render(templ, model)
-#         with open(output, 'wb') as fp:
-#             fp.write(text.encode())
-        
-
-
 @cli.command()
 @click.option('-o', '--output', default="/dev/stdout",
-              type=click.Path(exists=False, dir_okay=False, file_okay=True),
+              type=click.Path(dir_okay=False, file_okay=True),
               help="Output file, default is stdout")
 @click.argument('filename')
 @click.pass_context
@@ -321,13 +284,16 @@ def imports(ctx, output, filename):
     with open(output, 'wb') as fp:
         fp.write(text.encode())
 
-    
+
+@cli.command()
+def version():
+    'Print the version'
+    click.echo(moo.__version__)
+
 
 def main():
     cli(obj=None)
 
+
 if '__main__' == __name__:
     main()
-    
-
-

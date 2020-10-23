@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2020-09-30 Wed 13:00 -->
+<!-- 2020-10-23 Fri 12:46 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Schema Objects</title>
@@ -592,6 +592,7 @@ We can see the final result in full JSON glory:
         <span style="color: #b4fa70;">"schema"</span>: <span style="color: #e9b96e;">"string"</span>
     },
     {
+        <span style="color: #b4fa70;">"default"</span>: <span style="color: #e9b96e;">"introversion"</span>,
         <span style="color: #b4fa70;">"deps"</span>: [],
         <span style="color: #b4fa70;">"name"</span>: <span style="color: #e9b96e;">"MBTI"</span>,
         <span style="color: #b4fa70;">"path"</span>: [
@@ -634,6 +635,7 @@ We can see the final result in full JSON glory:
                 <span style="color: #b4fa70;">"name"</span>: <span style="color: #e9b96e;">"affil"</span>
             },
             {
+                <span style="color: #b4fa70;">"default"</span>: <span style="color: #e9b96e;">"introversion"</span>,
                 <span style="color: #b4fa70;">"doc"</span>: <span style="color: #e9b96e;">"Personality"</span>,
                 <span style="color: #b4fa70;">"item"</span>: <span style="color: #e9b96e;">"app.MBTI"</span>,
                 <span style="color: #b4fa70;">"name"</span>: <span style="color: #e9b96e;">"mbti"</span>
@@ -1043,7 +1045,8 @@ bring these in as a model "graft".
                          <span style="color: #e9b96e;">'name'</span>: <span style="color: #e9b96e;">'Email'</span>,
                          <span style="color: #e9b96e;">'path'</span>: [<span style="color: #e9b96e;">'app'</span>],
                          <span style="color: #e9b96e;">'schema'</span>: <span style="color: #e9b96e;">'string'</span>},
-           <span style="color: #e9b96e;">'app.MBTI'</span>: {<span style="color: #e9b96e;">'deps'</span>: [],
+           <span style="color: #e9b96e;">'app.MBTI'</span>: {<span style="color: #e9b96e;">'default'</span>: <span style="color: #e9b96e;">'introversion'</span>,
+                        <span style="color: #e9b96e;">'deps'</span>: [],
                         <span style="color: #e9b96e;">'name'</span>: <span style="color: #e9b96e;">'MBTI'</span>,
                         <span style="color: #e9b96e;">'path'</span>: [<span style="color: #e9b96e;">'app'</span>],
                         <span style="color: #e9b96e;">'schema'</span>: <span style="color: #e9b96e;">'enum'</span>,
@@ -1070,7 +1073,8 @@ bring these in as a model "graft".
                                      {<span style="color: #e9b96e;">'doc'</span>: <span style="color: #e9b96e;">'Some affiliation'</span>,
                                       <span style="color: #e9b96e;">'item'</span>: <span style="color: #e9b96e;">'app.Affiliation'</span>,
                                       <span style="color: #e9b96e;">'name'</span>: <span style="color: #e9b96e;">'affil'</span>},
-                                     {<span style="color: #e9b96e;">'doc'</span>: <span style="color: #e9b96e;">'Personality'</span>,
+                                     {<span style="color: #e9b96e;">'default'</span>: <span style="color: #e9b96e;">'introversion'</span>,
+                                      <span style="color: #e9b96e;">'doc'</span>: <span style="color: #e9b96e;">'Personality'</span>,
                                       <span style="color: #e9b96e;">'item'</span>: <span style="color: #e9b96e;">'app.MBTI'</span>,
                                       <span style="color: #e9b96e;">'name'</span>: <span style="color: #e9b96e;">'mbti'</span>}],
                           <span style="color: #e9b96e;">'name'</span>: <span style="color: #e9b96e;">'Person'</span>,
@@ -1353,7 +1357,7 @@ schema.
 </div>
 <div id="postamble" class="status">
 <p class="author">Author: Brett Viren</p>
-<p class="date">Created: 2020-09-30 Wed 13:00</p>
+<p class="date">Created: 2020-10-23 Fri 12:46</p>
 <p class="validation"><a href="http://validator.w3.org/check?uri=referer">Validate</a></p>
 </div>
 </body>
