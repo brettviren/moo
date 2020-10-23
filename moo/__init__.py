@@ -7,7 +7,7 @@ import moo.oschema
 import moo.otypes
 
 # Set for release, post-release add "<last>-dev" or "<next>-rc<N>"
-__version__ = '0.1.0-dev'
+__version__ = '0.1.0'
 
 known_extensions = ["jsonnet", "json", "csv", "xml", "yaml", "ini"]
 try:
