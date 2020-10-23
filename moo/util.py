@@ -120,23 +120,22 @@ def tla_pack(tlas, jpath):
     tla_vars = dict()
     tla_codes = dict()
     for one in tlas:
-        k,v = one.split("=",1)
-
-
-        chunks = v.split(".")
-        if len(chunks) > 1:
+        key, val = one.split("=", 1)
+        chunks = val.split(".")
+        if val[0] in '{["]}':   # inline code
+            tla_codes[key] = val
+        elif len(chunks) > 1:
             ext = chunks[-1]
             if ext in [".jsonnet", ".json"]:
-                fname = resolve(v, jpath)
-                tla_codes[k] = open(fname).read()
+                fname = resolve(val, jpath)
+                tla_codes[key] = open(fname).read()
             elif ext in moo.known_extensions:
-                v = moo.io.load(v, jpath)
-                tla_codes[k] = json.dumps(v)
-
-        elif v[0] in '{["]}':   # inline code
-            tla_codes[k] = v;   
+                val = moo.io.load(val, jpath)
+                tla_codes[key] = json.dumps(val)
+            else:               # assume simple string happens to have .'s
+                tla_vars[key] = val
         else:                   # string
-            tla_vars[k] = v
+            tla_vars[key] = val
 
     # these keywords are what jsonnet.evaluate_file() expects
     return dict(tla_vars=tla_vars, tla_codes=tla_codes)

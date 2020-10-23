@@ -15,7 +15,6 @@ class Context:
     '''
     def __init__(self, dpath="", mpath=(), tpath=(),
                  tla=(), transform=(), graft=()):
-
         self.dpath = dpath
         self.mpath = mpath
         self.tpath = tpath
@@ -26,6 +25,9 @@ class Context:
         self.grafts = graft
 
     def just_load(self, filename, mpath=None, dpath=None):
+        '''
+        Simple load.
+        '''
         return moo.io.load(self.resolve(filename),
                            mpath or self.mpath,
                            dpath or self.dpath, **self.tlas)
