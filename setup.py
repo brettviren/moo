@@ -18,6 +18,7 @@ setuptools.setup(
         "fastjsonschema",
         "jsonpointer",
         "numpy",
+        "openpyxl",             # make optional?
 #        "transitions",
     ],
     entry_points = dict(
