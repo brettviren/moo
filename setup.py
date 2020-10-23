@@ -17,6 +17,7 @@ setuptools.setup(
         "jsonschema",
         "fastjsonschema",
         "jsonpointer",
+        "numpy",
 #        "transitions",
     ],
     entry_points = dict(
