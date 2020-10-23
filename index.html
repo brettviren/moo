@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2020-10-23 Fri 14:21 -->
+<!-- 2020-10-23 Fri 15:24 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>moo 無 model oriented objects</title>
@@ -265,12 +265,17 @@ for the JavaScript code in this tag.
 <li><a href="#version">Version</a></li>
 <li><a href="#install">Installation</a>
 <ul>
-<li><a href="#orgb7b2793">Install a release</a></li>
-<li><a href="#orgce3be52">Install development</a></li>
+<li><a href="#org264fe13">Install a release</a></li>
+<li><a href="#org552f073">Install development</a></li>
 </ul>
 </li>
 <li><a href="#punt">Quick start</a></li>
-<li><a href="#docs">Documentation</a></li>
+<li><a href="#docs">Documentation</a>
+<ul>
+<li><a href="#links">Links</a></li>
+</ul>
+</li>
+<li><a href="#etc">Etc</a></li>
 </ul>
 </div>
 </div>
@@ -329,18 +334,18 @@ usual ways.  Some examples are given below.  Due to a name conflict
 </p>
 </div>
 
-<div id="outline-container-orgb7b2793" class="outline-3">
-<h3 id="orgb7b2793">Install a release</h3>
-<div class="outline-text-3" id="text-orgb7b2793">
+<div id="outline-container-org264fe13" class="outline-3">
+<h3 id="org264fe13">Install a release</h3>
+<div class="outline-text-3" id="text-org264fe13">
 <pre class="example">
 $ python -m pip install https://github.com/brettviren/moo/archive/0.1.0.tar.gz
 </pre>
 </div>
 </div>
 
-<div id="outline-container-orgce3be52" class="outline-3">
-<h3 id="orgce3be52">Install development</h3>
-<div class="outline-text-3" id="text-orgce3be52">
+<div id="outline-container-org552f073" class="outline-3">
+<h3 id="org552f073">Install development</h3>
+<div class="outline-text-3" id="text-org552f073">
 <p>
 Just install:
 </p>
@@ -383,6 +388,11 @@ See documentation section for details.
 <div id="outline-container-docs" class="outline-2">
 <h2 id="docs">Documentation</h2>
 <div class="outline-text-2" id="text-docs">
+</div>
+
+<div id="outline-container-links" class="outline-3">
+<h3 id="links">Links</h3>
+<div class="outline-text-3" id="text-links">
 <ul class="org-ul">
 <li><a href="https://brettviren.github.io/moo">https://brettviren.github.io/moo</a></li>
 
@@ -403,9 +413,45 @@ See documentation section for details.
 </div>
 </div>
 </div>
+
+<div id="outline-container-etc" class="outline-2">
+<h2 id="etc">Etc</h2>
+<div class="outline-text-2" id="text-etc">
+<p>
+The name <b>moo</b> is a play on the Japanese term 無 which may be
+interpreted to English in a few ways.  Some are listed below along
+with how the meaning reflects on aspects of <b>moo</b>.
+</p>
+
+<dl class="org-dl">
+<dt>Untainted pure mind</dt><dd><b>moo</b> avoids being "opinionated", is centered
+on ideas expressed as abstract data structures and so can be used
+for a wide variety of things from generating code, documents or
+package skeletons.  <b>moo</b> forms its data structures by ingesting most
+of the popular file formats likely to be used.  And, <b>moo</b> can produce
+any file format for which a user may create a template.</dd>
+
+<dt>No strings attached</dt><dd><b>moo</b> is not intended to be an invasive tool.
+<b>moo</b> artifacts can be generated as desired and <b>moo</b> may be left
+behind.  <b>moo</b> does not lock-in particular formats.  <b>moo</b> extends this
+freedom to your own applications.  By adopting <b>moo</b> codegen
+philosophy an app need not lock-in itself to particular data
+formats, representations, or serializations technologies.</dd>
+
+<dt>Nothingness</dt><dd><b>moo</b> is not really anything itself but rather it is
+the bits that go between other real things which perform the "heavy
+lifting" (Jsonnet, anyconfig, Jinja, JSON Schema, user templates).
+<b>moo</b> lets apps embrace the power of this nothingness by switching
+developer effort away from repetitive programming tasks and toward
+data structure and template development and then through code
+generation that effort gains multiplicative power.</dd>
+</dl>
+</div>
+</div>
+</div>
 <div id="postamble" class="status">
 <p class="author">Author: Brett Viren</p>
-<p class="date">Created: 2020-10-23 Fri 14:21</p>
+<p class="date">Created: 2020-10-23 Fri 15:24</p>
 <p class="validation"><a href="http://validator.w3.org/check?uri=referer">Validate</a></p>
 </div>
 </body>

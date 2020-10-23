@@ -89,6 +89,11 @@ See documentation section for details.
   :CUSTOM_ID: docs
   :END:
 
+** Links
+   :PROPERTIES:
+   :CUSTOM_ID: links
+   :END:
+
 - https://brettviren.github.io/moo
 
 - [[https://github.com/brettviren/moo][code repository]] and its [[file:README.org][README]] 
@@ -104,4 +109,35 @@ See documentation section for details.
 - [[file:wcup.org][moo as Wire-Cell user package generator]]
 
 - [[file:reqs.org][moo for LaTeX and spreadsheet generator]]
+
+* Etc
+   :PROPERTIES:
+   :CUSTOM_ID: etc
+   :END:
+
+The name *moo* is a play on the Japanese term 無 which may be
+interpreted to English in a few ways.  Some are listed below along
+with how the meaning reflects on aspects of *moo*.
+
+- Untainted pure mind :: *moo* avoids being "opinionated", is centered
+  on ideas expressed as abstract data structures and so can be used
+  for a wide variety of things from generating code, documents or
+  package skeletons.  *moo* forms its data structures by ingesting most
+  of the popular file formats likely to be used.  And, *moo* can produce
+  any file format for which a user may create a template.
+
+- No strings attached :: *moo* is not intended to be an invasive tool.
+  *moo* artifacts can be generated as desired and *moo* may be left
+  behind.  *moo* does not lock-in particular formats.  *moo* extends this
+  freedom to your own applications.  By adopting *moo* codegen
+  philosophy an app need not lock-in itself to particular data
+  formats, representations, or serializations technologies.
+
+- Nothingness :: *moo* is not really anything itself but rather it is
+  the bits that go between other real things which perform the "heavy
+  lifting" (Jsonnet, anyconfig, Jinja, JSON Schema, user templates).
+  *moo* lets apps embrace the power of this nothingness by switching
+  developer effort away from repetitive programming tasks and toward
+  data structure and template development and then through code
+  generation that effort gains multiplicative power.
 
