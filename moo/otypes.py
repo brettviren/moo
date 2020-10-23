@@ -97,7 +97,6 @@ class Record(BaseType):
         print(self.field_names)
         ret = dict()
         for fname, field in self.fields.items():
-            print(fname, self._value.get(fname, "unset"))
             try:
                 ret[fname] = getattr(self, fname)
             except AttributeError:
@@ -476,7 +475,7 @@ class Number(BaseType):
             self._value = numpy.array(val, self.ost["dtype"])
             return
         if isinstance(val, self.__class__):
-            self._value = val.pod()
+            self._value = numpy.array(val.pod(), self.ost["dtype"])
             return
         cname = self.__class__.__name__
         raise ValueError(f'illegal {cname} number type: {type(val)}')
