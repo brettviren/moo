@@ -2,7 +2,7 @@ import setuptools
 
 setuptools.setup(
     name="moo",
-    version="0.1.0",
+    version="0.1.x-dev",
     author="Brett Viren",
     author_email="brett.viren@gmail.com",
     description="Model oriented objects",

@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2020-10-23 Fri 12:42 -->
+<!-- 2020-10-23 Fri 14:21 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>moo 無 model oriented objects</title>
@@ -263,7 +263,12 @@ for the JavaScript code in this tag.
 <ul>
 <li><a href="#overview">Overview</a></li>
 <li><a href="#version">Version</a></li>
-<li><a href="#install">Installation</a></li>
+<li><a href="#install">Installation</a>
+<ul>
+<li><a href="#orgb7b2793">Install a release</a></li>
+<li><a href="#orgce3be52">Install development</a></li>
+</ul>
+</li>
 <li><a href="#punt">Quick start</a></li>
 <li><a href="#docs">Documentation</a></li>
 </ul>
@@ -302,7 +307,7 @@ The current <b>moo</b> version is
 </div>
 
 <pre class="example">
-0.1.0
+0.1.x-dev
 </pre>
 </div>
 </div>
@@ -313,27 +318,47 @@ The current <b>moo</b> version is
 <h2 id="install">Installation</h2>
 <div class="outline-text-2" id="text-install">
 <p>
-<b>moo</b> requires Python, probably at least 3.8 and installs in to your
-favorite Python environment in the usual ways.
+<b>moo</b> requires Python 3.5 or newer and <code>python</code> below is assumed to
+provide that.
+</p>
+
+<p>
+<b>moo</b> installs in to your favorite Python environment in most of the
+usual ways.  Some examples are given below.  Due to a name conflict
+(this) <b>moo</b> is not expected to be distributed through PyPI.
+</p>
+</div>
+
+<div id="outline-container-orgb7b2793" class="outline-3">
+<h3 id="orgb7b2793">Install a release</h3>
+<div class="outline-text-3" id="text-orgb7b2793">
+<pre class="example">
+$ python -m pip install https://github.com/brettviren/moo/archive/0.1.0.tar.gz
+</pre>
+</div>
+</div>
+
+<div id="outline-container-orgce3be52" class="outline-3">
+<h3 id="orgce3be52">Install development</h3>
+<div class="outline-text-3" id="text-orgce3be52">
+<p>
+Just install:
 </p>
 
 <pre class="example">
-$ pip install git+git://github.com/brettviren/moo.git#egg=moo
+$ python -m pip install git+git://github.com/brettviren/moo.git#egg=moo
 </pre>
 
 <p>
-Or, to work on the code
+Or, to allow working on the code:
 </p>
 
 <pre class="example">
 $ git clone https://github.com/brettviren/moo.git
 $ cd moo
-$ pip install -e .
+$ pyton -m pip install -e .
 </pre>
-
-<p>
-PyPI install is still t.b.d.
-</p>
+</div>
 </div>
 </div>
 
@@ -380,7 +405,7 @@ See documentation section for details.
 </div>
 <div id="postamble" class="status">
 <p class="author">Author: Brett Viren</p>
-<p class="date">Created: 2020-10-23 Fri 12:42</p>
+<p class="date">Created: 2020-10-23 Fri 14:21</p>
 <p class="validation"><a href="http://validator.w3.org/check?uri=referer">Validate</a></p>
 </div>
 </body>
