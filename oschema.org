@@ -658,7 +658,7 @@ These CLI are getting rather long and we may add bits to make that easier but le
    :CUSTOM_ID: struct
    :END:
 
-The [[file:examples/oschema/ostructs.hpp.j2][ostructs.hpp.j2]] template file gets applied to the ~omodel~ to
+The [[file:moo/templates/ostructs.hpp.j2][ostructs.hpp.j2]] template file gets applied to the ~omodel~ to
 produce a C++ header file defining a ~struct~ for each ~record~ instance
 in the model and any supporting types via a ~using~ type alias.  It also
 uses the ~extref~ info to ~#include~ any required external headers that
@@ -752,7 +752,7 @@ namespace app {
 #+end_src
 
 And, here are the corresponding ~nlohmann::json~ serialization
-functions, produced by applying the [[file:examples/oschema/onljs.hpp.j2][onljs.hpp.j2]] template to the same
+functions, produced by applying the [[file:moo/templates/oschema/onljs.hpp.j2][onljs.hpp.j2]] template to the same
 model.
 
 #+begin_src shell :exports both :results output code :wrap "src c++"
