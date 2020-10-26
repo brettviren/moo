@@ -1,0 +1,2 @@
+recursive-include moo/jsonnet-code *.jsonnet
+recursive-include moo/templates *.j2
