@@ -382,13 +382,19 @@ subsub = {'a': 1, 'b': 2, 'c': 'hello', 'd': 'FORTRAN'}
 This section describes one way to integrate ~moo~ with a CMake-based
 build.  It shows what one must do to insert a code generator into the
 build graph in a way that respects intermediate dependencies using ~moo
-imports~ like the [[Waf]] examples.
+imports~ like the [[Waf]] examples.  
 
-The ~CMakeLists.txt~ file:
+Currently the code is just an "vendored" example and found in
+[[file:buildsys/cmake/moo.cmake][moo.cmake]].  Still todo:
+
+- [ ] install ~moo.cmake~ and other cmake files via ~setup.py~
+- [ ] have the usual ~find_package(moo)~ do the right thing
+
+The current example ~CMakeLists.txt~ file using the ~moo~ CMake support is:
 
 #+include: buildsys/cmake/CMakeLists.txt src cmake
 
-Here it is getting exercised:
+And, here it is getting exercised:
 
 #+begin_src shell :exports both :results output code :wrap "example"
   cd buildsys/cmake
@@ -416,7 +422,7 @@ Here it is getting exercised:
   cmake --build build
   ls -l --full-time build/model-dump.txt
 
-  echo -e '\nUpdate new implicit dependency, which will be missed(?)\n'  
+  echo -e '\nUpdate new implicit dependency, which should cause a rebuild\n'  
   echo '{a:1,b:2,c:"see me"}' > sub/sub2.jsonnet
   cmake --build build
   ls -l --full-time build/model-dump.txt
@@ -445,33 +451,37 @@ Here it is getting exercised:
 
 Do initial build
 
-Scanning dependencies of target ModelDump
-[100%] Generating model-dump.txt
-[100%] Built target ModelDump
--rw-rw-r-- 1 bv bv 93 2020-10-23 12:24:56.059227482 -0400 build/model-dump.txt
+Scanning dependencies of target DOIT
+[100%] generate code model-dump.txt
+[100%] Built target DOIT
+-rw-rw-r-- 1 bv bv 93 2020-10-27 17:28:21.541964215 -0400 build/model-dump.txt
 
 Next we edit the intermediate files and notice a rebuild
 
-[100%] Generating model-dump.txt
-[100%] Built target ModelDump
--rw-rw-r-- 1 bv bv 93 2020-10-23 12:24:56.663218888 -0400 build/model-dump.txt
+[100%] generate code model-dump.txt
+[100%] Built target DOIT
+-rw-rw-r-- 1 bv bv 93 2020-10-27 17:28:22.153954091 -0400 build/model-dump.txt
 
 Do do a second build, output is not rebuilt
 
-[100%] Built target ModelDump
--rw-rw-r-- 1 bv bv 93 2020-10-23 12:24:56.663218888 -0400 build/model-dump.txt
+[100%] Built target DOIT
+-rw-rw-r-- 1 bv bv 93 2020-10-27 17:28:22.153954091 -0400 build/model-dump.txt
 
 Add new implicit dependency, which should cause a rebuild
 
-[100%] Generating model-dump.txt
-[100%] Built target ModelDump
--rw-rw-r-- 1 bv bv 93 2020-10-23 12:24:57.311209669 -0400 build/model-dump.txt
+[100%] generate code model-dump.txt
+[100%] Built target DOIT
+-rw-rw-r-- 1 bv bv 93 2020-10-27 17:28:22.797943438 -0400 build/model-dump.txt
 
-Update new implicit dependency, which will be missed(?)
+Update new implicit dependency, which should cause a rebuild
 
-[100%] Built target ModelDump
--rw-rw-r-- 1 bv bv 93 2020-10-23 12:24:57.311209669 -0400 build/model-dump.txt
+[100%] Built target DOIT
+-rw-rw-r-- 1 bv bv 93 2020-10-27 17:28:22.797943438 -0400 build/model-dump.txt
 #+end_example
+
+
+
+
 
 
 

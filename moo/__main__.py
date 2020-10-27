@@ -3,6 +3,7 @@
 Main CLI to moo
 '''
 import os
+import re
 import json
 import click
 import moo
@@ -280,7 +281,15 @@ def imports(ctx, output, filename):
     Emit a list of imports required by the model
     '''
     deps = ctx.obj.imports(filename)
-    text = '\n'.join(deps)
+    if output.endswith(".cmake"):  # special output format
+        basename = os.path.splitext(os.path.basename(output))[0]
+        varname = re.sub("[^a-zA-Z0-9]", "_", basename).upper()
+        lines = [f'set({varname}']
+        lines += ['    "%s"' % one for one in deps]
+        lines += [')']
+        text = '\n'.join(lines)
+    else:
+        text = '\n'.join(deps)
     with open(output, 'wb') as fp:
         fp.write(text.encode())
 

@@ -1,28 +1,13 @@
 project("moo-buildsys-cmake")
 cmake_minimum_required(VERSION 3.4...3.17) # older may also work
 
-# fixme: find_package(moo)
+# fixme: needs to turn into a find_package(moo)!
+list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR})
+include(moo)
 
-execute_process(
-  COMMAND moo -T ${CMAKE_SOURCE_DIR} -M ${CMAKE_SOURCE_DIR} imports model.jsonnet
-  OUTPUT_VARIABLE MODEL_DEPENDENCIES_LINES
-  RESULT_VARIABLE RETURN_VALUE
-  WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
-)
-if (NOT RETURN_VALUE EQUAL 0)
-  message(FATAL_ERROR "Failed to get the dependencies")
-endif()
-string(REPLACE "\n" ";" MODEL_DEPENDENCIES ${MODEL_DEPENDENCIES_LINES})
+moo_codegen(MODEL model.jsonnet TEMPL dump.txt.j2 CODEGEN model-dump.txt)
 
-install(FILES ${CMAKE_CURRENT_BINARY_DIR}/model-dump.txt DESTINATION ${CMAKE_INSTALL_PREFIX})
-
-add_custom_command(
-  OUTPUT model-dump.txt
-  COMMAND moo -T ${CMAKE_SOURCE_DIR} -M ${CMAKE_SOURCE_DIR} render -o model-dump.txt model.jsonnet dump.txt.j2
-  DEPENDS model.jsonnet dump.txt.j2 ${MODEL_DEPENDENCIES}
-  COMMENT "Generating model-dump.txt"
-)
-add_custom_target(ModelDump ALL
-  DEPENDS model-dump.txt)
-
-message("implicit dependencies: ${MODEL_DEPENDENCIES}")
+## We need some target to trigger the codegen.  Normally, this would
+## be done by some "real" code target depending on the CODEGEN output.
+##   cmake --build build/ -t DOIT
+add_custom_target(DOIT ALL DEPENDS model-dump.txt)
