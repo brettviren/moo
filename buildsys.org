@@ -485,10 +485,3 @@ Update new implicit dependency, which should cause a rebuild
 
 
 
-*** TODO Caveats
-
-As-is, implicit dependencies are only given to CMake at configuration
-time.  In the above test, adding a new implicit dependency is okay
-because doing so modifies an existing known file.  But changing the
-contents of that new implicit dependency does not result in a correct
-rebuild.
