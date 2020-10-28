@@ -1,0 +1,7 @@
+#+title: Object Types
+#+subtitle: ~moo~ 無 ~otypes~
+#+setupfile: setup.org
+
+* Overview
+
+General is t.b.d., for now see  [[https://brettviren.github.io/dune-daq-repl/ddcmd.html][DUNE DAQ Command Object Creation]] which describes ~moo.otypes~ in the context of one particular application.

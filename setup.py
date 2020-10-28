@@ -1,8 +1,10 @@
 import setuptools
 
+from moo.version import version
+
 setuptools.setup(
     name="moo",
-    version="0.1.x-dev",
+    version=version,
     author="Brett Viren",
     author_email="brett.viren@gmail.com",
     description="Model oriented objects",

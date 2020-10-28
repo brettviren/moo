@@ -5,9 +5,9 @@ import moo.io
 import moo.csvio
 import moo.oschema
 import moo.otypes
+from moo.version import version
 
-# Set for release, post-release add "<last>-dev" or "<next>-rc<N>"
-__version__ = '0.1.x-dev'
+__version__ = version
 
 known_extensions = ["jsonnet", "json", "csv", "xml", "yaml", "ini"]
 try:

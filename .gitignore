@@ -23,3 +23,8 @@ latexmk-out
 auto
 cut*
 junk*
+dist
+buildsys/cmake/sub.jsonnet
+buildsys/cmake/sub/sub2.jsonnet
+buildsys/cmake/test.cmake
+buildsys/make/model-dump.txt
