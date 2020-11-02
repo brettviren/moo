@@ -48,6 +48,29 @@ provide that.
 usual ways.  Some examples are given below.  Due to a name conflict
 (this) *moo* is not expected to be distributed through PyPI.
 
+** Python environment
+
+Use whatever your favorite Python environment is.  Some suggestions:
+
+*** Python3 built in virtual environment
+
+#+begin_example
+  $ python3 -m venv venv
+  $ source venv/bin/activiate
+#+end_example
+
+
+*** Direnv
+
+Install ~direnv~ and activate it in your shell https://github.com/direnv/direnv
+
+Then:
+
+#+begin_example
+  $ echo "layout python3" > .envrc
+  $ direnv allow
+#+end_example
+
 ** Install a release
 
 #+begin_example
