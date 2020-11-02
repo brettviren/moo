@@ -10,7 +10,12 @@
 #define {{cpp.headerguard(model, tcname)}}
 
 
-#include "{{model.relpath|replace(".","/")}}/Structs.hpp"
+{% set reldir = model.relpath|replace(".","/") %}
+{% if reldir %}
+#include "{{reldir}}/Structs.hpp"
+{% else %}
+#include "Structs.hpp"
+{% endif %}
 
 {% for ep in model.extrefs %}
 #include "{{ep}}/{{tcname}}.hpp"
