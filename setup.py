@@ -11,7 +11,7 @@ setuptools.setup(
     url="https://brettviren.github.io/moo",
     packages=setuptools.find_packages(),
     python_requires='>=3.5',    # use of typing probably drive this
-    install_requires = [
+    install_requires=[
         "click",
         "jsonnet",
         "jinja2",

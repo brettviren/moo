@@ -1,0 +1,9 @@
+click
+jsonnet
+jinja2
+anyconfig
+jsonschema
+fastjsonschema
+jsonpointer
+numpy
+openpyxl
