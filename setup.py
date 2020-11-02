@@ -13,7 +13,7 @@ setuptools.setup(
     python_requires='>=3.5',    # use of typing probably drive this
     install_requires=[
         "click",
-        "jsonnet",
+        "jsonnet>=0.16.0",
         "jinja2",
         "anyconfig",
         "jsonschema",
