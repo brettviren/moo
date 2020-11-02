@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2020-10-23 Fri 15:24 -->
+<!-- 2020-11-02 Mon 17:05 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>moo 無 model oriented objects</title>
@@ -265,8 +265,15 @@ for the JavaScript code in this tag.
 <li><a href="#version">Version</a></li>
 <li><a href="#install">Installation</a>
 <ul>
-<li><a href="#org264fe13">Install a release</a></li>
-<li><a href="#org552f073">Install development</a></li>
+<li><a href="#orgfd47bd2">Python environment</a>
+<ul>
+<li><a href="#org8eb4e29">Python3 built in virtual environment</a></li>
+<li><a href="#org6005b20">Direnv</a></li>
+</ul>
+</li>
+<li><a href="#org5604993">Install dependencies</a></li>
+<li><a href="#orge0bd64d">Install a release</a></li>
+<li><a href="#orge292bfa">Install development</a></li>
 </ul>
 </li>
 <li><a href="#punt">Quick start</a></li>
@@ -312,7 +319,7 @@ The current <b>moo</b> version is
 </div>
 
 <pre class="example">
-0.1.x-dev
+0.2.x-dev
 </pre>
 </div>
 </div>
@@ -334,22 +341,68 @@ usual ways.  Some examples are given below.  Due to a name conflict
 </p>
 </div>
 
-<div id="outline-container-org264fe13" class="outline-3">
-<h3 id="org264fe13">Install a release</h3>
-<div class="outline-text-3" id="text-org264fe13">
+<div id="outline-container-orgfd47bd2" class="outline-3">
+<h3 id="orgfd47bd2">Python environment</h3>
+<div class="outline-text-3" id="text-orgfd47bd2">
+<p>
+Here, <code>python</code> is assumed to be Python 3.  Use whatever your favorite Python environment is to assure that.  Some suggestions:
+</p>
+</div>
+
+<div id="outline-container-org8eb4e29" class="outline-4">
+<h4 id="org8eb4e29">Python3 built in virtual environment</h4>
+<div class="outline-text-4" id="text-org8eb4e29">
 <pre class="example">
-$ python -m pip install https://github.com/brettviren/moo/archive/0.1.0.tar.gz
+$ python3 -m venv venv
+$ source venv/bin/activiate
 </pre>
 </div>
 </div>
 
-<div id="outline-container-org552f073" class="outline-3">
-<h3 id="org552f073">Install development</h3>
-<div class="outline-text-3" id="text-org552f073">
+<div id="outline-container-org6005b20" class="outline-4">
+<h4 id="org6005b20">Direnv</h4>
+<div class="outline-text-4" id="text-org6005b20">
 <p>
-Just install:
+Install <code>direnv</code> and activate it in your shell, then:
 </p>
 
+<pre class="example">
+$ echo "layout python3" &gt; .envrc
+$ direnv allow
+</pre>
+
+<p>
+See more at <a href="https://github.com/direnv/direnv">https://github.com/direnv/direnv</a>
+</p>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org5604993" class="outline-3">
+<h3 id="org5604993">Install dependencies</h3>
+<div class="outline-text-3" id="text-org5604993">
+<p>
+To install the dependencies, you may use the latest <code>requirements.txt</code> file or one from a release.
+</p>
+
+<pre class="example">
+$ python -m pip install -r https://raw.githubusercontent.com/brettviren/moo/master/requirements.txt
+</pre>
+</div>
+</div>
+
+<div id="outline-container-orge0bd64d" class="outline-3">
+<h3 id="orge0bd64d">Install a release</h3>
+<div class="outline-text-3" id="text-orge0bd64d">
+<pre class="example">
+$ python -m pip install https://github.com/brettviren/moo/archive/0.3.0.tar.gz
+</pre>
+</div>
+</div>
+
+<div id="outline-container-orge292bfa" class="outline-3">
+<h3 id="orge292bfa">Install development</h3>
+<div class="outline-text-3" id="text-orge292bfa">
 <pre class="example">
 $ python -m pip install git+git://github.com/brettviren/moo.git#egg=moo
 </pre>
@@ -451,7 +504,7 @@ generation that effort gains multiplicative power.</dd>
 </div>
 <div id="postamble" class="status">
 <p class="author">Author: Brett Viren</p>
-<p class="date">Created: 2020-10-23 Fri 15:24</p>
+<p class="date">Created: 2020-11-02 Mon 17:05</p>
 <p class="validation"><a href="http://validator.w3.org/check?uri=referer">Validate</a></p>
 </div>
 </body>

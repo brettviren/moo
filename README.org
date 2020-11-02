@@ -50,7 +50,7 @@ usual ways.  Some examples are given below.  Due to a name conflict
 
 ** Python environment
 
-Use whatever your favorite Python environment is.  Some suggestions:
+Here, ~python~ is assumed to be Python 3.  Use whatever your favorite Python environment is to assure that.  Some suggestions:
 
 *** Python3 built in virtual environment
 
@@ -59,27 +59,32 @@ Use whatever your favorite Python environment is.  Some suggestions:
   $ source venv/bin/activiate
 #+end_example
 
-
 *** Direnv
 
-Install ~direnv~ and activate it in your shell https://github.com/direnv/direnv
-
-Then:
+Install ~direnv~ and activate it in your shell, then:
 
 #+begin_example
   $ echo "layout python3" > .envrc
   $ direnv allow
 #+end_example
 
+See more at https://github.com/direnv/direnv
+
+** Install dependencies
+
+To install the dependencies, you may use the latest ~requirements.txt~ file or one from a release.
+
+#+begin_example
+  $ python -m pip install -r https://raw.githubusercontent.com/brettviren/moo/master/requirements.txt
+#+end_example
+
 ** Install a release
 
 #+begin_example
-  $ python -m pip install https://github.com/brettviren/moo/archive/0.1.0.tar.gz
+  $ python -m pip install https://github.com/brettviren/moo/archive/0.3.0.tar.gz
 #+end_example
 
 ** Install development
-
-Just install:
 
 #+begin_example
   $ python -m pip install git+git://github.com/brettviren/moo.git#egg=moo

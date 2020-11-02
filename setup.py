@@ -28,5 +28,6 @@ setuptools.setup(
             'moo = moo.__main__:main',
         ]
     ),
+    include_package_data=True,
 )
 
