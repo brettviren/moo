@@ -93,7 +93,7 @@ To install the dependencies, you may use the latest ~requirements.txt~ file or o
 Or, to allow working on the code:
 
 #+begin_example
-  $ git clone https://github.com/brettviren/moo.git
+  $ git clone git@github.com:brettviren/moo.git
   $ cd moo
   $ pyton -m pip install -e .
 #+end_example
