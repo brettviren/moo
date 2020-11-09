@@ -3,6 +3,7 @@ Load spreadsheets
 '''
 from openpyxl import load_workbook
 
+
 def load(filename, paths, **kwds):
     '''Load spreadsheet
 
@@ -24,9 +25,10 @@ def load(filename, paths, **kwds):
         if head is None:
             head = [c.value.strip() for c in row]
             continue
-        one = {k:v.value for k,v in zip(head, row)}
-        if all([v is None for v in one.values()]):
-            continue
+        one = {k: v.value for k, v in zip(head, row)}
+        have = [v for v in one.values() if v]
+        if not have:            # bail on empty row
+            break
 
         ret.append(one)
     return ret
