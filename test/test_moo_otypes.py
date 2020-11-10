@@ -71,3 +71,11 @@ def test_with_schema():
         p.update(affil="bv@bnl.gov")
     p.update(affil=Email("bv@bnl.gov"))
     print(p.pod())
+
+
+# pytest -s -k issue_1 test/test_moo_otypes.py
+def test_issue_1():
+    'Test uknown dtype is caught'
+    bad = dict(dtype="u32", schema="number", name="Bad")
+    with pytest.raises(TypeError):
+        moo.otypes.make_type(**bad)

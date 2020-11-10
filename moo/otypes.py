@@ -471,11 +471,14 @@ class Number(BaseType):
         return self._value.item()
 
     def update(self, val):
+        dtype = self.ost["dtype"]
+        dtype = numpy.dtype(dtype)
+
         if type(val) in (int, float, str):
-            self._value = numpy.array(val, self.ost["dtype"])
+            self._value = numpy.array(val, dtype)
             return
         if isinstance(val, self.__class__):
-            self._value = numpy.array(val.pod(), self.ost["dtype"])
+            self._value = numpy.array(val.pod(), dtype)
             return
         cname = self.__class__.__name__
         raise ValueError(f'illegal {cname} number type: {type(val)}')
@@ -485,6 +488,9 @@ def number_class(**ost):
     '''
     Make and return a type corresponding to number object schema type.
     '''
+    dtype = ost["dtype"]
+    dtype = numpy.dtype(dtype)
+
     ost.setdefault("doc", "")
     class_source = '''
 class {name}(Number):
