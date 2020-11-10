@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2020-10-26 Mon 14:43 -->
+<!-- 2020-11-10 Tue 09:11 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Schema Objects</title>
@@ -1218,16 +1218,16 @@ to <code>render</code> and adding the template file name.
     <span style="color: #b4fa70;">struct</span> <span style="color: #8cc4ff;">Person</span> {
 
         <span style="color: #73d216;">// </span><span style="color: #73d216;">@brief E-mail address</span>
-        <span style="color: #8cc4ff;">Email</span> <span style="color: #fcaf3e;">email</span>;
+        <span style="color: #8cc4ff;">Email</span> <span style="color: #fcaf3e;">email</span> = None;
 
         <span style="color: #73d216;">// </span><span style="color: #73d216;">@brief Count of some things</span>
-        <span style="color: #8cc4ff;">Counts</span> <span style="color: #fcaf3e;">counts</span>;
+        <span style="color: #8cc4ff;">Counts</span> <span style="color: #fcaf3e;">counts</span> = None;
 
         <span style="color: #73d216;">// </span><span style="color: #73d216;">@brief Some affiliation</span>
-        <span style="color: #8cc4ff;">Affiliation</span> <span style="color: #fcaf3e;">affil</span>;
+        <span style="color: #8cc4ff;">Affiliation</span> <span style="color: #fcaf3e;">affil</span> = None;
 
         <span style="color: #73d216;">// </span><span style="color: #73d216;">@brief Personality</span>
-        <span style="color: #8cc4ff;">MBTI</span> <span style="color: #fcaf3e;">mbti</span>;
+        <span style="color: #8cc4ff;">MBTI</span> <span style="color: #fcaf3e;">mbti</span> = introversion;
     };
 
 } <span style="color: #73d216;">// </span><span style="color: #73d216;">namespace app</span>
@@ -1357,7 +1357,7 @@ schema.
 </div>
 <div id="postamble" class="status">
 <p class="author">Author: Brett Viren</p>
-<p class="date">Created: 2020-10-26 Mon 14:43</p>
+<p class="date">Created: 2020-11-10 Tue 09:11</p>
 <p class="validation"><a href="http://validator.w3.org/check?uri=referer">Validate</a></p>
 </div>
 </body>

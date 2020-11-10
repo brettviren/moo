@@ -7,6 +7,7 @@
         any: "nlohmann::json",
         sequence: "std::vector"
     },
+    // fixme: there are more numpy dtypes that are supported here!
     dtypes: {
         i2: "int16_t",
         i4: "int32_t",

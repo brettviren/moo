@@ -15,6 +15,9 @@ function(os, path, ctxpath=[]) {
     // Select out the types "in" this namespace.
     types: [t for t in os if oschema.isin(self.path, t.path)],
 
+    // all types, including types referred to by those in "types" array
+    all_types: os,
+
     // Reference full type by its FQN.
     byref: {[oschema.fqn(t)]:t for t in $.types},
 

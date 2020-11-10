@@ -692,63 +692,6 @@ to ~render~ and adding the template file name.
 
 #+RESULTS:
 #+begin_src c++
-/*
- ,* This file is 100% generated.  Any manual edits will likely be lost.
- ,*
- ,* This contains struct and other type definitions for shema in 
- ,* namespace app.
- ,*/
-#ifndef APP_STRUCTS_HPP
-#define APP_STRUCTS_HPP
-
-#include "sys/Structs.hpp"
-
-#include <nlohmann/json.hpp>
-#include <vector>
-#include <string>
-
-namespace app {
-
-    // @brief An associated object of any type
-    using Affiliation = nlohmann::json;
-
-    // @brief All the counts
-    using Counts = std::vector<sys::Count>;
-
-    // @brief Electronic mail address
-    using Email = std::string;
-
-    // @brief 
-    enum class MBTI: unsigned {
-        introversion,
-        extroversion,
-        sensing,
-        intuition,
-        thinking,
-        feeling,
-        judging,
-        perceiving,
-    };
-
-    // @brief Describe everything there is to know about an individual human
-    struct Person {
-
-        // @brief E-mail address
-        Email email;
-
-        // @brief Count of some things
-        Counts counts;
-
-        // @brief Some affiliation
-        Affiliation affil;
-
-        // @brief Personality
-        MBTI mbti;
-    };
-
-} // namespace app
-
-#endif // APP_STRUCTS_HPP
 #+end_src
 
 And, here are the corresponding ~nlohmann::json~ serialization
