@@ -28,7 +28,7 @@ def render(task):
 
     # keep compatibility with moo render
     helper = moo.io.load(moo.util.resolve("moo.jsonnet"))
-    out.write(moo.template.render(templ, dict(model=model, moo=helper)))
+    out.write(moo.templates.render(templ, dict(model=model, moo=helper)))
 
 
 def configure(cfg):
