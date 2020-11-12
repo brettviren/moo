@@ -1,13 +1,13 @@
-{% import 'ocpp.hpp.j2' as cpp %}
+{% import 'ocpp.hpp.j2' as cppm %}
 /*
  * This file is 100% generated.  Any manual edits will likely be lost.
  *
  * This contains struct and other type definitions for shema in 
- * {{cpp.ns(model)}}.
+ * {{cppm.ns(model)}}.
  */
 {% set tcname = "Structs" %}
-#ifndef {{cpp.headerguard(model, tcname)}}
-#define {{cpp.headerguard(model, tcname)}}
+#ifndef {{cppm.headerguard(model, tcname)}}
+#define {{cppm.headerguard(model, tcname)}}
 
 #include <cstdint>
 {% for ep in model.extrefs %}
@@ -20,13 +20,13 @@
 {% endfor %}{% endif %}
 {% endfor %}
 
-{{ cpp.ns(model) }} {
+{{ cppm.ns(model) }} {
 
     {% for t in model.types %}
     // @brief {{ t.doc }}
-    {{ cpp["declare_"+t.schema](model, t)|indent }}
+    {{ cppm["declare_"+t.schema](model, t)|indent }}
 
     {% endfor %}
-} // {{ cpp.ns(model) }}
+} // {{ cppm.ns(model) }}
 
-#endif // {{cpp.headerguard(model, tcname)}}
+#endif // {{cppm.headerguard(model, tcname)}}

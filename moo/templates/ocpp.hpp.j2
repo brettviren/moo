@@ -1,4 +1,4 @@
-{# This provides some helper macros for C++ templates #}
+{# This provides some helper macros for C++ templates.  See also moo.templates.cpp #}
 
 {%- macro field_type(ft) %}
 {% if ft is mapping %}std::vector<{{field_type(ft["items"])}}>{% elif ft == "string" %}std::string{% elif ft == "any"%}model.anytype{% else %}{{ ft }}{% endif %}
@@ -12,7 +12,7 @@ struct {{t.name}} {
     {% for f in t.fields %}
 
     // @brief {{f.doc}}
-    {{f.item|replace(model.nspre,"")|replace(".","::")}} {{f.name}} = {{cpp_field_default(model.all_types, f)}};
+    {{f.item|replace(model.nspre,"")|replace(".","::")}} {{f.name}} = {{cpp.field_default(model.all_types, f)}};
     {% endfor %}
 };
 {%- endmacro -%}

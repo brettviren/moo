@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2020-11-10 Tue 09:11 -->
+<!-- 2020-11-12 Thu 12:58 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Schema Objects</title>
@@ -193,17 +193,17 @@
   .org-svg { width: 90%; }
   /*]]>*/-->
 </style>
-<link rel="stylesheet" type="text/css" href="export/styles/darksun/css/htmlize.css"/>
-<link rel="stylesheet" type="text/css" href="export/styles/darksun/css/darksun.css"/>
-<link rel="stylesheet" type="text/css" href="export/styles/darksun/css/hideshow.css"/>
-<script type="text/javascript" src="export/styles/darksun/js/jquery-1.11.0.min.js"></script>
-<script type="text/javascript" src="export/styles/darksun/js/jquery-ui-1.10.2.min.js"></script>
-<script type="text/javascript" src="export/styles/darksun/js/jquery.localscroll-min.js"></script>
-<script type="text/javascript" src="export/styles/darksun/js/jquery.scrollTo-1.4.3.1-min.js"></script>
-<script type="text/javascript" src="export/styles/darksun/js/jquery.zclip.min.js"></script>
-<script type="text/javascript" src="export/styles/darksun/js/darksun.js"></script>
-<script type="text/javascript" src="export/styles/darksun/js/hideshow.js"></script>
-<script type="text/javascript" src="export/styles/lib/js/jquery.stickytableheaders.min.js"></script>
+<link rel="stylesheet" type="text/css" href="https://fniessen.github.io/org-html-themes/styles/readtheorg/css/htmlize.css"/>
+<link rel="stylesheet" type="text/css" href="https://fniessen.github.io/org-html-themes/styles/readtheorg/css/readtheorg.css"/>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>
+<script type="text/javascript" src="https://fniessen.github.io/org-html-themes/styles/lib/js/jquery.stickytableheaders.min.js"></script>
+<script type="text/javascript" src="https://fniessen.github.io/org-html-themes/styles/readtheorg/js/readtheorg.js"></script>
+<style> #content{max-width:1800px;}</style>
+<style> p{max-width:800px;}</style>
+<style> li{max-width:800px;}</style>
+<style> pre.src{background-color:#333; color:white;}</style>
+<style> pre.example{background-color:#333; color:white;}</style>
 <script type="text/javascript">
 /*
 @licstart  The following is the entire license notice for the
@@ -266,10 +266,9 @@ for the JavaScript code in this tag.
 <ul>
 <li><a href="#schema-in-jsonnet">Jsonnet</a></li>
 <li><a href="#schema-in-python">Python</a></li>
-<li><a href="#other">Other</a></li>
 </ul>
 </li>
-<li><a href="#transforms">Transforms</a>
+<li><a href="#transforms">Models</a>
 <ul>
 <li><a href="#diy-trans">DIY</a></li>
 <li><a href="#jsonnet-tla-trans">Jsonnet</a></li>
@@ -282,12 +281,7 @@ for the JavaScript code in this tag.
 <li><a href="#struct">Template</a></li>
 </ul>
 </li>
-<li><a href="#objects">Objects</a>
-<ul>
-<li><a href="#object-ctor">Construction</a></li>
-<li><a href="#object-val">Validation</a></li>
-</ul>
-</li>
+<li><a href="#objects">Objects</a></li>
 </ul>
 </div>
 </div>
@@ -296,11 +290,19 @@ for the JavaScript code in this tag.
 <h2 id="concepts">Concepts</h2>
 <div class="outline-text-2" id="text-concepts">
 <p>
-A <b>schema</b> describes one or more <b>types</b>.  In the "oschema"
-representation, a type is represented as an finalized <b>object</b> (compared
-to other representations in moo which are functional in nature).  Each
-type can be considered an instance of a <b>schema class</b>.  The following
-schema classes are currently supported.
+In general, a <b>schema</b> describes one or more <b>types</b>.  There are many ways
+to represent schema (JSON Schema, XML schema, Protobuf or Avro
+schema).  In <b>moo</b> the <i>oschema</i> representation is one that is supported.
+The "o" stands for "object" as <i>oschema</i> has an object representation.
+Any data or programming language which provides support for the
+concepts described here and which can provide compatible data
+structures may be used by <b>moo</b>.
+</p>
+
+<p>
+A schema expressed as <i>oschema</i> defines a number of <b>types</b>.  Each type is
+an instance of exactly one <b>schema class</b>.  There are a limited number
+of schema classes defined:
 </p>
 
 <dl class="org-dl">
@@ -317,8 +319,9 @@ schema classes are currently supported.
 </dl>
 
 <p>
-Every <b>type</b> provides a common set of <b>attributes</b> some of which are
-required and others optional:
+Every <i>oschema</i> <b>type</b> then provides a set of <b>attributes</b> as determined by
+its schema class.  Some attributes are common across all schema
+classes and are required or optional:
 </p>
 
 <dl class="org-dl">
@@ -334,12 +337,13 @@ Python module path)</dd>
 </dl>
 
 <p>
-Some types <b>reference</b> other types.  These include instances of:
-<code>sequence</code>, <code>record</code>, <code>namespace</code> and <code>anyOf</code>.  A <b>type reference</b> is
-represented as a <i>fully-qualified type name</i> (FQTN) which is formed as
-the period ("<code>.</code>") delimited concatenation of the elements of <code>path</code>
-(if any) and the <code>name</code>.  A FQTN shall not begin nor end with a period
-and there the concept of a "relative" type reference is not supported.
+The types of some schema classes must <b>reference</b> one or more other
+types.  These include instances of: <code>sequence</code>, <code>record</code>, <code>namespace</code>, and
+<code>anyOf</code>.  A <b>type reference</b> is represented as a <i>fully-qualified type name</i>
+(FQTN) which is formed as the period ("<code>.</code>") delimited concatenation of
+the elements of <code>path</code> (if any) and the <code>name</code>.  A FQTN shall not begin
+nor end with a period and the concept of a "relative" type reference
+is not supported.
 </p>
 
 <p>
@@ -359,72 +363,88 @@ in order to match the type reference against possible <code>path</code> and
 <h2 id="Schema">Schema</h2>
 <div class="outline-text-2" id="text-Schema">
 <p>
-This section describes how to construct Schema in Jsonnet and in
-Python.  
+This section describes how to author a schema in either the <b>Jsonnet</b> or
+<b>Python</b> language.  Too illustrate some patterns of large scale projects
+the example will factor the schema into two parts
 </p>
 
-<p>
-We will describe how to use Jsonnet to build schema in some detail in
-the next subsection.  However, it should be noted that this is a proxy
-for using <b>any language</b> which can produce the same kind of data
-structure.  <code>moo</code> can read in such structure in Jsonnet, JSON, XML,
-INI and YAML formats.
-</p>
-
-<p>
-Internally, <code>moo</code> represents a schema with Python objects that are
-instances of Python versions of the conceptual schema classes
-described above.  <code>moo</code> can build these objects by reading schema as
-data structures or a developer may "hand-wire" schema by writing
-Python code in terms of these classes.  This is described in the
-second subsection below.
-</p>
+<dl class="org-dl">
+<dt><i>sys</i></dt><dd>a set of types relevant to some system (eg a framework)</dd>
+<dt><i>app</i></dt><dd>a set of types relevant to an application based on the system</dd>
+</dl>
 </div>
 
 <div id="outline-container-schema-in-jsonnet" class="outline-3">
 <h3 id="schema-in-jsonnet">Jsonnet</h3>
 <div class="outline-text-3" id="text-schema-in-jsonnet">
 <p>
-Schema may be described easily in the <a href="https://jsonnet.org/">Jsonnet</a> language which
-explicitly targets the domain of data structure construction.  The
-language allows for the construction to be factored into independent
-"modules" (files) so that they may be combined in various ways to meet
-different end goals.
+<b>moo</b> <i>oschema</i> may be described easily in the <a href="https://jsonnet.org/">Jsonnet</a> language as it
+explicitly targets defining data structures.
 </p>
 
 <p>
-A simple example is given.  It consists of an overall schema factored
-into a <code>sys</code> schema and an <code>app</code> schema which depends on <code>sys</code>.  In a real
-system, the <code>sys</code> schema may correspond to common types used by a
-variety of system applications and the <code>app</code> structure may correspond to
-schema relevant to one particular type of application.
-</p>
-
-<p>
-Here is the <code>sys</code> schema:
+We start by simply presenting the <code>sys</code> schema:
 </p>
 
 <div class="org-src-container">
 <pre class="src src-jsonnet"><span style="color: #73d216;">// examples/oschema/sys.jsonnet</span>
 <span style="color: #b4fa70;">local</span> moo = <span style="color: #b4fa70;">import</span> <span style="color: #e9b96e;">"moo.jsonnet"</span>;
 <span style="color: #b4fa70;">local</span> sys = moo.oschema.schema(<span style="color: #e9b96e;">"sys"</span>);
-moo.oschema.sort_select([
-    sys.number(<span style="color: #e9b96e;">"Count"</span>, <span style="color: #e9b96e;">"u4"</span>)
-])
+[sys.number(<span style="color: #e9b96e;">"Count"</span>, <span style="color: #e9b96e;">"u4"</span>)]
 </pre>
 </div>
 
 <p>
-The body of this simple schema is merely the single line:
+Let's walk through this short example line by line:
 </p>
 
 <div class="org-src-container">
-<pre class="src src-jsonnet">sys.number(<span style="color: #e9b96e;">"Count"</span>, <span style="color: #e9b96e;">"u4"</span>)
+<pre class="src src-jsonnet"><span style="color: #b4fa70;">local</span> moo = <span style="color: #b4fa70;">import</span> <span style="color: #e9b96e;">"moo.jsonnet"</span>;
 </pre>
 </div>
 
 <p>
-We may see a fully compiled representation in JSON format using <code>moo</code>:
+This shows Jsonnet's "module" system in action.  A file is loaded and its
+contents available via the <code>moo</code> variable.  The <code>moo.jsonnet</code> file holds
+various Jsonnet functions and data that will help build our <i>oschema</i>.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-jsonnet"><span style="color: #b4fa70;">local</span> sys = moo.oschema.schema(<span style="color: #e9b96e;">"sys"</span>);
+</pre>
+</div>
+
+<p>
+This call of the <code>schema()</code> function of the <code>moo.oschema</code> object returns
+another object held by <code>sys</code> which will provide sort of a "schema
+factory" that operates "in" the path of <code>sys</code>.  We see it in action:
+</p>
+
+<div class="org-src-container">
+<pre class="src src-jsonnet">[sys.number(<span style="color: #e9b96e;">"Count"</span>, <span style="color: #e9b96e;">"u4"</span>)]
+</pre>
+</div>
+
+<p>
+This last line defines the data structure that is sort of the "return"
+value of the <code>sys.jsonnet</code> file.  That is, this file "compiles" to an
+array holding a single <i>oschema</i> type.
+</p>
+
+<div class="note">
+<p>
+All <b>moo</b> "schema files" are expected to provide an
+array-of-type-objects.  We will later see how the order of this array
+matters and how to assure it is correct.  We will also later see how
+this array becomes just one element of a more complex structure called
+a <b>model</b> which we will form prior to applying to a <b>template</b>.
+</p>
+
+</div>
+
+<p>
+We can see how the <i>sys</i> schema expands or compiles to its JSON
+representation using <b>moo</b>:
 </p>
 
 <div class="org-src-container">
@@ -448,21 +468,33 @@ We may see a fully compiled representation in JSON format using <code>moo</code>
 </div>
 
 <p>
-This is thus a schema with a single type called <code>Count</code> which is of
-schema class <code>number</code> that has numeric Numpy-style type code <code>dtype</code>
-of an unsigned integer in four bytes <code>"u4"</code> and is in a context
-<code>path</code> of simply <code>["sys"]</code>.
+This is then a schema with a single type called <code>Count</code> which is of
+schema class <code>number</code> that has numeric Numpy-style type code <code>dtype</code> of an
+unsigned integer in four bytes <code>"u4"</code> and is in a context <code>path</code> of simply
+<code>["sys"]</code>.
 </p>
 
+<div class="note">
 <p>
-Next we imagine one possible application schema which will use the
-<code>sys</code> schema above.  Here it is defined in Jsonnet as:
+The final structural form of <i>oschema</i> (ie, the JSON above) is not
+something that a developer of a schema strictly needs to know.  <b>moo</b>
+support for Jsonnet and Python provide native language code to assist
+in building a schema without exposing all the details of the type
+object structure.  These details will need to be understood if any new
+native language support is developed.
+</p>
+
+</div>
+
+<p>
+Next, we imagine an application schema with a more rich set of types:
 </p>
 
 <div class="org-src-container">
 <pre class="src src-jsonnet"><span style="color: #73d216;">// examples/oschema/app.jsonnet</span>
 <span style="color: #b4fa70;">local</span> moo = <span style="color: #b4fa70;">import</span> <span style="color: #e9b96e;">"moo.jsonnet"</span>;
-<span style="color: #b4fa70;">local</span> sh = moo.oschema.hier(<span style="color: #b4fa70;">import</span> <span style="color: #e9b96e;">"sys.jsonnet"</span>);
+<span style="color: #b4fa70;">local</span> sa = <span style="color: #b4fa70;">import</span> <span style="color: #e9b96e;">"sys.jsonnet"</span>;
+<span style="color: #b4fa70;">local</span> sh = moo.oschema.hier(sa);
 <span style="color: #b4fa70;">local</span> as = moo.oschema.schema(<span style="color: #e9b96e;">"app"</span>);
 <span style="color: #b4fa70;">local</span> hier = {
     counts: as.sequence(<span style="color: #e9b96e;">"Counts"</span>,sh.sys.Count,
@@ -476,41 +508,93 @@ Next we imagine one possible application schema which will use the
                           <span style="color: #e9b96e;">"sensing"</span>,<span style="color: #e9b96e;">"intuition"</span>,
                           <span style="color: #e9b96e;">"thinking"</span>,<span style="color: #e9b96e;">"feeling"</span>,
                           <span style="color: #e9b96e;">"judging"</span>,<span style="color: #e9b96e;">"perceiving"</span>]),
+    make: as.string(<span style="color: #e9b96e;">"Make"</span>),
+    model: as.string(<span style="color: #e9b96e;">"Model"</span>),
+    autotype: as.enum(<span style="color: #e9b96e;">"VehicleClass"</span>, [<span style="color: #e9b96e;">"boring"</span>, <span style="color: #e9b96e;">"fun"</span>]),
+    vehicle : as.record(<span style="color: #e9b96e;">"Vehicle"</span>, [
+        as.field(<span style="color: #e9b96e;">"make"</span>, <span style="color: #b4fa70;">self</span>.make, default=<span style="color: #e9b96e;">"Subaru"</span>),
+        as.field(<span style="color: #e9b96e;">"model"</span>, <span style="color: #b4fa70;">self</span>.model, default=<span style="color: #e9b96e;">"WRX"</span>),
+        as.field(<span style="color: #e9b96e;">"type"</span>, <span style="color: #b4fa70;">self</span>.autotype, default=<span style="color: #e9b96e;">"fun"</span>)]),
+
     person: as.record(<span style="color: #e9b96e;">"Person"</span>, [
         as.field(<span style="color: #e9b96e;">"email"</span>,<span style="color: #b4fa70;">self</span>.email,
                  doc=<span style="color: #e9b96e;">"E-mail address"</span>),
+        as.field(<span style="color: #e9b96e;">"email2"</span>,<span style="color: #b4fa70;">self</span>.email,
+                 doc=<span style="color: #e9b96e;">"E-mail address"</span>, default=<span style="color: #e9b96e;">"me@example.com"</span>),
         as.field(<span style="color: #e9b96e;">"counts"</span>,<span style="color: #b4fa70;">self</span>.counts,
                  doc=<span style="color: #e9b96e;">"Count of some things"</span>),
+        as.field(<span style="color: #e9b96e;">"counts2"</span>,<span style="color: #b4fa70;">self</span>.counts,
+                 doc=<span style="color: #e9b96e;">"Count of some things"</span>, default=[0,1,2]),
         as.field(<span style="color: #e9b96e;">"affil"</span>, <span style="color: #b4fa70;">self</span>.affil,
                  doc=<span style="color: #e9b96e;">"Some affiliation"</span>),
         as.field(<span style="color: #e9b96e;">"mbti"</span>, <span style="color: #b4fa70;">self</span>.mbti,
                  doc=<span style="color: #e9b96e;">"Personality"</span>),
+        as.field(<span style="color: #e9b96e;">"vehicle"</span>, <span style="color: #b4fa70;">self</span>.vehicle, doc=<span style="color: #e9b96e;">"Example of nested record"</span>),
+        as.field(<span style="color: #e9b96e;">"vehicle2"</span>, <span style="color: #b4fa70;">self</span>.vehicle, default={model:<span style="color: #e9b96e;">"CrossTrek"</span>, type:<span style="color: #e9b96e;">"boring"</span>},
+                 doc=<span style="color: #e9b96e;">"Example of nested record with default"</span>),
+        as.field(<span style="color: #e9b96e;">"vehicle2"</span>, <span style="color: #b4fa70;">self</span>.vehicle, default={model:<span style="color: #e9b96e;">"BRZ"</span>},
+                 doc=<span style="color: #e9b96e;">"Example of nested record with default"</span>),
     ], doc=<span style="color: #e9b96e;">"Describe everything there is to know about an individual human"</span>),
 };
-moo.oschema.sort_select(hier, <span style="color: #e9b96e;">"app"</span>)
+sa + moo.oschema.sort_select(hier, <span style="color: #e9b96e;">"app"</span>)
 </pre>
 </div>
 
 <p>
-We will go through these lines of Jsonnet in order to give some
-detail.  Starting with the first few:
+We will go through some of these lines of Jsonnet in order to explain
+some of the forms.  Starting with the first few lines:
 </p>
 
 <div class="org-src-container">
 <pre class="src src-jsonnet"><span style="color: #b4fa70;">local</span> moo = <span style="color: #b4fa70;">import</span> <span style="color: #e9b96e;">"moo.jsonnet"</span>;
-<span style="color: #b4fa70;">local</span> sh = moo.oschema.hier(<span style="color: #b4fa70;">import</span> <span style="color: #e9b96e;">"sys.jsonnet"</span>);
+<span style="color: #b4fa70;">local</span> sa = <span style="color: #b4fa70;">import</span> <span style="color: #e9b96e;">"sys.jsonnet"</span>;
+<span style="color: #b4fa70;">local</span> sh = moo.oschema.hier(sa);
 <span style="color: #b4fa70;">local</span> as = moo.oschema.schema(<span style="color: #e9b96e;">"app"</span>);
 </pre>
 </div>
 
 <p>
-As with <code>sys</code> we import the support module <code>moo.jsonnet</code>.  We then
-use <code>moo.oschema.hier()</code> method to process the previously defined <code>sys</code>
-schema which we <code>import</code> in place.  The <code>.hier()</code> method gives us a
-handy object representation of this schema where they keys of the
-object are the individual type names.  We'll see that in use next.  In
-the third line we create a new schema factory rooted in the <code>["app"]</code>
-path.
+As with <code>sys</code> we import the support module <code>moo.jsonnet</code>.  We also import
+the <i>sys</i> schema that we made above.  Thus, <code>sa</code> holds a single-element
+array.
+</p>
+
+<p>
+Next we call the <code>moo.oschema.hier()</code> method on this array.  This
+transforms the ordered array of types into an (unordered) object where
+each type is available by its name.  We'll see <code>sh</code> in use next.  
+</p>
+
+<p>
+Finally for this preamble, we make another "schema factory" which is
+this time "in" the path: <code>app</code>.  We'll use <code>as</code> many times to build up
+elements of our schema.  
+</p>
+
+<p>
+Next we build our <i>sys</i> schema and do so inside a "working object".
+This lets us use Jsonnet language feature to refer to one of our types
+in another.  Let's look at the start:
+</p>
+
+<div class="org-src-container">
+<pre class="src src-jsonnet"><span style="color: #b4fa70;">local</span> hier = {
+    counts: as.sequence(<span style="color: #e9b96e;">"Counts"</span>,sh.sys.Count,
+                        doc=<span style="color: #e9b96e;">"All the counts"</span>),
+</pre>
+</div>
+
+<p>
+Here we start our object and save it in a local variable <code>hier</code> and give
+it an initial entry.  The key name <code>counts</code> is a temporary convenience
+and the value is what will ultimately matter.  The type we make is a
+sequence that references the <code>sys.Count</code> type made in the <i>sys</i> schema.
+This shows how "cross schema" references can be made.
+</p>
+
+<p>
+The next set of types are nothing special but illustrate how instances
+of some of the different schema classes in Jsonnet are made:
 </p>
 
 <p>
@@ -518,201 +602,221 @@ Next, let's jump to the definition of the <code>Person</code> type which begins 
 </p>
 
 <div class="org-src-container">
-<pre class="src src-jsonnet">person: as.record(<span style="color: #e9b96e;">"Person"</span>, [
-    as.field(<span style="color: #e9b96e;">"email"</span>,<span style="color: #b4fa70;">self</span>.email,
-             doc=<span style="color: #e9b96e;">"E-mail address"</span>),
+<pre class="src src-jsonnet">email: as.string(<span style="color: #e9b96e;">"Email"</span>, format=<span style="color: #e9b96e;">"email"</span>,
+                doc=<span style="color: #e9b96e;">"Electronic mail address"</span>),
+affil: as.any(<span style="color: #e9b96e;">"Affiliation"</span>,
+              doc=<span style="color: #e9b96e;">"An associated object of any type"</span>),
+mbti: as.enum(<span style="color: #e9b96e;">"MBTI"</span>,[<span style="color: #e9b96e;">"introversion"</span>,<span style="color: #e9b96e;">"extroversion"</span>,
+                      <span style="color: #e9b96e;">"sensing"</span>,<span style="color: #e9b96e;">"intuition"</span>,
+                      <span style="color: #e9b96e;">"thinking"</span>,<span style="color: #e9b96e;">"feeling"</span>,
+                      <span style="color: #e9b96e;">"judging"</span>,<span style="color: #e9b96e;">"perceiving"</span>]),
 </pre>
 </div>
 
 <p>
-You will note that <code>Person</code> is defined as a value of a <code>person:</code> key in a
-containing object and that the type refers to other types by their own
-key (eg <code>self.email</code>).  It is to provide these references that we build
-our types in a temporary object even though the ultimate output (as
-we'll see) is a topologically sorted array of types.
-</p>
-
-<p>
-And, in fact, finally our <code>app</code> schema is produced as a flat array
-using:
+Now we define an instance of the <code>record</code> schema class:
 </p>
 
 <div class="org-src-container">
-<pre class="src src-jsonnet">moo.oschema.sort_select(hier, <span style="color: #e9b96e;">"app"</span>)
+<pre class="src src-jsonnet">make: as.string(<span style="color: #e9b96e;">"Make"</span>),
+model: as.string(<span style="color: #e9b96e;">"Model"</span>),
+autotype: as.enum(<span style="color: #e9b96e;">"VehicleClass"</span>, [<span style="color: #e9b96e;">"boring"</span>, <span style="color: #e9b96e;">"fun"</span>]),
+vehicle : as.record(<span style="color: #e9b96e;">"Vehicle"</span>, [
+    as.field(<span style="color: #e9b96e;">"make"</span>, <span style="color: #b4fa70;">self</span>.make, default=<span style="color: #e9b96e;">"Subaru"</span>),
+    as.field(<span style="color: #e9b96e;">"model"</span>, <span style="color: #b4fa70;">self</span>.model, default=<span style="color: #e9b96e;">"WRX"</span>),
+    as.field(<span style="color: #e9b96e;">"type"</span>, <span style="color: #b4fa70;">self</span>.autotype, default=<span style="color: #e9b96e;">"fun"</span>)]),
 </pre>
 </div>
 
 <p>
-This scans our temporary object <code>hier</code> and outputs an array holding
-only the types which are "in" the <code>["app"]</code> path.  The array is output
-in topological so that any dependency precedes a type that depends on
-it. 
+In addition to showing how an instance of a <code>record</code> schema class this
+example shows how to reference types within our "working object"
+through a <code>self</code> object.  We will skip the res of our "working object"
+other than to say that this <code>Vehicle</code> type is referenced in the <code>Person</code>
+type described in the remaining and that this shows an example of
+"nested" records.
 </p>
 
 <p>
-We can see the final result in full JSON glory:
+We end the <i>app</i> schema file by producing a "sorted" array of types: 
 </p>
 
 <div class="org-src-container">
-<pre class="src src-shell">moo compile examples/oschema/app.jsonnet
+<pre class="src src-jsonnet">sa + moo.oschema.sort_select(hier, <span style="color: #e9b96e;">"app"</span>)
 </pre>
 </div>
 
-<div class="org-src-container">
-<pre class="src src-json">[
-    {
-        <span style="color: #b4fa70;">"deps"</span>: [],
-        <span style="color: #b4fa70;">"doc"</span>: <span style="color: #e9b96e;">"An associated object of any type"</span>,
-        <span style="color: #b4fa70;">"name"</span>: <span style="color: #e9b96e;">"Affiliation"</span>,
-        <span style="color: #b4fa70;">"path"</span>: [
-            <span style="color: #e9b96e;">"app"</span>
-        ],
-        <span style="color: #b4fa70;">"schema"</span>: <span style="color: #e9b96e;">"any"</span>
-    },
-    {
-        <span style="color: #b4fa70;">"deps"</span>: [
-            <span style="color: #e9b96e;">"sys.Count"</span>
-        ],
-        <span style="color: #b4fa70;">"doc"</span>: <span style="color: #e9b96e;">"All the counts"</span>,
-        <span style="color: #b4fa70;">"items"</span>: <span style="color: #e9b96e;">"sys.Count"</span>,
-        <span style="color: #b4fa70;">"name"</span>: <span style="color: #e9b96e;">"Counts"</span>,
-        <span style="color: #b4fa70;">"path"</span>: [
-            <span style="color: #e9b96e;">"app"</span>
-        ],
-        <span style="color: #b4fa70;">"schema"</span>: <span style="color: #e9b96e;">"sequence"</span>
-    },
-    {
-        <span style="color: #b4fa70;">"deps"</span>: [],
-        <span style="color: #b4fa70;">"doc"</span>: <span style="color: #e9b96e;">"Electronic mail address"</span>,
-        <span style="color: #b4fa70;">"format"</span>: <span style="color: #e9b96e;">"email"</span>,
-        <span style="color: #b4fa70;">"name"</span>: <span style="color: #e9b96e;">"Email"</span>,
-        <span style="color: #b4fa70;">"path"</span>: [
-            <span style="color: #e9b96e;">"app"</span>
-        ],
-        <span style="color: #b4fa70;">"schema"</span>: <span style="color: #e9b96e;">"string"</span>
-    },
-    {
-        <span style="color: #b4fa70;">"default"</span>: <span style="color: #e9b96e;">"introversion"</span>,
-        <span style="color: #b4fa70;">"deps"</span>: [],
-        <span style="color: #b4fa70;">"name"</span>: <span style="color: #e9b96e;">"MBTI"</span>,
-        <span style="color: #b4fa70;">"path"</span>: [
-            <span style="color: #e9b96e;">"app"</span>
-        ],
-        <span style="color: #b4fa70;">"schema"</span>: <span style="color: #e9b96e;">"enum"</span>,
-        <span style="color: #b4fa70;">"symbols"</span>: [
-            <span style="color: #e9b96e;">"introversion"</span>,
-            <span style="color: #e9b96e;">"extroversion"</span>,
-            <span style="color: #e9b96e;">"sensing"</span>,
-            <span style="color: #e9b96e;">"intuition"</span>,
-            <span style="color: #e9b96e;">"thinking"</span>,
-            <span style="color: #e9b96e;">"feeling"</span>,
-            <span style="color: #e9b96e;">"judging"</span>,
-            <span style="color: #e9b96e;">"perceiving"</span>
-        ]
-    },
-    {
-        <span style="color: #b4fa70;">"deps"</span>: [
-            <span style="color: #e9b96e;">"app.Email"</span>,
-            <span style="color: #e9b96e;">"app.Counts"</span>,
-            <span style="color: #e9b96e;">"app.Affiliation"</span>,
-            <span style="color: #e9b96e;">"app.MBTI"</span>
-        ],
-        <span style="color: #b4fa70;">"doc"</span>: <span style="color: #e9b96e;">"Describe everything there is to know about an individual human"</span>,
-        <span style="color: #b4fa70;">"fields"</span>: [
-            {
-                <span style="color: #b4fa70;">"doc"</span>: <span style="color: #e9b96e;">"E-mail address"</span>,
-                <span style="color: #b4fa70;">"item"</span>: <span style="color: #e9b96e;">"app.Email"</span>,
-                <span style="color: #b4fa70;">"name"</span>: <span style="color: #e9b96e;">"email"</span>
-            },
-            {
-                <span style="color: #b4fa70;">"doc"</span>: <span style="color: #e9b96e;">"Count of some things"</span>,
-                <span style="color: #b4fa70;">"item"</span>: <span style="color: #e9b96e;">"app.Counts"</span>,
-                <span style="color: #b4fa70;">"name"</span>: <span style="color: #e9b96e;">"counts"</span>
-            },
-            {
-                <span style="color: #b4fa70;">"doc"</span>: <span style="color: #e9b96e;">"Some affiliation"</span>,
-                <span style="color: #b4fa70;">"item"</span>: <span style="color: #e9b96e;">"app.Affiliation"</span>,
-                <span style="color: #b4fa70;">"name"</span>: <span style="color: #e9b96e;">"affil"</span>
-            },
-            {
-                <span style="color: #b4fa70;">"default"</span>: <span style="color: #e9b96e;">"introversion"</span>,
-                <span style="color: #b4fa70;">"doc"</span>: <span style="color: #e9b96e;">"Personality"</span>,
-                <span style="color: #b4fa70;">"item"</span>: <span style="color: #e9b96e;">"app.MBTI"</span>,
-                <span style="color: #b4fa70;">"name"</span>: <span style="color: #e9b96e;">"mbti"</span>
-            }
-        ],
-        <span style="color: #b4fa70;">"name"</span>: <span style="color: #e9b96e;">"Person"</span>,
-        <span style="color: #b4fa70;">"path"</span>: [
-            <span style="color: #e9b96e;">"app"</span>
-        ],
-        <span style="color: #b4fa70;">"schema"</span>: <span style="color: #e9b96e;">"record"</span>
-    }
-]
-</pre>
-</div>
-</div>
-</div>
+<p>
+Like any <i>oschema</i>, this array must include <b>all</b> of the types needed to
+satisfy any type references and in an order such that any referenced
+types come first.  That is, a <a href="https://en.wikipedia.org/wiki/Topological_sorting">topological sort</a> must be applied to the
+graph built between types and their references.  This is not so
+trivial of an operation, but the <code>moo</code> Jsonnet support provides the
+required algorithm.  As the <i>sys</i> schema is simple and independent from
+<i>app</i> by construction we merely prepend it.
+</p>
 
+<p>
+Sparing the long output here, the full schema compiled to JSON can be
+produced with this command:
+</p>
+
+<pre class="example">
+moo compile examples/oschema/app.jsonnet
+</pre>
+
+<div class="note">
+<p>
+While developing a schema, it is very useful to run <code>moo compile</code>
+frequently in order to check for Jsonnet syntax or logic errors.
+</p>
+
+</div>
+</div>
+</div>
 
 <div id="outline-container-schema-in-python" class="outline-3">
 <h3 id="schema-in-python">Python</h3>
 <div class="outline-text-3" id="text-schema-in-python">
 <p>
-A bare bones example of the use of <code>moo</code> Python to load schema as data
-into <code>moo.oschema</code> objects and back to data is given in:
+<b>moo</b> provides support for defining <i>oschema</i> in Python which has some
+similarities to its Jsonnet support.  However, Python is a far more
+expressive language than Jsonnet and thus <b>moo</b> Python support provides
+more options to the developer.  
+</p>
+
+<p>
+Like the Jsonnet support there are layers of representation of schema
+information, transformations between the layers.  These are
+summarized:
+</p>
+
+<dl class="org-dl">
+<dt>Object representation</dt><dd>the <code>moo.oschema</code> module provides a set of Python classes,
+each associated with one <i>oschema</i> class and object instances of which
+represent types.</dd>
+
+<dt>POD representation</dt><dd>the plain-old-data representation corresponds
+closely to JSON.  In fact, one may copy-paste an <i>oschema</i> type in
+JSON representation into a Python file and it works as POD.  POD and
+Object representations can be inter-transformed.</dd>
+</dl>
+
+<p>
+Like with the Jsonnet "schema factory" object, a <code>moo.oschema.Namespace</code>
+may be constructed with a <code>path</code> and then be used to construct type
+objects which are "in" that path.
+</p>
+
+<p>
+Python is far more expressive than Jsonnet and that leaves the
+developer many choices how to work with <i>oschema</i> representations in
+Python.  The example presented here make some reasonable choices that
+systems may adopt but other approaches are certainly possible.  
+</p>
+
+<p>
+In general we will make files which are analogous to the Jsonnet files
+but which may imported as Python modules.  We take the convention that
+a <code>.schema</code> module variable will hold the array of types.  These types
+will be in Object form.  
+</p>
+
+<p>
+Starting with the simple <i>sys</i> schema we can make something like:
 </p>
 
 <div class="org-src-container">
 <pre class="src src-python"><span style="color: #73d216;">#</span><span style="color: #73d216;">!/usr/bin/env python3</span>
-<span style="color: #b4fa70;">import</span> sys
-<span style="color: #b4fa70;">import</span> moo.io <span style="color: #b4fa70;">as</span> mio
-<span style="color: #b4fa70;">import</span> moo.util <span style="color: #b4fa70;">as</span> mu
-<span style="color: #b4fa70;">import</span> moo.oschema <span style="color: #b4fa70;">as</span> ms
-
-<span style="color: #fcaf3e;">fname</span> = mu.resolve(sys.argv[1])
-<span style="color: #fcaf3e;">dat</span> = mio.load(fname)
-<span style="color: #b4fa70;">assert</span>(dat)
-<span style="color: #b4fa70;">for</span> d <span style="color: #b4fa70;">in</span> dat:
-    <span style="color: #fcaf3e;">s</span> = ms.from_dict(d)
-    <span style="color: #fcaf3e;">d2</span> = s.to_dict()
-    <span style="color: #b4fa70;">print</span>(f<span style="color: #e9b96e;">'data in:\n\t{d}\nobject:\n\t{s!r}\ndata out:\n\t{d2}'</span>)
+<span style="color: #b4fa70;">import</span> moo.oschema <span style="color: #b4fa70;">as</span> mo
+<span style="color: #fcaf3e;">ns</span> = mo.Namespace(<span style="color: #e9b96e;">"sys"</span>)
+<span style="color: #fcaf3e;">schema</span> = [ns.Number(<span style="color: #e9b96e;">"Count"</span>, <span style="color: #e9b96e;">"u4"</span>)]
 </pre>
 </div>
 
+<div class="note">
 <p>
-A trivial hand-wired construction of the same schema using
-<code>moo.oschema</code> Python is in:
+We name the module <code>systypes</code> to not conflict with Python's <code>sys</code> module.
+</p>
+
+</div>
+
+<p>
+The <i>app</i> schema is structured similarly, if a fair bit longer.  
 </p>
 
 <div class="org-src-container">
 <pre class="src src-python"><span style="color: #b4fa70;">import</span> moo.oschema <span style="color: #b4fa70;">as</span> mo
+<span style="color: #b4fa70;">import</span> systypes
 
-<span style="color: #fcaf3e;">s</span> = mo.Number(<span style="color: #e9b96e;">"Count"</span>, <span style="color: #e9b96e;">"u4"</span>)
-<span style="color: #fcaf3e;">d2</span> = s.to_dict()
-<span style="color: #b4fa70;">print</span>(f<span style="color: #e9b96e;">'object:\n\t{s!r}\ndata out:\n\t{d2}'</span>)
+<span style="color: #fcaf3e;">ss</span> = {typ.name.lower(): typ <span style="color: #b4fa70;">for</span> typ <span style="color: #b4fa70;">in</span> systypes.schema}
+
+<span style="color: #fcaf3e;">ns</span> = mo.Namespace(<span style="color: #e9b96e;">"app"</span>)
+
+<span style="color: #fcaf3e;">counts</span> = ns.sequence(<span style="color: #e9b96e;">"Counts"</span>, ss[<span style="color: #e9b96e;">'count'</span>])
+<span style="color: #fcaf3e;">email</span> = ns.string(<span style="color: #e9b96e;">"Email"</span>, <span style="color: #e090d7;">format</span>=<span style="color: #e9b96e;">"email"</span>,
+                  doc=<span style="color: #e9b96e;">"Electronic mail address"</span>)
+<span style="color: #fcaf3e;">affil</span> = ns.<span style="color: #e090d7;">any</span>(<span style="color: #e9b96e;">"Affiliation"</span>,
+               doc=<span style="color: #e9b96e;">"An associated object of any type"</span>)
+<span style="color: #fcaf3e;">mbti</span> = ns.enum(<span style="color: #e9b96e;">"MBTI"</span>, [<span style="color: #e9b96e;">"introversion"</span>, <span style="color: #e9b96e;">"extroversion"</span>,
+                        <span style="color: #e9b96e;">"sensing"</span>, <span style="color: #e9b96e;">"intuition"</span>,
+                        <span style="color: #e9b96e;">"thinking"</span>, <span style="color: #e9b96e;">"feeling"</span>,
+                        <span style="color: #e9b96e;">"judging"</span>, <span style="color: #e9b96e;">"perceiving"</span>])
+
+<span style="color: #fcaf3e;">make</span> = ns.string(<span style="color: #e9b96e;">"Make"</span>)
+<span style="color: #fcaf3e;">model</span> = ns.string(<span style="color: #e9b96e;">"Model"</span>)
+<span style="color: #fcaf3e;">autotype</span> = ns.enum(<span style="color: #e9b96e;">"VehicleClass"</span>, [<span style="color: #e9b96e;">"boring"</span>, <span style="color: #e9b96e;">"fun"</span>])
+<span style="color: #fcaf3e;">vehicle</span> = ns.record(<span style="color: #e9b96e;">"Vehicle"</span>, [
+    ns.field(<span style="color: #e9b96e;">"make"</span>, make, default=<span style="color: #e9b96e;">"Subaru"</span>),
+    ns.field(<span style="color: #e9b96e;">"model"</span>, model, default=<span style="color: #e9b96e;">"WRX"</span>),
+    ns.field(<span style="color: #e9b96e;">"type"</span>, autotype, default=<span style="color: #e9b96e;">"fun"</span>)])
+
+
+<span style="color: #fcaf3e;">person</span> = ns.record(<span style="color: #e9b96e;">"Person"</span>, [
+    ns.field(<span style="color: #e9b96e;">"email"</span>, email, doc=<span style="color: #e9b96e;">"E-mail address"</span>),
+    ns.field(<span style="color: #e9b96e;">"email2"</span>, email, doc=<span style="color: #e9b96e;">"E-mail address"</span>, default=<span style="color: #e9b96e;">"me@example.com"</span>),
+    ns.field(<span style="color: #e9b96e;">"counts"</span>, counts, doc=<span style="color: #e9b96e;">"Count of some things"</span>),
+    ns.field(<span style="color: #e9b96e;">"counts2"</span>, counts, doc=<span style="color: #e9b96e;">"Count of some things"</span>, default=[0, 1, 2]),
+    ns.field(<span style="color: #e9b96e;">"affil"</span>, affil, doc=<span style="color: #e9b96e;">"Some affiliation"</span>),
+    ns.field(<span style="color: #e9b96e;">"mbti"</span>, mbti, doc=<span style="color: #e9b96e;">"Personality"</span>),
+    ns.field(<span style="color: #e9b96e;">"vehicle"</span>, vehicle, doc=<span style="color: #e9b96e;">"Example of nested record"</span>),
+    ns.field(<span style="color: #e9b96e;">"vehicle2"</span>, vehicle, default=<span style="color: #e090d7;">dict</span>(model=<span style="color: #e9b96e;">"CrossTrek"</span>, <span style="color: #e090d7;">type</span>=<span style="color: #e9b96e;">"boring"</span>),
+             doc=<span style="color: #e9b96e;">"Example of nested record with default"</span>),
+    ns.field(<span style="color: #e9b96e;">"vehicle2"</span>, vehicle, default=<span style="color: #e090d7;">dict</span>(model=<span style="color: #e9b96e;">"BRZ"</span>),
+             doc=<span style="color: #e9b96e;">"Example of nested record with default"</span>),
+], doc=<span style="color: #e9b96e;">"Describe everything there is to know about an individual human"</span>)
+
+
+<span style="color: #fcaf3e;">schema</span> = systypes.schema + mo.depsort({k: v <span style="color: #b4fa70;">for</span> k, v <span style="color: #b4fa70;">in</span> <span style="color: #e090d7;">globals</span>().items() <span style="color: #b4fa70;">if</span> <span style="color: #e090d7;">isinstance</span>(v, mo.BaseType)})
 </pre>
 </div>
-</div>
+
+<p>
+Comparing this to the <code>app.jsonnet</code> above, one can see it is a near
+transliteration of syntax and so we will not dwell on the details.
+But, one thing to call out is that like with <code>app.jsonnet</code> we must
+prepend the <i>sys</i> schema array to our result and perform a topological
+sort on the types we make here.  The sort is provided by
+<code>moo.oschema.depsort</code> and we play a bit of a Python trick to collect all
+the <i>oschema</i> type objects made in the module using a filter on
+<code>globals()</code>.
+</p>
 </div>
 
-<div id="outline-container-other" class="outline-3">
-<h3 id="other">Other</h3>
-<div class="outline-text-3" id="text-other">
-<p>
-<code>moo</code> oschema provides support for construction of schema in Jsonnet and
-Python languages only.  However, the user may produce schema in any
-manner desired so long as the resulting data structure is represented
-by one of the many input file formats supported by <code>moo</code>.  In addition
-to Jsonnet and JSON as described above, <code>moo</code> supports data structures
-in XML, INI and YAML.
-</p>
+<div id="outline-container-orgbaee121" class="outline-4">
+<h4 id="orgbaee121"><span class="todo TODO">TODO</span> call from moo.</h4>
+<div class="outline-text-4" id="text-orgbaee121">
+<ul class="org-ul">
+<li>add an <code>import</code> based Python loader to <code>moo</code></li>
+</ul>
+</div>
 </div>
 </div>
 </div>
 
 
 <div id="outline-container-transforms" class="outline-2">
-<h2 id="transforms">Transforms</h2>
+<h2 id="transforms">Models</h2>
 <div class="outline-text-2" id="text-transforms">
 <p>
 The main use of <code>moo</code> is to apply a data structure ("model") to a
@@ -726,7 +830,7 @@ easily defined.
 <p>
 We must then have means to <b>transform</b> and possibly <b>augment</b> the
 initial data structure into a <b>model</b> expected by the template and
-<code>moo</code> supports several strategies.
+<code>moo</code> supports several strategies to supply that.
 </p>
 </div>
 
@@ -757,6 +861,13 @@ function.
 <p>
 This simple example shows how TLAs work:
 </p>
+
+<div class="org-src-container">
+<pre class="src src-jsonnet"><span style="color: #b4fa70;">function</span>(arg=<span style="color: #e9b96e;">""</span>, def=<span style="color: #e9b96e;">"default"</span>) {
+    arg: arg, def:def,
+}
+</pre>
+</div>
 
 <div class="org-src-container">
 <pre class="src src-shell">moo -A <span style="color: #fcaf3e;">arg</span>=<span style="color: #e9b96e;">"hi"</span> compile examples/oschema/tla.jsonnet
@@ -803,21 +914,73 @@ function.  Reusing the above example and the <code>sys</code> schema file:
 </div>
 
 <p>
-Thus, with TLAs one may construct a Jsonnet file that transforms and
-augments some initial data structure. 
+Thus, with TLAs one may construct a somewhat <b>general</b> Jsonnet file that
+transforms and augments some initial data structure to something more
+specific.
+</p>
+
+<p>
+TLAs have one more useful trick.  The function to which TLAs are given
+is just a normal Jsonnet function.  This gives us the option to "bake
+in" some TLAs in a Jsonnet file that calls the original function.
+Consider:
+</p>
+
+<div class="org-src-container">
+<pre class="src src-jsonnet"><span style="color: #b4fa70;">local</span> sys = <span style="color: #b4fa70;">import</span> <span style="color: #e9b96e;">"sys.jsonnet"</span>;
+<span style="color: #b4fa70;">local</span> tla = <span style="color: #b4fa70;">import</span> <span style="color: #e9b96e;">"tla.jsonnet"</span>;
+tla(sys)
+</pre>
+</div>
+
+<p>
+Thus we may get the same output with a simpler command:
+</p>
+
+<div class="org-src-container">
+<pre class="src src-shell">moo compile examples/oschema/tla-sys.jsonnet
+</pre>
+</div>
+
+<div class="org-src-container">
+<pre class="src src-json">{
+    <span style="color: #b4fa70;">"arg"</span>: [
+        {
+            <span style="color: #b4fa70;">"deps"</span>: [],
+            <span style="color: #b4fa70;">"dtype"</span>: <span style="color: #e9b96e;">"u4"</span>,
+            <span style="color: #b4fa70;">"name"</span>: <span style="color: #e9b96e;">"Count"</span>,
+            <span style="color: #b4fa70;">"path"</span>: [
+                <span style="color: #e9b96e;">"sys"</span>
+            ],
+            <span style="color: #b4fa70;">"schema"</span>: <span style="color: #e9b96e;">"number"</span>
+        }
+    ],
+    <span style="color: #b4fa70;">"def"</span>: <span style="color: #e9b96e;">"default"</span>
+}
+</pre>
+</div>
+
+<p>
+This pattern of "baking in" of TLAs can be useful, for example, if one
+has a codegen system where a package must supply the specific
+information but otherwise relies on a common model.  By "hiding" the
+TLAs to that model in a Jsonnet file, the build system layer can be
+made simpler.  See <a href="https://brettviren.github.io/moo/buildsys.html">build sys</a> document for some pointers on integrating
+<code>moo</code> into popular build systems.
 </p>
 </div>
 </div>
+
 
 <div id="outline-container-python-trans" class="outline-3">
 <h3 id="python-trans">Python</h3>
 <div class="outline-text-3" id="text-python-trans">
 <p>
-Jsonnet is a "small" language (one of its charms) and some
+Jsonnet is a "small" language (one of its charms) and some model
 transformations may be complex enough that its simplicity poses a
 limitation.  <code>moo</code> thus allows transformations to be defined in Python
-and this opens up the ability to form the contract between model and
-template in a more strong and object-oriented manner.
+and this opens up the ability to form the model in a more strong and
+object-oriented manner.
 </p>
 
 <p>
@@ -833,13 +996,19 @@ illustrate a transformation applied to the <code>app</code> schema:
 </pre>
 </div>
 
-<pre class="example">
-[&lt;Any "app.Affiliation"&gt;,
- &lt;Sequence "app.Counts" items:sys.Count&gt;,
- &lt;String "app.Email"&gt;,
- &lt;Enum "app.MBTI"&gt;,
- &lt;Record "app.Person" fields:{email, counts, affil, mbti}&gt;]
+<div class="org-src-container">
+<pre class="src src-python">[&lt;Number <span style="color: #e9b96e;">"sys.Count"</span>&gt;,
+ &lt;Any <span style="color: #e9b96e;">"app.Affiliation"</span>&gt;,
+ &lt;Sequence <span style="color: #e9b96e;">"app.Counts"</span> items:sys.Count&gt;,
+ &lt;String <span style="color: #e9b96e;">"app.Email"</span>&gt;,
+ &lt;Enum <span style="color: #e9b96e;">"app.MBTI"</span>&gt;,
+ &lt;String <span style="color: #e9b96e;">"app.Make"</span>&gt;,
+ &lt;String <span style="color: #e9b96e;">"app.Model"</span>&gt;,
+ &lt;Enum <span style="color: #e9b96e;">"app.VehicleClass"</span>&gt;,
+ &lt;Record <span style="color: #e9b96e;">"app.Vehicle"</span> fields:{make, model, <span style="color: #e090d7;">type</span>}&gt;,
+ &lt;Record <span style="color: #e9b96e;">"app.Person"</span> fields:{email, email2, counts, counts2, affil, mbti, vehicle, vehicle2, vehicle2}&gt;]
 </pre>
+</div>
 
 <p>
 The built-in <code>moo.oschema.typify()</code> function illustrated here converts a
@@ -867,11 +1036,16 @@ are ordered from least dependent to most.
 
 <pre class="example">
 Iterate over list of types:
+&lt;Number "sys.Count"&gt;
 &lt;Any "app.Affiliation"&gt;
 &lt;Sequence "app.Counts" items:sys.Count&gt;
 &lt;String "app.Email"&gt;
 &lt;Enum "app.MBTI"&gt;
-&lt;Record "app.Person" fields:{email, counts, affil, mbti}&gt;
+&lt;String "app.Make"&gt;
+&lt;String "app.Model"&gt;
+&lt;Enum "app.VehicleClass"&gt;
+&lt;Record "app.Vehicle" fields:{make, model, type}&gt;
+&lt;Record "app.Person" fields:{email, email2, counts, counts2, affil, mbti, vehicle, vehicle2, vehicle2}&gt;
 </pre>
 
 <p>
@@ -889,7 +1063,7 @@ may be useful to keep the command argument list small.
 </p>
 
 <p>
-But, let us now move on.
+But, let us now move on to codegen.
 </p>
 </div>
 </div>
@@ -945,6 +1119,9 @@ The <code>omodel</code> contract is embodied in this Jsonnet file:
 
     <span style="color: #73d216;">// Select out the types "in" this namespace.</span>
     types: [t <span style="color: #b4fa70;">for</span> t <span style="color: #b4fa70;">in</span> os <span style="color: #b4fa70;">if</span> oschema.isin(<span style="color: #b4fa70;">self</span>.path, t.path)],
+
+    <span style="color: #73d216;">// all types, including types referred to by those in "types" array</span>
+    all_types: os,
 
     <span style="color: #73d216;">// Reference full type by its FQN.</span>
     byref: {[oschema.fqn(t)]:t <span style="color: #b4fa70;">for</span> t <span style="color: #b4fa70;">in</span> $.types},
@@ -1023,107 +1200,27 @@ bring these in as a model "graft".
     -M examples/oschema <span style="color: #e9b96e;">\</span>
     -A <span style="color: #fcaf3e;">os</span>=<span style="color: #e9b96e;">'app.jsonnet'</span> -A <span style="color: #fcaf3e;">path</span>=<span style="color: #e9b96e;">'app'</span> <span style="color: #e9b96e;">\</span>
     -t <span style="color: #e9b96e;">'/types:moo.oschema.typify|moo.oschema.graph|moo.oschema.depsort'</span> <span style="color: #e9b96e;">\</span>
-    dump -f pretty omodel.jsonnet
+    dump -f types omodel.jsonnet
 </pre>
 </div>
 
-<div class="org-src-container">
-<pre class="src src-python">{<span style="color: #e9b96e;">'byref'</span>: {<span style="color: #e9b96e;">'app.Affiliation'</span>: {<span style="color: #e9b96e;">'deps'</span>: [],
-                               <span style="color: #e9b96e;">'doc'</span>: <span style="color: #e9b96e;">'An associated object of any type'</span>,
-                               <span style="color: #e9b96e;">'name'</span>: <span style="color: #e9b96e;">'Affiliation'</span>,
-                               <span style="color: #e9b96e;">'path'</span>: [<span style="color: #e9b96e;">'app'</span>],
-                               <span style="color: #e9b96e;">'schema'</span>: <span style="color: #e9b96e;">'any'</span>},
-           <span style="color: #e9b96e;">'app.Counts'</span>: {<span style="color: #e9b96e;">'deps'</span>: [<span style="color: #e9b96e;">'sys.Count'</span>],
-                          <span style="color: #e9b96e;">'doc'</span>: <span style="color: #e9b96e;">'All the counts'</span>,
-                          <span style="color: #e9b96e;">'items'</span>: <span style="color: #e9b96e;">'sys.Count'</span>,
-                          <span style="color: #e9b96e;">'name'</span>: <span style="color: #e9b96e;">'Counts'</span>,
-                          <span style="color: #e9b96e;">'path'</span>: [<span style="color: #e9b96e;">'app'</span>],
-                          <span style="color: #e9b96e;">'schema'</span>: <span style="color: #e9b96e;">'sequence'</span>},
-           <span style="color: #e9b96e;">'app.Email'</span>: {<span style="color: #e9b96e;">'deps'</span>: [],
-                         <span style="color: #e9b96e;">'doc'</span>: <span style="color: #e9b96e;">'Electronic mail address'</span>,
-                         <span style="color: #e9b96e;">'format'</span>: <span style="color: #e9b96e;">'email'</span>,
-                         <span style="color: #e9b96e;">'name'</span>: <span style="color: #e9b96e;">'Email'</span>,
-                         <span style="color: #e9b96e;">'path'</span>: [<span style="color: #e9b96e;">'app'</span>],
-                         <span style="color: #e9b96e;">'schema'</span>: <span style="color: #e9b96e;">'string'</span>},
-           <span style="color: #e9b96e;">'app.MBTI'</span>: {<span style="color: #e9b96e;">'default'</span>: <span style="color: #e9b96e;">'introversion'</span>,
-                        <span style="color: #e9b96e;">'deps'</span>: [],
-                        <span style="color: #e9b96e;">'name'</span>: <span style="color: #e9b96e;">'MBTI'</span>,
-                        <span style="color: #e9b96e;">'path'</span>: [<span style="color: #e9b96e;">'app'</span>],
-                        <span style="color: #e9b96e;">'schema'</span>: <span style="color: #e9b96e;">'enum'</span>,
-                        <span style="color: #e9b96e;">'symbols'</span>: [<span style="color: #e9b96e;">'introversion'</span>,
-                                    <span style="color: #e9b96e;">'extroversion'</span>,
-                                    <span style="color: #e9b96e;">'sensing'</span>,
-                                    <span style="color: #e9b96e;">'intuition'</span>,
-                                    <span style="color: #e9b96e;">'thinking'</span>,
-                                    <span style="color: #e9b96e;">'feeling'</span>,
-                                    <span style="color: #e9b96e;">'judging'</span>,
-                                    <span style="color: #e9b96e;">'perceiving'</span>]},
-           <span style="color: #e9b96e;">'app.Person'</span>: {<span style="color: #e9b96e;">'deps'</span>: [<span style="color: #e9b96e;">'app.Email'</span>,
-                                   <span style="color: #e9b96e;">'app.Counts'</span>,
-                                   <span style="color: #e9b96e;">'app.Affiliation'</span>,
-                                   <span style="color: #e9b96e;">'app.MBTI'</span>],
-                          <span style="color: #e9b96e;">'doc'</span>: <span style="color: #e9b96e;">'Describe everything there is to know about '</span>
-                                 <span style="color: #e9b96e;">'an individual human'</span>,
-                          <span style="color: #e9b96e;">'fields'</span>: [{<span style="color: #e9b96e;">'doc'</span>: <span style="color: #e9b96e;">'E-mail address'</span>,
-                                      <span style="color: #e9b96e;">'item'</span>: <span style="color: #e9b96e;">'app.Email'</span>,
-                                      <span style="color: #e9b96e;">'name'</span>: <span style="color: #e9b96e;">'email'</span>},
-                                     {<span style="color: #e9b96e;">'doc'</span>: <span style="color: #e9b96e;">'Count of some things'</span>,
-                                      <span style="color: #e9b96e;">'item'</span>: <span style="color: #e9b96e;">'app.Counts'</span>,
-                                      <span style="color: #e9b96e;">'name'</span>: <span style="color: #e9b96e;">'counts'</span>},
-                                     {<span style="color: #e9b96e;">'doc'</span>: <span style="color: #e9b96e;">'Some affiliation'</span>,
-                                      <span style="color: #e9b96e;">'item'</span>: <span style="color: #e9b96e;">'app.Affiliation'</span>,
-                                      <span style="color: #e9b96e;">'name'</span>: <span style="color: #e9b96e;">'affil'</span>},
-                                     {<span style="color: #e9b96e;">'default'</span>: <span style="color: #e9b96e;">'introversion'</span>,
-                                      <span style="color: #e9b96e;">'doc'</span>: <span style="color: #e9b96e;">'Personality'</span>,
-                                      <span style="color: #e9b96e;">'item'</span>: <span style="color: #e9b96e;">'app.MBTI'</span>,
-                                      <span style="color: #e9b96e;">'name'</span>: <span style="color: #e9b96e;">'mbti'</span>}],
-                          <span style="color: #e9b96e;">'name'</span>: <span style="color: #e9b96e;">'Person'</span>,
-                          <span style="color: #e9b96e;">'path'</span>: [<span style="color: #e9b96e;">'app'</span>],
-                          <span style="color: #e9b96e;">'schema'</span>: <span style="color: #e9b96e;">'record'</span>}},
- <span style="color: #e9b96e;">'byscn'</span>: {<span style="color: #e9b96e;">'any'</span>: [<span style="color: #e9b96e;">'app.Affiliation'</span>],
-           <span style="color: #e9b96e;">'anyOf'</span>: [],
-           <span style="color: #e9b96e;">'boolean'</span>: [],
-           <span style="color: #e9b96e;">'enum'</span>: [<span style="color: #e9b96e;">'app.MBTI'</span>],
-           <span style="color: #e9b96e;">'namespace'</span>: [],
-           <span style="color: #e9b96e;">'number'</span>: [],
-           <span style="color: #e9b96e;">'record'</span>: [<span style="color: #e9b96e;">'app.Person'</span>],
-           <span style="color: #e9b96e;">'sequence'</span>: [<span style="color: #e9b96e;">'app.Counts'</span>],
-           <span style="color: #e9b96e;">'string'</span>: [<span style="color: #e9b96e;">'app.Email'</span>]},
- <span style="color: #e9b96e;">'ctxpath'</span>: [],
- <span style="color: #e9b96e;">'ctxpre'</span>: <span style="color: #e9b96e;">''</span>,
- <span style="color: #e9b96e;">'extrefs'</span>: [<span style="color: #e9b96e;">'sys'</span>],
- <span style="color: #e9b96e;">'lang'</span>: {<span style="color: #e9b96e;">'dtypes'</span>: {<span style="color: #e9b96e;">'f4'</span>: <span style="color: #e9b96e;">'float'</span>,
-                     <span style="color: #e9b96e;">'f8'</span>: <span style="color: #e9b96e;">'double'</span>,
-                     <span style="color: #e9b96e;">'i2'</span>: <span style="color: #e9b96e;">'int16_t'</span>,
-                     <span style="color: #e9b96e;">'i4'</span>: <span style="color: #e9b96e;">'int32_t'</span>,
-                     <span style="color: #e9b96e;">'i8'</span>: <span style="color: #e9b96e;">'int64_t'</span>,
-                     <span style="color: #e9b96e;">'u2'</span>: <span style="color: #e9b96e;">'uint16_t'</span>,
-                     <span style="color: #e9b96e;">'u4'</span>: <span style="color: #e9b96e;">'uint32_t'</span>,
-                     <span style="color: #e9b96e;">'u8'</span>: <span style="color: #e9b96e;">'uint64_t'</span>},
-          <span style="color: #e9b96e;">'imports'</span>: {<span style="color: #e9b96e;">'any'</span>: [<span style="color: #e9b96e;">'nlohmann/json.hpp'</span>],
-                      <span style="color: #e9b96e;">'anyof'</span>: [<span style="color: #e9b96e;">'variant'</span>],
-                      <span style="color: #e9b96e;">'sequence'</span>: [<span style="color: #e9b96e;">'vector'</span>],
-                      <span style="color: #e9b96e;">'string'</span>: [<span style="color: #e9b96e;">'string'</span>]},
-          <span style="color: #e9b96e;">'types'</span>: {<span style="color: #e9b96e;">'any'</span>: <span style="color: #e9b96e;">'nlohmann::json'</span>,
-                    <span style="color: #e9b96e;">'sequence'</span>: <span style="color: #e9b96e;">'std::vector'</span>,
-                    <span style="color: #e9b96e;">'string'</span>: <span style="color: #e9b96e;">'std::string'</span>}},
- <span style="color: #e9b96e;">'nspre'</span>: <span style="color: #e9b96e;">'app.'</span>,
- <span style="color: #e9b96e;">'path'</span>: [<span style="color: #e9b96e;">'app'</span>],
- <span style="color: #e9b96e;">'relpath'</span>: <span style="color: #e9b96e;">'app'</span>,
- <span style="color: #e9b96e;">'types'</span>: [&lt;Any <span style="color: #e9b96e;">"app.Affiliation"</span>&gt;,
-           &lt;Sequence <span style="color: #e9b96e;">"app.Counts"</span> items:sys.Count&gt;,
-           &lt;String <span style="color: #e9b96e;">"app.Email"</span>&gt;,
-           &lt;Enum <span style="color: #e9b96e;">"app.MBTI"</span>&gt;,
-           &lt;Record <span style="color: #e9b96e;">"app.Person"</span> fields:{email, counts, affil, mbti}&gt;]}
+<pre class="example">
+all_types &lt;class 'list'&gt;
+byref &lt;class 'dict'&gt;
+byscn &lt;class 'dict'&gt;
+ctxpath &lt;class 'list'&gt;
+ctxpre &lt;class 'str'&gt;
+extrefs &lt;class 'list'&gt;
+nspre &lt;class 'str'&gt;
+path &lt;class 'list'&gt;
+relpath &lt;class 'str'&gt;
+types &lt;class 'list'&gt;
+lang &lt;class 'dict'&gt;
 </pre>
-</div>
 
 <p>
-If you squint at that dump you'll find the <code>lang</code> attribute added.
-</p>
-
-<p>
-These CLI are getting rather long and we may add bits to make that easier but let's now move to the template.
+If you squint you'll see the <code>lang</code> attribute added with others from the
+model.  Let's now move to the template.
 </p>
 </div>
 </div>
@@ -1169,7 +1266,6 @@ to <code>render</code> and adding the template file name.
 <pre class="src src-shell">moo -g <span style="color: #e9b96e;">'/lang:ocpp.jsonnet'</span> <span style="color: #e9b96e;">\</span>
     -M examples/oschema <span style="color: #e9b96e;">\</span>
     -A <span style="color: #fcaf3e;">os</span>=<span style="color: #e9b96e;">'app.jsonnet'</span> -A <span style="color: #fcaf3e;">path</span>=<span style="color: #e9b96e;">'app'</span> <span style="color: #e9b96e;">\</span>
-    -t <span style="color: #e9b96e;">'/types:moo.oschema.typify|moo.oschema.graph|moo.oschema.depsort'</span> <span style="color: #e9b96e;">\</span>
     render omodel.jsonnet ostructs.hpp.j2
 </pre>
 </div>
@@ -1214,20 +1310,60 @@ to <code>render</code> and adding the template file name.
         <span style="color: #fcaf3e;">perceiving</span>,
     };
 
+    <span style="color: #73d216;">// </span><span style="color: #73d216;">@brief </span>
+    <span style="color: #b4fa70;">using</span> <span style="color: #8cc4ff;">Make</span> = <span style="color: #e9b2e3;">std</span>::string;
+
+    <span style="color: #73d216;">// </span><span style="color: #73d216;">@brief </span>
+    <span style="color: #b4fa70;">using</span> <span style="color: #8cc4ff;">Model</span> = <span style="color: #e9b2e3;">std</span>::string;
+
+    <span style="color: #73d216;">// </span><span style="color: #73d216;">@brief </span>
+    <span style="color: #b4fa70;">enum</span> <span style="color: #b4fa70;">class</span> <span style="color: #8cc4ff;">VehicleClass</span>: <span style="color: #8cc4ff;">unsigned</span> {
+        <span style="color: #fcaf3e;">boring</span>,
+        <span style="color: #fcaf3e;">fun</span>,
+    };
+
+    <span style="color: #73d216;">// </span><span style="color: #73d216;">@brief </span>
+    <span style="color: #b4fa70;">struct</span> <span style="color: #8cc4ff;">Vehicle</span> {
+
+        <span style="color: #73d216;">// </span><span style="color: #73d216;">@brief </span>
+        <span style="color: #8cc4ff;">Make</span> <span style="color: #fcaf3e;">make</span> = <span style="color: #e9b96e;">"Subaru"</span>;
+
+        <span style="color: #73d216;">// </span><span style="color: #73d216;">@brief </span>
+        <span style="color: #8cc4ff;">Model</span> <span style="color: #fcaf3e;">model</span> = <span style="color: #e9b96e;">"WRX"</span>;
+
+        <span style="color: #73d216;">// </span><span style="color: #73d216;">@brief </span>
+        <span style="color: #8cc4ff;">VehicleClass</span> <span style="color: #fcaf3e;">type</span> = <span style="color: #e9b2e3;">app</span>::<span style="color: #e9b2e3;">VehicleClass</span>::fun;
+    };
+
     <span style="color: #73d216;">// </span><span style="color: #73d216;">@brief Describe everything there is to know about an individual human</span>
     <span style="color: #b4fa70;">struct</span> <span style="color: #8cc4ff;">Person</span> {
 
         <span style="color: #73d216;">// </span><span style="color: #73d216;">@brief E-mail address</span>
-        <span style="color: #8cc4ff;">Email</span> <span style="color: #fcaf3e;">email</span> = None;
+        <span style="color: #8cc4ff;">Email</span> <span style="color: #fcaf3e;">email</span> = <span style="color: #e9b96e;">""</span>;
+
+        <span style="color: #73d216;">// </span><span style="color: #73d216;">@brief E-mail address</span>
+        <span style="color: #8cc4ff;">Email</span> <span style="color: #fcaf3e;">email2</span> = <span style="color: #e9b96e;">"me@example.com"</span>;
 
         <span style="color: #73d216;">// </span><span style="color: #73d216;">@brief Count of some things</span>
-        <span style="color: #8cc4ff;">Counts</span> <span style="color: #fcaf3e;">counts</span> = None;
+        <span style="color: #8cc4ff;">Counts</span> <span style="color: #fcaf3e;">counts</span> = {};
+
+        <span style="color: #73d216;">// </span><span style="color: #73d216;">@brief Count of some things</span>
+        <span style="color: #8cc4ff;">Counts</span> <span style="color: #fcaf3e;">counts2</span> = {0, 1, 2};
 
         <span style="color: #73d216;">// </span><span style="color: #73d216;">@brief Some affiliation</span>
-        <span style="color: #8cc4ff;">Affiliation</span> <span style="color: #fcaf3e;">affil</span> = None;
+        <span style="color: #8cc4ff;">Affiliation</span> <span style="color: #fcaf3e;">affil</span> = {};
 
         <span style="color: #73d216;">// </span><span style="color: #73d216;">@brief Personality</span>
-        <span style="color: #8cc4ff;">MBTI</span> <span style="color: #fcaf3e;">mbti</span> = introversion;
+        <span style="color: #8cc4ff;">MBTI</span> <span style="color: #fcaf3e;">mbti</span> = <span style="color: #e9b2e3;">app</span>::<span style="color: #e9b2e3;">MBTI</span>::introversion;
+
+        <span style="color: #73d216;">// </span><span style="color: #73d216;">@brief Example of nested record</span>
+        <span style="color: #8cc4ff;">Vehicle</span> <span style="color: #fcaf3e;">vehicle</span> = {<span style="color: #e9b96e;">"Subaru"</span>, <span style="color: #e9b96e;">"WRX"</span>, <span style="color: #e9b2e3;">app</span>::<span style="color: #e9b2e3;">VehicleClass</span>::fun};
+
+        <span style="color: #73d216;">// </span><span style="color: #73d216;">@brief Example of nested record with default</span>
+        <span style="color: #8cc4ff;">Vehicle</span> <span style="color: #fcaf3e;">vehicle2</span> = {<span style="color: #e9b96e;">"Subaru"</span>, <span style="color: #e9b96e;">"CrossTrek"</span>, <span style="color: #e9b2e3;">app</span>::<span style="color: #e9b2e3;">VehicleClass</span>::boring};
+
+        <span style="color: #73d216;">// </span><span style="color: #73d216;">@brief Example of nested record with default</span>
+        <span style="color: #8cc4ff;">Vehicle</span> <span style="color: #fcaf3e;">vehicle2</span> = {<span style="color: #e9b96e;">"Subaru"</span>, <span style="color: #e9b96e;">"BRZ"</span>, <span style="color: #e9b2e3;">app</span>::<span style="color: #e9b2e3;">VehicleClass</span>::fun};
     };
 
 } <span style="color: #73d216;">// </span><span style="color: #73d216;">namespace app</span>
@@ -1246,7 +1382,6 @@ model.
 <pre class="src src-shell">moo -g <span style="color: #e9b96e;">'/lang:ocpp.jsonnet'</span> <span style="color: #e9b96e;">\</span>
     -M examples/oschema <span style="color: #e9b96e;">\</span>
     -A <span style="color: #fcaf3e;">os</span>=<span style="color: #e9b96e;">'app.jsonnet'</span> -A <span style="color: #fcaf3e;">path</span>=<span style="color: #e9b96e;">'app'</span> <span style="color: #e9b96e;">\</span>
-    -t <span style="color: #e9b96e;">'/types:moo.oschema.typify|moo.oschema.graph|moo.oschema.depsort'</span> <span style="color: #e9b96e;">\</span>
     render omodel.jsonnet onljs.hpp.j2
 </pre>
 </div>
@@ -1282,23 +1417,57 @@ model.
             { <span style="color: #e9b2e3;">app</span>::<span style="color: #e9b2e3;">MBTI</span>::judging, <span style="color: #e9b96e;">"judging"</span> },
             { <span style="color: #e9b2e3;">app</span>::<span style="color: #e9b2e3;">MBTI</span>::perceiving, <span style="color: #e9b96e;">"perceiving"</span> },
         })
+    NLOHMANN_JSON_SERIALIZE_ENUM( VehicleClass, {
+            { <span style="color: #e9b2e3;">app</span>::<span style="color: #e9b2e3;">VehicleClass</span>::boring, <span style="color: #e9b96e;">"boring"</span> },
+            { <span style="color: #e9b2e3;">app</span>::<span style="color: #e9b2e3;">VehicleClass</span>::fun, <span style="color: #e9b96e;">"fun"</span> },
+        })
 
+
+    <span style="color: #b4fa70;">inline</span> <span style="color: #8cc4ff;">void</span> <span style="color: #fce94f;">to_json</span>(<span style="color: #8cc4ff;">data_t</span>&amp; <span style="color: #fcaf3e;">j</span>, <span style="color: #b4fa70;">const</span> <span style="color: #8cc4ff;">Vehicle</span>&amp; <span style="color: #fcaf3e;">obj</span>) {
+        j[<span style="color: #e9b96e;">"make"</span>] = obj.make;
+        j[<span style="color: #e9b96e;">"model"</span>] = obj.model;
+        j[<span style="color: #e9b96e;">"type"</span>] = obj.type;
+    }
+
+    <span style="color: #b4fa70;">inline</span> <span style="color: #8cc4ff;">void</span> <span style="color: #fce94f;">from_json</span>(<span style="color: #b4fa70;">const</span> <span style="color: #8cc4ff;">data_t</span>&amp; <span style="color: #fcaf3e;">j</span>, <span style="color: #8cc4ff;">Vehicle</span>&amp; <span style="color: #fcaf3e;">obj</span>) {
+        <span style="color: #b4fa70;">if</span> (j.contains(<span style="color: #e9b96e;">"make"</span>))
+            j.at(<span style="color: #e9b96e;">"make"</span>).get_to(obj.make);    
+        <span style="color: #b4fa70;">if</span> (j.contains(<span style="color: #e9b96e;">"model"</span>))
+            j.at(<span style="color: #e9b96e;">"model"</span>).get_to(obj.model);    
+        <span style="color: #b4fa70;">if</span> (j.contains(<span style="color: #e9b96e;">"type"</span>))
+            j.at(<span style="color: #e9b96e;">"type"</span>).get_to(obj.type);    
+    }
 
     <span style="color: #b4fa70;">inline</span> <span style="color: #8cc4ff;">void</span> <span style="color: #fce94f;">to_json</span>(<span style="color: #8cc4ff;">data_t</span>&amp; <span style="color: #fcaf3e;">j</span>, <span style="color: #b4fa70;">const</span> <span style="color: #8cc4ff;">Person</span>&amp; <span style="color: #fcaf3e;">obj</span>) {
         j[<span style="color: #e9b96e;">"email"</span>] = obj.email;
+        j[<span style="color: #e9b96e;">"email2"</span>] = obj.email2;
         j[<span style="color: #e9b96e;">"counts"</span>] = obj.counts;
+        j[<span style="color: #e9b96e;">"counts2"</span>] = obj.counts2;
         j[<span style="color: #e9b96e;">"affil"</span>] = obj.affil;
         j[<span style="color: #e9b96e;">"mbti"</span>] = obj.mbti;
+        j[<span style="color: #e9b96e;">"vehicle"</span>] = obj.vehicle;
+        j[<span style="color: #e9b96e;">"vehicle2"</span>] = obj.vehicle2;
+        j[<span style="color: #e9b96e;">"vehicle2"</span>] = obj.vehicle2;
     }
 
     <span style="color: #b4fa70;">inline</span> <span style="color: #8cc4ff;">void</span> <span style="color: #fce94f;">from_json</span>(<span style="color: #b4fa70;">const</span> <span style="color: #8cc4ff;">data_t</span>&amp; <span style="color: #fcaf3e;">j</span>, <span style="color: #8cc4ff;">Person</span>&amp; <span style="color: #fcaf3e;">obj</span>) {
         <span style="color: #b4fa70;">if</span> (j.contains(<span style="color: #e9b96e;">"email"</span>))
             j.at(<span style="color: #e9b96e;">"email"</span>).get_to(obj.email);    
+        <span style="color: #b4fa70;">if</span> (j.contains(<span style="color: #e9b96e;">"email2"</span>))
+            j.at(<span style="color: #e9b96e;">"email2"</span>).get_to(obj.email2);    
         <span style="color: #b4fa70;">if</span> (j.contains(<span style="color: #e9b96e;">"counts"</span>))
             j.at(<span style="color: #e9b96e;">"counts"</span>).get_to(obj.counts);    
+        <span style="color: #b4fa70;">if</span> (j.contains(<span style="color: #e9b96e;">"counts2"</span>))
+            j.at(<span style="color: #e9b96e;">"counts2"</span>).get_to(obj.counts2);    
         obj.affil = j.at(<span style="color: #e9b96e;">"affil"</span>);
         <span style="color: #b4fa70;">if</span> (j.contains(<span style="color: #e9b96e;">"mbti"</span>))
             j.at(<span style="color: #e9b96e;">"mbti"</span>).get_to(obj.mbti);    
+        <span style="color: #b4fa70;">if</span> (j.contains(<span style="color: #e9b96e;">"vehicle"</span>))
+            j.at(<span style="color: #e9b96e;">"vehicle"</span>).get_to(obj.vehicle);    
+        <span style="color: #b4fa70;">if</span> (j.contains(<span style="color: #e9b96e;">"vehicle2"</span>))
+            j.at(<span style="color: #e9b96e;">"vehicle2"</span>).get_to(obj.vehicle2);    
+        <span style="color: #b4fa70;">if</span> (j.contains(<span style="color: #e9b96e;">"vehicle2"</span>))
+            j.at(<span style="color: #e9b96e;">"vehicle2"</span>).get_to(obj.vehicle2);    
     }
 
     <span style="color: #73d216;">// </span><span style="color: #73d216;">fixme: add support for MessagePack serializers (at least)</span>
@@ -1319,45 +1488,16 @@ model.
 <div class="outline-text-2" id="text-objects">
 <p>
 Besides generating code from a schema, data objects may be constructed
-with the help of and validated against schema.
+with the help of and validated against schema.  For information about
+this usage pattern see the <a href="otypes.html">otypes document</a> which describes how to use
+the <code>moo.otypes</code> module.
 </p>
-</div>
-
-<div id="outline-container-object-ctor" class="outline-3">
-<h3 id="object-ctor">Construction</h3>
-<div class="outline-text-3" id="text-object-ctor">
-<p>
-A goal is to provide comprehensive object editors which are directed
-by schema.  When such editors are implemented as Python they may use
-<code>moo.ogen</code> module to produce Python classes that correspond to <code>moo</code>
-object schema.
-</p>
-</div>
-</div>
-
-
-
-<div id="outline-container-object-val" class="outline-3">
-<h3 id="object-val">Validation</h3>
-<div class="outline-text-3" id="text-object-val">
-<p>
-The <code>moo.oschema</code> schema classes produce type instances which provide
-snippets of <a href="https://json-schema.org/understanding-json-schema/index.html">JSON Schema</a>.  Type instances are also <code>callable</code> objects.
-When called on a value, it will be validated against the type's
-schema.
-</p>
-
-<ul class="org-ul">
-<li class="off"><code>[&#xa0;]</code> use with <code>moo</code> with a schema document</li>
-<li class="off"><code>[&#xa0;]</code> use with <code>moo.oschema</code></li>
-</ul>
-</div>
 </div>
 </div>
 </div>
 <div id="postamble" class="status">
 <p class="author">Author: Brett Viren</p>
-<p class="date">Created: 2020-11-10 Tue 09:11</p>
+<p class="date">Created: 2020-11-12 Thu 12:58</p>
 <p class="validation"><a href="http://validator.w3.org/check?uri=referer">Validate</a></p>
 </div>
 </body>

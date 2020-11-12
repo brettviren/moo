@@ -7,17 +7,28 @@
 grep -m1 -A$a "$re" "$file"
 #+end_src
 
+#+name: awk
+#+begin_src shell :var re="" :var file="/dev/null" :var lang="shell" :exports none :results output code
+awk "$re" "$file"
+#+end_src
+
 * Concepts
   :PROPERTIES:
   :CUSTOM_ID: concepts
   :END:
 
 
-A *schema* describes one or more *types*.  In the "oschema"
-representation, a type is represented as an finalized *object* (compared
-to other representations in moo which are functional in nature).  Each
-type can be considered an instance of a *schema class*.  The following
-schema classes are currently supported.
+In general, a *schema* describes one or more *types*.  There are many ways
+to represent schema (JSON Schema, XML schema, Protobuf or Avro
+schema).  In *moo* the /oschema/ representation is one that is supported.
+The "o" stands for "object" as /oschema/ has an object representation.
+Any data or programming language which provides support for the
+concepts described here and which can provide compatible data
+structures may be used by *moo*.
+
+A schema expressed as /oschema/ defines a number of *types*.  Each type is
+an instance of exactly one *schema class*.  There are a limited number
+of schema classes defined:
 
 - ~boolean~ :: a type which may take value "true" or "false"
 - ~number~ :: a numeric type of given format and size
@@ -30,8 +41,9 @@ schema classes are currently supported.
 - ~anyOf~ :: a type that may take a value of any type in a predefined, limited set of types.
 - ~namespace~ :: a collection of named types, (distinct from ~record~ to match eg C++/Python semantics)
 
-Every *type* provides a common set of *attributes* some of which are
-required and others optional:
+Every /oschema/ *type* then provides a set of *attributes* as determined by
+its schema class.  Some attributes are common across all schema
+classes and are required or optional:
 
 - ~name~ :: (required) type name unique to the type context (see ~path~)
 
@@ -43,12 +55,13 @@ required and others optional:
   representing the context of the type (eg as a C++ ~namespace~ or
   Python module path)
 
-Some types *reference* other types.  These include instances of:
-~sequence~, ~record~, ~namespace~ and ~anyOf~.  A *type reference* is
-represented as a /fully-qualified type name/ (FQTN) which is formed as
-the period ("~.~") delimited concatenation of the elements of ~path~
-(if any) and the ~name~.  A FQTN shall not begin nor end with a period
-and there the concept of a "relative" type reference is not supported.
+The types of some schema classes must *reference* one or more other
+types.  These include instances of: ~sequence~, ~record~, ~namespace~, and
+~anyOf~.  A *type reference* is represented as a /fully-qualified type name/
+(FQTN) which is formed as the period ("~.~") delimited concatenation of
+the elements of ~path~ (if any) and the ~name~.  A FQTN shall not begin
+nor end with a period and the concept of a "relative" type reference
+is not supported.
 
 Thus, every type exists at an absolutely determined location in a name
 hierarchy, and it carries this location with it as ~path~ + ~name~.
@@ -64,55 +77,70 @@ in order to match the type reference against possible ~path~ and
   :CUSTOM_ID: Schema
   :END:
 
+This section describes how to author a schema in either the *Jsonnet* or
+*Python* language.  Too illustrate some patterns of large scale projects
+the example will factor the schema into two parts
 
-This section describes how to construct Schema in Jsonnet and in
-Python.  
-
-We will describe how to use Jsonnet to build schema in some detail in
-the next subsection.  However, it should be noted that this is a proxy
-for using *any language* which can produce the same kind of data
-structure.  ~moo~ can read in such structure in Jsonnet, JSON, XML,
-INI and YAML formats.
-
-Internally, ~moo~ represents a schema with Python objects that are
-instances of Python versions of the conceptual schema classes
-described above.  ~moo~ can build these objects by reading schema as
-data structures or a developer may "hand-wire" schema by writing
-Python code in terms of these classes.  This is described in the
-second subsection below.
+- /sys/ :: a set of types relevant to some system (eg a framework)
+- /app/ :: a set of types relevant to an application based on the system
 
 ** Jsonnet
    :PROPERTIES:
    :CUSTOM_ID: schema-in-jsonnet
    :END:
 
+*moo* /oschema/ may be described easily in the [[https://jsonnet.org/][Jsonnet]] language as it
+explicitly targets defining data structures.
 
-Schema may be described easily in the [[https://jsonnet.org/][Jsonnet]] language which
-explicitly targets the domain of data structure construction.  The
-language allows for the construction to be factored into independent
-"modules" (files) so that they may be combined in various ways to meet
-different end goals.
-
-A simple example is given.  It consists of an overall schema factored
-into a ~sys~ schema and an ~app~ schema which depends on ~sys~.  In a real
-system, the ~sys~ schema may correspond to common types used by a
-variety of system applications and the ~app~ structure may correspond to
-schema relevant to one particular type of application.
-
-Here is the ~sys~ schema:
+We start by simply presenting the ~sys~ schema:
 
 #+include: examples/oschema/sys.jsonnet src jsonnet
 
-The body of this simple schema is merely the single line:
+Let's walk through this short example line by line:
+
+#+call: grep("local moo", "examples/oschema/sys.jsonnet", 0) :wrap "src jsonnet"
+
+#+RESULTS:
+#+begin_src jsonnet
+local moo = import "moo.jsonnet";
+#+end_src
+
+This shows Jsonnet's "module" system in action.  A file is loaded and its
+contents available via the ~moo~ variable.  The ~moo.jsonnet~ file holds
+various Jsonnet functions and data that will help build our /oschema/.
+
+#+call: grep("local sys", "examples/oschema/sys.jsonnet", 0) :wrap "src jsonnet"
+
+#+RESULTS:
+#+begin_src jsonnet
+local sys = moo.oschema.schema("sys");
+#+end_src
+
+This call of the ~schema()~ function of the ~moo.oschema~ object returns
+another object held by ~sys~ which will provide sort of a "schema
+factory" that operates "in" the path of ~sys~.  We see it in action:
 
 #+call: grep("Count", "examples/oschema/sys.jsonnet", 0) :wrap "src jsonnet"
 
 #+RESULTS:
 #+begin_src jsonnet
-    sys.number("Count", "u4")
+[sys.number("Count", "u4")]
 #+end_src
 
-We may see a fully compiled representation in JSON format using ~moo~:
+This last line defines the data structure that is sort of the "return"
+value of the ~sys.jsonnet~ file.  That is, this file "compiles" to an
+array holding a single /oschema/ type.
+
+#+begin_note
+All *moo* "schema files" are expected to provide an
+array-of-type-objects.  We will later see how the order of this array
+matters and how to assure it is correct.  We will also later see how
+this array becomes just one element of a more complex structure called
+a *model* which we will form prior to applying to a *template*.
+#+end_note
+
+We can see how the /sys/ schema expands or compiles to its JSON
+representation using *moo*:
 
 #+begin_src shell :exports both :results output code :wrap "src json"
   moo compile examples/oschema/sys.jsonnet
@@ -133,195 +161,202 @@ We may see a fully compiled representation in JSON format using ~moo~:
 ]
 #+end_src
 
-This is thus a schema with a single type called ~Count~ which is of
-schema class ~number~ that has numeric Numpy-style type code ~dtype~
-of an unsigned integer in four bytes ~"u4"~ and is in a context
-~path~ of simply ~["sys"]~.
+This is then a schema with a single type called ~Count~ which is of
+schema class ~number~ that has numeric Numpy-style type code ~dtype~ of an
+unsigned integer in four bytes ~"u4"~ and is in a context ~path~ of simply
+~["sys"]~.
 
-Next we imagine one possible application schema which will use the
-~sys~ schema above.  Here it is defined in Jsonnet as:
+#+begin_note
+The final structural form of /oschema/ (ie, the JSON above) is not
+something that a developer of a schema strictly needs to know.  *moo*
+support for Jsonnet and Python provide native language code to assist
+in building a schema without exposing all the details of the type
+object structure.  These details will need to be understood if any new
+native language support is developed.
+#+end_note
+
+Next, we imagine an application schema with a more rich set of types:
 
 #+include: examples/oschema/app.jsonnet src jsonnet
 
-We will go through these lines of Jsonnet in order to give some
-detail.  Starting with the first few:
+We will go through some of these lines of Jsonnet in order to explain
+some of the forms.  Starting with the first few lines:
 
-#+call: grep("local moo", "examples/oschema/app.jsonnet", 2) :wrap "src jsonnet"
+#+call: awk("/local moo/,/local as/", "examples/oschema/app.jsonnet") :wrap "src jsonnet"
 
 #+RESULTS:
 #+begin_src jsonnet
 local moo = import "moo.jsonnet";
-local sh = moo.oschema.hier(import "sys.jsonnet");
+local sa = import "sys.jsonnet";
+local sh = moo.oschema.hier(sa);
 local as = moo.oschema.schema("app");
 #+end_src
 
-As with ~sys~ we import the support module ~moo.jsonnet~.  We then
-use ~moo.oschema.hier()~ method to process the previously defined ~sys~
-schema which we ~import~ in place.  The ~.hier()~ method gives us a
-handy object representation of this schema where they keys of the
-object are the individual type names.  We'll see that in use next.  In
-the third line we create a new schema factory rooted in the ~["app"]~
-path.
+As with ~sys~ we import the support module ~moo.jsonnet~.  We also import
+the /sys/ schema that we made above.  Thus, ~sa~ holds a single-element
+array.
 
-Next, let's jump to the definition of the ~Person~ type which begins with:
+Next we call the ~moo.oschema.hier()~ method on this array.  This
+transforms the ordered array of types into an (unordered) object where
+each type is available by its name.  We'll see ~sh~ in use next.  
 
-#+call: grep("person:", "examples/oschema/app.jsonnet", 2) :wrap "src jsonnet"
+Finally for this preamble, we make another "schema factory" which is
+this time "in" the path: ~app~.  We'll use ~as~ many times to build up
+elements of our schema.  
+
+Next we build our /sys/ schema and do so inside a "working object".
+This lets us use Jsonnet language feature to refer to one of our types
+in another.  Let's look at the start:
+
+#+call: awk("/local hier/,/the counts/", "examples/oschema/app.jsonnet") :wrap "src jsonnet"
 
 #+RESULTS:
 #+begin_src jsonnet
-    person: as.record("Person", [
-        as.field("email",self.email,
-                 doc="E-mail address"),
+local hier = {
+    counts: as.sequence("Counts",sh.sys.Count,
+                        doc="All the counts"),
 #+end_src
 
-You will note that ~Person~ is defined as a value of a ~person:~ key in a
-containing object and that the type refers to other types by their own
-key (eg ~self.email~).  It is to provide these references that we build
-our types in a temporary object even though the ultimate output (as
-we'll see) is a topologically sorted array of types.
+Here we start our object and save it in a local variable ~hier~ and give
+it an initial entry.  The key name ~counts~ is a temporary convenience
+and the value is what will ultimately matter.  The type we make is a
+sequence that references the ~sys.Count~ type made in the /sys/ schema.
+This shows how "cross schema" references can be made.
 
-And, in fact, finally our ~app~ schema is produced as a flat array
-using:
+The next set of types are nothing special but illustrate how instances
+of some of the different schema classes in Jsonnet are made:
+
+Next, let's jump to the definition of the ~Person~ type which begins with:
+
+#+call: awk("/email:/,/perceiving/", "examples/oschema/app.jsonnet") :wrap "src jsonnet"
+
+#+RESULTS:
+#+begin_src jsonnet
+    email: as.string("Email", format="email",
+                    doc="Electronic mail address"),
+    affil: as.any("Affiliation",
+                  doc="An associated object of any type"),
+    mbti: as.enum("MBTI",["introversion","extroversion",
+                          "sensing","intuition",
+                          "thinking","feeling",
+                          "judging","perceiving"]),
+#+end_src
+
+Now we define an instance of the ~record~ schema class:
+
+#+call: awk("/make:/,/self.autotype/", "examples/oschema/app.jsonnet") :wrap "src jsonnet"
+
+#+RESULTS:
+#+begin_src jsonnet
+    make: as.string("Make"),
+    model: as.string("Model"),
+    autotype: as.enum("VehicleClass", ["boring", "fun"]),
+    vehicle : as.record("Vehicle", [
+        as.field("make", self.make, default="Subaru"),
+        as.field("model", self.model, default="WRX"),
+        as.field("type", self.autotype, default="fun")]),
+#+end_src
+
+In addition to showing how an instance of a ~record~ schema class this
+example shows how to reference types within our "working object"
+through a ~self~ object.  We will skip the res of our "working object"
+other than to say that this ~Vehicle~ type is referenced in the ~Person~
+type described in the remaining and that this shows an example of
+"nested" records.
+
+We end the /app/ schema file by producing a "sorted" array of types: 
 
 #+call: grep("sort_select", "examples/oschema/app.jsonnet", 0) :wrap "src jsonnet"
 
 #+RESULTS:
 #+begin_src jsonnet
-moo.oschema.sort_select(hier, "app")
+sa + moo.oschema.sort_select(hier, "app")
 #+end_src
 
-This scans our temporary object ~hier~ and outputs an array holding
-only the types which are "in" the ~["app"]~ path.  The array is output
-in topological so that any dependency precedes a type that depends on
-it. 
+Like any /oschema/, this array must include *all* of the types needed to
+satisfy any type references and in an order such that any referenced
+types come first.  That is, a [[https://en.wikipedia.org/wiki/Topological_sorting][topological sort]] must be applied to the
+graph built between types and their references.  This is not so
+trivial of an operation, but the ~moo~ Jsonnet support provides the
+required algorithm.  As the /sys/ schema is simple and independent from
+/app/ by construction we merely prepend it.
 
-We can see the final result in full JSON glory:
+Sparing the long output here, the full schema compiled to JSON can be
+produced with this command:
 
-#+begin_src shell :exports both :results output code :wrap "src json"
-  moo compile examples/oschema/app.jsonnet
-#+end_src
+#+begin_example
+moo compile examples/oschema/app.jsonnet
+#+end_example
 
-#+RESULTS:
-#+begin_src json
-[
-    {
-        "deps": [],
-        "doc": "An associated object of any type",
-        "name": "Affiliation",
-        "path": [
-            "app"
-        ],
-        "schema": "any"
-    },
-    {
-        "deps": [
-            "sys.Count"
-        ],
-        "doc": "All the counts",
-        "items": "sys.Count",
-        "name": "Counts",
-        "path": [
-            "app"
-        ],
-        "schema": "sequence"
-    },
-    {
-        "deps": [],
-        "doc": "Electronic mail address",
-        "format": "email",
-        "name": "Email",
-        "path": [
-            "app"
-        ],
-        "schema": "string"
-    },
-    {
-        "deps": [],
-        "name": "MBTI",
-        "path": [
-            "app"
-        ],
-        "schema": "enum",
-        "symbols": [
-            "introversion",
-            "extroversion",
-            "sensing",
-            "intuition",
-            "thinking",
-            "feeling",
-            "judging",
-            "perceiving"
-        ]
-    },
-    {
-        "deps": [
-            "app.Email",
-            "app.Counts",
-            "app.Affiliation",
-            "app.MBTI"
-        ],
-        "doc": "Describe everything there is to know about an individual human",
-        "fields": [
-            {
-                "doc": "E-mail address",
-                "item": "app.Email",
-                "name": "email"
-            },
-            {
-                "doc": "Count of some things",
-                "item": "app.Counts",
-                "name": "counts"
-            },
-            {
-                "doc": "Some affiliation",
-                "item": "app.Affiliation",
-                "name": "affil"
-            },
-            {
-                "doc": "Personality",
-                "item": "app.MBTI",
-                "name": "mbti"
-            }
-        ],
-        "name": "Person",
-        "path": [
-            "app"
-        ],
-        "schema": "record"
-    }
-]
-#+end_src
-
+#+begin_note
+While developing a schema, it is very useful to run ~moo compile~
+frequently in order to check for Jsonnet syntax or logic errors.
+#+end_note
 
 ** Python
    :PROPERTIES:
    :CUSTOM_ID: schema-in-python
    :END:
 
-A bare bones example of the use of ~moo~ Python to load schema as data
-into ~moo.oschema~ objects and back to data is given in:
+*moo* provides support for defining /oschema/ in Python which has some
+similarities to its Jsonnet support.  However, Python is a far more
+expressive language than Jsonnet and thus *moo* Python support provides
+more options to the developer.  
 
-#+include: examples/oschema/round-trip.py src python
+Like the Jsonnet support there are layers of representation of schema
+information, transformations between the layers.  These are
+summarized:
 
-A trivial hand-wired construction of the same schema using
-~moo.oschema~ Python is in:
+- Object representation :: the ~moo.oschema~ module provides a set of Python classes,
+  each associated with one /oschema/ class and object instances of which
+  represent types.
 
-#+include: examples/oschema/hand-wired.py src python
+- POD representation :: the plain-old-data representation corresponds
+  closely to JSON.  In fact, one may copy-paste an /oschema/ type in
+  JSON representation into a Python file and it works as POD.  POD and
+  Object representations can be inter-transformed.
 
-** Other
-   :PROPERTIES:
-   :CUSTOM_ID: other
-   :END:
+Like with the Jsonnet "schema factory" object, a ~moo.oschema.Namespace~
+may be constructed with a ~path~ and then be used to construct type
+objects which are "in" that path.
 
-~moo~ oschema provides support for construction of schema in Jsonnet and
-Python languages only.  However, the user may produce schema in any
-manner desired so long as the resulting data structure is represented
-by one of the many input file formats supported by ~moo~.  In addition
-to Jsonnet and JSON as described above, ~moo~ supports data structures
-in XML, INI and YAML.
+Python is far more expressive than Jsonnet and that leaves the
+developer many choices how to work with /oschema/ representations in
+Python.  The example presented here make some reasonable choices that
+systems may adopt but other approaches are certainly possible.  
+
+In general we will make files which are analogous to the Jsonnet files
+but which may imported as Python modules.  We take the convention that
+a ~.schema~ module variable will hold the array of types.  These types
+will be in Object form.  
+
+Starting with the simple /sys/ schema we can make something like:
+
+#+include: examples/oschema/systypes.py src python
+
+#+begin_note
+We name the module ~systypes~ to not conflict with Python's ~sys~ module.
+#+end_note
+
+The /app/ schema is structured similarly, if a fair bit longer.  
+
+#+include: examples/oschema/apptypes.py src python
+
+Comparing this to the ~app.jsonnet~ above, one can see it is a near
+transliteration of syntax and so we will not dwell on the details.
+But, one thing to call out is that like with ~app.jsonnet~ we must
+prepend the /sys/ schema array to our result and perform a topological
+sort on the types we make here.  The sort is provided by
+~moo.oschema.depsort~ and we play a bit of a Python trick to collect all
+the /oschema/ type objects made in the module using a filter on
+~globals()~.
+
+*** TODO call from moo.
+
+- add an ~import~ based Python loader to ~moo~ 
 
 
-* Transforms
+* Models
   :PROPERTIES:
   :CUSTOM_ID: transforms
   :END:
@@ -335,7 +370,7 @@ easily defined.
 
 We must then have means to *transform* and possibly *augment* the
 initial data structure into a *model* expected by the template and
-~moo~ supports several strategies.
+~moo~ supports several strategies to supply that.
 
 ** DIY
    :PROPERTIES:
@@ -361,7 +396,7 @@ function.
 
 This simple example shows how TLAs work:
 
-#+input: examples/oschema/tla.jsonnet src jsonnet
+#+include: examples/oschema/tla.jsonnet src jsonnet
 
 #+begin_src shell :exports both :results output code :wrap "src json"
   moo -A arg="hi" compile examples/oschema/tla.jsonnet
@@ -403,19 +438,59 @@ function.  Reusing the above example and the ~sys~ schema file:
 }
 #+end_src
 
-Thus, with TLAs one may construct a Jsonnet file that transforms and
-augments some initial data structure. 
+Thus, with TLAs one may construct a somewhat *general* Jsonnet file that
+transforms and augments some initial data structure to something more
+specific.
+
+TLAs have one more useful trick.  The function to which TLAs are given
+is just a normal Jsonnet function.  This gives us the option to "bake
+in" some TLAs in a Jsonnet file that calls the original function.
+Consider:
+
+#+include: examples/oschema/tla-sys.jsonnet src jsonnet
+
+Thus we may get the same output with a simpler command:
+
+#+begin_src shell :exports both :results output code :wrap "src json"
+  moo compile examples/oschema/tla-sys.jsonnet
+#+end_src
+
+#+RESULTS:
+#+begin_src json
+{
+    "arg": [
+        {
+            "deps": [],
+            "dtype": "u4",
+            "name": "Count",
+            "path": [
+                "sys"
+            ],
+            "schema": "number"
+        }
+    ],
+    "def": "default"
+}
+#+end_src
+
+This pattern of "baking in" of TLAs can be useful, for example, if one
+has a codegen system where a package must supply the specific
+information but otherwise relies on a common model.  By "hiding" the
+TLAs to that model in a Jsonnet file, the build system layer can be
+made simpler.  See [[https://brettviren.github.io/moo/buildsys.html][build sys]] document for some pointers on integrating
+~moo~ into popular build systems.
+
 
 ** Python
    :PROPERTIES:
    :CUSTOM_ID: python-trans
    :END:
 
-Jsonnet is a "small" language (one of its charms) and some
+Jsonnet is a "small" language (one of its charms) and some model
 transformations may be complex enough that its simplicity poses a
 limitation.  ~moo~ thus allows transformations to be defined in Python
-and this opens up the ability to form the contract between model and
-template in a more strong and object-oriented manner.
+and this opens up the ability to form the model in a more strong and
+object-oriented manner.
 
 To do this, the user may tell the ~moo~ CLI to apply a Python function
 to transform the input data just prior to the application of the
@@ -423,7 +498,7 @@ template.  The function is specified as a "dot" path naming the
 function in its module.  We may use the ~moo dump~ command to
 illustrate a transformation applied to the ~app~ schema:
 
-#+begin_src shell :exports both :results output code :wrap "example"
+#+begin_src shell :exports both :results output code :wrap "src python"
   moo -M examples/oschema -t moo.oschema.typify dump -f pretty app.jsonnet
 #+end_src
 
@@ -458,11 +533,16 @@ are ordered from least dependent to most.
 #+RESULTS:
 #+begin_example
 Iterate over list of types:
+<Number "sys.Count">
 <Any "app.Affiliation">
 <Sequence "app.Counts" items:sys.Count>
 <String "app.Email">
 <Enum "app.MBTI">
-<Record "app.Person" fields:{email, counts, affil, mbti}>
+<String "app.Make">
+<String "app.Model">
+<Enum "app.VehicleClass">
+<Record "app.Vehicle" fields:{make, model, type}>
+<Record "app.Person" fields:{email, email2, counts, counts2, affil, mbti, vehicle, vehicle2, vehicle2}>
 #+end_example
 
 Note the ~Person~ type comes after the types that it refers to in its
@@ -475,7 +555,7 @@ becomes rather complex.  At some point, developing a composite
 transformation function in Python and referring to it on the ~moo~ CLI
 may be useful to keep the command argument list small.  
 
-But, let us now move on.
+But, let us now move on to codegen.
 
 
 * Codegen
@@ -550,106 +630,31 @@ developing the template and which are specific to the target-language
 bring these in as a model "graft".
 
 
-#+begin_src shell :exports both :results output code :wrap "src python"
+#+begin_src shell :exports both :results output code :wrap "example"
   moo -g '/lang:ocpp.jsonnet' \
       -M examples/oschema \
       -A os='app.jsonnet' -A path='app' \
       -t '/types:moo.oschema.typify|moo.oschema.graph|moo.oschema.depsort' \
-      dump -f pretty omodel.jsonnet
+      dump -f types omodel.jsonnet
 #+end_src
 
 #+RESULTS:
-#+begin_src python
-{'byref': {'app.Affiliation': {'deps': [],
-                               'doc': 'An associated object of any type',
-                               'name': 'Affiliation',
-                               'path': ['app'],
-                               'schema': 'any'},
-           'app.Counts': {'deps': ['sys.Count'],
-                          'doc': 'All the counts',
-                          'items': 'sys.Count',
-                          'name': 'Counts',
-                          'path': ['app'],
-                          'schema': 'sequence'},
-           'app.Email': {'deps': [],
-                         'doc': 'Electronic mail address',
-                         'format': 'email',
-                         'name': 'Email',
-                         'path': ['app'],
-                         'schema': 'string'},
-           'app.MBTI': {'deps': [],
-                        'name': 'MBTI',
-                        'path': ['app'],
-                        'schema': 'enum',
-                        'symbols': ['introversion',
-                                    'extroversion',
-                                    'sensing',
-                                    'intuition',
-                                    'thinking',
-                                    'feeling',
-                                    'judging',
-                                    'perceiving']},
-           'app.Person': {'deps': ['app.Email',
-                                   'app.Counts',
-                                   'app.Affiliation',
-                                   'app.MBTI'],
-                          'doc': 'Describe everything there is to know about '
-                                 'an individual human',
-                          'fields': [{'doc': 'E-mail address',
-                                      'item': 'app.Email',
-                                      'name': 'email'},
-                                     {'doc': 'Count of some things',
-                                      'item': 'app.Counts',
-                                      'name': 'counts'},
-                                     {'doc': 'Some affiliation',
-                                      'item': 'app.Affiliation',
-                                      'name': 'affil'},
-                                     {'doc': 'Personality',
-                                      'item': 'app.MBTI',
-                                      'name': 'mbti'}],
-                          'name': 'Person',
-                          'path': ['app'],
-                          'schema': 'record'}},
- 'byscn': {'any': ['app.Affiliation'],
-           'anyOf': [],
-           'boolean': [],
-           'enum': ['app.MBTI'],
-           'namespace': [],
-           'number': [],
-           'record': ['app.Person'],
-           'sequence': ['app.Counts'],
-           'string': ['app.Email']},
- 'ctxpath': [],
- 'ctxpre': '',
- 'extrefs': ['sys'],
- 'lang': {'dtypes': {'f4': 'float',
-                     'f8': 'double',
-                     'i2': 'int16_t',
-                     'i4': 'int32_t',
-                     'i8': 'int64_t',
-                     'u2': 'uint16_t',
-                     'u4': 'uint32_t',
-                     'u8': 'uint64_t'},
-          'imports': {'any': ['nlohmann/json.hpp'],
-                      'anyof': ['variant'],
-                      'sequence': ['vector'],
-                      'string': ['string']},
-          'types': {'any': 'nlohmann::json',
-                    'sequence': 'std::vector',
-                    'string': 'std::string'}},
- 'nspre': 'app.',
- 'path': ['app'],
- 'relpath': 'app',
- 'types': [<Any "app.Affiliation">,
-           <Sequence "app.Counts" items:sys.Count>,
-           <String "app.Email">,
-           <Enum "app.MBTI">,
-           <Record "app.Person" fields:{email, counts, affil, mbti}>]}
-#+end_src
+#+begin_example
+all_types <class 'list'>
+byref <class 'dict'>
+byscn <class 'dict'>
+ctxpath <class 'list'>
+ctxpre <class 'str'>
+extrefs <class 'list'>
+nspre <class 'str'>
+path <class 'list'>
+relpath <class 'str'>
+types <class 'list'>
+lang <class 'dict'>
+#+end_example
 
-If you squint at that dump you'll find the ~lang~ attribute added.
-
-These CLI are getting rather long and we may add bits to make that easier but let's now move to the template.
+If you squint you'll see the ~lang~ attribute added with others from the
+model.  Let's now move to the template.
 
 
 
@@ -686,12 +691,109 @@ to ~render~ and adding the template file name.
   moo -g '/lang:ocpp.jsonnet' \
       -M examples/oschema \
       -A os='app.jsonnet' -A path='app' \
-      -t '/types:moo.oschema.typify|moo.oschema.graph|moo.oschema.depsort' \
       render omodel.jsonnet ostructs.hpp.j2
 #+end_src
 
 #+RESULTS:
 #+begin_src c++
+/*
+ ,* This file is 100% generated.  Any manual edits will likely be lost.
+ ,*
+ ,* This contains struct and other type definitions for shema in 
+ ,* namespace app.
+ ,*/
+#ifndef APP_STRUCTS_HPP
+#define APP_STRUCTS_HPP
+
+#include <cstdint>
+#include "sys/Structs.hpp"
+
+#include <nlohmann/json.hpp>
+#include <vector>
+#include <string>
+
+namespace app {
+
+    // @brief An associated object of any type
+    using Affiliation = nlohmann::json;
+
+    // @brief All the counts
+    using Counts = std::vector<sys::Count>;
+
+    // @brief Electronic mail address
+    using Email = std::string;
+
+    // @brief 
+    enum class MBTI: unsigned {
+        introversion,
+        extroversion,
+        sensing,
+        intuition,
+        thinking,
+        feeling,
+        judging,
+        perceiving,
+    };
+
+    // @brief 
+    using Make = std::string;
+
+    // @brief 
+    using Model = std::string;
+
+    // @brief 
+    enum class VehicleClass: unsigned {
+        boring,
+        fun,
+    };
+
+    // @brief 
+    struct Vehicle {
+
+        // @brief 
+        Make make = "Subaru";
+
+        // @brief 
+        Model model = "WRX";
+
+        // @brief 
+        VehicleClass type = app::VehicleClass::fun;
+    };
+
+    // @brief Describe everything there is to know about an individual human
+    struct Person {
+
+        // @brief E-mail address
+        Email email = "";
+
+        // @brief E-mail address
+        Email email2 = "me@example.com";
+
+        // @brief Count of some things
+        Counts counts = {};
+
+        // @brief Count of some things
+        Counts counts2 = {0, 1, 2};
+
+        // @brief Some affiliation
+        Affiliation affil = {};
+
+        // @brief Personality
+        MBTI mbti = app::MBTI::introversion;
+
+        // @brief Example of nested record
+        Vehicle vehicle = {"Subaru", "WRX", app::VehicleClass::fun};
+
+        // @brief Example of nested record with default
+        Vehicle vehicle2 = {"Subaru", "CrossTrek", app::VehicleClass::boring};
+
+        // @brief Example of nested record with default
+        Vehicle vehicle2 = {"Subaru", "BRZ", app::VehicleClass::fun};
+    };
+
+} // namespace app
+
+#endif // APP_STRUCTS_HPP
 #+end_src
 
 And, here are the corresponding ~nlohmann::json~ serialization
@@ -702,7 +804,6 @@ model.
   moo -g '/lang:ocpp.jsonnet' \
       -M examples/oschema \
       -A os='app.jsonnet' -A path='app' \
-      -t '/types:moo.oschema.typify|moo.oschema.graph|moo.oschema.depsort' \
       render omodel.jsonnet onljs.hpp.j2
 #+end_src
 
@@ -738,23 +839,57 @@ namespace app {
             { app::MBTI::judging, "judging" },
             { app::MBTI::perceiving, "perceiving" },
         })
+    NLOHMANN_JSON_SERIALIZE_ENUM( VehicleClass, {
+            { app::VehicleClass::boring, "boring" },
+            { app::VehicleClass::fun, "fun" },
+        })
 
+    
+    inline void to_json(data_t& j, const Vehicle& obj) {
+        j["make"] = obj.make;
+        j["model"] = obj.model;
+        j["type"] = obj.type;
+    }
+    
+    inline void from_json(const data_t& j, Vehicle& obj) {
+        if (j.contains("make"))
+            j.at("make").get_to(obj.make);    
+        if (j.contains("model"))
+            j.at("model").get_to(obj.model);    
+        if (j.contains("type"))
+            j.at("type").get_to(obj.type);    
+    }
     
     inline void to_json(data_t& j, const Person& obj) {
         j["email"] = obj.email;
+        j["email2"] = obj.email2;
         j["counts"] = obj.counts;
+        j["counts2"] = obj.counts2;
         j["affil"] = obj.affil;
         j["mbti"] = obj.mbti;
+        j["vehicle"] = obj.vehicle;
+        j["vehicle2"] = obj.vehicle2;
+        j["vehicle2"] = obj.vehicle2;
     }
     
     inline void from_json(const data_t& j, Person& obj) {
         if (j.contains("email"))
             j.at("email").get_to(obj.email);    
+        if (j.contains("email2"))
+            j.at("email2").get_to(obj.email2);    
         if (j.contains("counts"))
             j.at("counts").get_to(obj.counts);    
+        if (j.contains("counts2"))
+            j.at("counts2").get_to(obj.counts2);    
         obj.affil = j.at("affil");
         if (j.contains("mbti"))
             j.at("mbti").get_to(obj.mbti);    
+        if (j.contains("vehicle"))
+            j.at("vehicle").get_to(obj.vehicle);    
+        if (j.contains("vehicle2"))
+            j.at("vehicle2").get_to(obj.vehicle2);    
+        if (j.contains("vehicle2"))
+            j.at("vehicle2").get_to(obj.vehicle2);    
     }
     
     // fixme: add support for MessagePack serializers (at least)
@@ -772,32 +907,7 @@ namespace app {
   :END:
 
 Besides generating code from a schema, data objects may be constructed
-with the help of and validated against schema.
-
-** Construction
-   :PROPERTIES:
-   :CUSTOM_ID: object-ctor
-   :END:
-
-A goal is to provide comprehensive object editors which are directed
-by schema.  When such editors are implemented as Python they may use
-~moo.ogen~ module to produce Python classes that correspond to ~moo~
-object schema.
-
-
-
-** Validation
-   :PROPERTIES:
-   :CUSTOM_ID: object-val
-   :END:
-
-The ~moo.oschema~ schema classes produce type instances which provide
-snippets of [[https://json-schema.org/understanding-json-schema/index.html][JSON Schema]].  Type instances are also ~callable~ objects.
-When called on a value, it will be validated against the type's
-schema.
-
-- [ ] use with ~moo~ with a schema document
-- [ ] use with ~moo.oschema~ 
-
-
+with the help of and validated against schema.  For information about
+this usage pattern see the [[file:otypes.org][otypes document]] which describes how to use
+the ~moo.otypes~ module.
 

@@ -1,6 +1,12 @@
-// some C++ specific helpers for templates.
-// Suggested use:
-//   moo -g '/lang:ocpp.jsonnet' [...]
+// This holds some translation from Jsonnet schema to C++ syntax
+// templates.  This file provides reasonable defaults but some
+// projects may desire to interpret schema differently (eg a different
+// "Any" type or different allowed dtypes).
+
+// Suggested use is to "graft" it into a model so it is available
+// model.lang.*:
+//
+//   moo -g '/lang:ocpp.jsonnet' [...] some-cplusplus-template.hpp.j2
 {
     types: {            // type conversion between schema and C++
         string: "std::string",

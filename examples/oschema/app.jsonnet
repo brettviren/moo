@@ -43,8 +43,7 @@ local hier = {
                  doc="Example of nested record with default"),
     ], doc="Describe everything there is to know about an individual human"),
 };
-// moo.oschema.sort_select(hier, "app")
-sa + moo.oschema.sort_select(hier)
+sa + moo.oschema.sort_select(hier, "app")
 
 
 

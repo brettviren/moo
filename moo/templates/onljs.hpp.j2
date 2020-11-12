@@ -1,13 +1,13 @@
-{% import 'ocpp.hpp.j2' as cpp %}
+{% import 'ocpp.hpp.j2' as cppm %}
 /*
  * This file is 100% generated.  Any manual edits will likely be lost.
  *
  * This contains functions struct and other type definitions for shema in 
- * {{cpp.ns(model)}} to be serialized via nlohmann::json.
+ * {{cppm.ns(model)}} to be serialized via nlohmann::json.
  */
 {% set tcname = "Nljs" %}
-#ifndef {{cpp.headerguard(model, tcname)}}
-#define {{cpp.headerguard(model, tcname)}}
+#ifndef {{cppm.headerguard(model, tcname)}}
+#define {{cppm.headerguard(model, tcname)}}
 
 
 {% set reldir = model.relpath|replace(".","/") %}
@@ -23,7 +23,7 @@
 
 #include <nlohmann/json.hpp>
 
-{{ cpp.ns(model) }} {
+{{ cppm.ns(model) }} {
 
     using data_t = nlohmann::json;
 
@@ -66,6 +66,6 @@
     
     // fixme: add support for MessagePack serializers (at least)
 
-} // {{ cpp.ns(model) }}
+} // {{ cppm.ns(model) }}
 
-#endif // {{cpp.headerguard(model, tcname)}}
+#endif // {{cppm.headerguard(model, tcname)}}

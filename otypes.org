@@ -4,4 +4,6 @@
 
 * Overview
 
-General is t.b.d., for now see  [[https://brettviren.github.io/dune-daq-repl/ddcmd.html][DUNE DAQ Command Object Creation]] which describes ~moo.otypes~ in the context of one particular application.
+A general document describing how to make objects remains t.b.d.  For
+now, see the document [[https://brettviren.github.io/dune-daq-repl/ddcmd.html][DUNE DAQ Command Object Creation]] which describes
+~moo.otypes~ in the context of one particular application.

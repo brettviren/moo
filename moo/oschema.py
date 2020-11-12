@@ -1,4 +1,15 @@
 #!/usr/bin/env python3
+'''The moo.oschema module provides Python classes which correspond to
+moo schema classes.  One might use these in order to define a schema
+in Python instead of writing Jsonnet using the oschema.jsonnet
+support.
+
+An instance of a moo.oschema class is a type (not an object).  See
+also moo.otypes which provide ways to instantiate instances of types
+defined through schema classes.
+
+'''
+
 
 import numpy
 import jsonschema
@@ -14,8 +25,6 @@ def validate(value, schema):
 known_types = dict()
 
 
-# it would be nice to use typing.NamedTuple but wanting a base type
-# puts the kibosh on that.
 class BaseType(object):
     name = None
     doc = ""
@@ -187,6 +196,9 @@ class Field(object):
         item = known_types[self.item]
         return item(val)
 
+    def to_dict(self):
+        return dict(name=self.name, item=self.item, default=self.default, doc=self.doc)
+
 class Record(BaseType):
     'A thing with named/typed fields like a struct or a class'
     fields = ()
@@ -201,7 +213,7 @@ class Record(BaseType):
 
     def to_dict(self):
         d = super().to_dict()
-        d.update(fields=[dict(name=f.name, item=f.item) for f in self.fields])
+        d.update(fields=[f.to_dict() for f in self.fields])
         return d
 
     def __repr__(self):
@@ -442,7 +454,6 @@ def from_dict(d):
     ret = meth(name, **d)
     return ret
 
-
 def graph(types):
     '''
     Given a list of types, return an object which indexes each type by its fqn
@@ -490,12 +501,37 @@ def toposort(graph):
 
 def typify(data):
     '''
-    Return an array of schema class type objects from array of data structures.
-
-    This simply calls from_dict() on each.
+    Return data assured to be an oschema object or array of such.
     '''
-    return [from_dict(d) for d in data]
+    if isinstance(data, list):
+        return [typify(one) for one in data]
 
+    if isinstance(data, dict):
+        return from_dict(data)
+
+    if isinstance(data, BaseType):
+        return data
+
+    raise TypeError('bad type for oschema: %s %s' %
+                    (type(data), repr(data)))
+
+
+def untypify(obj):
+    '''
+    Return POD data structure given oschema object or array of such
+    '''
+    if isinstance(obj, list):
+        return [untypify(one) for one in obj]
+    if isinstance(obj, (BaseType, Field)):
+        return obj.to_dict()
+    if isinstance(obj, dict):
+        if "schema" in obj:
+            return obj          # probably a schema structure
+        if "item" in obj:
+            return obj          # probably a field structure
+
+    raise TypeError('bad type for oschema: %s %s' %
+                    (type(obj), repr(obj)))
 
 def depsort(g):
     '''Given graph g, return dependency-sorted array of its types.'''

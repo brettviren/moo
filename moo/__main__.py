@@ -7,7 +7,7 @@ import re
 import json
 import click
 import moo
-from pprint import pprint
+from pprint import pprint, pformat
 
 
 class Context:
@@ -80,7 +80,7 @@ class Context:
         '''
         templ = self.resolve(templ_file, self.tpath)
         helper = self.just_load("moo.jsonnet", dpath="templ")
-        return moo.template.render(templ, dict(model=model, moo=helper))
+        return moo.templates.render(templ, dict(model=model, moo=helper))
 
     def imports(self, filename):
         '''
@@ -203,7 +203,7 @@ def compileit(ctx, multi, output, string, model):
               type=click.Path(exists=False, dir_okay=False, file_okay=True),
               help="Output file, default is stdout")
 @click.option('-f', '--format', default='repr',
-              type=click.Choice(['repr', 'pretty', 'plain', 'types']),
+              type=click.Choice(['json', 'repr', 'pretty', 'plain', 'types']),
               help="Output format")
 @click.argument('model')
 @click.pass_context
@@ -212,7 +212,9 @@ def dump(ctx, output, format, model):
     Like render but print model that would be sent to the template
     '''
     data = ctx.obj.load(model)
-    if format == 'repr':
+    if format == 'json':
+        print(json.dumps(data, indent=4))
+    elif format == 'repr':
         print(repr(data))
     elif format == 'pretty':
         pprint(data)
