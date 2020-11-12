@@ -2,8 +2,9 @@
 
 import os
 import json
-from _jsonnet import *
+from _jsonnet import evaluate_file, evaluate_snippet
 from moo.util import clean_paths, resolve
+
 
 def try_path(path, rel):
     '''
@@ -60,8 +61,19 @@ def load(fname, paths=(), **kwds):
     paths = clean_paths(paths)
     fname = resolve(fname, paths)
     ic = ImportCallback(paths)
-    text = evaluate_file(fname, import_callback = ic, **kwds)
+    text = evaluate_file(fname, import_callback=ic, **kwds)
     return json.loads(text)
+
+
+def loads(jtext, paths=(), **kwds):
+    '''
+    Load Jsonnet text
+    '''
+    paths = clean_paths(paths)
+    ic = ImportCallback(paths)
+    text = evaluate_snippet("<stdin>", jtext, import_callback=ic, **kwds)
+    return json.loads(text)
+
 
 def imports(fname, paths=(), **kwds):
     '''
@@ -69,8 +81,8 @@ def imports(fname, paths=(), **kwds):
     '''
     paths = clean_paths(paths)
     fname = resolve(fname, paths)
-    ic = ImportCallback(paths);
-    evaluate_file(fname, import_callback = ic, **kwds)
+    ic = ImportCallback(paths)
+    evaluate_file(fname, import_callback=ic, **kwds)
     ret = list(ic.found)
     ret.sort()
     return ret
