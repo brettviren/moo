@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2020-10-27 Tue 17:38 -->
+<!-- 2020-11-12 Thu 15:20 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>moo 無 build</title>
@@ -193,17 +193,17 @@
   .org-svg { width: 90%; }
   /*]]>*/-->
 </style>
-<link rel="stylesheet" type="text/css" href="export/styles/darksun/css/htmlize.css"/>
-<link rel="stylesheet" type="text/css" href="export/styles/darksun/css/darksun.css"/>
-<link rel="stylesheet" type="text/css" href="export/styles/darksun/css/hideshow.css"/>
-<script type="text/javascript" src="export/styles/darksun/js/jquery-1.11.0.min.js"></script>
-<script type="text/javascript" src="export/styles/darksun/js/jquery-ui-1.10.2.min.js"></script>
-<script type="text/javascript" src="export/styles/darksun/js/jquery.localscroll-min.js"></script>
-<script type="text/javascript" src="export/styles/darksun/js/jquery.scrollTo-1.4.3.1-min.js"></script>
-<script type="text/javascript" src="export/styles/darksun/js/jquery.zclip.min.js"></script>
-<script type="text/javascript" src="export/styles/darksun/js/darksun.js"></script>
-<script type="text/javascript" src="export/styles/darksun/js/hideshow.js"></script>
-<script type="text/javascript" src="export/styles/lib/js/jquery.stickytableheaders.min.js"></script>
+<link rel="stylesheet" type="text/css" href="https://fniessen.github.io/org-html-themes/styles/readtheorg/css/htmlize.css"/>
+<link rel="stylesheet" type="text/css" href="https://fniessen.github.io/org-html-themes/styles/readtheorg/css/readtheorg.css"/>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>
+<script type="text/javascript" src="https://fniessen.github.io/org-html-themes/styles/lib/js/jquery.stickytableheaders.min.js"></script>
+<script type="text/javascript" src="https://fniessen.github.io/org-html-themes/styles/readtheorg/js/readtheorg.js"></script>
+<style> #content{max-width:1800px;}</style>
+<style> p{max-width:800px;}</style>
+<style> li{max-width:800px;}</style>
+<style> pre.src{background-color:#333; color:white;}</style>
+<style> pre.example{background-color:#333; color:white;}</style>
 <script type="text/javascript">
 /*
 @licstart  The following is the entire license notice for the
@@ -270,19 +270,14 @@ for the JavaScript code in this tag.
 <li><a href="#inputs">Inputs</a></li>
 <li><a href="#outputs">Outputs</a>
 <ul>
-<li><a href="#orgc2487f0"><code>imports</code></a></li>
-<li><a href="#org88daace"><code>compile</code></a></li>
-<li><a href="#org7613864"><code>render</code></a></li>
+<li><a href="#imports"><code>imports</code></a></li>
+<li><a href="#compile"><code>compile</code></a></li>
+<li><a href="#render"><code>render</code></a></li>
 </ul>
 </li>
 <li><a href="#examples">Examples</a>
 <ul>
-<li><a href="#waf">Waf</a>
-<ul>
-<li><a href="#org4d0a4c0">cmd</a></li>
-<li><a href="#org790447e">mod</a></li>
-</ul>
-</li>
+<li><a href="#waf">Waf</a></li>
 <li><a href="#make">Make</a></li>
 <li><a href="#cmake">CMake</a></li>
 </ul>
@@ -384,14 +379,37 @@ systems use a file-based dependency graph.
 <h2 id="inputs">Inputs</h2>
 <div class="outline-text-2" id="text-inputs">
 <p>
-<code>moo</code> takes as input two types of files, "templates" and "models" (data).
+<code>moo</code> takes input from files in a number of different ways:
 </p>
 
 <dl class="org-dl">
-<dt>templates</dt><dd>these files conventionally have a "double extension" such as <code>.hpp.j2</code>.  The first (<code>.hpp</code>) signifies the target file extension and the second (<code>.j2</code>) identifies the file as being marked up with Jinja2 templates.  The first part is free, while some <code>moo</code> functionality is sensitive to the trailing <code>.j2</code>.</dd>
+<dt>models</dt><dd>these files may be provided in many different formats.
+The format used for <code>moo</code> examples and which is recommended is
+<code>.jsonnet</code>.  But <code>moo</code> also supports the consumption of <code>.json</code>, <code>.xml</code>,
+<code>.ini</code>, <code>.yaml</code>, <code>.csv</code> and others.  Models are provided to <code>moo</code> via a
+command line positional argument.</dd>
 
-<dt>models</dt><dd>these files may be provided in many different formats.  The format used for <code>moo</code> examples and which is recommended is <code>.jsonnet</code>.  But <code>moo</code> also supports the consumption of <code>.json</code>, <code>.xml</code>, <code>.ini</code>, <code>.yaml</code>, <code>.csv</code> and others.</dd>
+<dt>templates</dt><dd>these files conventionally have a "double extension"
+such as <code>.hpp.j2</code>.  The first (<code>.hpp</code>) signifies the target file
+extension and the second (<code>.j2</code>) identifies the file as being marked
+up with Jinja2 templates.  The first part is free, while some <code>moo</code>
+functionality is sensitive to the trailing <code>.j2</code>.  Templates are
+provided to <code>moo</code> via a command line positional argument.</dd>
+
+<dt>graft</dt><dd>data may be added to the model data structure by specifying
+its location via <a href="https://tools.ietf.org/html/rfc6901">JSON Pointer</a> syntax and a file that provides the
+value.  The file will be evaluated based on its file extension and
+then "grafted" into the location.  Grafts are performed with the
+<code>moo -g &lt;ptr&gt;:&lt;file&gt;</code> option.</dd>
+
+<dt>TLAs</dt><dd>when a model in a <code>.jsonnet</code> file evaluates to a function, the
+function arguments aka "top-level arguments" (TLAs) may be provided
+with the <code>moo -A var=&lt;value&gt;</code> command line argument.  The <code>&lt;value&gt;</code> may
+be code in Jsonnet syntax or a file name.  If the latter, the file
+will be loaded (as a model is) and its resulting data will provide
+the <code>&lt;value&gt;</code>.</dd>
 </dl>
+
 
 <p>
 <code>moo</code> can be given these files via an absolute or relative path.  If a
@@ -407,22 +425,18 @@ $ moo -M /path/to/models -M /path/to/more/models \
 </pre>
 
 <p>
-One may also set these search paths by setting <code>MOO_MODEL_PATH</code> and <code>MOO_TEMPLATE_PATH</code> environment variables.
+One may also set these search paths by setting <code>MOO_MODEL_PATH</code> and
+<code>MOO_TEMPLATE_PATH</code> environment variables.
 </p>
 
 <p>
-Besides explicit input files provided as <code>moo</code> command arguments (as
-above example) <code>moo</code> may also receive inputs via two other channels:
+Besides explicit files provided as <code>moo</code> command arguments (as above
+example) <code>moo</code> may also receive inputs via two other channels:
 </p>
 
-<dl class="org-dl">
-<dt>graft</dt><dd><code>moo</code> can augment the model with additional data structure provided from a secondary model file.  The grafted data structure may be provided in Jsonnet format or any other supported input format file.</dd>
-
-<dt>tla</dt><dd><code>moo</code> accepts and may pass top-level arguments (TLA) to a model which is itself a Jsonnet function (here is one case where only Jsonnet may be used).  The TLA may provide directly a data structure or may name a file to load (and this file may be Jsonnet or any supported input format).</dd>
-</dl>
-
 <p>
-For example, prepare three models where <code>a.jsonnet</code> is a function and the other two are simple objects.
+For example, let's prepare three models where <code>a.jsonnet</code> is a function
+and the other two are simple objects.
 </p>
 
 <div class="org-src-container">
@@ -441,18 +455,19 @@ Here is an example of grafting:
 </pre>
 </div>
 
-<pre class="example">
-{
-    "b": 69,
-    "greetings": {
-        "c": "hello"
+<div class="org-src-container">
+<pre class="src src-json">{
+    <span style="color: #b4fa70;">"b"</span>: <span style="color: #e9b2e3;">69</span>,
+    <span style="color: #b4fa70;">"greetings"</span>: {
+        <span style="color: #b4fa70;">"c"</span>: <span style="color: #e9b96e;">"hello"</span>
     }
 }
 </pre>
+</div>
 
 <p>
-Here is an example of inject model <code>b</code> via TLA where <code>b</code> is found via a
-model search path set by <code>-M</code>.
+Here is an example were we inject model <code>b</code> via TLA where <code>b</code> is found via
+a model search path set by <code>-M</code>.
 </p>
 
 <div class="org-src-container">
@@ -460,13 +475,14 @@ model search path set by <code>-M</code>.
 </pre>
 </div>
 
-<pre class="example">
-{
-    "x": {
-        "b": 69
+<div class="org-src-container">
+<pre class="src src-json">{
+    <span style="color: #b4fa70;">"x"</span>: {
+        <span style="color: #b4fa70;">"b"</span>: <span style="color: #e9b2e3;">69</span>
     }
 }
 </pre>
+</div>
 
 <p>
 Here is an example where we supply the injected data as a literal representation:
@@ -477,13 +493,14 @@ Here is an example where we supply the injected data as a literal representation
 </pre>
 </div>
 
-<pre class="example">
-{
-    "x": {
-        "name": "moo"
+<div class="org-src-container">
+<pre class="src src-json">{
+    <span style="color: #b4fa70;">"x"</span>: {
+        <span style="color: #b4fa70;">"name"</span>: <span style="color: #e9b96e;">"moo"</span>
     }
 }
 </pre>
+</div>
 </div>
 </div>
 
@@ -498,9 +515,9 @@ output files.
 </p>
 </div>
 
-<div id="outline-container-orgc2487f0" class="outline-3">
-<h3 id="orgc2487f0"><code>imports</code></h3>
-<div class="outline-text-3" id="text-orgc2487f0">
+<div id="outline-container-imports" class="outline-3">
+<h3 id="imports"><code>imports</code></h3>
+<div class="outline-text-3" id="text-imports">
 <p>
 The <code>moo</code> command <code>imports</code> is provided to help discover intermediate
 dependency files which have been imported through Jsonnet's or Jinja's
@@ -530,19 +547,46 @@ the implicit dependencies:
 </pre>
 
 <p>
-A Jinja template file can be scanned similarly.  If ending in <code>.j2</code> it
-will be assumed to be such.
+When a model is a function, all TLAs that lack default values must be
+satisfied in order for evaluation to succeed.  Thus all TLAs must be
+satisfied when the <code>compile</code>, <code>render</code> or <code>imports</code> commands are used.
 </p>
+
+<div class="org-src-container">
+<pre class="src src-shell">moo -A <span style="color: #fcaf3e;">more</span>=less imports buildsys/topf.jsonnet
+</pre>
+</div>
+
+<pre class="example">
+/home/bv/dev/moo/buildsys/b.jsonnet
+/home/bv/dev/moo/buildsys/top.jsonnet
+</pre>
 
 <p>
-By default, <code>moo</code> will print the result to standard output.  The <code>-o</code> option to <code>imports</code> can be provided to output to a specific file.
+A Jinja template file can be scanned similarly and will be detected as
+such if its file name ends in <code>.j2</code>.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-shell">moo imports buildsys/top.txt.j2
+</pre>
+</div>
+
+<pre class="example">
+/home/bv/dev/moo/buildsys/hi.txt.j2
+</pre>
+
+<p>
+By default, <code>moo</code> will print the list of imported files to standard
+output.  The <code>-o</code> option to <code>imports</code> can be provided to output to a
+specific file.
 </p>
 </div>
 </div>
 
-<div id="outline-container-org88daace" class="outline-3">
-<h3 id="org88daace"><code>compile</code></h3>
-<div class="outline-text-3" id="text-org88daace">
+<div id="outline-container-compile" class="outline-3">
+<h3 id="compile"><code>compile</code></h3>
+<div class="outline-text-3" id="text-compile">
 <p>
 <code>moo compile</code> will take a model in Jsonnet or other format and output
 JSON.  This takes the same main options as <code>render</code> (next) and so is a
@@ -559,9 +603,9 @@ production.  It should only be employed if needed.
 </div>
 </div>
 
-<div id="outline-container-org7613864" class="outline-3">
-<h3 id="org7613864"><code>render</code></h3>
-<div class="outline-text-3" id="text-org7613864">
+<div id="outline-container-render" class="outline-3">
+<h3 id="render"><code>render</code></h3>
+<div class="outline-text-3" id="text-render">
 <p>
 The main goal of <code>moo</code> is to generate code and this is the main command
 do perform that.  Like <code>compile</code> (and <code>imports</code>) it prints the result to
@@ -596,9 +640,9 @@ Python module.
 </p>
 </div>
 
-<div id="outline-container-org4d0a4c0" class="outline-4">
-<h4 id="org4d0a4c0">cmd</h4>
-<div class="outline-text-4" id="text-org4d0a4c0">
+<div id="outline-container-waf-cmd" class="outline-4">
+<h4 id="waf-cmd">cmd</h4>
+<div class="outline-text-4" id="text-waf-cmd">
 <p>
 The Waf project in <a href="buildsys/waf/cmd/">buildsys/waf/cmd/</a> provides an example of using <code>moo</code>
 as a command line program.  It uses <code>moo render</code> to apply a model to a
@@ -669,7 +713,7 @@ waf
 Setting top to                           : /home/bv/dev/moo/buildsys/waf/cmd 
 Setting out to                           : /home/bv/dev/moo/buildsys/waf/cmd/build 
 Checking for program 'moo'               : /home/bv/dev/moo/.direnv/python-venv-3.8.0/bin/moo 
-'configure' finished successfully (0.003s)
+'configure' finished successfully (0.002s)
 
 first build
 
@@ -677,13 +721,13 @@ Waf: Entering directory `/home/bv/dev/moo/buildsys/waf/cmd/build'
 [/home/bv/dev/moo/buildsys/waf/cmd/sub.jsonnet, /home/bv/dev/moo/buildsys/waf/cmd/sub/sub.jsonnet]
 [1/1] Processing model-dump.txt: model.jsonnet dump.txt.j2 -&gt; build/model-dump.txt
 Waf: Leaving directory `/home/bv/dev/moo/buildsys/waf/cmd/build'
-'build' finished successfully (1.477s)
+'build' finished successfully (1.431s)
 
 second build, no rebuild
 
 Waf: Entering directory `/home/bv/dev/moo/buildsys/waf/cmd/build'
 Waf: Leaving directory `/home/bv/dev/moo/buildsys/waf/cmd/build'
-'build' finished successfully (0.016s)
+'build' finished successfully (0.013s)
 
 modify intermediate dependency, see it rebuild
 
@@ -691,14 +735,14 @@ Waf: Entering directory `/home/bv/dev/moo/buildsys/waf/cmd/build'
 [/home/bv/dev/moo/buildsys/waf/cmd/sub.jsonnet, /home/bv/dev/moo/buildsys/waf/cmd/sub/sub.jsonnet]
 [1/1] Processing model-dump.txt: model.jsonnet dump.txt.j2 -&gt; build/model-dump.txt
 Waf: Leaving directory `/home/bv/dev/moo/buildsys/waf/cmd/build'
-'build' finished successfully (1.439s)
+'build' finished successfully (1.428s)
 </pre>
 </div>
 </div>
 
-<div id="outline-container-org790447e" class="outline-4">
-<h4 id="org790447e">mod</h4>
-<div class="outline-text-4" id="text-org790447e">
+<div id="outline-container-waf-mod" class="outline-4">
+<h4 id="waf-mod">mod</h4>
+<div class="outline-text-4" id="text-waf-mod">
 <p>
 The second example works the same but instead of calling <code>moo</code> as a CLI
 program, the Python module is used.  In principle, this can be better
@@ -741,7 +785,7 @@ Here is the <code>wscript</code> file for the "mod" example:
 
     <span style="color: #73d216;"># </span><span style="color: #73d216;">keep compatibility with moo render</span>
     <span style="color: #fcaf3e;">helper</span> = moo.io.load(moo.util.resolve(<span style="color: #e9b96e;">"moo.jsonnet"</span>))
-    out.write(moo.template.render(templ, <span style="color: #e090d7;">dict</span>(model=model, moo=helper)))
+    out.write(moo.templates.render(templ, <span style="color: #e090d7;">dict</span>(model=model, moo=helper)))
 
 
 <span style="color: #b4fa70;">def</span> <span style="color: #fce94f;">configure</span>(cfg):
@@ -757,7 +801,7 @@ Here is the <code>wscript</code> file for the "mod" example:
 </div>
 
 <p>
-And, here is it being exercised:
+And, here it is being exercised:
 </p>
 
 <div class="org-src-container">
@@ -786,13 +830,13 @@ Waf: Entering directory `/home/bv/dev/moo/buildsys/waf/mod/build'
 [/home/bv/dev/moo/buildsys/waf/mod/sub.jsonnet, /home/bv/dev/moo/buildsys/waf/mod/sub/sub.jsonnet]
 [1/1] Processing model-dump.txt: model.jsonnet dump.txt.j2 -&gt; build/model-dump.txt
 Waf: Leaving directory `/home/bv/dev/moo/buildsys/waf/mod/build'
-'build' finished successfully (0.259s)
+'build' finished successfully (0.257s)
 
 second build, no rebuild
 
 Waf: Entering directory `/home/bv/dev/moo/buildsys/waf/mod/build'
 Waf: Leaving directory `/home/bv/dev/moo/buildsys/waf/mod/build'
-'build' finished successfully (0.014s)
+'build' finished successfully (0.016s)
 
 modify intermediate dependency, see it rebuild
 
@@ -800,7 +844,7 @@ Waf: Entering directory `/home/bv/dev/moo/buildsys/waf/mod/build'
 [/home/bv/dev/moo/buildsys/waf/mod/sub.jsonnet, /home/bv/dev/moo/buildsys/waf/mod/sub/sub.jsonnet]
 [1/1] Processing model-dump.txt: model.jsonnet dump.txt.j2 -&gt; build/model-dump.txt
 Waf: Leaving directory `/home/bv/dev/moo/buildsys/waf/mod/build'
-'build' finished successfully (0.260s)
+'build' finished successfully (0.255s)
 </pre>
 </div>
 </div>
@@ -859,7 +903,7 @@ make: 'model-dump.txt' is up to date.
 
 In any case, first build gave us:
 
--rw-rw-r-- 1 bv bv 93 Oct 27 17:38 model-dump.txt
+-rw-rw-r-- 1 bv bv 93 Nov 12 15:20 model-dump.txt
 sub = {'a': 1, 'b': 2, 'c': 'hello'}
 subsub = {'a': 1, 'b': 2, 'c': 'hello', 'd': 'FORTRAN'}
 </pre>
@@ -970,29 +1014,29 @@ Do initial build
 Scanning dependencies of target DOIT
 [100%] generate code model-dump.txt
 [100%] Built target DOIT
--rw-rw-r-- 1 bv bv 93 2020-10-27 17:38:09.036256241 -0400 build/model-dump.txt
+-rw-rw-r-- 1 bv bv 93 2020-11-12 15:20:26.407827565 -0500 build/model-dump.txt
 
 Next we edit the intermediate files and notice a rebuild
 
 [100%] generate code model-dump.txt
 [100%] Built target DOIT
--rw-rw-r-- 1 bv bv 93 2020-10-27 17:38:09.648245973 -0400 build/model-dump.txt
+-rw-rw-r-- 1 bv bv 93 2020-11-12 15:20:27.023817146 -0500 build/model-dump.txt
 
 Do do a second build, output is not rebuilt
 
 [100%] Built target DOIT
--rw-rw-r-- 1 bv bv 93 2020-10-27 17:38:09.648245973 -0400 build/model-dump.txt
+-rw-rw-r-- 1 bv bv 93 2020-11-12 15:20:27.023817146 -0500 build/model-dump.txt
 
 Add new implicit dependency, which should cause a rebuild
 
 [100%] generate code model-dump.txt
 [100%] Built target DOIT
--rw-rw-r-- 1 bv bv 93 2020-10-27 17:38:10.300235036 -0400 build/model-dump.txt
+-rw-rw-r-- 1 bv bv 93 2020-11-12 15:20:27.663806322 -0500 build/model-dump.txt
 
 Update new implicit dependency, which should cause a rebuild
 
 [100%] Built target DOIT
--rw-rw-r-- 1 bv bv 93 2020-10-27 17:38:10.300235036 -0400 build/model-dump.txt
+-rw-rw-r-- 1 bv bv 93 2020-11-12 15:20:27.663806322 -0500 build/model-dump.txt
 </pre>
 </div>
 </div>
@@ -1000,7 +1044,7 @@ Update new implicit dependency, which should cause a rebuild
 </div>
 <div id="postamble" class="status">
 <p class="author">Author: Brett Viren</p>
-<p class="date">Created: 2020-10-27 Tue 17:38</p>
+<p class="date">Created: 2020-11-12 Thu 15:20</p>
 <p class="validation"><a href="http://validator.w3.org/check?uri=referer">Validate</a></p>
 </div>
 </body>

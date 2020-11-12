@@ -73,11 +73,34 @@ systems use a file-based dependency graph.
   :END:
 
 
-~moo~ takes as input two types of files, "templates" and "models" (data).
+~moo~ takes input from files in a number of different ways:
 
-- templates :: these files conventionally have a "double extension" such as ~.hpp.j2~.  The first (~.hpp~) signifies the target file extension and the second (~.j2~) identifies the file as being marked up with Jinja2 templates.  The first part is free, while some ~moo~ functionality is sensitive to the trailing ~.j2~.
+- models :: these files may be provided in many different formats.
+  The format used for ~moo~ examples and which is recommended is
+  ~.jsonnet~.  But ~moo~ also supports the consumption of ~.json~, ~.xml~,
+  ~.ini~, ~.yaml~, ~.csv~ and others.  Models are provided to ~moo~ via a
+  command line positional argument.
 
-- models :: these files may be provided in many different formats.  The format used for ~moo~ examples and which is recommended is ~.jsonnet~.  But ~moo~ also supports the consumption of ~.json~, ~.xml~, ~.ini~, ~.yaml~, ~.csv~ and others.
+- templates :: these files conventionally have a "double extension"
+  such as ~.hpp.j2~.  The first (~.hpp~) signifies the target file
+  extension and the second (~.j2~) identifies the file as being marked
+  up with Jinja2 templates.  The first part is free, while some ~moo~
+  functionality is sensitive to the trailing ~.j2~.  Templates are
+  provided to ~moo~ via a command line positional argument.
+
+- graft :: data may be added to the model data structure by specifying
+  its location via [[https://tools.ietf.org/html/rfc6901][JSON Pointer]] syntax and a file that provides the
+  value.  The file will be evaluated based on its file extension and
+  then "grafted" into the location.  Grafts are performed with the
+  ~moo -g <ptr>:<file>~ option.
+
+- TLAs :: when a model in a ~.jsonnet~ file evaluates to a function, the
+  function arguments aka "top-level arguments" (TLAs) may be provided
+  with the ~moo -A var=<value>~ command line argument.  The ~<value>~ may
+  be code in Jsonnet syntax or a file name.  If the latter, the file
+  will be loaded (as a model is) and its resulting data will provide
+  the ~<value>~.
+
 
 ~moo~ can be given these files via an absolute or relative path.  If a
 relative path is given then ~moo~ will check for the file in list of
@@ -90,16 +113,14 @@ specified independently via command line arguments:
         render a/relative/model.jsonnet /an/absolute/template.xyz.j2
 #+end_example
 
-One may also set these search paths by setting ~MOO_MODEL_PATH~ and ~MOO_TEMPLATE_PATH~ environment variables.
+One may also set these search paths by setting ~MOO_MODEL_PATH~ and
+~MOO_TEMPLATE_PATH~ environment variables.
 
-Besides explicit input files provided as ~moo~ command arguments (as
-above example) ~moo~ may also receive inputs via two other channels:
+Besides explicit files provided as ~moo~ command arguments (as above
+example) ~moo~ may also receive inputs via two other channels:
 
-- graft :: ~moo~ can augment the model with additional data structure provided from a secondary model file.  The grafted data structure may be provided in Jsonnet format or any other supported input format file.
-
-- tla :: ~moo~ accepts and may pass top-level arguments (TLA) to a model which is itself a Jsonnet function (here is one case where only Jsonnet may be used).  The TLA may provide directly a data structure or may name a file to load (and this file may be Jsonnet or any supported input format).
-
-For example, prepare three models where ~a.jsonnet~ is a function and the other two are simple objects.
+For example, let's prepare three models where ~a.jsonnet~ is a function
+and the other two are simple objects.
 
 #+begin_src shell :exports code :results none
   echo 'function(a=42) {x:a}' > buildsys/a.jsonnet
@@ -109,39 +130,39 @@ For example, prepare three models where ~a.jsonnet~ is a function and the other 
 
 Here is an example of grafting:
 
-#+begin_src shell :exports both :results output code :wrap "example"
+#+begin_src shell :exports both :results output code :wrap "src json"
   moo -g /greetings:buildsys/c.jsonnet compile buildsys/b.jsonnet
 #+end_src
 
 #+RESULTS:
-#+begin_example
+#+begin_src json
 {
     "b": 69,
     "greetings": {
         "c": "hello"
     }
 }
-#+end_example
+#+end_src
 
-Here is an example of inject model ~b~ via TLA where ~b~ is found via a
-model search path set by ~-M~.
+Here is an example were we inject model ~b~ via TLA where ~b~ is found via
+a model search path set by ~-M~.
 
-#+begin_src shell :exports both :results output code :wrap "example"
+#+begin_src shell :exports both :results output code :wrap "src json"
   moo -M buildsys -A a=b.jsonnet compile buildsys/a.jsonnet
 #+end_src
 
 #+RESULTS:
-#+begin_example
+#+begin_src json
 {
     "x": {
         "b": 69
     }
 }
-#+end_example
+#+end_src
 
 Here is an example where we supply the injected data as a literal representation:
 
-#+begin_src shell :exports both :results output code :wrap "example"
+#+begin_src shell :exports both :results output code :wrap "src json"
   moo -A a='{name:"moo"}' compile buildsys/a.jsonnet
 #+end_src
 
@@ -166,6 +187,10 @@ give a tour of the commands relevant to a build system and their
 output files.
 
 ** ~imports~
+   :PROPERTIES:
+   :CUSTOM_ID: imports
+   :END:
+
 
 The ~moo~ command ~imports~ is provided to help discover intermediate
 dependency files which have been imported through Jsonnet's or Jinja's
@@ -190,12 +215,40 @@ the implicit dependencies:
 /home/bv/dev/moo/buildsys/b.jsonnet
 #+end_example
 
-A Jinja template file can be scanned similarly.  If ending in ~.j2~ it
-will be assumed to be such.
+When a model is a function, all TLAs that lack default values must be
+satisfied in order for evaluation to succeed.  Thus all TLAs must be
+satisfied when the ~compile~, ~render~ or ~imports~ commands are used.
 
-By default, ~moo~ will print the result to standard output.  The ~-o~ option to ~imports~ can be provided to output to a specific file.
+#+begin_src shell :exports both :results output code :wrap "example"
+  moo -A more=less imports buildsys/topf.jsonnet
+#+end_src
+
+#+RESULTS:
+#+begin_example
+/home/bv/dev/moo/buildsys/b.jsonnet
+/home/bv/dev/moo/buildsys/top.jsonnet
+#+end_example
+
+A Jinja template file can be scanned similarly and will be detected as
+such if its file name ends in ~.j2~.
+
+#+begin_src shell :exports both :results output code :wrap "example"
+  moo imports buildsys/top.txt.j2
+#+end_src
+
+#+RESULTS:
+#+begin_example
+/home/bv/dev/moo/buildsys/hi.txt.j2
+#+end_example
+
+By default, ~moo~ will print the list of imported files to standard
+output.  The ~-o~ option to ~imports~ can be provided to output to a
+specific file.
 
 ** ~compile~
+   :PROPERTIES:
+   :CUSTOM_ID: compile
+   :END:
 
 ~moo compile~ will take a model in Jsonnet or other format and output
 JSON.  This takes the same main options as ~render~ (next) and so is a
@@ -208,6 +261,9 @@ representation but that must come at a cost of more file I/O and file
 production.  It should only be employed if needed.
 
 ** ~render~
+   :PROPERTIES:
+   :CUSTOM_ID: render
+   :END:
 
 The main goal of ~moo~ is to generate code and this is the main command
 do perform that.  Like ~compile~ (and ~imports~) it prints the result to
@@ -237,6 +293,10 @@ system.  One may either call ~moo~ as a CLI program or use it as a
 Python module.
 
 *** cmd
+    :PROPERTIES:
+    :CUSTOM_ID: waf-cmd
+    :END:
+
 
 The Waf project in [[file:buildsys/waf/cmd/][buildsys/waf/cmd/]] provides an example of using ~moo~
 as a command line program.  It uses ~moo render~ to apply a model to a
@@ -270,6 +330,9 @@ rebuild and notice that indeed the change is noticed.
 #+end_example
 
 *** mod
+    :PROPERTIES:
+    :CUSTOM_ID: waf-mod
+    :END:
 
 The second example works the same but instead of calling ~moo~ as a CLI
 program, the Python module is used.  In principle, this can be better
@@ -280,7 +343,7 @@ Here is the ~wscript~ file for the "mod" example:
 
 #+include: buildsys/waf/mod/wscript src python
 
-And, here is it being exercised:
+And, here it is being exercised:
 
 #+begin_src shell :exports both :results output code :wrap "example"
   cd buildsys/waf/mod/
@@ -308,13 +371,13 @@ Waf: Entering directory `/home/bv/dev/moo/buildsys/waf/mod/build'
 [/home/bv/dev/moo/buildsys/waf/mod/sub.jsonnet, /home/bv/dev/moo/buildsys/waf/mod/sub/sub.jsonnet]
 [1/1] Processing model-dump.txt: model.jsonnet dump.txt.j2 -> build/model-dump.txt
 Waf: Leaving directory `/home/bv/dev/moo/buildsys/waf/mod/build'
-'build' finished successfully (0.247s)
+'build' finished successfully (0.260s)
 
 second build, no rebuild
 
 Waf: Entering directory `/home/bv/dev/moo/buildsys/waf/mod/build'
 Waf: Leaving directory `/home/bv/dev/moo/buildsys/waf/mod/build'
-'build' finished successfully (0.012s)
+'build' finished successfully (0.019s)
 
 modify intermediate dependency, see it rebuild
 
@@ -322,7 +385,7 @@ Waf: Entering directory `/home/bv/dev/moo/buildsys/waf/mod/build'
 [/home/bv/dev/moo/buildsys/waf/mod/sub.jsonnet, /home/bv/dev/moo/buildsys/waf/mod/sub/sub.jsonnet]
 [1/1] Processing model-dump.txt: model.jsonnet dump.txt.j2 -> build/model-dump.txt
 Waf: Leaving directory `/home/bv/dev/moo/buildsys/waf/mod/build'
-'build' finished successfully (0.248s)
+'build' finished successfully (0.258s)
 #+end_example
 
 

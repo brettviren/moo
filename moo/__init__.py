@@ -18,10 +18,15 @@ else:
     known_extensions += ["xls", "xlsx"]
 
 
-def imports(filename, path):
-    'Return list of files imported by a file'
+def imports(filename, path, **kwds):
+    '''Return list of files imported by a file
+    
+    The file type is guessed and a corresponding import scan is run. 
+
+    For Jsonnet files, kwds may provide TLAs.
+    '''
     if filename.endswith('.jsonnet'):
-        return moo.jsonnet.imports(filename, path)
+        return moo.jsonnet.imports(filename, path, **kwds)
     if filename.endswith('.j2'):
         return moo.templates.imports(filename, path)
     raise ValueError(f'unknown file type: {filename}')

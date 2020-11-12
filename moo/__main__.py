@@ -87,7 +87,7 @@ class Context:
         Return list of files the given file imports
         '''
         filename = self.resolve(filename)
-        return moo.imports(filename, self.mpath+self.tpath)
+        return moo.imports(filename, self.mpath+self.tpath, **self.tlas)
 
 @click.group()
 @click.option('-D', '--dpath', default="",
