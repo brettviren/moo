@@ -31,7 +31,6 @@ The current *moo* version is...
 
 #+RESULTS:
 #+begin_example
-0.4.0
 #+end_example
 
 ...as of last time this file was updated.  See ~moo/version.py~ for the
@@ -80,38 +79,36 @@ Install ~direnv~ and activate it in your shell, then:
 
 See more at https://github.com/direnv/direnv
 
-** Install dependencies
-   :PROPERTIES:
-   :CUSTOM_ID: install-deps
-   :END:
-
-To install the dependencies, you may use the latest ~requirements.txt~
-file or one from a release.
-
-#+begin_example
-  $ python -m pip install -r https://raw.githubusercontent.com/brettviren/moo/master/requirements.txt
-#+end_example
-
 ** Install a release
    :PROPERTIES:
    :CUSTOM_ID: install-rel
    :END:
 
+Via a release tarball:
+
 #+begin_example
-  $ python -m pip install https://github.com/brettviren/moo/archive/0.3.0.tar.gz
+  $ python -m pip install https://github.com/brettviren/moo/archive/0.4.1.tar.gz
 #+end_example
+
+Or, via git:
+
+#+begin_example
+  $ python -m pip install git+git://github.com/brettviren/moo.git@0.4.1#egg=moo
+#+end_example
+
 
 ** Install development
    :PROPERTIES:
    :CUSTOM_ID: install-dev
    :END:
 
+Just install:
 
 #+begin_example
   $ python -m pip install git+git://github.com/brettviren/moo.git#egg=moo
 #+end_example
 
-Or, to allow working on the code:
+Or, maybe you want to hack on the code:
 
 #+begin_example
   $ git clone git@github.com:brettviren/moo.git

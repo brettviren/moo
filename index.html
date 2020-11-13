@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2020-11-13 Fri 09:33 -->
+<!-- 2020-11-13 Fri 14:42 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>moo 無 model oriented objects</title>
@@ -263,11 +263,10 @@ for the JavaScript code in this tag.
 <ul>
 <li><a href="#overview">Overview</a></li>
 <li><a href="#version">Version</a></li>
-<li><a href="#org8f1a1ea">License</a></li>
+<li><a href="#orgf67cc29">License</a></li>
 <li><a href="#install">Installation</a>
 <ul>
 <li><a href="#python-env">Python environment</a></li>
-<li><a href="#install-deps">Install dependencies</a></li>
 <li><a href="#install-rel">Install a release</a></li>
 <li><a href="#install-dev">Install development</a></li>
 </ul>
@@ -320,7 +319,7 @@ The current <b>moo</b> version is&#x2026;
 </div>
 
 <pre class="example">
-0.4.0
+0.4.x-dev
 </pre>
 
 <p>
@@ -330,9 +329,9 @@ definitive version.
 </div>
 </div>
 
-<div id="outline-container-org8f1a1ea" class="outline-2">
-<h2 id="org8f1a1ea">License</h2>
-<div class="outline-text-2" id="text-org8f1a1ea">
+<div id="outline-container-orgf67cc29" class="outline-2">
+<h2 id="orgf67cc29">License</h2>
+<div class="outline-text-2" id="text-orgf67cc29">
 <p>
 <b>moo</b> is free software and may be used under the terms described in file
 <a href="COPYING">COPYING</a>.  These terms explicitly do NOT extend to any of your own
@@ -364,9 +363,9 @@ Python environment is to assure that.  Some suggestions:
 </p>
 </div>
 
-<div id="outline-container-org08f9028" class="outline-4">
-<h4 id="org08f9028">Python3 built in virtual environment</h4>
-<div class="outline-text-4" id="text-org08f9028">
+<div id="outline-container-org0c42d9e" class="outline-4">
+<h4 id="org0c42d9e">Python3 built in virtual environment</h4>
+<div class="outline-text-4" id="text-org0c42d9e">
 <pre class="example">
 $ python3 -m venv venv
 $ source venv/bin/activiate
@@ -374,9 +373,9 @@ $ source venv/bin/activiate
 </div>
 </div>
 
-<div id="outline-container-org01b8534" class="outline-4">
-<h4 id="org01b8534">Direnv</h4>
-<div class="outline-text-4" id="text-org01b8534">
+<div id="outline-container-org8348074" class="outline-4">
+<h4 id="org8348074">Direnv</h4>
+<div class="outline-text-4" id="text-org8348074">
 <p>
 Install <code>direnv</code> and activate it in your shell, then:
 </p>
@@ -393,38 +392,41 @@ See more at <a href="https://github.com/direnv/direnv">https://github.com/direnv
 </div>
 </div>
 
-<div id="outline-container-install-deps" class="outline-3">
-<h3 id="install-deps">Install dependencies</h3>
-<div class="outline-text-3" id="text-install-deps">
-<p>
-To install the dependencies, you may use the latest <code>requirements.txt</code>
-file or one from a release.
-</p>
-
-<pre class="example">
-$ python -m pip install -r https://raw.githubusercontent.com/brettviren/moo/master/requirements.txt
-</pre>
-</div>
-</div>
-
 <div id="outline-container-install-rel" class="outline-3">
 <h3 id="install-rel">Install a release</h3>
 <div class="outline-text-3" id="text-install-rel">
+<p>
+Via a release tarball:
+</p>
+
 <pre class="example">
-$ python -m pip install https://github.com/brettviren/moo/archive/0.3.0.tar.gz
+$ python -m pip install https://github.com/brettviren/moo/archive/0.4.1.tar.gz
+</pre>
+
+<p>
+Or, via git:
+</p>
+
+<pre class="example">
+$ python -m pip install git+git://github.com/brettviren/moo.git@0.4.1#egg=moo
 </pre>
 </div>
 </div>
+
 
 <div id="outline-container-install-dev" class="outline-3">
 <h3 id="install-dev">Install development</h3>
 <div class="outline-text-3" id="text-install-dev">
+<p>
+Just install:
+</p>
+
 <pre class="example">
 $ python -m pip install git+git://github.com/brettviren/moo.git#egg=moo
 </pre>
 
 <p>
-Or, to allow working on the code:
+Or, maybe you want to hack on the code:
 </p>
 
 <pre class="example">
@@ -550,7 +552,7 @@ generation that effort gains multiplicative power.</dd>
 </div>
 <div id="postamble" class="status">
 <p class="author">Author: Brett Viren</p>
-<p class="date">Created: 2020-11-13 Fri 09:33</p>
+<p class="date">Created: 2020-11-13 Fri 14:42</p>
 <p class="validation"><a href="http://validator.w3.org/check?uri=referer">Validate</a></p>
 </div>
 </body>
