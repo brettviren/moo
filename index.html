@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2020-11-02 Mon 17:10 -->
+<!-- 2020-11-13 Fri 09:33 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>moo 無 model oriented objects</title>
@@ -193,17 +193,17 @@
   .org-svg { width: 90%; }
   /*]]>*/-->
 </style>
-<link rel="stylesheet" type="text/css" href="export/styles/darksun/css/htmlize.css"/>
-<link rel="stylesheet" type="text/css" href="export/styles/darksun/css/darksun.css"/>
-<link rel="stylesheet" type="text/css" href="export/styles/darksun/css/hideshow.css"/>
-<script type="text/javascript" src="export/styles/darksun/js/jquery-1.11.0.min.js"></script>
-<script type="text/javascript" src="export/styles/darksun/js/jquery-ui-1.10.2.min.js"></script>
-<script type="text/javascript" src="export/styles/darksun/js/jquery.localscroll-min.js"></script>
-<script type="text/javascript" src="export/styles/darksun/js/jquery.scrollTo-1.4.3.1-min.js"></script>
-<script type="text/javascript" src="export/styles/darksun/js/jquery.zclip.min.js"></script>
-<script type="text/javascript" src="export/styles/darksun/js/darksun.js"></script>
-<script type="text/javascript" src="export/styles/darksun/js/hideshow.js"></script>
-<script type="text/javascript" src="export/styles/lib/js/jquery.stickytableheaders.min.js"></script>
+<link rel="stylesheet" type="text/css" href="https://fniessen.github.io/org-html-themes/styles/readtheorg/css/htmlize.css"/>
+<link rel="stylesheet" type="text/css" href="https://fniessen.github.io/org-html-themes/styles/readtheorg/css/readtheorg.css"/>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>
+<script type="text/javascript" src="https://fniessen.github.io/org-html-themes/styles/lib/js/jquery.stickytableheaders.min.js"></script>
+<script type="text/javascript" src="https://fniessen.github.io/org-html-themes/styles/readtheorg/js/readtheorg.js"></script>
+<style> #content{max-width:1800px;}</style>
+<style> p{max-width:800px;}</style>
+<style> li{max-width:800px;}</style>
+<style> pre.src{background-color:#333; color:white;}</style>
+<style> pre.example{background-color:#333; color:white;}</style>
 <script type="text/javascript">
 /*
 @licstart  The following is the entire license notice for the
@@ -263,23 +263,24 @@ for the JavaScript code in this tag.
 <ul>
 <li><a href="#overview">Overview</a></li>
 <li><a href="#version">Version</a></li>
+<li><a href="#org8f1a1ea">License</a></li>
 <li><a href="#install">Installation</a>
 <ul>
-<li><a href="#org1802aed">Python environment</a>
-<ul>
-<li><a href="#org727ff19">Python3 built in virtual environment</a></li>
-<li><a href="#org563ff50">Direnv</a></li>
-</ul>
-</li>
-<li><a href="#org9bdb058">Install dependencies</a></li>
-<li><a href="#org8107ead">Install a release</a></li>
-<li><a href="#orgf8290dc">Install development</a></li>
+<li><a href="#python-env">Python environment</a></li>
+<li><a href="#install-deps">Install dependencies</a></li>
+<li><a href="#install-rel">Install a release</a></li>
+<li><a href="#install-dev">Install development</a></li>
 </ul>
 </li>
 <li><a href="#punt">Quick start</a></li>
 <li><a href="#docs">Documentation</a>
 <ul>
 <li><a href="#links">Links</a></li>
+</ul>
+</li>
+<li><a href="#releases">Releases</a>
+<ul>
+<li><a href="#releasing">Releasing</a></li>
 </ul>
 </li>
 <li><a href="#etc">Etc</a></li>
@@ -310,7 +311,7 @@ for the JavaScript code in this tag.
 <h2 id="version">Version</h2>
 <div class="outline-text-2" id="text-version">
 <p>
-The current <b>moo</b> version is
+The current <b>moo</b> version is&#x2026;
 </p>
 
 <div class="org-src-container">
@@ -319,39 +320,53 @@ The current <b>moo</b> version is
 </div>
 
 <pre class="example">
-0.3.0
+0.4.0
 </pre>
+
+<p>
+&#x2026;as of last time this file was updated.  See <code>moo/version.py</code> for the
+definitive version.
+</p>
 </div>
 </div>
 
-
+<div id="outline-container-org8f1a1ea" class="outline-2">
+<h2 id="org8f1a1ea">License</h2>
+<div class="outline-text-2" id="text-org8f1a1ea">
+<p>
+<b>moo</b> is free software and may be used under the terms described in file
+<a href="COPYING">COPYING</a>.  These terms explicitly do NOT extend to any of your own
+files which may be input to or output from <b>moo</b> software.
+</p>
+</div>
+</div>
 
 <div id="outline-container-install" class="outline-2">
 <h2 id="install">Installation</h2>
 <div class="outline-text-2" id="text-install">
 <p>
-<b>moo</b> requires Python 3.5 or newer and <code>python</code> below is assumed to
-provide that.
+<b>moo</b> requires Python 3.5 or newer.
 </p>
 
 <p>
 <b>moo</b> installs in to your favorite Python environment in most of the
 usual ways.  Some examples are given below.  Due to a name conflict
-(this) <b>moo</b> is not expected to be distributed through PyPI.
+(this) <b>moo</b> is currently not distributed through PyPI.
 </p>
 </div>
 
-<div id="outline-container-org1802aed" class="outline-3">
-<h3 id="org1802aed">Python environment</h3>
-<div class="outline-text-3" id="text-org1802aed">
+<div id="outline-container-python-env" class="outline-3">
+<h3 id="python-env">Python environment</h3>
+<div class="outline-text-3" id="text-python-env">
 <p>
-Here, <code>python</code> is assumed to be Python 3.  Use whatever your favorite Python environment is to assure that.  Some suggestions:
+Here, <code>python</code> is assumed to be Python 3.  Use whatever your favorite
+Python environment is to assure that.  Some suggestions:
 </p>
 </div>
 
-<div id="outline-container-org727ff19" class="outline-4">
-<h4 id="org727ff19">Python3 built in virtual environment</h4>
-<div class="outline-text-4" id="text-org727ff19">
+<div id="outline-container-org08f9028" class="outline-4">
+<h4 id="org08f9028">Python3 built in virtual environment</h4>
+<div class="outline-text-4" id="text-org08f9028">
 <pre class="example">
 $ python3 -m venv venv
 $ source venv/bin/activiate
@@ -359,9 +374,9 @@ $ source venv/bin/activiate
 </div>
 </div>
 
-<div id="outline-container-org563ff50" class="outline-4">
-<h4 id="org563ff50">Direnv</h4>
-<div class="outline-text-4" id="text-org563ff50">
+<div id="outline-container-org01b8534" class="outline-4">
+<h4 id="org01b8534">Direnv</h4>
+<div class="outline-text-4" id="text-org01b8534">
 <p>
 Install <code>direnv</code> and activate it in your shell, then:
 </p>
@@ -378,11 +393,12 @@ See more at <a href="https://github.com/direnv/direnv">https://github.com/direnv
 </div>
 </div>
 
-<div id="outline-container-org9bdb058" class="outline-3">
-<h3 id="org9bdb058">Install dependencies</h3>
-<div class="outline-text-3" id="text-org9bdb058">
+<div id="outline-container-install-deps" class="outline-3">
+<h3 id="install-deps">Install dependencies</h3>
+<div class="outline-text-3" id="text-install-deps">
 <p>
-To install the dependencies, you may use the latest <code>requirements.txt</code> file or one from a release.
+To install the dependencies, you may use the latest <code>requirements.txt</code>
+file or one from a release.
 </p>
 
 <pre class="example">
@@ -391,18 +407,18 @@ $ python -m pip install -r https://raw.githubusercontent.com/brettviren/moo/mast
 </div>
 </div>
 
-<div id="outline-container-org8107ead" class="outline-3">
-<h3 id="org8107ead">Install a release</h3>
-<div class="outline-text-3" id="text-org8107ead">
+<div id="outline-container-install-rel" class="outline-3">
+<h3 id="install-rel">Install a release</h3>
+<div class="outline-text-3" id="text-install-rel">
 <pre class="example">
 $ python -m pip install https://github.com/brettviren/moo/archive/0.3.0.tar.gz
 </pre>
 </div>
 </div>
 
-<div id="outline-container-orgf8290dc" class="outline-3">
-<h3 id="orgf8290dc">Install development</h3>
-<div class="outline-text-3" id="text-orgf8290dc">
+<div id="outline-container-install-dev" class="outline-3">
+<h3 id="install-dev">Install development</h3>
+<div class="outline-text-3" id="text-install-dev">
 <pre class="example">
 $ python -m pip install git+git://github.com/brettviren/moo.git#egg=moo
 </pre>
@@ -467,6 +483,36 @@ See documentation section for details.
 </div>
 </div>
 
+<div id="outline-container-releases" class="outline-2">
+<h2 id="releases">Releases</h2>
+<div class="outline-text-2" id="text-releases">
+<p>
+While <code>moo</code> has a <code>0.y.z</code> release, backward compatibility is not a strong
+priority as all uses are also in flux.  <code>y</code> will increment with major
+new features which may or may not be backward compatible.  <code>z</code> will
+increment with minor bug fixes.
+</p>
+</div>
+
+<div id="outline-container-releasing" class="outline-3">
+<h3 id="releasing">Releasing</h3>
+<div class="outline-text-3" id="text-releasing">
+<p>
+Notes to self on making a release: 
+</p>
+
+<ul class="org-ul">
+<li>edit <a href="moo/version.py">moo/version.py</a> to set release version</li>
+<li>reexport this and other documentation files, check for failures</li>
+<li><code>git commit</code> and <code>git tag -am 'Pithy release message' X.Y.Z</code> using matching string</li>
+<li>edit <a href="moo/version.py">moo/version.py</a> to go back to a dev version</li>
+<li><code>git commit</code> and <code>git push</code> and <code>git push --tags</code></li>
+<li>visit github release page and add any useful details</li>
+</ul>
+</div>
+</div>
+</div>
+
 <div id="outline-container-etc" class="outline-2">
 <h2 id="etc">Etc</h2>
 <div class="outline-text-2" id="text-etc">
@@ -504,7 +550,7 @@ generation that effort gains multiplicative power.</dd>
 </div>
 <div id="postamble" class="status">
 <p class="author">Author: Brett Viren</p>
-<p class="date">Created: 2020-11-02 Mon 17:10</p>
+<p class="date">Created: 2020-11-13 Fri 09:33</p>
 <p class="validation"><a href="http://validator.w3.org/check?uri=referer">Validate</a></p>
 </div>
 </body>
