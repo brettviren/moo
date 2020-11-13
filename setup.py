@@ -1,6 +1,9 @@
 import setuptools
 
-from moo.version import version
+ver_globals = {}
+with open("moo/version.py") as fp:
+    exec(fp.read(), ver_globals)
+version = ver_globals["version"]
 
 setuptools.setup(
     name="moo",
