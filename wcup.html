@@ -3,10 +3,10 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2020-09-24 Thu 12:17 -->
+<!-- 2020-11-13 Fri 15:27 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>wcup - Wire-Cell User Package Generator</title>
+<title>Wire-Cell User Package Generator</title>
 <meta name="generator" content="Org mode" />
 <meta name="author" content="Brett Viren" />
 <style type="text/css">
@@ -193,17 +193,17 @@
   .org-svg { width: 90%; }
   /*]]>*/-->
 </style>
-<link rel="stylesheet" type="text/css" href="export/styles/darksun/css/htmlize.css"/>
-<link rel="stylesheet" type="text/css" href="export/styles/darksun/css/darksun.css"/>
-<link rel="stylesheet" type="text/css" href="export/styles/darksun/css/hideshow.css"/>
-<script type="text/javascript" src="export/styles/darksun/js/jquery-1.11.0.min.js"></script>
-<script type="text/javascript" src="export/styles/darksun/js/jquery-ui-1.10.2.min.js"></script>
-<script type="text/javascript" src="export/styles/darksun/js/jquery.localscroll-min.js"></script>
-<script type="text/javascript" src="export/styles/darksun/js/jquery.scrollTo-1.4.3.1-min.js"></script>
-<script type="text/javascript" src="export/styles/darksun/js/jquery.zclip.min.js"></script>
-<script type="text/javascript" src="export/styles/darksun/js/darksun.js"></script>
-<script type="text/javascript" src="export/styles/darksun/js/hideshow.js"></script>
-<script type="text/javascript" src="export/styles/lib/js/jquery.stickytableheaders.min.js"></script>
+<link rel="stylesheet" type="text/css" href="https://fniessen.github.io/org-html-themes/styles/readtheorg/css/htmlize.css"/>
+<link rel="stylesheet" type="text/css" href="https://fniessen.github.io/org-html-themes/styles/readtheorg/css/readtheorg.css"/>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>
+<script type="text/javascript" src="https://fniessen.github.io/org-html-themes/styles/lib/js/jquery.stickytableheaders.min.js"></script>
+<script type="text/javascript" src="https://fniessen.github.io/org-html-themes/styles/readtheorg/js/readtheorg.js"></script>
+<style> #content{max-width:1800px;}</style>
+<style> p{max-width:800px;}</style>
+<style> li{max-width:800px;}</style>
+<style> pre.src{background-color:#333; color:white;}</style>
+<style> pre.example{background-color:#333; color:white;}</style>
 <script type="text/javascript">
 /*
 @licstart  The following is the entire license notice for the
@@ -253,21 +253,24 @@ for the JavaScript code in this tag.
 </head>
 <body>
 <div id="content">
-<h1 class="title">wcup - Wire-Cell User Package Generator</h1>
+<h1 class="title">Wire-Cell User Package Generator
+<br />
+<span class="subtitle"><code>moo</code> 無 <code>wcup</code></span>
+</h1>
 <div id="table-of-contents">
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents">
 <ul>
-<li><a href="#orgaaf2847">Introduction</a></li>
-<li><a href="#orga79ab15">Usage</a></li>
-<li><a href="#org46fd173">Caution</a></li>
+<li><a href="#intro">Introduction</a></li>
+<li><a href="#usage">Usage</a></li>
+<li><a href="#caution">Caution</a></li>
 </ul>
 </div>
 </div>
 
-<div id="outline-container-orgaaf2847" class="outline-2">
-<h2 id="orgaaf2847">Introduction</h2>
-<div class="outline-text-2" id="text-orgaaf2847">
+<div id="outline-container-intro" class="outline-2">
+<h2 id="intro">Introduction</h2>
+<div class="outline-text-2" id="text-intro">
 <p>
 The Wire-Cell Toolkit supports "user packages" (WCUP).  A WCUP is like
 a "vertical slice" of the main <code>wire-cell-toolkit</code> repository in that it
@@ -278,14 +281,18 @@ contains a main `wscript` and a "sub-package" directory.
 The <a href="wcup/">wcup</a> directory in moo provides templates and other support to
 generate your own WCUP starting point.
 </p>
+
+<p>
+WCUP also provides an example of the use of <code>moo render-many</code>.
+</p>
 </div>
 </div>
 
-<div id="outline-container-orga79ab15" class="outline-2">
-<h2 id="orga79ab15">Usage</h2>
-<div class="outline-text-2" id="text-orga79ab15">
+<div id="outline-container-usage" class="outline-2">
+<h2 id="usage">Usage</h2>
+<div class="outline-text-2" id="text-usage">
 <pre class="example">
-$ moo many -C ~/dev/pcbro -T wcup wcup/pcbraw.jsonnet
+$ moo  -T wcup render-many -o ~/dev/pcbro wcup/pcbraw.jsonnet
 $ cd ~/dev/pcbro
 $ git init &amp;&amp; git add * &amp;&amp; git commmit -am "First commit"
 $ cp /path/to/wire-cell-toolkit/wcb .
@@ -299,9 +306,9 @@ The developer may then start adding in more code and files.
 </div>
 </div>
 
-<div id="outline-container-org46fd173" class="outline-2">
-<h2 id="org46fd173">Caution</h2>
-<div class="outline-text-2" id="text-org46fd173">
+<div id="outline-container-caution" class="outline-2">
+<h2 id="caution">Caution</h2>
+<div class="outline-text-2" id="text-caution">
 <p>
 There is <b>no</b> protection against overwriting existing files.  <code>moo</code> will
 happily regenerate the initial skeleton files even if you have poured
@@ -312,7 +319,7 @@ your heart into developing them manually.
 </div>
 <div id="postamble" class="status">
 <p class="author">Author: Brett Viren</p>
-<p class="date">Created: 2020-09-24 Thu 12:17</p>
+<p class="date">Created: 2020-11-13 Fri 15:27</p>
 <p class="validation"><a href="http://validator.w3.org/check?uri=referer">Validate</a></p>
 </div>
 </body>

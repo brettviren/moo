@@ -52,10 +52,10 @@ class Context:
             model = moo.util.graft(model, ptr, data)
         return model
 
-    def transform(self, model):
+    def transform(self, model, transforms=()):
         'Transform a model'
         if self.transforms:
-            model = moo.util.transform(model, self.transforms)
+            model = moo.util.transform(model, transforms + self.transforms)
         return model
 
     def resolve(self, filename, fpath=None):
@@ -264,10 +264,13 @@ def render_many(ctx, outdir, model):
     '''
     data = ctx.obj.load(model)
     for one in data:
-        data = ctx.obj.transform(one["model"], one.get("transform", None))
+        data = ctx.obj.transform(one["model"], one.get("transform", ()))
         text = ctx.obj.render(one["template"], data)
         output = os.path.join(outdir, one["filename"])
         print(f"generating {output}:")
+        odir = os.path.dirname(output)
+        if not os.path.exists(odir):
+            os.makedirs(odir)
         with open(output, 'wb') as fp:
             fp.write(text.encode())
 
