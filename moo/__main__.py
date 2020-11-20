@@ -132,14 +132,14 @@ def resolve(ctx, filename):
               type=click.Path(exists=False, dir_okay=False, file_okay=True),
               help="Output file, default is stdout")
 @click.option('-S', '--spath', default="",
-              help="Specify a search path to find validation schema")
+              help="Specify path to validation schema object in schema data")
 @click.option('-s', '--schema', required=True,
               type=click.Path(exists=True, dir_okay=False, file_okay=True),
               help="JSON Schema to validate against.")
 @click.option("--sequence", default=False, is_flag=True,
               help="Assume a sequence of schema and models")
 @click.option('-V', '--validator', default="jsonschema",
-              type=click.Choice(["jsonschema","fastjsonschema"]),
+              type=click.Choice(["jsonschema", "fastjsonschema"]),
               help="Specify which validator")
 @click.argument('model')
 @click.pass_context
@@ -147,8 +147,8 @@ def cmd_validate(ctx, output, spath, schema, sequence, validator, model):
     '''
     Validate a model against a schema
     '''
-    data = ctx.obj.load(model, ctx.obj.dpath)
-    sche = moo.io.load_schema(ctx.obj.resolve(schema), spath)
+    sche = ctx.obj.just_load(schema, ctx.obj.mpath, spath)
+    data = ctx.obj.load(model)
 
     if not sequence:
         data = [data]
@@ -164,6 +164,37 @@ def cmd_validate(ctx, output, spath, schema, sequence, validator, model):
     text = json.dumps(res, indent=4)
     with open(output, 'wb') as fp:
         fp.write(text.encode())
+
+
+@cli.command("regex")
+@click.option('-V', '--validator', default="jsonschema",
+              type=click.Choice(["jsonschema", "fastjsonschema"]),
+              help="Specify which validator")
+@click.option("-O", "--only", default=False, is_flag=True,
+              help="Assure regex is bound by ^$")
+@click.option('-R', '--rpath', default="",
+              help="Specify a data path and treat regex as a file to load")
+@click.argument('regex')
+@click.argument('string')
+@click.pass_context
+def cmd_regex(ctx, validator, only, rpath, regex, string):
+    '''
+    Validate a string against a regex
+    '''
+    if rpath:
+        regex = ctx.obj.just_load(regex, ctx.obj.mpath, rpath)
+
+    if only:
+        if regex[0] != '^':
+            regex = '^' + regex
+        if regex[-1] != '$':
+            regex = regex + '$'
+
+    valid = dict(type="string", pattern=regex)
+    res = moo.util.validate(string, valid, validator)
+    if res:
+        print(regex)
+        print(res)
 
 
 def writeit(data, output, need_dump=True):

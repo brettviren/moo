@@ -4,18 +4,50 @@
     ident: '[a-zA-Z][a-zA-Z0-9_]*',
     ident_only: '^' + self.ident + '$',
     // DNS hostname
-    dnslabel: '([a-zA-Z0-9][a-zA-Z0-9\\-]*[^-])+',
-    dnshost: '(\\*)|(%s(\\.%s)*)' % [self.dnslabel, self.dnslabel],
-    // URIs are either of the zeromq type:
-    // - tcp://host:port
-    tcpport: '(:(\\*)|([0-9]+))?',
-    tcp: '^tcp://' + self.dnshost + self.tcpport + '$',
+    ipv4: '[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}',
+    dnslabel: '[a-zA-Z0-9]([a-zA-Z0-9\\-]*[a-zA-Z0-9])?',
+    dnshost: '%s(\\.%s)*' % [self.dnslabel, self.dnslabel],
+
+    tcpport: '(:[0-9]+)?',
+
+    // a slash-separated list/path like FS paths
+    // fixme: this is maybe too accepting
     hiername: '[^/\\| ]+',
     hierpath: '/?(%s/?)+' % self.hiername,
-    // - ipc://filename.ipc
-    ipc: '^ipc://' + self.hierpath + '$',
-    // - inproc://label
-    inproc: '$inproc://' + self.hiername + '$',
+    // a dot-separated list/path list Python modules
+    dotname: self.ident,
+    dotpath: '%s(\\.%s)*' % [self.dotname, self.dotname],
+
+    // thing specific to zmq
+    zmq: {
+        tcp: {
+            // add zeromq wild card
+            host: '(\\*)|(%s)' % $.dnshost,
+            // URIs are either of the zeromq type:
+            // with zeromq wild card
+            port: '(:(\\*|[0-9]+))?',
+            // zeromq tcp scheme
+            uri: 'tcp://(%s|%s)(%s)' % [self.host, $.ipv4, self.port],
+        },
+        ipc: {
+            uri: 'ipc://' + $.hierpath,
+        },
+        inproc: {
+            uri: 'inproc://' + $.hiername,
+        },
+
+        uri_list : [self.tcp.uri, self.ipc.uri, self.inproc.uri],
+        uri: '(%s)' % std.join('|',['(%s)'%one for one in self.uri_list]),
+        
+        socket: {
+            name_list: [
+                "PAIR", "PUB", "SUB", "REQ", "REP", "DEALER", "ROUTER",
+                "PULL", "PUSH", "XPUB", "XSUB", "STREAM", "SERVER", "CLIENT",
+                "RADIO", "DISH", "GATHER", "SCATTER", "DGRAM", "PEER",
+            ],
+            name: std.join('|',['(%s)'% one for one in self.name_list]),
+        },
+    },
 
     // or for auto connect via Zyre discovery
     // - zyre://nodename/portname[?header=value]
@@ -30,8 +62,6 @@
     param: '(\\?%s=%s(&%s=%s)*)?' % [self.ident for n in std.range(0,3)],
     zyre: '^zyre://%s/%s%s$' % [self.nodename, self.portname, self.param],
 
-    // All supported URI (no http/https yet)
-    uri: std.join('|', [self.tcp, self.ipc, self.inproc, self.zyre]),
 
     // match an instance name for a component
     compname: self.ident,

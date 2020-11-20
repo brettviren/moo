@@ -34,6 +34,9 @@ local select(obj, keys) = {
         [f.name]: $.field(f) for f in r.fields
     }},
     
+    // note, enum need not be string type but here we force it
+    enum(e) :: { type: "string", enum: e.symbols },
+
     // Boolean combos
     xxxOf(of, a) :: { [of] : [$.ref(t) for t in a.types] },
     anyOf(a) :: self.xxxOf("anyOf", a),

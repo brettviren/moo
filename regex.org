@@ -1,0 +1,48 @@
+#+title moo regex
+
+* Overview
+
+*moo* schema validation uses [[https://json-schema.org/understanding-json-schema/reference/regular_expressions.html#regular-expressions][JSON Schema compatible regular expressions]].
+
+* Testing
+
+The ~moo regex~ command gives CLI access to testing regular expressions against strings.
+
+** Immediate
+
+An immediate test can be done like:
+
+#+begin_example
+  $ moo regex '^[a-z]$' a
+  None
+  $ moo regex '^[a-z]$' aa 
+  ...
+  jsonschema.exceptions.ValidationError: 'aa' does not match '^[a-z]$'
+
+  Failed validating 'pattern' in schema:
+      {'pattern': '^[a-z]$', 'type': 'string'}
+
+  On instance:
+      'aa'
+#+end_example
+
+** File based
+
+A Jsonnet file can be used, with optional path into data structure,
+eg:
+
+#+begin_example
+$ moo regex -O -R ipv4 schema/re.jsonnet '1.2.3.4'
+None
+$ moo regex -O -R ipv4 schema/re.jsonnet '1.2.3.4.5'
+jsonschema.exceptions.ValidationError: '1.2.3.4.5' does not match '^[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}$'
+
+Failed validating 'pattern' in schema:
+    {'pattern': '^[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}$',
+     'type': 'string'}
+
+On instance:
+    '1.2.3.4.5'
+#+end_example
+
+

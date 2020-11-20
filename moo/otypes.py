@@ -94,7 +94,12 @@ class Record(BaseType):
             (self.__class__.__name__, ', '.join(self.field_names))
 
     def pod(self):
-        print(self.field_names)
+        '''
+        Return record as plain old data.
+
+        Will perform validation.
+        '''
+        # print(self.field_names)
         ret = dict()
         for fname, field in self.fields.items():
             try:
