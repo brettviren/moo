@@ -5,8 +5,8 @@
 ;
 [subrepo]
 	remote = https://github.com/fniessen/org-html-themes
-	branch = master
-	commit = f7224a489462abc2c2174edbf7d4e82c0e276183
-	parent = bd234ee512c540eb233180a7f3bb530d8e83ac7e
+	branch = v1.0.2
+	commit = 3a1995b80004dde40f663f310903fd82deae58fe
+	parent = 2a95d2e6ab73c91b2a1b3826a69d9fb0c83f7a86
 	method = merge
 	cmdver = 0.4.1

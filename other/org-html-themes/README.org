@@ -7,7 +7,7 @@
 #+OPTIONS:   H:4 toc:t num:2
 
 #+PROPERTY:  header-args :padline no
-#+SETUPFILE: https://fniessen.github.io/org-html-themes/org/theme-readtheorg.setup
+#+SETUPFILE: https://fniessen.github.io/org-html-themes/setup/theme-readtheorg.setup
 
 #+html: <a href="http://opensource.org/licenses/GPL-3.0">
 #+html:   <img src="http://img.shields.io/:license-gpl-blue.svg" alt=":license-gpl-blue.svg" />
@@ -40,53 +40,20 @@ Org mode version 8 (or later) is required.
 
 If such a version is not bundled with your Emacs, install one from ELPA.
 
-* Gallery
-:PROPERTIES:
-:ID:       79e0ed21-c3b0-4f00-bdab-29fbff9dcad4
-:END:
+* Quotations
 
-This is a list of available *HTML themes for Org mode*, which you can use right
-now!  Well, I hope to have more than one in a couple of weeks...
-
-** Bigblow
-
-Bigblow is perfect for your work: it is a clean design aimed at optimal *Org
-mode experience in your browser*.  It looks just awesome!
-
-#+ATTR_HTML: :width 640
-[[https://www.youtube.com/watch?v=DnSGSiXYuOk][file:docs/bigblow.png]]
-
-Click on the image for a quick [[https://www.youtube.com/watch?v=DnSGSiXYuOk][demo of Bigblow]] (2:49 min, no audio).
-
-Keyboard shortcuts to save time and boost your productivity:
-
-| Shortcut | What it does                      |
-|----------+-----------------------------------|
-| =?= or =h=   | Access the *dashboard*              |
-| =n=        | Move to the *next* main heading     |
-| =p=        | Move to the *previous* main heading |
-| =b=        | Scroll up                         |
-| =<=        | Scroll to top                     |
-| =>=        | Scroll to bottom                  |
-| =-=        | Collapse all                      |
-| =+=        | Expand all                        |
-| =r=        | Go to next task in list           |
-| =R=        | Go to previous task in list       |
-| =q=        | Stop reviewing the list of tasks  |
-| =g=        | Reload the page                   |
-
-*** Quotations about Bigblow
+** About Bigblow
 
 "Very very nice, I enjoy it a lot." \\
 -- /Ista Zahn/
 
-"This is awesome.  I love it!" \\
+"This is awesome. I love it!" \\
 -- /Rainer M Krug/
 
 "This is awesome!!" \\
 -- /Mehul Sanghvi/
 
-"This very nice html theme. [...]  I cannot use another emacs-theme than your
+"This very nice html theme. [...] I cannot use another emacs-theme than your
 [[https://github.com/fniessen/emacs-leuven-theme][emacs-leuven-theme]], and it is going to be probably the same with your html
 theme!" \\
 -- /Joseph Vidal-Rosset/
@@ -102,30 +69,10 @@ and published them within my company's intranet.  Thanks for sharing this
 wonderful package!" \\
 -- /Richard K./
 
-** ReadTheOrg
+** About ReadTheOrg
 
-ReadTheOrg is a clone of the official -- and great! -- [[https://github.com/snide/sphinx_rtd_theme][Sphinx theme]] used in the
-[[http://docs.readthedocs.org/en/latest/][Read The Docs]] site.  It gives a beautiful and professional style to all your Org
-docs.
-
-*Thanks to its creator(s)!*
-
-#+ATTR_HTML: :width 640
-[[file:docs/readtheorg.png]]
-
-#+begin_note
-While the original theme shines on mobile devices as well, ReadTheOrg does not
-stay completely functional.
-
-I don't have a lot of time to maintain this project due to other
-responsibilities.  Help is welcome to work on that (and eventually improve the
-default structure of the HTML export)!
-#+end_note
-
-*** Quotations about ReadTheOrg
-
-"OMG.  The ReadTheOrg theme for exported HTML from org mode files is eye
-wateringly beautiful.  Thank you!" \\
+"OMG. The ReadTheOrg theme for exported HTML from org mode files is eye
+wateringly beautiful. Thank you!" \\
 -- /Rob Stewart/
 
 "It is fantastic, so beautiful.  I will switch several of my pages over to
@@ -147,9 +94,64 @@ available." \\
 "Extremely useful." \\
 -- /Thomas S. Dye/
 
+* Gallery
+  :PROPERTIES:
+  :ID:       79e0ed21-c3b0-4f00-bdab-29fbff9dcad4
+  :END:
+
+This is a list of available *HTML themes for Org mode*, which you can use right
+now!  Well, I hope to have more than one in a couple of weeks...
+
+** Bigblow
+
+Bigblow is perfect for your work: it is a clean design aimed at optimal *Org
+mode experience in your browser*. It looks just awesome!
+
+#+ATTR_HTML: :width 640
+[[https://www.youtube.com/watch?v=DnSGSiXYuOk][file:bigblow.png]]
+
+Click on the image for a quick demo of Bigblow (2:49 min, no audio).
+
+Keyboard shortcuts to save time and boost your productivity:
+
+| Shortcut | What it does                      |
+|----------+-----------------------------------|
+| =?= or =h=   | Access the *dashboard*              |
+| =n=        | Move to the *next* main heading     |
+| =p=        | Move to the *previous* main heading |
+| =b=        | Scroll up                         |
+| =<=        | Scroll to top                     |
+| =>=        | Scroll to bottom                  |
+| =-=        | Collapse all                      |
+| =+=        | Expand all                        |
+| =r=        | Go to next task in list           |
+| =R=        | Go to previous task in list       |
+| =q=        | Stop reviewing the list of tasks  |
+| =g=        | Reload the page                   |
+
+** ReadTheOrg
+
+ReadTheOrg is a clone of the official -- and great! --  [[https://github.com/snide/sphinx_rtd_theme][theme]]
+used in the [[http://docs.readthedocs.org/en/latest/][Read The Docs]] site.  It gives a beautiful and professional style to
+all your Org docs.
+
+*Thanks to its creator(s)!*
+
+#+ATTR_HTML: :width 640
+[[file:readtheorg.png]]
+
+#+begin_note
+While the original theme shines on mobile devices as well, ReadTheOrg does not
+stay completely functional.
+
+I don't have a lot of time to maintain this project due to other
+responsibilities.  Help is welcome to work on that (and eventually improve the
+default structure of the HTML export)!
+#+end_note
+
 * Demo
 
-I've written a [[file:org/org-mode-syntax-example.txt][demo page]] for the themes that provides a maximal working support
+I've written a demo page for the themes that provides a maximal working support
 of Org mode syntax.
 
 Please see the [[https://github.com/fniessen/refcard-org-mode][Org mode refcard]] page for full examples of headings, code,
@@ -166,18 +168,17 @@ Using a theme from the [[id:79e0ed21-c3b0-4f00-bdab-29fbff9dcad4][theme gallery]
    chosen theme:
 
    #+begin_src org :exports code
-   ,#+SETUPFILE: https://fniessen.github.io/org-html-themes/org/theme-NAME.setup
+   ,#+SETUPFILE: https://fniessen.github.io/org-html-themes/setup/THEME-NAME.setup
    #+end_src
 
-   (where ~NAME~ is either ~bigblow~ or ~readtheorg~)
+   (where ~THEME-NAME~ is ~theme-bigblow~ or ~theme-readtheorg~)
 
    or, if you *cloned or downloaded* the Org-HTML themes project -- to get no
    dependency on an Internet connection --, use a (relative or absolute) path to
-   the local "setup file" and copy the "styles" folder from the cloned folder
-   into the same folder as the file you want to export:
+   the local "setup file" and copy the "styles" folder from the cloned folder into the same folder as the file you want to export:
 
    #+begin_src org :exports code
-   ,#+SETUPFILE: PATH/TO/GIT/REPO/org/theme-NAME-local.setup
+   ,#+SETUPFILE: path/to/Git/repo/setup/THEME-NAME-local.setup
    #+end_src
 
 2. Then, you *export* your Org mode file *to HTML* with =org-html-export-to-html= or
@@ -249,10 +250,10 @@ version.
 
 This program is distributed in the hope that it will be useful, but WITHOUT ANY
 WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
-A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License along with
-this program.  If not, see http://www.gnu.org/licenses/.
+this program. If not, see http://www.gnu.org/licenses/.
 
 #+html: <a href="http://opensource.org/licenses/GPL-3.0">
 #+html:   <img src="http://img.shields.io/:license-gpl-blue.svg" alt=":license-gpl-blue.svg" />
