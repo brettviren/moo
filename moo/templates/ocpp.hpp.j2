@@ -31,6 +31,21 @@ enum class {{t.name}}: unsigned {
     {{sname}},
     {% endfor %}
 };
+// return a string representation of a {{t.name}}.
+inline
+const char* str({{t.name}} val) {
+    {% for sname in t.symbols %}
+    if (val == {{t.name}}::{{sname}}) { return "{{sname}}" ;}
+    {% endfor %}
+    return "";                  // should not reach
+}
+inline
+{{t.name}} parse_{{t.name}}(std::string val, {{t.name}} def = {{t.name}}::{{t.default}}) {
+    {% for sname in t.symbols %}
+    if (val == "{{sname}}") { return {{t.name}}::{{sname}}; }
+    {% endfor %}
+    return def;
+}
 {%- endmacro -%}
 
 {% macro ns(model) %}
