@@ -1,0 +1,12 @@
+; DO NOT EDIT (unless you know what you are doing)
+;
+; This subdirectory is a git "subrepo", and this file is maintained by the
+; git-subrepo command. See https://github.com/git-commands/git-subrepo#readme
+;
+[subrepo]
+	remote = https://github.com/alphapapa/org-html-theme-darksun
+	branch = master
+	commit = 136d317edb7c065ad5fca3630119140755333438
+	parent = 7591d716a23b83d8a39b07a54246aa280606f059
+	method = merge
+	cmdver = 0.4.1
