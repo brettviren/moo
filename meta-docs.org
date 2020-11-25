@@ -1,0 +1,48 @@
+#+title: moo 無 docs
+#+subtitle: moo meta-documentation
+#+setupfile: setup-index.org
+
+* Layout
+
+The moo documentation source tends to reference moo code source via
+relative paths and thus it is location sensitive.  Currently, GH Pages
+point to the root of the repo and thus it is heavily populated.  
+
+** TODO move moo documentation into ~docs/~
+
+This will require correcting a lot of paths in the ~.org~ source.  This
+future reorg does *not* include making ~docs/~ the root of the GH Pages.
+
+* Export
+
+HTML is produced by running a manual export (~C-c C-e h h~) in a ~.org~
+source.  This produces an HTML file of the same basename except
+~README.org~ files have directives to export to ~index.html~.  
+
+** TODO automate moo documentation export
+
+* Themes
+
+HTML themes are provided by the fantastic work of ~fniessen~ (readtheorg) and ~alphapapa~ (darksun).  To allow the moo GH pages to be self contained, copies of their files are interned.
+
+#+begin_example
+  $ git-subrepo clone https://github.com/fniessen/org-html-themes docs/static/org-html-themes
+  $ git-subrepo clone https://github.com/alphapapa/org-html-theme-darksun docs/static/org-html-theme-darksun
+  $ cd docs/
+  $ cp static/org-html-themes/org/theme-readtheorg-local.setup setup-topic.org
+  $ cp static/org-html-theme-darksun/export/setup/theme-darksun-local.setup setup-index.org  
+  $ emacs setup-*.org  # fix paths
+  $ cd static/
+  $ ln -s org-html-themes/src/* .
+  $ ln -s org-html-theme-darksun/export/styles/darksun .
+#+end_example
+
+The symlinks are made to compress the URLs and defend somewhat against
+upstream repo reorg.  The ~setup-*.org~ files need various paths fixed
+to match expectations set by GH Pages settings.  As their name
+implies, the two themes are meant for two different types of pages.
+
+- ~setup-index.org~ :: used for ~README.org/index.html~ 
+- ~setup-topic.org~ :: and for any "topic" documents
+
+

@@ -1,29 +1,33 @@
 #+title: moo 無 build
-#+subtitle: Building Software Packages with ~moo~
-#+setupfile: setup.org
+#+subtitle: Integrating ~moo~ with build systems
+#+setupfile: other/setup-topic.org
 
 * Introduction
   :PROPERTIES:
   :CUSTOM_ID: intro
   :END:
 
-One of the primary use for ~moo~ is to generate code.  It can greatly
-simply production of code which follows some sort of meta-programming
-patterns.  Typically a software package will have a portion that must
-still be developed manually.  Although ~moo~ has been used to generate
-[[file:wcup.org][full]] packages, in most cases it is expected that ~moo~ will generate
-just a portion of a package and that this generation will be
-integrated into the native package build system.  This note gives
-guidance on how that is done.
+One of the primary use for ~moo~ is to generate code.  So, naturally
+it must integrate into code build systems and this note collects
+methods to do just that.
+
+#+begin_note
+~moo~ can also be used in generating a build system.  See for example
+the [[file:wcup.org][wcup]] document which describes the use of ~moo~
+to generate a software package skeleton including its build system.
+#+end_note
 
 ** Manual codegen
    :PROPERTIES:
    :CUSTOM_ID: manual
    :END:
 
-A reasonable solution is to simply run ~moo~ manually, or partly
-automated via a shell script.  Arrange for the generated files to be
-placed in the source areas and then commit the results.
+A reasonably simple way to "integrate" ~moo~ into a build system is to
+not.  One may run ~moo~ manually, or partly automated via a shell
+script, and arrange for the generated files to be placed in the source
+areas and committed.  Absent any apparent knowledge of ~moo~, the
+software project will simply appear to have an impeccably consistent
+code developer.
 
 Pros:
 
@@ -44,20 +48,16 @@ Cons:
 
 Another reasonable solution is to run ~moo~ commands as part of the
 native build of the package.  From the point of view of developing a
-build system, ~moo~ is seen as a *compiler*.  
+build system, ~moo~ is seen as a *compiler* or possibly more
+accurately a *pre processor*.
 
 While ~g++~ may convert C++ files to ~.o~ object files, ~moo~ converts ~.j2~
 and ~.jsonnet~ files into ~.hpp~, ~.cpp~, etc files (which then themselves
 must go on to be further compiled.  Thus, ~moo~ commands must be
 *inserted* into the build graph that the build system (Waf, CMake, etc)
-creates in a novel manner.  
+creates in a more novel manner than merely adding more source files.  
 
-Depending on the build system, one may find examples of this pattern
-to mimic by looking for use of ~m4~, the processing of ~.in~ files or the
-CPP.  Though, be aware that some build systems have special support
-for this kind of compiling which may not be easily mimicked.
-
-The "pros" and "cons" are largely reversed from the manual option with the following exceptions:
+The "pros" and "cons" are largely reversed from the manual option with the following additional "pros":
 
 - correct build dependencies may be assured, given a quality build system
 - generated code may be placed in or outside the source area
@@ -65,7 +65,7 @@ The "pros" and "cons" are largely reversed from the manual option with the follo
 The rest of this document gives information to help build system
 developers understand how to fit ~moo~ into their system.  It focuses on
 what input and output files with which ~moo~ may interact as most build
-systems use a file-based dependency graph.
+systems use a file-based dependency graph.  It ends with some [[Examples]] of integrating ~moo~ into a few of the more popular build systems (which are also understood by the author).
 
 * Inputs
   :PROPERTIES:
@@ -287,10 +287,10 @@ into various build systems.
    :CUSTOM_ID: waf
    :END:
 
-Both Waf and ~moo~ is implemented in Python and that gives the
-developers options in how to integrate ~moo~ into their Waf-based build
-system.  One may either call ~moo~ as a CLI program or use it as a
-Python module.
+Both Waf and ~moo~ are implemented in Python and that gives the
+developers options in how to integrate ~moo~ into their Waf-based
+build system.  One may either call ~moo~ as a CLI program (see section
+[[cmd]]) or use it as a Python module (see section [[mod]]).
 
 *** cmd
     :PROPERTIES:
@@ -298,7 +298,7 @@ Python module.
     :END:
 
 
-The Waf project in [[file:buildsys/waf/cmd/][buildsys/waf/cmd/]] provides an example of using ~moo~
+The Waf project in [[file:buildsys/waf/cmd/][buildsys/waf/cmd/]] provides an example of integrating ~moo~ 
 as a command line program.  It uses ~moo render~ to apply a model to a
 simple template that merely dumps the data.  The model is composed
 through Jsonnet ~import~ mechanism and so ~moo import~ is also as a Waf
@@ -336,8 +336,8 @@ rebuild and notice that indeed the change is noticed.
 
 The second example works the same but instead of calling ~moo~ as a CLI
 program, the Python module is used.  In principle, this can be better
-performing but it does require Waf is called with a version of Python
-that is new enough to support ~moo~.
+performing but it does that require ~waf~ is called with a version of Python
+that is supported by ~moo~.
 
 Here is the ~wscript~ file for the "mod" example:
 
@@ -447,11 +447,14 @@ build.  It shows what one must do to insert a code generator into the
 build graph in a way that respects intermediate dependencies using ~moo
 imports~ like the [[Waf]] examples.  
 
-Currently the code is just an "vendored" example and found in
-[[file:buildsys/cmake/moo.cmake][moo.cmake]].  Still todo:
+#+begin_note
+Currently the CMake code is provided merely as an example which is
+found in [[file:buildsys/cmake/moo.cmake][moo.cmake]].  The goal is to
+further develop this example into proper support including:
 
 - [ ] install ~moo.cmake~ and other cmake files via ~setup.py~
 - [ ] have the usual ~find_package(moo)~ do the right thing
+#+end_note
 
 The current example ~CMakeLists.txt~ file using the ~moo~ CMake support is:
 
@@ -517,29 +520,29 @@ Do initial build
 Scanning dependencies of target DOIT
 [100%] generate code model-dump.txt
 [100%] Built target DOIT
--rw-rw-r-- 1 bv bv 93 2020-10-27 17:28:21.541964215 -0400 build/model-dump.txt
+-rw-rw-r-- 1 bv bv 93 2020-11-25 17:39:55.712350480 -0500 build/model-dump.txt
 
 Next we edit the intermediate files and notice a rebuild
 
 [100%] generate code model-dump.txt
 [100%] Built target DOIT
--rw-rw-r-- 1 bv bv 93 2020-10-27 17:28:22.153954091 -0400 build/model-dump.txt
+-rw-rw-r-- 1 bv bv 93 2020-11-25 17:39:56.432341740 -0500 build/model-dump.txt
 
 Do do a second build, output is not rebuilt
 
 [100%] Built target DOIT
--rw-rw-r-- 1 bv bv 93 2020-10-27 17:28:22.153954091 -0400 build/model-dump.txt
+-rw-rw-r-- 1 bv bv 93 2020-11-25 17:39:56.432341740 -0500 build/model-dump.txt
 
 Add new implicit dependency, which should cause a rebuild
 
 [100%] generate code model-dump.txt
 [100%] Built target DOIT
--rw-rw-r-- 1 bv bv 93 2020-10-27 17:28:22.797943438 -0400 build/model-dump.txt
+-rw-rw-r-- 1 bv bv 93 2020-11-25 17:39:57.200332410 -0500 build/model-dump.txt
 
 Update new implicit dependency, which should cause a rebuild
 
 [100%] Built target DOIT
--rw-rw-r-- 1 bv bv 93 2020-10-27 17:28:22.797943438 -0400 build/model-dump.txt
+-rw-rw-r-- 1 bv bv 93 2020-11-25 17:39:57.200332410 -0500 build/model-dump.txt
 #+end_example
 
 

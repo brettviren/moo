@@ -1,6 +1,6 @@
-#+title: Schema Objects
-#+subtitle: ~moo~ 無 ~oschema~
-#+setupfile: setup.org
+#+title:  ~moo~ 無 ~oschema~
+#+subtitle: Describing schema as objects
+#+setupfile: other/setup-topic.org
 
 #+name: grep
 #+begin_src shell :var re="" :var file="/dev/null"  :var a=0 :var lang="shell" :exports none :results output code
@@ -18,32 +18,48 @@ awk "$re" "$file"
   :END:
 
 
-In general, a *schema* describes one or more *types*.  There are many ways
-to represent schema (JSON Schema, XML schema, Protobuf or Avro
-schema).  In *moo* the /oschema/ representation is one that is supported.
-The "o" stands for "object" as /oschema/ has an object representation.
-Any data or programming language which provides support for the
-concepts described here and which can provide compatible data
-structures may be used by *moo*.
+In general, a *schema system* (aka meta schema) defines ways in which we
+may define *schema*.  Each schema describes one or more *types*.  And each
+type in turn defines the allowed structure and constraints of *models*
+(aka "values").  *moo* supports a number of schema systems but the
+dominant one is /oschema/.
 
-A schema expressed as /oschema/ defines a number of *types*.  Each type is
-an instance of exactly one *schema class*.  There are a limited number
-of schema classes defined:
+#+begin_note
+The "o" stands for "object" as /oschema/ describes a type using an
+object representation.  A lesser used *moo* schema system is /fschema/
+which as you may guess uses a functional representation.
+#+end_note
+
+Many schema systems will specify a persistent representation (file
+format) for expressing a schema.  Eg, XML has XSD and JSON has JSON
+Schema (itself expressed as JSON).  *moo* /oschema/ system is defined
+in terms of a transient representation (structured data in memory).
+Thus, a large number of persistent representations may be used to
+provide /oschema/ schema.  Users may select file formats they know and
+love if they wish.  Below we will describe two (Jsonnet and Python).
+
+*moo* /oschema/ is defined conceptually starting with a fixed set of
+*schema classes* that are listed below.  A *moo* /oschema/ *type*
+(called in some parts of *moo* an /otype/) is considered an instance
+of exactly one *schema class*.  Dropping down one rung of the semantic
+ladder, a *model* (aka "value") is an instance of a *type*.
+
+The *moo* /oschema/ schema classes are:
 
 - ~boolean~ :: a type which may take value "true" or "false"
 - ~number~ :: a numeric type of given format and size
 - ~string~ :: a character string type possibly matching some pattern or format
 - ~sequence~ :: an array or vector with elements of one type
-- ~tuple~ :: (not yet)
+- ~tuple~ :: (not yet supported, but you can guess what it will be)
 - ~record~ :: a collection of named types, (eg such as a ~class~ or ~struct~)
 - ~enum~ :: a type that may take one value from a predefined, limited set of values
 - ~any~ :: a type that may take a value of any type (eg such as ~void*~, ~boost::any~, ~nlohmann::json~)
 - ~anyOf~ :: a type that may take a value of any type in a predefined, limited set of types.
 - ~namespace~ :: a collection of named types, (distinct from ~record~ to match eg C++/Python semantics)
 
-Every /oschema/ *type* then provides a set of *attributes* as determined by
-its schema class.  Some attributes are common across all schema
-classes and are required or optional:
+Every /oschema/ *type* then provides a set of *attributes* as
+determined by its schema class.  Some attributes are common across all
+schema classes and may be required or optional:
 
 - ~name~ :: (required) type name unique to the type context (see ~path~)
 
@@ -52,23 +68,25 @@ classes and are required or optional:
 - ~doc~ :: (optional, default empty) document string briefly describing the type
 
 - ~path~ :: (required, potentially empty), ordered array of names
-  representing the context of the type (eg as a C++ ~namespace~ or
-  Python module path)
+  representing the absolute context of the type (eg as a C++
+  ~namespace~ or Python module path).
 
-The types of some schema classes must *reference* one or more other
-types.  These include instances of: ~sequence~, ~record~, ~namespace~, and
-~anyOf~.  A *type reference* is represented as a /fully-qualified type name/
-(FQTN) which is formed as the period ("~.~") delimited concatenation of
-the elements of ~path~ (if any) and the ~name~.  A FQTN shall not begin
-nor end with a period and the concept of a "relative" type reference
-is not supported.
+Some *types* must *reference* one or more other types.  These include
+instances of the schema classes: ~sequence~, ~record~, ~namespace~,
+and ~anyOf~.  A *type reference* is represented as a /fully-qualified
+type name/ (FQTN) which is formed as the dot-separated concatenation
+of the elements of ~path~ (if any) and the ~name~.  A FQTN shall not
+begin nor end with a period.  As the ~path~ is absolute there is no
+concept of a "relative" type reference.
 
-Thus, every type exists at an absolutely determined location in a name
-hierarchy, and it carries this location with it as ~path~ + ~name~.
-Types that do so may reference another type by its ~path~ and ~name~.
-Of course, to resolve a reference the referred type must be available
-in order to match the type reference against possible ~path~ and
-~name~.
+Thus, every *type* exists at an absolutely determined location in a
+name hierarchy, and it carries this location with it as ~path~ +
+~name~.  Types that must reference another type do so by its ~path~
+and ~name~.  Of course, to resolve a reference the referred type must
+be available in order to match the type reference against possible
+~path~ and ~name~.  For this reason a *schema* is considered
+*complete* if every type referenced by any of the schema's types are
+also included.
 
 
 
@@ -77,9 +95,11 @@ in order to match the type reference against possible ~path~ and
   :CUSTOM_ID: Schema
   :END:
 
-This section describes how to author a schema in either the *Jsonnet* or
-*Python* language.  Too illustrate some patterns of large scale projects
-the example will factor the schema into two parts
+This section describes how to define a schema using either the
+*Jsonnet* or the *Python* programming language as a persistent
+representation.  To illustrate some of the patterns seen in real,
+large-scale projects the example will factor the schema into two
+parts:
 
 - /sys/ :: a set of types relevant to some system (eg a framework)
 - /app/ :: a set of types relevant to an application based on the system
@@ -89,8 +109,9 @@ the example will factor the schema into two parts
    :CUSTOM_ID: schema-in-jsonnet
    :END:
 
-*moo* /oschema/ may be described easily in the [[https://jsonnet.org/][Jsonnet]] language as it
-explicitly targets defining data structures.
+*moo* /oschema/ may be described easily in the
+[[https://jsonnet.org/][Jsonnet]] language as Jsonnet was designed for
+defining data structures.
 
 We start by simply presenting the ~sys~ schema:
 
@@ -116,9 +137,10 @@ various Jsonnet functions and data that will help build our /oschema/.
 local sys = moo.oschema.schema("sys");
 #+end_src
 
-This call of the ~schema()~ function of the ~moo.oschema~ object returns
-another object held by ~sys~ which will provide sort of a "schema
-factory" that operates "in" the path of ~sys~.  We see it in action:
+This call of the ~schema()~ function of the ~moo.oschema~ object
+returns another object held by the local variable ~sys~ which will
+provide sort of a "schema factory" that operates "in" the type path of
+"sys".  We see it in action:
 
 #+call: grep("Count", "examples/oschema/sys.jsonnet", 0) :wrap "src jsonnet"
 
@@ -127,8 +149,8 @@ factory" that operates "in" the path of ~sys~.  We see it in action:
 [sys.number("Count", "u4")]
 #+end_src
 
-This last line defines the data structure that is sort of the "return"
-value of the ~sys.jsonnet~ file.  That is, this file "compiles" to an
+This last line defines the data structure which is the "return" value
+of the entire ~sys.jsonnet~ file.  That is, this file "compiles" to an
 array holding a single /oschema/ type.
 
 #+begin_note
@@ -139,7 +161,7 @@ this array becomes just one element of a more complex structure called
 a *model* which we will form prior to applying to a *template*.
 #+end_note
 
-We can see how the /sys/ schema expands or compiles to its JSON
+We can see how the /sys/ schema expands or compiles to a JSON
 representation using *moo*:
 
 #+begin_src shell :exports both :results output code :wrap "src json"
@@ -171,8 +193,8 @@ The final structural form of /oschema/ (ie, the JSON above) is not
 something that a developer of a schema strictly needs to know.  *moo*
 support for Jsonnet and Python provide native language code to assist
 in building a schema without exposing all the details of the type
-object structure.  These details will need to be understood if any new
-native language support is developed.
+object structure.  But these details shall need to be understood if
+any new native language support is developed.
 #+end_note
 
 Next, we imagine an application schema with a more rich set of types:

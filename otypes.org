@@ -1,6 +1,6 @@
-#+title: Object Types
-#+subtitle: ~moo~ 無 ~otypes~
-#+setupfile: setup.org
+#+title: ~moo~ 無 /otypes/
+#+subtitle: Defining objects with ~moo~ /oschema/ types
+#+setupfile: other/setup-topic.org
 
 * Overview
 

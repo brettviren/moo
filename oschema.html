@@ -3,10 +3,10 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2020-11-12 Thu 12:58 -->
+<!-- 2020-11-25 Wed 17:15 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Schema Objects</title>
+<title><code>moo</code> 無 <code>oschema</code></title>
 <meta name="generator" content="Org mode" />
 <meta name="author" content="Brett Viren" />
 <style type="text/css">
@@ -193,17 +193,18 @@
   .org-svg { width: 90%; }
   /*]]>*/-->
 </style>
-<link rel="stylesheet" type="text/css" href="https://fniessen.github.io/org-html-themes/styles/readtheorg/css/htmlize.css"/>
-<link rel="stylesheet" type="text/css" href="https://fniessen.github.io/org-html-themes/styles/readtheorg/css/readtheorg.css"/>
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
-<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>
-<script type="text/javascript" src="https://fniessen.github.io/org-html-themes/styles/lib/js/jquery.stickytableheaders.min.js"></script>
-<script type="text/javascript" src="https://fniessen.github.io/org-html-themes/styles/readtheorg/js/readtheorg.js"></script>
+<link rel="stylesheet" type="text/css" href="other/readtheorg/css/htmlize.css"/>
+<link rel="stylesheet" type="text/css" href="other/readtheorg/css/readtheorg.css"/>
+<script type="text/javascript" src="other/lib/js/jquery.min.js"></script>
+<script type="text/javascript" src="other/lib/js/bootstrap.min.js"></script>
+<script type="text/javascript" src="other/lib/js/jquery.stickytableheaders.min.js"></script>
+<script type="text/javascript" src="other/readtheorg/js/readtheorg.js"></script>
 <style> #content{max-width:1800px;}</style>
 <style> p{max-width:800px;}</style>
 <style> li{max-width:800px;}</style>
-<style> pre.src{background-color:#333; color:white;}</style>
+<style> pre.src{border-radius: 5px; background-color:#333; color:white;}</style>
 <style> pre.example{background-color:#333; color:white;}</style>
+<style> code{border-radius: 5px; background-color:#333; color:#0f0;}</style>
 <script type="text/javascript">
 /*
 @licstart  The following is the entire license notice for the
@@ -253,9 +254,9 @@ for the JavaScript code in this tag.
 </head>
 <body>
 <div id="content">
-<h1 class="title">Schema Objects
+<h1 class="title"><code>moo</code> 無 <code>oschema</code>
 <br />
-<span class="subtitle"><code>moo</code> 無 <code>oschema</code></span>
+<span class="subtitle">Describing schema as objects</span>
 </h1>
 <div id="table-of-contents">
 <h2>Table of Contents</h2>
@@ -290,19 +291,42 @@ for the JavaScript code in this tag.
 <h2 id="concepts">Concepts</h2>
 <div class="outline-text-2" id="text-concepts">
 <p>
-In general, a <b>schema</b> describes one or more <b>types</b>.  There are many ways
-to represent schema (JSON Schema, XML schema, Protobuf or Avro
-schema).  In <b>moo</b> the <i>oschema</i> representation is one that is supported.
-The "o" stands for "object" as <i>oschema</i> has an object representation.
-Any data or programming language which provides support for the
-concepts described here and which can provide compatible data
-structures may be used by <b>moo</b>.
+In general, a <b>schema system</b> (aka meta schema) defines ways in which we
+may define <b>schema</b>.  Each schema describes one or more <b>types</b>.  And each
+type in turn defines the allowed structure and constraints of <b>models</b>
+(aka "values").  <b>moo</b> supports a number of schema systems but the
+dominant one is <i>oschema</i>.
+</p>
+
+<div class="note">
+<p>
+The "o" stands for "object" as <i>oschema</i> describes a type using an
+object representation.  A lesser used <b>moo</b> schema system is <i>fschema</i>
+which as you may guess uses a functional representation.
+</p>
+
+</div>
+
+<p>
+Many schema systems will specify a persistent representation (file
+format) for expressing a schema.  Eg, XML has XSD and JSON has JSON
+Schema (itself expressed as JSON).  <b>moo</b> <i>oschema</i> system is defined
+in terms of a transient representation (structured data in memory).
+Thus, a large number of persistent representations may be used to
+provide <i>oschema</i> schema.  Users may select file formats they know and
+love if they wish.  Below we will describe two (Jsonnet and Python).
 </p>
 
 <p>
-A schema expressed as <i>oschema</i> defines a number of <b>types</b>.  Each type is
-an instance of exactly one <b>schema class</b>.  There are a limited number
-of schema classes defined:
+<b>moo</b> <i>oschema</i> is defined conceptually starting with a fixed set of
+<b>schema classes</b> that are listed below.  A <b>moo</b> <i>oschema</i> <b>type</b>
+(called in some parts of <b>moo</b> an <i>otype</i>) is considered an instance
+of exactly one <b>schema class</b>.  Dropping down one rung of the semantic
+ladder, a <b>model</b> (aka "value") is an instance of a <b>type</b>.
+</p>
+
+<p>
+The <b>moo</b> <i>oschema</i> schema classes are:
 </p>
 
 <dl class="org-dl">
@@ -310,7 +334,7 @@ of schema classes defined:
 <dt><code>number</code></dt><dd>a numeric type of given format and size</dd>
 <dt><code>string</code></dt><dd>a character string type possibly matching some pattern or format</dd>
 <dt><code>sequence</code></dt><dd>an array or vector with elements of one type</dd>
-<dt><code>tuple</code></dt><dd>(not yet)</dd>
+<dt><code>tuple</code></dt><dd>(not yet supported, but you can guess what it will be)</dd>
 <dt><code>record</code></dt><dd>a collection of named types, (eg such as a <code>class</code> or <code>struct</code>)</dd>
 <dt><code>enum</code></dt><dd>a type that may take one value from a predefined, limited set of values</dd>
 <dt><code>any</code></dt><dd>a type that may take a value of any type (eg such as <code>void*</code>, <code>boost::any</code>, <code>nlohmann::json</code>)</dd>
@@ -319,9 +343,9 @@ of schema classes defined:
 </dl>
 
 <p>
-Every <i>oschema</i> <b>type</b> then provides a set of <b>attributes</b> as determined by
-its schema class.  Some attributes are common across all schema
-classes and are required or optional:
+Every <i>oschema</i> <b>type</b> then provides a set of <b>attributes</b> as
+determined by its schema class.  Some attributes are common across all
+schema classes and may be required or optional:
 </p>
 
 <dl class="org-dl">
@@ -332,27 +356,29 @@ classes and are required or optional:
 <dt><code>doc</code></dt><dd>(optional, default empty) document string briefly describing the type</dd>
 
 <dt><code>path</code></dt><dd>(required, potentially empty), ordered array of names
-representing the context of the type (eg as a C++ <code>namespace</code> or
-Python module path)</dd>
+representing the absolute context of the type (eg as a C++
+<code>namespace</code> or Python module path).</dd>
 </dl>
 
 <p>
-The types of some schema classes must <b>reference</b> one or more other
-types.  These include instances of: <code>sequence</code>, <code>record</code>, <code>namespace</code>, and
-<code>anyOf</code>.  A <b>type reference</b> is represented as a <i>fully-qualified type name</i>
-(FQTN) which is formed as the period ("<code>.</code>") delimited concatenation of
-the elements of <code>path</code> (if any) and the <code>name</code>.  A FQTN shall not begin
-nor end with a period and the concept of a "relative" type reference
-is not supported.
+Some <b>types</b> must <b>reference</b> one or more other types.  These include
+instances of the schema classes: <code>sequence</code>, <code>record</code>, <code>namespace</code>,
+and <code>anyOf</code>.  A <b>type reference</b> is represented as a <i>fully-qualified
+type name</i> (FQTN) which is formed as the dot-separated concatenation
+of the elements of <code>path</code> (if any) and the <code>name</code>.  A FQTN shall not
+begin nor end with a period.  As the <code>path</code> is absolute there is no
+concept of a "relative" type reference.
 </p>
 
 <p>
-Thus, every type exists at an absolutely determined location in a name
-hierarchy, and it carries this location with it as <code>path</code> + <code>name</code>.
-Types that do so may reference another type by its <code>path</code> and <code>name</code>.
-Of course, to resolve a reference the referred type must be available
-in order to match the type reference against possible <code>path</code> and
-<code>name</code>.
+Thus, every <b>type</b> exists at an absolutely determined location in a
+name hierarchy, and it carries this location with it as <code>path</code> +
+<code>name</code>.  Types that must reference another type do so by its <code>path</code>
+and <code>name</code>.  Of course, to resolve a reference the referred type must
+be available in order to match the type reference against possible
+<code>path</code> and <code>name</code>.  For this reason a <b>schema</b> is considered
+<b>complete</b> if every type referenced by any of the schema's types are
+also included.
 </p>
 </div>
 </div>
@@ -363,9 +389,11 @@ in order to match the type reference against possible <code>path</code> and
 <h2 id="Schema">Schema</h2>
 <div class="outline-text-2" id="text-Schema">
 <p>
-This section describes how to author a schema in either the <b>Jsonnet</b> or
-<b>Python</b> language.  Too illustrate some patterns of large scale projects
-the example will factor the schema into two parts
+This section describes how to define a schema using either the
+<b>Jsonnet</b> or the <b>Python</b> programming language as a persistent
+representation.  To illustrate some of the patterns seen in real,
+large-scale projects the example will factor the schema into two
+parts:
 </p>
 
 <dl class="org-dl">
@@ -378,8 +406,9 @@ the example will factor the schema into two parts
 <h3 id="schema-in-jsonnet">Jsonnet</h3>
 <div class="outline-text-3" id="text-schema-in-jsonnet">
 <p>
-<b>moo</b> <i>oschema</i> may be described easily in the <a href="https://jsonnet.org/">Jsonnet</a> language as it
-explicitly targets defining data structures.
+<b>moo</b> <i>oschema</i> may be described easily in the
+<a href="https://jsonnet.org/">Jsonnet</a> language as Jsonnet was designed for
+defining data structures.
 </p>
 
 <p>
@@ -415,9 +444,10 @@ various Jsonnet functions and data that will help build our <i>oschema</i>.
 </div>
 
 <p>
-This call of the <code>schema()</code> function of the <code>moo.oschema</code> object returns
-another object held by <code>sys</code> which will provide sort of a "schema
-factory" that operates "in" the path of <code>sys</code>.  We see it in action:
+This call of the <code>schema()</code> function of the <code>moo.oschema</code> object
+returns another object held by the local variable <code>sys</code> which will
+provide sort of a "schema factory" that operates "in" the type path of
+"sys".  We see it in action:
 </p>
 
 <div class="org-src-container">
@@ -426,8 +456,8 @@ factory" that operates "in" the path of <code>sys</code>.  We see it in action:
 </div>
 
 <p>
-This last line defines the data structure that is sort of the "return"
-value of the <code>sys.jsonnet</code> file.  That is, this file "compiles" to an
+This last line defines the data structure which is the "return" value
+of the entire <code>sys.jsonnet</code> file.  That is, this file "compiles" to an
 array holding a single <i>oschema</i> type.
 </p>
 
@@ -443,7 +473,7 @@ a <b>model</b> which we will form prior to applying to a <b>template</b>.
 </div>
 
 <p>
-We can see how the <i>sys</i> schema expands or compiles to its JSON
+We can see how the <i>sys</i> schema expands or compiles to a JSON
 representation using <b>moo</b>:
 </p>
 
@@ -480,8 +510,8 @@ The final structural form of <i>oschema</i> (ie, the JSON above) is not
 something that a developer of a schema strictly needs to know.  <b>moo</b>
 support for Jsonnet and Python provide native language code to assist
 in building a schema without exposing all the details of the type
-object structure.  These details will need to be understood if any new
-native language support is developed.
+object structure.  But these details shall need to be understood if
+any new native language support is developed.
 </p>
 
 </div>
@@ -803,9 +833,9 @@ the <i>oschema</i> type objects made in the module using a filter on
 </p>
 </div>
 
-<div id="outline-container-orgbaee121" class="outline-4">
-<h4 id="orgbaee121"><span class="todo TODO">TODO</span> call from moo.</h4>
-<div class="outline-text-4" id="text-orgbaee121">
+<div id="outline-container-org15fae0b" class="outline-4">
+<h4 id="org15fae0b"><span class="todo TODO">TODO</span> call from moo.</h4>
+<div class="outline-text-4" id="text-org15fae0b">
 <ul class="org-ul">
 <li>add an <code>import</code> based Python loader to <code>moo</code></li>
 </ul>
@@ -1309,6 +1339,31 @@ to <code>render</code> and adding the template file name.
         <span style="color: #fcaf3e;">judging</span>,
         <span style="color: #fcaf3e;">perceiving</span>,
     };
+    <span style="color: #73d216;">// </span><span style="color: #73d216;">return a string representation of a MBTI.</span>
+    <span style="color: #b4fa70;">inline</span>
+    <span style="color: #b4fa70;">const</span> <span style="color: #8cc4ff;">char</span>* <span style="color: #fce94f;">str</span>(<span style="color: #8cc4ff;">MBTI</span> <span style="color: #fcaf3e;">val</span>) {
+        <span style="color: #b4fa70;">if</span> (val == <span style="color: #e9b2e3;">MBTI</span>::introversion) { <span style="color: #b4fa70;">return</span> <span style="color: #e9b96e;">"introversion"</span> ;}
+        <span style="color: #b4fa70;">if</span> (val == <span style="color: #e9b2e3;">MBTI</span>::extroversion) { <span style="color: #b4fa70;">return</span> <span style="color: #e9b96e;">"extroversion"</span> ;}
+        <span style="color: #b4fa70;">if</span> (val == <span style="color: #e9b2e3;">MBTI</span>::sensing) { <span style="color: #b4fa70;">return</span> <span style="color: #e9b96e;">"sensing"</span> ;}
+        <span style="color: #b4fa70;">if</span> (val == <span style="color: #e9b2e3;">MBTI</span>::intuition) { <span style="color: #b4fa70;">return</span> <span style="color: #e9b96e;">"intuition"</span> ;}
+        <span style="color: #b4fa70;">if</span> (val == <span style="color: #e9b2e3;">MBTI</span>::thinking) { <span style="color: #b4fa70;">return</span> <span style="color: #e9b96e;">"thinking"</span> ;}
+        <span style="color: #b4fa70;">if</span> (val == <span style="color: #e9b2e3;">MBTI</span>::feeling) { <span style="color: #b4fa70;">return</span> <span style="color: #e9b96e;">"feeling"</span> ;}
+        <span style="color: #b4fa70;">if</span> (val == <span style="color: #e9b2e3;">MBTI</span>::judging) { <span style="color: #b4fa70;">return</span> <span style="color: #e9b96e;">"judging"</span> ;}
+        <span style="color: #b4fa70;">if</span> (val == <span style="color: #e9b2e3;">MBTI</span>::perceiving) { <span style="color: #b4fa70;">return</span> <span style="color: #e9b96e;">"perceiving"</span> ;}
+        <span style="color: #b4fa70;">return</span> <span style="color: #e9b96e;">""</span>;                  <span style="color: #73d216;">// </span><span style="color: #73d216;">should not reach</span>
+    }
+    <span style="color: #b4fa70;">inline</span>
+    <span style="color: #8cc4ff;">MBTI</span> <span style="color: #fce94f;">parse_MBTI</span>(<span style="color: #e9b2e3;">std</span>::<span style="color: #8cc4ff;">string</span> <span style="color: #fcaf3e;">val</span>, <span style="color: #8cc4ff;">MBTI</span> <span style="color: #fcaf3e;">def</span> = <span style="color: #e9b2e3;">MBTI</span>::introversion) {
+        <span style="color: #b4fa70;">if</span> (val == <span style="color: #e9b96e;">"introversion"</span>) { <span style="color: #b4fa70;">return</span> <span style="color: #e9b2e3;">MBTI</span>::introversion; }
+        <span style="color: #b4fa70;">if</span> (val == <span style="color: #e9b96e;">"extroversion"</span>) { <span style="color: #b4fa70;">return</span> <span style="color: #e9b2e3;">MBTI</span>::extroversion; }
+        <span style="color: #b4fa70;">if</span> (val == <span style="color: #e9b96e;">"sensing"</span>) { <span style="color: #b4fa70;">return</span> <span style="color: #e9b2e3;">MBTI</span>::sensing; }
+        <span style="color: #b4fa70;">if</span> (val == <span style="color: #e9b96e;">"intuition"</span>) { <span style="color: #b4fa70;">return</span> <span style="color: #e9b2e3;">MBTI</span>::intuition; }
+        <span style="color: #b4fa70;">if</span> (val == <span style="color: #e9b96e;">"thinking"</span>) { <span style="color: #b4fa70;">return</span> <span style="color: #e9b2e3;">MBTI</span>::thinking; }
+        <span style="color: #b4fa70;">if</span> (val == <span style="color: #e9b96e;">"feeling"</span>) { <span style="color: #b4fa70;">return</span> <span style="color: #e9b2e3;">MBTI</span>::feeling; }
+        <span style="color: #b4fa70;">if</span> (val == <span style="color: #e9b96e;">"judging"</span>) { <span style="color: #b4fa70;">return</span> <span style="color: #e9b2e3;">MBTI</span>::judging; }
+        <span style="color: #b4fa70;">if</span> (val == <span style="color: #e9b96e;">"perceiving"</span>) { <span style="color: #b4fa70;">return</span> <span style="color: #e9b2e3;">MBTI</span>::perceiving; }
+        <span style="color: #b4fa70;">return</span> def;
+    }
 
     <span style="color: #73d216;">// </span><span style="color: #73d216;">@brief </span>
     <span style="color: #b4fa70;">using</span> <span style="color: #8cc4ff;">Make</span> = <span style="color: #e9b2e3;">std</span>::string;
@@ -1321,6 +1376,19 @@ to <code>render</code> and adding the template file name.
         <span style="color: #fcaf3e;">boring</span>,
         <span style="color: #fcaf3e;">fun</span>,
     };
+    <span style="color: #73d216;">// </span><span style="color: #73d216;">return a string representation of a VehicleClass.</span>
+    <span style="color: #b4fa70;">inline</span>
+    <span style="color: #b4fa70;">const</span> <span style="color: #8cc4ff;">char</span>* <span style="color: #fce94f;">str</span>(<span style="color: #8cc4ff;">VehicleClass</span> <span style="color: #fcaf3e;">val</span>) {
+        <span style="color: #b4fa70;">if</span> (val == <span style="color: #e9b2e3;">VehicleClass</span>::boring) { <span style="color: #b4fa70;">return</span> <span style="color: #e9b96e;">"boring"</span> ;}
+        <span style="color: #b4fa70;">if</span> (val == <span style="color: #e9b2e3;">VehicleClass</span>::fun) { <span style="color: #b4fa70;">return</span> <span style="color: #e9b96e;">"fun"</span> ;}
+        <span style="color: #b4fa70;">return</span> <span style="color: #e9b96e;">""</span>;                  <span style="color: #73d216;">// </span><span style="color: #73d216;">should not reach</span>
+    }
+    <span style="color: #b4fa70;">inline</span>
+    <span style="color: #8cc4ff;">VehicleClass</span> <span style="color: #fce94f;">parse_VehicleClass</span>(<span style="color: #e9b2e3;">std</span>::<span style="color: #8cc4ff;">string</span> <span style="color: #fcaf3e;">val</span>, <span style="color: #8cc4ff;">VehicleClass</span> <span style="color: #fcaf3e;">def</span> = <span style="color: #e9b2e3;">VehicleClass</span>::boring) {
+        <span style="color: #b4fa70;">if</span> (val == <span style="color: #e9b96e;">"boring"</span>) { <span style="color: #b4fa70;">return</span> <span style="color: #e9b2e3;">VehicleClass</span>::boring; }
+        <span style="color: #b4fa70;">if</span> (val == <span style="color: #e9b96e;">"fun"</span>) { <span style="color: #b4fa70;">return</span> <span style="color: #e9b2e3;">VehicleClass</span>::fun; }
+        <span style="color: #b4fa70;">return</span> def;
+    }
 
     <span style="color: #73d216;">// </span><span style="color: #73d216;">@brief </span>
     <span style="color: #b4fa70;">struct</span> <span style="color: #8cc4ff;">Vehicle</span> {
@@ -1497,7 +1565,7 @@ the <code>moo.otypes</code> module.
 </div>
 <div id="postamble" class="status">
 <p class="author">Author: Brett Viren</p>
-<p class="date">Created: 2020-11-12 Thu 12:58</p>
+<p class="date">Created: 2020-11-25 Wed 17:15</p>
 <p class="validation"><a href="http://validator.w3.org/check?uri=referer">Validate</a></p>
 </div>
 </body>
