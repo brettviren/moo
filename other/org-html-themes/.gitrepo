@@ -1,0 +1,12 @@
+; DO NOT EDIT (unless you know what you are doing)
+;
+; This subdirectory is a git "subrepo", and this file is maintained by the
+; git-subrepo command. See https://github.com/git-commands/git-subrepo#readme
+;
+[subrepo]
+	remote = https://github.com/fniessen/org-html-themes
+	branch = master
+	commit = f7224a489462abc2c2174edbf7d4e82c0e276183
+	parent = bd234ee512c540eb233180a7f3bb530d8e83ac7e
+	method = merge
+	cmdver = 0.4.1
