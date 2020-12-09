@@ -138,12 +138,14 @@ def resolve(ctx, filename):
               help="JSON Schema to validate against.")
 @click.option("--sequence", default=False, is_flag=True,
               help="Assume a sequence of schema and models")
+@click.option("--passfail", default=False, is_flag=True,
+              help="Print PASS or FAIL instead of null/throw")
 @click.option('-V', '--validator', default="jsonschema",
               type=click.Choice(["jsonschema", "fastjsonschema"]),
               help="Specify which validator")
 @click.argument('model')
 @click.pass_context
-def cmd_validate(ctx, output, spath, schema, sequence, validator, model):
+def cmd_validate(ctx, output, spath, schema, sequence, passfail, validator, model):
     '''
     Validate a model against a schema
     '''
@@ -157,8 +159,16 @@ def cmd_validate(ctx, output, spath, schema, sequence, validator, model):
         assert len(data) == len(sche)
     res = list()
     for m, s in zip(data, sche):
-        one = moo.util.validate(m, s, validator)
-        res.append(one)
+        if passfail:
+            try:
+                one = moo.util.validate(m, s, validator)
+            except moo.util.ValidationError:
+                res.append("FAIL")
+            else:
+                res.append("PASS")
+        else:
+            one = moo.util.validate(m, s, validator)
+            res.append(one)
     if not sequence:
         res = res[0]
     text = json.dumps(res, indent=4)

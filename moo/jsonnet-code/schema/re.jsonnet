@@ -12,7 +12,7 @@
 
     // a slash-separated list/path like FS paths
     // fixme: this is maybe too accepting
-    hiername: '[^/\\| ]+',
+    hiername: '[a-zA-Z0-9.]([a-zA-Z0-9._+\\-])?',
     hierpath: '/?(%s/?)+' % self.hiername,
     // a dot-separated list/path list Python modules
     dotname: self.ident,
@@ -21,19 +21,17 @@
     // thing specific to zmq
     zmq: {
         tcp: {
-            // add zeromq wild card
-            host: '(\\*)|(%s)' % $.dnshost,
-            // URIs are either of the zeromq type:
-            // with zeromq wild card
-            port: '(:(\\*|[0-9]+))?',
             // zeromq tcp scheme
-            uri: 'tcp://(%s|%s)(%s)' % [self.host, $.ipv4, self.port],
+            uri: 'tcp://(%s|%s)(%s)' % [$.dnshost, $.ipv4, $.tcpport],
         },
         ipc: {
+            // http://api.zeromq.org/master:zmq-ipc
+            // this needs to be a legal OS file system path
             uri: 'ipc://' + $.hierpath,
         },
         inproc: {
-            uri: 'inproc://' + $.hiername,
+            // http://api.zeromq.org/master:zmq-inproc
+            uri: 'inproc://.{1,255}'
         },
 
         uri_list : [self.tcp.uri, self.ipc.uri, self.inproc.uri],

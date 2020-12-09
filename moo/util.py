@@ -30,6 +30,8 @@ def select_path(obj, path, delim='.'):
     return obj
 
 
+# fixme: erase type difference between the two validators!
+from jsonschema.exceptions import ValidationError
 def validate(model, schema, validator="jsonschema"):
     'Validate model against schema with validator'
     if validator == "jsonschema":
