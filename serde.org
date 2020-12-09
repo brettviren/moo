@@ -1,0 +1,25 @@
+#+title: moo 無 serde
+#+subtitle: Serialize / Deserialize
+#+setupfile: other/setup-topic.org
+
+* Overview
+
+Serialization the process by which structured data is converted to a
+linear array of bytes and deserialization is the inverse.  As they
+must work together the pair is sometimes called a serde.  A serde
+typically refers to higher level formatting of the bytes while lower
+level formatting is sometimes called encode/decode or codec.  Whatever
+the name, *moo* provides support for generating serde methods to use
+with *moo* generated types.
+
+This example will walk through how to use *moo* to provide a serde
+through JSON or MessagePack serialization using ~nlohmann::json~ (using
+labels "NLJS" and "NLMP" respectively) and a higher performance
+MessagePack using the library from https://msgpack.org (using label
+"MSGP").
+
+* Schema
+
+The example will use the schema from the [[file:oschema.org][oschema]] example.
+
+t.b.d....
