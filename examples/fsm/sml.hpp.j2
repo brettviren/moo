@@ -1,0 +1,41 @@
+/*
+ * This file is 100% generated.  Any manual edits will likely be lost.
+ *
+ * It is not a full header file and is meant to be included in a
+ * source file which provides required context.
+ */
+#include <boost/sml.hpp>
+namespace sml = boost::sml;
+
+// fixme: we define these here but eventually want to make them provided elsewhere
+
+namespace {
+// events
+{% for event in model.events %}
+    struct {{event}} {};
+{% endfor %}
+}
+
+namespace {
+// states
+{% for state in model.states %}
+    struct {{state}} {};
+{% endfor %}
+}
+
+namespace {
+// tts
+{% for tt in model.tts %}
+    struct {{tt.state}} {
+        auto operator()() const noexcept {
+            using namespace sml;
+            return make_transition_table(
+                {% for t in tt.trans %}
+                state<{{t.ini}}> + event<{{t.evt}}> [ {% for g in tt.guards %}{{ g }} && {% endfor %} ] / ({% for a in tt.actions %}{{ a }} && {%endfor%}, ) = state<{{t.fin}}>
+                {% endfor %}
+                );
+        }
+    };
+{% endfor %}
+}
+

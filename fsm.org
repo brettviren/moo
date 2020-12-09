@@ -1,0 +1,26 @@
+#+title: moo 無 fsm
+#+subtitle: Finite State Machines
+#+setupfile: other/setup-topic.org
+
+* Overview
+
+In *moo*, a Finite State Machine (FSM) is to *behavior* what schema is to
+data structure.  That is, we model some desired behavior in the usual
+terms of FSM and from that model we generate code that enacts the
+behavior.  
+
+We will first describe how to model an FSM in moo /oschema/ and then
+from such models how to use a *moo* template to generate an FSM based on
+[[https://github.com/boost-ext/sml][boost-ext/sml]] for C++ projects and how for Python projects how to use
+the model to construct an FSM based on the [[https://github.com/pytransitions/transitions][transitions]] package.
+
+* Schema
+
+As with any model in *moo* we describe an FSM with a data structure and
+that data structure adheres to a schema.  This schema is relatively
+simple and is described in *moo* [[file:oschema.org][/oschema/]] form in [[file:examples/fsm/fsm-schema.jsonnet]].
+
+
+* C++ 
+
+* Python
