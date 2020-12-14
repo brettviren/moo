@@ -4,6 +4,28 @@
 
 * Overview
 
-A general document describing how to make objects remains t.b.d.  For
-now, see the document [[https://brettviren.github.io/dune-daq-repl/ddcmd.html][DUNE DAQ Command Object Creation]] which describes
-~moo.otypes~ in the context of one particular application.
+*moo* /otypes/ is way to produce instances of /oschema/ types following a
+valid-by-construction pattern.  In general, /otypes/ are native language
+types (eg those of Python) which derive from /oschema/.  In the [[file:oschema.org][oschema]]
+document we saw some basic use of the /otypes/ pattern in codegen from
+the C++ ~structs.hpp.j2~ and ~nljs.hpp.j2~ templates.  Starting from a
+codegen'ed C++ ~struct~ we are largely guaranteed to produce a valid (at
+some level) JSON object after serialization.
+
+However, not all constraints given in schema is applied in these
+templates.  For example, the ~number~ schema class may have value range
+constraints and the ~string~ class may have pattern constraints set in
+the schema.  As of this writing, the C++ struct codegen does not apply
+them.
+
+The rest of this document describes the use of the ~moo.otypes~ Python
+module to provide the /otypes/ pattern to that language.   
+
+#+begin_info
+See also [[https://brettviren.github.io/dune-daq-repl/ddcmd.html][DUNE DAQ Command Object Creation]] which describes ~moo.otypes~
+in the context of one particular application.
+#+end_info
+
+* How it works
+
+* Example

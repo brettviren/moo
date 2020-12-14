@@ -171,7 +171,9 @@ See links below for documentation which provides various examples.
 
   - [[file:oschema.org][moo object schema paradigm]] how to define schema and use it to validate models, apply models to templates
 
-  - [[file:otypes.org][moo object types]] way to create valid models
+  - [[file:otypes.org][moo object types]] way to create valid-by-construction objects in Python
+
+  - [[file:ovalid.org][moo object validation]] to strongly check if existing objects are valid against moo schema.
 
   - [[file:buildsys.org][moo and build systems]] how to integrate *moo* codegen into various build systems
 

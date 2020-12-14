@@ -1,0 +1,4 @@
+#+title: ~moo~ 無 /ovalid/
+#+subtitle: Validating objects with ~moo~ /oschema/ types
+#+setupfile: other/setup-topic.org
+
