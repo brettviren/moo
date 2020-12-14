@@ -8,12 +8,12 @@ local select(obj, keys) = {
 
 {
     dtypes: {
-        i8: { type:"integer", maximum: 2^63-1, minimum: -2^63 },
-        i4: { type:"integer", maximum: 2^31-1, minimum: -2^31 },
-        i2: { type:"integer", maximum: 2^1-1, minimum: -2^15 },
-        u8: { type:"integer", minimum: 0, maximum: 2^64-1 },
-        u4: { type:"integer", minimum: 0, maximum: 2^32-1 },
-        u2: { type:"integer", minimum: 0, maximum: 2^16-1 },
+        i8: { type:"integer", maximum: std.pow(2,63)-1, minimum: -std.pow(2,63) },
+        i4: { type:"integer", maximum: std.pow(2,31)-1, minimum: -std.pow(2,31) },
+        i2: { type:"integer", maximum: std.pow(2,15)-1, minimum: -std.pow(2,15) },
+        u8: { type:"integer", minimum: 0, maximum: std.pow(2,64)-1 },
+        u4: { type:"integer", minimum: 0, maximum: std.pow(2,32)-1 },
+        u2: { type:"integer", minimum: 0, maximum: std.pow(2,16)-1 },
         f4: { type:"number" },
         f8: { type:"number" },
     },
@@ -24,9 +24,15 @@ local select(obj, keys) = {
 
     string(s) :: { type: "string" } + select(s, ["format","pattern"]),
 
-    ref(t) :: "#/" + std.join("/", std.split(t, ".")),
+    lastdot(t) :: {
+        local a = std.split(t, "."),
+        res: a[std.length(a)-1],
+    }.res,
 
-    sequence(s) :: { type: "array", items: $.ref(s.items)},
+    ref(t) :: "#/definitions/" + std.join("/", std.split(t, ".")),
+    //ref(t) :: "#/definitions/" + self.lastdot(t),
+
+    sequence(s) :: { type: "array", items: {"$ref": $.ref(s.items)}},
 
     field(f) :: { "$ref": $.ref(f.item) },
 
@@ -59,5 +65,6 @@ local select(obj, keys) = {
         "$schema": "http://json-schema.org/draft-07/schema#",
         definitions: std.foldl(function(p,t) std.mergePatch(p, $.place(t,t.path)),
                                types, {}),
+        //definitions: {[t.name]:$.type(t) for t in types},
     },
 }
