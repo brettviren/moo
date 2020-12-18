@@ -1,0 +1,112 @@
+{% import 'ocpp.hpp.j2' as cppm %}
+/*
+ * This file is 100% generated.  Any manual edits will likely be lost.
+ *
+ * This contains functions struct and other type definitions for schema in
+ * {{cppm.ns(model)}} to be serialized via MsgPack.
+ */
+{% set tcname = "MsgPack" %}
+#ifndef {{cppm.headerguard(model, tcname)}}
+#define {{cppm.headerguard(model, tcname)}}
+
+// My structs
+{% if model.ctxpath %}
+#include "{{ model.path|relpath(model.ctxpath)|join("/") }}/Structs.hpp"
+{% else %}
+#include "Structs.hpp"
+{% endif %}
+
+{% if model.extrefs %}
+// {{tcname}} for externally referenced schema
+{% endif %}
+{% for ep in model.extrefs %}
+{% if ep %}
+#include "{{ep|listify|join("/")}}/{{tcname}}.hpp"
+{% else %}
+#include "{{tcname}}.hpp"
+{% endif %}
+{% endfor %}
+
+{% if model.byscn.any %}
+// We have ANY types so need to include NLJS serialization
+{% if model.ctxpath %}
+#include "{{ model.path|relpath(model.ctxpath)|join("/") }}/Nljs.hpp"
+{% else %}
+#include "Nljs.hpp"
+{% endif %}
+{% endif %}
+
+#include <msgpack.hpp>
+
+{% for fqn in model.byscn.enum %}
+MSGPACK_ADD_ENUM({{fqn|replace(".","::")}})
+{% endfor %}
+
+// MsgPack serialization/deserialization functions
+namespace msgpack {
+MSGPACK_API_VERSION_NAMESPACE(MSGPACK_DEFAULT_API_NS) {
+namespace adaptor {
+
+{% for fqn in model.byscn.any %}
+{% set a = model.byref[fqn] %}
+{% set fqncpp = fqn|listify|join("::") %}
+// {{tcname}} serialization for ANY type:
+// {{fqncpp}}
+template<>
+struct convert<{{fqncpp}}> {
+    msgpack::object const& operator()(msgpack::object const& o, {{fqncpp}}& v) const {
+        if (o.type != msgpack::type::ARRAY) throw msgpack::type_error();
+        if (o.via.array.size != 1) throw msgpack::type_error();
+        v={{fqncpp}}::parse(o.via.array.ptr[0].as<std::string>());
+        return o;
+    }
+};
+template<>
+struct pack<{{fqncpp}}> {
+    template <typename Stream>
+    packer<Stream>& operator()(msgpack::packer<Stream>& o, {{fqncpp}} const& v) const {
+        // packing member variables as an array.
+        o.pack_array(1);
+        o.pack(v.dump());
+        return o;
+    }
+};
+
+{% endfor %}
+
+{% for fqn in model.byscn.record %}
+{% set r = model.byref[fqn] %}
+{% set fqncpp = fqn|listify|join("::") %}
+// {{tcname}} serialization for RECORD type:
+// {{fqncpp}}
+template<>
+struct convert<{{fqncpp}}> {
+    msgpack::object const& operator()(msgpack::object const& o, {{fqncpp}}& v) const {
+        if (o.type != msgpack::type::ARRAY) throw msgpack::type_error();
+        if (o.via.array.size != {{ r.fields|length }}) throw msgpack::type_error();
+        {% for f in r.fields %}
+        v.{{f.name}} = o.via.array.ptr[{{loop.index0}}].as<{{f.item|replace(".","::")}}>();
+        {% endfor %}
+        return o;
+    }
+};
+template<>
+struct pack<{{fqncpp}}> {
+    template <typename Stream>
+    packer<Stream>& operator()(msgpack::packer<Stream>& o, {{fqncpp}} const& v) const {
+        // packing member variables as an array.
+        o.pack_array({{ r.fields|length }});
+        {% for f in r.fields %}
+        o.pack(v.{{ f.name }});
+        {% endfor %}
+        return o;
+    }
+};
+
+{% endfor %}
+
+} // namespace adaptor
+} // MSGPACK_API_VERSION_NAMESPACE(MSGPACK_DEFAULT_API_NS)
+} // namespace msgpack
+
+#endif // {{cppm.headerguard(model, tcname)}}
