@@ -36,8 +36,6 @@ local isr(x,r) = if std.type(x) != "null" then r;
     prepath(p, delim=".") :: 
     if std.length(p) == 0 then "" else std.join(delim, p) + delim,
 
-
-
     /// Form a fully qualified type name
     fqn(type) :: std.join(".", type.path + [type.name]),
 
@@ -51,8 +49,10 @@ local isr(x,r) = if std.type(x) != "null" then r;
     // Place types into their path/name hierachy
     hier(types) :: std.foldl(function(p,t) std.mergePatch(p,$.place(t,t.path)), types, {}),
 
-    class_names: ["boolean", "string", "number", "sequence",
-                  "record", "enum", "any", "anyOf", "namespace"],
+    class_names: ["boolean", "string", "number", "enum", // scalars
+                  "sequence", "record", "assoc",         // collections
+                  "any", "anyOf", "allOf", "oneOf",      // unions
+                  "namespace"],                          // quasi-supported
 
     schema(ctx=[]) :: {
         local namepath = $.listify(ctx),
@@ -127,10 +127,28 @@ local isr(x,r) = if std.type(x) != "null" then r;
             symbols: symbols,
         },
 
-        // This may translate into, eg boost::any or nlohmann::json
+        // An associative maps an instance of a key type to an
+        // instance of a val type.  It is like a C++ std::map, a
+        // Python dict, a Scheme associative array, etc.
+        //
+        // Caveat: At the schema level there is no statement about the
+        // ability to form a hash from the key type but this is
+        // typically a requirement on the key type for a programming
+        // language.  Thus, a valid moo oschema type for the key type
+        // may not be a valid type in a target language!
+        assoc(name, keytype, valtype, default=null, doc=null)
+        :: self.type(name, "assoc", doc) {
+            key: keytype,
+            val: valtype,
+            [isr(default, "default")]: default
+        },
+
+        // An "any" type can be any type.  This may translate into, eg
+        // boost::any or nlohmann::json or void*.
         any(name, doc=null) :: self.type(name, "any", doc),
 
-        // parameterize across {any,all,one}Of
+        // The *Of types have a common meta schema and this function
+        // parameterize across them.
         xxxOf(sname, name, types, doc=null)
         :: self.type(name, sname, doc, [$.fqn(t) for t in types]) {
             types: self.deps,
