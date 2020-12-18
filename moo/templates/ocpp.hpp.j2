@@ -20,7 +20,11 @@ struct {{t.name}} {
 using {{t.name}} = {{model.lang.types.string}};
 {%- endmacro -%}
 {% macro declare_number(model, t) %}
+{% if t.dtype[0] == "u" %}
+using {{t.name}} = {{model.lang.dtypes[t.dtype]}}; // NOLINT
+{% else %}
 using {{t.name}} = {{model.lang.dtypes[t.dtype]}};
+{% endif %}
 {%- endmacro -%}
 {% macro declare_any(model, t) %}
 using {{t.name}} = {{model.lang.types.any}};
