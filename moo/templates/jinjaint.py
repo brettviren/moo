@@ -2,7 +2,7 @@ import os
 from jinja2 import meta, Environment, FileSystemLoader
 
 from . import cpp
-from .util import find_type
+from .util import find_type, listify, relpath
 
 styles = dict(
     normal=dict(),
@@ -31,6 +31,8 @@ def make_env(path):
                       lstrip_blocks=True,
                       extensions=['jinja2.ext.do', 'jinja2.ext.loopcontrols'],
                       **get_style(path))
+    env.filters["listify"] = listify
+    env.filters["relpath"] = relpath
     env.globals.update(find_type=find_type,
                        cpp=cpp)
     return env
