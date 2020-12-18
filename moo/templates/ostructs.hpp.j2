@@ -11,7 +11,7 @@
 
 #include <cstdint>
 {% for ep in model.extrefs %}
-#include "{{ep}}/{{tcname}}.hpp"
+#include "{{ep|listify|relpath(model.extpath)|join("/")}}/{{tcname}}.hpp"
 {% endfor %}
 
 {% for schema, typeref in model.byscn.items() %}
