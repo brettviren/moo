@@ -9,16 +9,22 @@
 #ifndef {{cppm.headerguard(model, tcname)}}
 #define {{cppm.headerguard(model, tcname)}}
 
-
-{% set reldir = model.relpath|replace(".","/") %}
-{% if reldir %}
-#include "{{reldir}}/Structs.hpp"
+// My structs
+{% if model.ctxpath %}
+#include "{{ model.path|relpath(model.ctxpath)|join("/") }}/Structs.hpp"
 {% else %}
 #include "Structs.hpp"
 {% endif %}
 
+{% if model.extrefs %}
+// {{tcname}} for externally referenced schema
+{% endif %}
 {% for ep in model.extrefs %}
-#include "{{ep}}/{{tcname}}.hpp"
+{% if ep %}
+#include "{{ep|listify|join("/")}}/{{tcname}}.hpp"
+{% else %}
+#include "{{tcname}}.hpp"
+{% endif %}
 {% endfor %}
 
 #include <nlohmann/json.hpp>
@@ -27,9 +33,9 @@
 
     using data_t = nlohmann::json;
 
-    {% for fqn in model.byscn.enum %}
-    {% set e = model.byref[fqn] %}
-    {% set n = fqn.replace(model.nspre,"") %}
+    {%- for fqn in model.byscn.enum -%}
+    {%- set e = model.byref[fqn] -%}
+    {% set n = fqn|listify|relpath(model.path)|join("::") %}
     NLOHMANN_JSON_SERIALIZE_ENUM( {{n}}, {
             {% for sname in e.symbols %}
             { {{"::".join(model.path)}}::{{n}}::{{sname}}, "{{sname}}" },
@@ -39,7 +45,7 @@
 
     {% for fqn in model.byscn.record %}    
     {% set r = model.byref[fqn] %}
-    {% set n = fqn.replace(model.nspre,"") %}
+    {% set n = fqn|listify|relpath(model.path)|join("::") %}
     inline void to_json(data_t& j, const {{n}}& obj) {
         {% for b in r.fields if b.name.startswith("_base_") %}
         to_json(j, (const {{b.type}}&)obj);
@@ -64,8 +70,6 @@
     }
     {% endfor %}
     
-    // fixme: add support for MessagePack serializers (at least)
-
 } // {{ cppm.ns(model) }}
 
 #endif // {{cppm.headerguard(model, tcname)}}
