@@ -43,8 +43,12 @@ local select(obj, keys) = {
     // note, enum need not be string type but here we force it
     enum(e) :: { type: "string", enum: e.symbols },
 
+    // JSON Schema doesn't have a pure "any" type but an "empty"
+    // schema is effectively equivalent.
+    any(a) :: {},
+
     // Boolean combos
-    xxxOf(of, a) :: { [of] : [$.ref(t) for t in a.types] },
+    xxxOf(of, a) :: { [of] : [{"$ref":$.ref(t)} for t in a.types] },
     anyOf(a) :: self.xxxOf("anyOf", a),
     allOf(a) :: self.xxxOf("allOf", a),
     oneOf(a) :: self.xxxOf("oneOf", a),
