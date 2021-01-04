@@ -18,12 +18,13 @@ def listify(thing, delim="."):
 
 
 def relpath(longpath, starting):
-    'Remove starting from start of longpath'
+    'Remove as much of starting from start of longpath as can before diverging'
     if not starting:
         return longpath
     longpath = listify(longpath)
     starting = listify(starting)
     if longpath[0] != starting[0]:
-        err = f'paths do not share common prefix: f{longpath} / f{starting}'
-        raise ValueError(err)
+        # err = f'paths do not share common prefix: f{longpath} / f{starting}'
+        # raise ValueError(err)
+        return longpath
     return relpath(longpath[1:], starting[1:])

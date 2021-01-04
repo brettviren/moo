@@ -12,7 +12,7 @@ struct {{t.name}} {
     {% for f in t.fields %}
 
     // @brief {{f.doc}}
-    {{f.item|replace(model.nspre,"")|replace(".","::")}} {{f.name}} = {{cpp.field_default(model.all_types, f)}};
+    {{f.item|listify|relpath(model.path)|join("::")}} {{f.name}} = {{cpp.field_default(model.all_types, f)}};
     {% endfor %}
 };
 {%- endmacro -%}

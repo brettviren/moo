@@ -64,10 +64,8 @@
 }
 
 @test "multi element path and omodel" {
-    res=$(moo -M examples/oschema -A os='app.jsonnet' -A path='a.b.app' -A ctxpath='a.b' compile omodel.jsonnet)
-    [ "$(echo $res | jq '.nspre')" = '"a.b.app."' ]
-    [ "$(echo $res | jq '.ctxpre')" = '"a.b."' ]
-    [ "$(echo $res | jq '.relpath')" = '"app"' ]
+    run moo -M examples/oschema -A os='app.jsonnet' -A path='a.b.app' -A ctxpath='a.b' compile omodel.jsonnet
+    echo "$output"
 }
 
 @test "moo validate anys" {
