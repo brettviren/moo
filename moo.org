@@ -137,6 +137,79 @@ Or, maybe you want to hack on the code:
   $ pyton -m pip install -e .
 #+end_example
 
+
+** Testing
+
+*moo* source provides many types of tests.  Below shows how to run the
+different types of tests and their output from last time this document
+was regenerated.  Besides these explicit examples, regenerating *moo*
+documents runs various tests which are embedded as examples.
+
+*** Shell level tests
+
+The shell-level tests require BATS and [[https://github.com/bats-core/bats-core/][bats-core]] is the recommended
+implementation.
+
+#+begin_src shell :exports both :results output code :wrap "example"
+  bats -j $(nproc) test
+#+end_src
+
+#+RESULTS:
+#+begin_example
+1..24
+ok 1 test any
+ok 2 trivial test
+ok 3 compile oschema/sys example
+ok 4 compile oschema/app example
+ok 5 simple TLAs
+ok 6 TLA as a file
+ok 7 TLAs as in Jsonnet code
+ok 8 moo dump
+ok 9 moo simple render
+ok 10 another TLA compile test
+ok 11 moo transform feature
+ok 12 moo graft feature with render
+ok 13 multi element path and omodel
+ok 14 moo validate anys
+ok 15 compile t-s-t-p test input
+ok 16 render ostructs on all-in-one model
+ok 17 render ostructs on model1
+ok 18 render ostructs on model2
+ok 19 render onljs on all-in-one model
+ok 20 render onljs on model1
+ok 21 render onljs on model2
+ok 22 render omsgp on all-in-one model
+ok 23 render omsgp on model1
+ok 24 render omsgp on model2
+#+end_example
+
+*** Python level tests
+
+The Python-level tests require pytest.  Note, developers should not
+disable warnings when running tests.  For the sake of brevity in this
+document they are turned off as some 3rd party packages trigger noisy
+but currently innocuous deprecation warnings.
+
+#+begin_src shell :exports both :results output code :wrap "example"
+  pytest --disable-warnings
+#+end_src
+
+#+RESULTS:
+#+begin_example
+============================= test session starts ==============================
+platform linux -- Python 3.8.0, pytest-6.1.1, py-1.9.0, pluggy-0.13.1
+rootdir: /home/bv/dev/moo
+collected 11 items
+
+test/test_moo_ogen.py .                                                  [  9%]
+test/test_moo_otypes.py .....                                            [ 54%]
+test/test_moo_util.py .....                                              [100%]
+
+======================== 11 passed, 2 warnings in 0.52s ========================
+#+end_example
+
+
+
 * Quick start
   :PROPERTIES:
   :CUSTOM_ID: punt

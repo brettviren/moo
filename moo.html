@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2020-11-25 Wed 16:25 -->
+<!-- 2021-01-06 Wed 13:00 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>moo 無 Model Oriented Objects</title>
@@ -199,6 +199,12 @@
 <script type="text/javascript" src="other/lib/js/bootstrap.min.js"></script>
 <script type="text/javascript" src="other/lib/js/jquery.stickytableheaders.min.js"></script>
 <script type="text/javascript" src="other/readtheorg/js/readtheorg.js"></script>
+<style> #content{max-width:1800px;}</style>
+<style> p{max-width:800px;}</style>
+<style> li{max-width:800px;}</style>
+<style> pre.src{border-radius: 5px; background-color:#333; color:#0f0;}</style>
+<style> pre.example{border-radius: 5px; background-color:#333; color:#0f0;}</style>
+<style> code{border-radius: 5px; background-color:#333; color:#0f0;}</style>
 <script type="text/javascript">
 /*
 @licstart  The following is the entire license notice for the
@@ -255,18 +261,19 @@ for the JavaScript code in this tag.
 <ul>
 <li><a href="#overview">Overview</a>
 <ul>
-<li><a href="#orgc323da6">Taxonomy</a></li>
-<li><a href="#orgf08c7ea">Operations</a></li>
-<li><a href="#org80dab3a">Uses</a></li>
+<li><a href="#org35b1260">Taxonomy</a></li>
+<li><a href="#org23959c1">Operations</a></li>
+<li><a href="#org5997286">Uses</a></li>
 </ul>
 </li>
 <li><a href="#version">Version</a></li>
-<li><a href="#orgacdde2e">License</a></li>
+<li><a href="#orgcd59dcb">License</a></li>
 <li><a href="#install">Installation</a>
 <ul>
 <li><a href="#python-env">Python environment</a></li>
 <li><a href="#install-rel">Install a release</a></li>
 <li><a href="#install-dev">Install development</a></li>
+<li><a href="#org363b27f">Testing</a></li>
 </ul>
 </li>
 <li><a href="#punt">Quick start</a></li>
@@ -293,9 +300,9 @@ for the JavaScript code in this tag.
 </p>
 </div>
 
-<div id="outline-container-orgc323da6" class="outline-3">
-<h3 id="orgc323da6">Taxonomy</h3>
-<div class="outline-text-3" id="text-orgc323da6">
+<div id="outline-container-org35b1260" class="outline-3">
+<h3 id="org35b1260">Taxonomy</h3>
+<div class="outline-text-3" id="text-org35b1260">
 <p>
 <b>moo</b> defines a conceptual taxonmy
 </p>
@@ -312,9 +319,9 @@ for the JavaScript code in this tag.
 </div>
 </div>
 
-<div id="outline-container-orgf08c7ea" class="outline-3">
-<h3 id="orgf08c7ea">Operations</h3>
-<div class="outline-text-3" id="text-orgf08c7ea">
+<div id="outline-container-org23959c1" class="outline-3">
+<h3 id="org23959c1">Operations</h3>
+<div class="outline-text-3" id="text-org23959c1">
 <p>
 <b>moo</b> may operate on instances of the <b>moo</b> taxonomy in various ways
 </p>
@@ -328,9 +335,9 @@ for the JavaScript code in this tag.
 </div>
 </div>
 
-<div id="outline-container-org80dab3a" class="outline-3">
-<h3 id="org80dab3a">Uses</h3>
-<div class="outline-text-3" id="text-org80dab3a">
+<div id="outline-container-org5997286" class="outline-3">
+<h3 id="org5997286">Uses</h3>
+<div class="outline-text-3" id="text-org5997286">
 <p>
 <b>moo</b> can be used for many things
 </p>
@@ -369,9 +376,9 @@ definitive version.
 </div>
 </div>
 
-<div id="outline-container-orgacdde2e" class="outline-2">
-<h2 id="orgacdde2e">License</h2>
-<div class="outline-text-2" id="text-orgacdde2e">
+<div id="outline-container-orgcd59dcb" class="outline-2">
+<h2 id="orgcd59dcb">License</h2>
+<div class="outline-text-2" id="text-orgcd59dcb">
 <p>
 <b>moo</b> is free software and may be used under the terms described in file
 <a href="COPYING">COPYING</a>.  These terms explicitly do NOT extend to any of your own
@@ -403,9 +410,9 @@ Python environment is to assure that.  Some suggestions:
 </p>
 </div>
 
-<div id="outline-container-org843ff36" class="outline-4">
-<h4 id="org843ff36">Python3 built in virtual environment</h4>
-<div class="outline-text-4" id="text-org843ff36">
+<div id="outline-container-org91c911b" class="outline-4">
+<h4 id="org91c911b">Python3 built in virtual environment</h4>
+<div class="outline-text-4" id="text-org91c911b">
 <pre class="example">
 $ python3 -m venv venv
 $ source venv/bin/activiate
@@ -413,9 +420,9 @@ $ source venv/bin/activiate
 </div>
 </div>
 
-<div id="outline-container-org8946723" class="outline-4">
-<h4 id="org8946723">Direnv</h4>
-<div class="outline-text-4" id="text-org8946723">
+<div id="outline-container-orgd77677d" class="outline-4">
+<h4 id="orgd77677d">Direnv</h4>
+<div class="outline-text-4" id="text-orgd77677d">
 <p>
 Install <code>direnv</code> and activate it in your shell, then:
 </p>
@@ -476,7 +483,95 @@ $ pyton -m pip install -e .
 </pre>
 </div>
 </div>
+
+
+<div id="outline-container-org363b27f" class="outline-3">
+<h3 id="org363b27f">Testing</h3>
+<div class="outline-text-3" id="text-org363b27f">
+<p>
+<b>moo</b> source provides many types of tests.  Below shows how to run the
+different types of tests and their output from last time this document
+was regenerated.  Besides these explicit examples, regenerating <b>moo</b>
+documents runs various tests which are embedded as examples.
+</p>
 </div>
+
+<div id="outline-container-org1a30cb8" class="outline-4">
+<h4 id="org1a30cb8">Shell level tests</h4>
+<div class="outline-text-4" id="text-org1a30cb8">
+<p>
+The shell-level tests require BATS and <a href="https://github.com/bats-core/bats-core/">bats-core</a> is the recommended
+implementation.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-shell">bats -j $(<span style="color: #fa8072;">nproc</span>) <span style="color: #e090d7;">test</span>
+</pre>
+</div>
+
+<pre class="example">
+1..24
+ok 1 test any
+ok 2 trivial test
+ok 3 compile oschema/sys example
+ok 4 compile oschema/app example
+ok 5 simple TLAs
+ok 6 TLA as a file
+ok 7 TLAs as in Jsonnet code
+ok 8 moo dump
+ok 9 moo simple render
+ok 10 another TLA compile test
+ok 11 moo transform feature
+ok 12 moo graft feature with render
+ok 13 multi element path and omodel
+ok 14 moo validate anys
+ok 15 compile t-s-t-p test input
+ok 16 render ostructs on all-in-one model
+ok 17 render ostructs on model1
+ok 18 render ostructs on model2
+ok 19 render onljs on all-in-one model
+ok 20 render onljs on model1
+ok 21 render onljs on model2
+ok 22 render omsgp on all-in-one model
+ok 23 render omsgp on model1
+ok 24 render omsgp on model2
+</pre>
+</div>
+</div>
+
+<div id="outline-container-orgf3cb8ea" class="outline-4">
+<h4 id="orgf3cb8ea">Python level tests</h4>
+<div class="outline-text-4" id="text-orgf3cb8ea">
+<p>
+The Python-level tests require pytest.  Note, developers should not
+disable warnings when running tests.  For the sake of brevity in this
+document they are turned off as some 3rd party packages trigger noisy
+but currently innocuous deprecation warnings.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-shell">pytest --disable-warnings
+</pre>
+</div>
+
+<pre class="example">
+============================= test session starts ==============================
+platform linux -- Python 3.8.0, pytest-6.1.1, py-1.9.0, pluggy-0.13.1
+rootdir: /home/bv/dev/moo
+collected 11 items
+
+test/test_moo_ogen.py .                                                  [  9%]
+test/test_moo_otypes.py .....                                            [ 54%]
+test/test_moo_util.py .....                                              [100%]
+
+======================== 11 passed, 2 warnings in 0.53s ========================
+</pre>
+</div>
+</div>
+</div>
+</div>
+
+
 
 <div id="outline-container-punt" class="outline-2">
 <h2 id="punt">Quick start</h2>
@@ -514,7 +609,9 @@ See links below for documentation which provides various examples.
 
 <li><a href="oschema.html">moo object schema paradigm</a> how to define schema and use it to validate models, apply models to templates</li>
 
-<li><a href="otypes.html">moo object types</a> way to create valid models</li>
+<li><a href="otypes.html">moo object types</a> way to create valid-by-construction objects in Python</li>
+
+<li><a href="ovalid.html">moo object validation</a> to strongly check if existing objects are valid against moo schema.</li>
 
 <li><a href="buildsys.html">moo and build systems</a> how to integrate <b>moo</b> codegen into various build systems</li>
 
@@ -594,7 +691,7 @@ generation that effort gains multiplicative power.</dd>
 </div>
 <div id="postamble" class="status">
 <p class="author">Author: Brett Viren</p>
-<p class="date">Created: 2020-11-25 Wed 16:25</p>
+<p class="date">Created: 2021-01-06 Wed 13:00</p>
 <p class="validation"><a href="http://validator.w3.org/check?uri=referer">Validate</a></p>
 </div>
 </body>

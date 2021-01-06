@@ -4,28 +4,284 @@
 
 * Overview
 
-*moo* /otypes/ is way to produce instances of /oschema/ types following a
-valid-by-construction pattern.  In general, /otypes/ are native language
-types (eg those of Python) which derive from /oschema/.  In the [[file:oschema.org][oschema]]
-document we saw some basic use of the /otypes/ pattern in codegen from
-the C++ ~structs.hpp.j2~ and ~nljs.hpp.j2~ templates.  Starting from a
-codegen'ed C++ ~struct~ we are largely guaranteed to produce a valid (at
-some level) JSON object after serialization.
+*moo* /otypes/ is way to produce instances of /oschema/ types that tries to
+follow a /valid-by-construction/ pattern.  In general, /otypes/ are native
+language types (eg those of Python) which derive from /oschema/ schema
+data structures.  
 
-However, not all constraints given in schema is applied in these
-templates.  For example, the ~number~ schema class may have value range
-constraints and the ~string~ class may have pattern constraints set in
-the schema.  As of this writing, the C++ struct codegen does not apply
-them.
+For example, in the [[file:oschema.org][oschema]] document we saw some basic use of the
+general /otypes/ pattern applied as C++ codegen in the ~structs.hpp.j2~
+and ~nljs.hpp.j2~ templates.  When instantiating a codegen'ed C++ ~struct~
+we have some immediate validity guarantees.  They may then
+automatically transfer to a JSON object that may be derived from the
+C++ ~struct~.
 
-The rest of this document describes the use of the ~moo.otypes~ Python
-module to provide the /otypes/ pattern to that language.   
+The rest of this document describes how *moo* applies the /otypes/ pattern
+in Python.  With the use of the ~moo.otypes~ Python module, user code
+may access Python classes corresponding to /oschema/ types and in
+instantiating them as Python objects gain some /valid-by-construction/
+guarantees.
 
 #+begin_info
 See also [[https://brettviren.github.io/dune-daq-repl/ddcmd.html][DUNE DAQ Command Object Creation]] which describes ~moo.otypes~
 in the context of one particular application.
 #+end_info
 
-* How it works
+* Usage
 
-* Example
+The ~moo.otypes~ module provides high level functions to construct types
+from /oschema/.  They make use of lower-level Python metaprogramming for
+the actual type construction which is also in this module.
+
+** Individual type construction
+
+We may make an individual type from /oschema/ data structure which is
+expressed as keyword arguments to the ~moo.otypes.make_type()~ function.
+For example:
+
+#+begin_src python :exports both :results output
+  import moo.otypes
+  Age = moo.otypes.make_type(
+      name="Age", doc="An age in years",
+      schema="number", dtype='i4', path='a.b')
+  myage = Age(42)  # my forever age
+  print(f'{Age}, {myage}, {myage.pod()}')
+  import a.b
+  myage2 = Age(18)
+  print(f'{a.b.Age}, {myage2}, {myage2.pod()}')
+
+#+end_src
+
+#+RESULTS:
+: <class 'a.b.Age'>, <number Age: 42>, 42
+: <class 'a.b.Age'>, <number Age: 18>, 18
+
+#+begin_note
+The ~moo.otypes.make_type()~ directly returns a Python type object (aka
+Python class) and it "places" the type object into the module tree
+given the schema structure's ~.path~ attribute.  
+#+end_note
+
+We may try to use our otype with invalid data:
+
+#+begin_example
+  myage = Age("older than the hills")
+#+end_example
+
+Which will return an error like:
+
+#+begin_example
+Traceback (most recent call last):
+  File "<stdin>", line 8, in <module>
+  File "<number Age>", line 13, in __init__
+  File "/home/bv/dev/moo/moo/otypes.py", line 485, in update
+    self._value = numpy.array(val, dtype)
+ValueError: invalid literal for int() with base 10: 'older than the hills'
+#+end_example
+
+This error illustrates how the /valid-by-construction/ pattern works.
+It's not that magic is performed and the data is miraculously valid.
+Rather, we the developer are immediately punished if we attempt to
+violate the schema.  
+
+#+begin_note
+We may also produce an object from these (or more generic) types and
+validate that object against schema.  It is important to know that the
+constraints asserted by these two validation procedures are somewhat
+disjoint.  As ~moo.otypes~ matures it may gain more rigor, but for now
+the JSON Schema based validation on a final object will catch mistakes
+that ~moo.otypes~ will miss during object construction.
+#+end_note
+
+** Schema structure array 
+
+Creation of a /system of related types/ is done with an array of data
+structures describing its schema and the Python types are constructed
+with the plural function ~moo.otypes.make_types()~.  For example:
+
+#+begin_src python :exports both :results output
+  import moo.otypes
+  schema = [dict(name="Pet", schema="enum",
+                 symbols=["cat", "dog", "early personal computer"],
+                 default="cat",
+                 path="my.home.office",
+                 doc="A kind of pet"),
+            dict(name="Desk", schema="record",
+                 fields=[
+                     dict(name="ontop", item="my.home.office.Pet"),
+                 ],
+                 path="my.home.office",
+                 doc="Model my desk")]
+  moo.otypes.make_types(schema)
+
+  from my.home.office import Desk, Pet
+  desk = Desk(ontop="cat")
+  print(f'{Desk}, {desk}, {desk.pod()}, {desk.ontop}')
+#+end_src
+
+#+RESULTS:
+: <class 'my.home.office.Desk'>, <record Desk, fields: {ontop}>, {'ontop': 'cat'}, cat
+
+#+begin_note
+The schema structure array is assumed to be sorted in topological
+order of type dependencies.  Here, this is implicitly assured by how
+the ~schema~ array is formed.  In more complex code one may rely on
+~moo.oschema.toposort()~ to produce a sorted schema array.
+#+end_note
+
+** Load types from file
+
+The highest layer function is ~moo.otypes.load_types()~.  It is a mere
+convenience function that combines the *moo* method to load a schema
+file and a call to ~make_types()~ on the result.  
+
+#+begin_note
+Any file format that *moo* supports may be used to provide schema, while
+Jsonnet is recommended.  See the [[file:oschema.org][oschema]] document for more details on
+how to construct schema files.
+#+end_note
+
+We can see ~load_types()~ in action using a schema that is part of the
+*moo* test suite:
+
+#+begin_src python :exports both :results output
+  import os
+  import moo.otypes
+
+  # Directly make a type in Python to use for an "any" below
+  moo.otypes.make_type(schema="string", name="Uni", path="test.basetypes")
+  from test.basetypes import Uni
+
+  # We locate and load a test schema file
+  here = os.path.join(os.path.dirname(__file__), "test")
+  types = moo.otypes.load_types("test-ogen-oschema.jsonnet", [here])
+
+  from app import Person
+  per = Person(email="foo@example.com", counts=[42],
+               affil=Uni("Snooty U"), mbti="judging")
+  print(f'{Person}, {per}, {per.affil}')
+  print(per.pod())
+#+end_src
+
+#+RESULTS:
+: <class 'app.Person'>, <record Person, fields: {email, counts, affil, mbti}>, Snooty U
+: {'email': 'foo@example.com', 'counts': [42], 'affil': 'Snooty U', 'mbti': 'judging'}
+
+In the above we give ~load_types()~ a file system path to find the *moo*
+test suite area relative to where we execute the example code (assumed
+in top-directory of *moo* git repo).  *moo* will search this path when a
+file is given as a relative path.  The current working directory ("~.~")
+will also be checked and failing that, any directories listed in the
+environment variable ~MOO_MODEL_PATH~ will be searched.
+
+
+* Help
+
+Type information and any ~doc~ strings given in the schema are reflected
+into the constructed Python types.  This information can be displayed
+using usual Python meta interrogation methods.  For example:
+
+#+begin_src python :exports both :results output
+  import os
+  import moo.otypes
+
+  here = os.path.join(os.path.dirname(__file__), "test")
+  types = moo.otypes.load_types("test-ogen-oschema.jsonnet", [here])
+
+  from app import Person
+
+  help(Person)
+#+end_src
+
+#+RESULTS:
+#+begin_example
+Help on class Person in module app:
+
+class Person(moo.otypes.Record)
+ |  Person(*args, email: app.Email = None, counts: app.Counts = None, affil: app.Affiliation = None, mbti: app.MBTI = 'introversion')
+ |  
+ |  Record type Person with fields: "email", "counts", "affil", "mbti"
+ |  
+ |  Describe everything there is to know about an individual human
+ |  
+ |  Method resolution order:
+ |      Person
+ |      moo.otypes.Record
+ |      moo.otypes.BaseType
+ |      abc.ABC
+ |      builtins.object
+ |  
+ |  Methods defined here:
+ |  
+ |  __init__(self, *args, email: app.Email = None, counts: app.Counts = None, affil: app.Affiliation = None, mbti: app.MBTI = 'introversion')
+ |      Create a record type of Person
+ |  
+ |  ----------------------------------------------------------------------
+ |  Data descriptors defined here:
+ |  
+ |  affil
+ |  
+ |  counts
+ |  
+ |  email
+ |  
+ |  mbti
+ |  
+ |  ----------------------------------------------------------------------
+ |  Data and other attributes defined here:
+ |  
+ |  __abstractmethods__ = frozenset()
+ |  
+ |  ----------------------------------------------------------------------
+ |  Methods inherited from moo.otypes.Record:
+ |  
+ |  __repr__(self)
+ |      Return repr(self).
+ |  
+ |  pod(self)
+ |      Return record as plain old data.
+ |      
+ |      Will perform validation.
+ |  
+ |  update(self, *args, **kwds)
+ |      Update a record.
+ |      
+ |      An arg in args may be one of:
+ |      - a JSON string
+ |      - a dictionary
+ |      - an instance of a record of same type.
+ |      
+ |      kwds may be a dictionary.
+ |      
+ |      Dictionaries are taken to be field settings, values can be POD
+ |      or a typed object consistent with the field type.
+ |  
+ |  ----------------------------------------------------------------------
+ |  Readonly properties inherited from moo.otypes.Record:
+ |  
+ |  field_names
+ |      Return list of field names
+ |  
+ |  fields
+ |      Return mapping of field name to field dict
+ |  
+ |  ----------------------------------------------------------------------
+ |  Readonly properties inherited from moo.otypes.BaseType:
+ |  
+ |  ost
+ |      The object schema type
+ |  
+ |  ----------------------------------------------------------------------
+ |  Data descriptors inherited from moo.otypes.BaseType:
+ |  
+ |  __dict__
+ |      dictionary for instance variables (if defined)
+ |  
+ |  __weakref__
+ |      list of weak references to the object (if defined)
+
+#+end_example
+
+
+
+
