@@ -1,8 +1,10 @@
+import os
 import json
 import numpy
 from abc import ABC, abstractmethod
 from importlib import import_module
 from moo.modutil import module_at
+from moo.io import load as load_file
 
 
 def get_deps(deps=None, **ost):
@@ -622,3 +624,58 @@ def make_type(**ost):
     '''
     meth = globals()[ost['schema'] + '_class']
     return meth(**ost)
+
+
+def make_types(schema):
+    '''Make Python types from a schema structure.  
+
+    The schema should be in the form of an array of oschema type
+    structures.
+
+    This returns a dict keyed by module + type name and the types will
+    also become available via usual Python "import" with their ".path"
+    forming the module tree.
+
+    >>> make_otypes(schema)
+    >>> from my.schema.path import MyType
+    >>> myobj = MyType()
+
+    '''
+    ret = dict()
+    for one in schema:
+        typ = make_type(**one)
+        ret[typ.__module__ + '.' + typ.__name__] = typ
+    return ret
+
+def default_schema_paths():
+    '''Return list of file system paths from which to locate schema files.
+
+    This returns a list with the current working directory and any
+    entries in the environment variable MOO_MODEL_PATH.
+    '''
+    maybe = [
+        ".",
+        os.environ.get("MOO_MODEL_PATH"),
+    ]
+    return [one for one in maybe if one]
+
+
+def load_types(filename, path=()):
+    '''Load Python types from an oschema file.
+
+    The named file may be provided in any format supported by moo.
+
+    See make_otypes() for more info on resulting types.
+
+    Formats for which moo supports an "import" idiom will search
+    directories given by the "path" argument followed by a default
+    path.
+
+    See default_schema_paths() for more information.
+
+    Note, the directory holding the current file being loaded is
+    implicitly checked.
+
+    '''
+    types = load_file(filename, list(path) + default_schema_paths())
+    return make_types(types)

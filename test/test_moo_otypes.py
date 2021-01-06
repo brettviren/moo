@@ -34,7 +34,7 @@ def test_junk():
     assert(p2.age == 43)
 
     People = moo.otypes.make_type(
-        name="People", code="A collection or Person items",
+        name="People", doc="A collection or Person items",
         schema="sequence", path="a.b", items='a.b.Person')
     print("p2:", p2.pod())
 
@@ -79,3 +79,42 @@ def test_issue_1():
     bad = dict(dtype="u32", schema="number", name="Bad")
     with pytest.raises(TypeError):
         moo.otypes.make_type(**bad)
+
+def test_make_types():
+    'Make otypes from array of schema structs'
+    schema = [dict(name="Pet", schema="enum",
+                   symbols=["cat", "dog", "early personal computer"],
+                   default="cat",
+                   path="my.home.office",
+                   doc="A kind of pet"),
+              dict(name="Desk", schema="record",
+                   fields=[
+                       dict(name="ontop", item="my.home.office.Pet"),
+                   ],
+                   path="my.home.office",
+                   doc="Model my desk")]
+    moo.otypes.make_types(schema)
+
+    from my.home.office import Desk, Pet
+    desk = Desk(ontop="cat")
+    print(desk.pod())
+    print(type(desk.ontop), desk.ontop)
+    assert desk.ontop == "cat"
+
+
+def test_load_types():
+    'Load an oschema, make types'
+    here = os.path.dirname(__file__)
+    print(f'include in path: {here}')
+
+    moo.otypes.make_type(schema="string", name="Uni", path="test.basetypes")
+    from test.basetypes import Uni
+
+    types = moo.otypes.load_types("test-ogen-oschema.jsonnet", [here])
+    from app import Person
+
+    per = Person(email="foo@example.com", counts=[42],
+                 affil=Uni("Snooty U"), mbti="judging")
+    print(per)
+    assert per.counts[0] == 42
+    print(per.affil)
