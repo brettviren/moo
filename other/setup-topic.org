@@ -18,4 +18,3 @@
 #+HTML_HEAD: <style> pre.example{border-radius: 5px; background-color:#333; color:#0f0;}</style>
 #+HTML_HEAD: <style> code{border-radius: 5px; background-color:#333; color:#0f0;}</style>
 
-
