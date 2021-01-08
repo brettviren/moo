@@ -7,6 +7,7 @@
 {% macro declare_sequence(model, t) %}
 using {{t.name}} = {{model.lang.types.sequence}}<{{t["items"]|replace(".","::")}}>;
 {%- endmacro -%}
+
 {% macro declare_record(model, t) %}
 struct {{t.name}} {
     {% for f in t.fields %}
@@ -16,9 +17,15 @@ struct {{t.name}} {
     {% endfor %}
 };
 {%- endmacro -%}
+
+{% macro declare_boolean(model, t) %}
+using {{t.name}} = {{model.lang.types.boolean}};
+{%- endmacro -%}
+
 {% macro declare_string(model, t) %}
 using {{t.name}} = {{model.lang.types.string}};
 {%- endmacro -%}
+
 {% macro declare_number(model, t) %}
 {% if t.dtype[0] == "u" %}
 using {{t.name}} = {{model.lang.dtypes[t.dtype]}}; // NOLINT
@@ -26,9 +33,11 @@ using {{t.name}} = {{model.lang.dtypes[t.dtype]}}; // NOLINT
 using {{t.name}} = {{model.lang.dtypes[t.dtype]}};
 {% endif %}
 {%- endmacro -%}
+
 {% macro declare_any(model, t) %}
 using {{t.name}} = {{model.lang.types.any}};
 {%- endmacro -%}
+
 {% macro declare_enum(model, t) %}
 enum class {{t.name}}: unsigned {
     {% for sname in t.symbols %}
@@ -55,6 +64,7 @@ inline
 {% macro ns(model) %}
 namespace {{ "::".join(model.path) }}
 {%- endmacro -%}
+
 {% macro headerguard(model, what) %}
 {{ "_".join(model.path).upper() + "_" + what.upper() + "_HPP" }}
 {%- endmacro -%}

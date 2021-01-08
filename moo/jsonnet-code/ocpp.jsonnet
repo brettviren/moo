@@ -11,7 +11,8 @@
     types: {            // type conversion between schema and C++
         string: "std::string",
         any: "nlohmann::json",
-        sequence: "std::vector"
+        sequence: "std::vector",
+        boolean: "bool",
     },
     // fixme: there are more numpy dtypes that are supported here!
     dtypes: {
