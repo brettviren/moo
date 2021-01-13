@@ -56,7 +56,7 @@ this are:
   analyze the body of code to understand where the external variables
   are applied.
 
-* Top Level Arguments
+* Top-Level Arguments
   :PROPERTIES:
   :CUSTOM_ID: tla
   :END:
@@ -77,14 +77,22 @@ Jsonnet removes the other.  Finally, since it is a functional
 programming pattern it is easy for developers to trace how the
 information is used.
 
-Okay, how to use it.  Let's start with a non-functional top-level code:
+Okay, on to how to use it.  
+
+** Non-functional Jsonnet file
+   :PROPERTIES:
+   :CUSTOM_ID: notla
+   :END:
+
+Let's start with some "non-functional" code (it works, but does not
+use a top-level function):
 
 #+include: examples/tla/notla.jsonnet src jsonnet
 
-This is somewhat contrived.  The ~var~ will be our variable of interest.
-The ~result~ represents some intermediate structure construction,
-possibly very complex in a real world use.  The last line provides the
-value of the file as a whole.
+This example is rather contrived.  The ~var~ will be our variable of
+interest.  The ~result~ represents some intermediate structure
+construction, possibly very complex in a real world use.  The last
+line provides the value of the file as a whole.
 
 We may compile this with ~moo~ or ~jsonnet~:
 
@@ -97,19 +105,24 @@ moo compile examples/tla/notla.jsonnet
 "hello"
 #+end_src
 
-To refactor we define a top-level ~function~ and move ~var~ into its
-argument list and its body holds the intermediate structure
+** Refactor to top-level function
+   :PROPERTIES:
+   :CUSTOM_ID: tlfunc
+   :END:
+
+To refactor this code, we define a top-level ~function~ and move ~var~
+into its argument list and its body holds the intermediate structure
 construction:
 
 #+include: examples/tla/tla.jsonnet src jsonnet
 
-There are other ways to shape the function body.  What is shown here
-is the use of an "inside-out pattern".  The inner ~result~ value is used
-to hold the final construction in the context of an object.  We then
-set another value called ~return~ which is exposed as the value of the
-~function~.  This is admittedly overkill for this simple example but
-shows a common pattern used when the structure requires various
-intermediates.
+There are certainly other ways to "shape" the function body.  What is
+shown here is the use of an "inside-out pattern".  The inner ~result~
+value is used to hold the final construction in the context of an
+object.  We then set another value called ~return~ which is exposed as
+the value of the ~function~.  This is admittedly overkill for this
+simple example but shows a common pattern used when the structure
+requires various intermediates.
 
 Because of the default value for the TLA we may compile it as before:
 
@@ -122,7 +135,12 @@ moo compile examples/tla/tla.jsonnet
 "hello"
 #+end_src
 
-And, finally, we may see how to provide a variant value:
+** Provide TLA value on CLI
+   :PROPERTIES:
+   :CUSTOM_ID: tlaoncli
+   :END:
+
+And, finally, we may see how to actually "inject" a variant value:
 
 #+begin_src shell :exports both :results output code :wrap "src json"
 moo -A var="hello world" compile examples/tla/tla.jsonnet
@@ -133,8 +151,13 @@ moo -A var="hello world" compile examples/tla/tla.jsonnet
 "hello world"
 #+end_src
 
-And one more example shows how we may reuse this same ~tla.jsonnet~ to
-build some higher-level structure.
+** Using top-level function from Jsonnet
+   :PROPERTIES:
+   :CUSTOM_ID: tlfuncinjsonnet
+   :END:
+
+And one more example shows how we may reuse this same ~tla.jsonnet~ as
+ingredients to build yet higher-level structure in Jsonnet.
 
 #+include: examples/tla/usetla.jsonnet src jsonnet
 
@@ -163,7 +186,14 @@ Jsonnet allows setting of TLAs to simple scalar values as well as
 Jsonnet structure and *moo* takes this further to allow TLAs to be set
 with values or structure provided in any support *moo* format.  
 
-Some examples show the power.  First we may write some Jsonnet code
+Some examples follow to show the power.  
+
+** TLA code on command line
+   :PROPERTIES:
+   :CUSTOM_ID: tlaclicode
+   :END:
+
+First we may write some Jsonnet code
 directly on the command line.
 
 #+begin_src shell :exports both :results output code :wrap "src json"
@@ -194,6 +224,11 @@ moo -A var="{a:42, b:'Jsonnet code from the CLI'}" compile examples/tla/passthro
 }
 #+end_src
 
+** TLA value from Jsonnet file
+   :PROPERTIES:
+   :CUSTOM_ID: tlajsonnetfile
+   :END:
+
 *moo* goes even further and checks if the ~-A~ argument "looks like" a file.
 
 #+begin_src shell :exports both :results output code :wrap "src json"
@@ -214,10 +249,15 @@ However, it allows for *moo* to provide one more trick.  Any TLA value
 which "looks like" a file to *moo* will be parsed and *moo* knows how to
 parse many languages (thanks to [[https://pypi.org/project/anyconfig/][anyconfig]]).  
 
+** TLA value from any file
+   :PROPERTIES:
+   :CUSTOM_ID: tlaanyfile
+   :END:
+
 This opens the door to a bit of craziness where one may supply data in
 JSON, INI, YAML, CSV, XLS spreadsheets or even XML:
 
-#+include: examples/tla/passthrough.jsonnet src xml
+#+include: examples/tla/data.xml src xml
 
 #+begin_src shell :exports both :results output code :wrap "src json"
 moo -A var=examples/tla/data.xml compile examples/tla/passthrough.jsonnet
@@ -239,25 +279,38 @@ moo -A var=examples/tla/data.xml compile examples/tla/passthrough.jsonnet
   :CUSTOM_ID: guidance
   :END:
 
+It is almost never "wrong" to structure a Jsonnet file as a top-level
+function.  At most, it means wrapping the otherwise top-level result
+in a ~function()~ and maybe adding the "inside-out" pattern.  But this
+small cost makes the Jsonent file useful in more contexts.
 
-There's almost never a wrong place to structure Jsonnet as a top-level
-function.  Even if one expects no use of TLAs the ~function()~ may have
-an empty argument list.  The only "cost" to the developer is wrapping
-what would otherwise be the return value in ~function()~, maybe making
-use of the "inside-out pattern".
+The real effort is of course in factoring the code itself.  But then,
+that's the point.  In the process of factoring one may find that parts
+can be abstracted into many files each providing a top-level
+~function()~.  Thus is the nature of well factored, functional
+programming.
 
-The real effort is in factoring the body so that any abstracted
-parameters may be provided by TLAs.  This factoring may lead to more
-Jsonnet files holding yet smaller functions.  Thus is the nature of
-well factored, functional programming.
+One caution to consider.  In applying TLA one should be sensitive to
+how the abstracted information that will be fed back through TLAs will
+ultimately be provided.  In the context of a [[file:buildsys.org][build system]] it may go
+into, eg, CMake files.  One should evaluate if adding complexity there
+makes sense.  To best provide an "external" TLA interface consider
+providing one or more layers of outer Jsonnet scope to "whittle down"
+the amount of abstracted parameters by providing sane defaults along
+the way.  
 
-In applying TLA one should be sensitive to how the abstracted
-information will ultimately be provided.  In the context of a [[file:buildsys.org][build
-system]] it may go into, eg, CMake files and one should evaluate if
-adding complexity there makes sense.  Or, one may provide one or more
-layers of outer Jsonnet scope to "whittle down" the amount of
-abstracted parameters by providing sane defaults.  An example from *moo*
-is how the [[file:oschema][omodel]] is used to connect simple array of type schema to an
-overall schema expected by some of the codegen templates.
+One example of this layering from *moo* is how the [[file:oschema][omodel]] is used to
+connect a simple array of type schema structures to an overall schema
+expected by some of the codegen templates.  The "model" is "just
+another Jsonnet" file and can house default values and bring together
+structure.  
+
+Both values and structure can be provided on the ~moo~ command line (see
+various main options to ~moo~) but that puts more structure outside of
+Jsonnet which means the user must remember the right CLI args or the
+script or build system calling ~moo~ grows more complex, etc.  Striking
+a balance can take "trial and anger" to get right.  
+
+When in doubt, use TLAs and provide another layer of Jsonnet!
 
 

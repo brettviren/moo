@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2021-01-13 Wed 10:30 -->
+<!-- 2021-01-13 Wed 10:53 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>moo 無 tla</title>
@@ -264,8 +264,21 @@ for the JavaScript code in this tag.
 <ul>
 <li><a href="#overview">Overview</a></li>
 <li><a href="#extvar">External Variables</a></li>
-<li><a href="#tla">Top Level Arguments</a></li>
-<li><a href="#mootla">Taking TLA further with <b>moo</b></a></li>
+<li><a href="#tla">Top-Level Arguments</a>
+<ul>
+<li><a href="#notla">Non-functional Jsonnet file</a></li>
+<li><a href="#tlfunc">Refactor to top-level function</a></li>
+<li><a href="#tlaoncli">Provide TLA value on CLI</a></li>
+<li><a href="#tlfuncinjsonnet">Using top-level function from Jsonnet</a></li>
+</ul>
+</li>
+<li><a href="#mootla">Taking TLA further with <b>moo</b></a>
+<ul>
+<li><a href="#tlaclicode">TLA code on command line</a></li>
+<li><a href="#tlajsonnetfile">TLA value from Jsonnet file</a></li>
+<li><a href="#tlaanyfile">TLA value from any file</a></li>
+</ul>
+</li>
 <li><a href="#guidance">When or when not to use TLA</a></li>
 </ul>
 </div>
@@ -337,7 +350,7 @@ are applied.</li>
 </div>
 
 <div id="outline-container-tla" class="outline-2">
-<h2 id="tla">Top Level Arguments</h2>
+<h2 id="tla">Top-Level Arguments</h2>
 <div class="outline-text-2" id="text-tla">
 <p>
 Happily, Jsonnet provides a second feature to "inject" values into
@@ -359,7 +372,16 @@ information is used.
 </p>
 
 <p>
-Okay, how to use it.  Let's start with a non-functional top-level code:
+Okay, on to how to use it.  
+</p>
+</div>
+
+<div id="outline-container-notla" class="outline-3">
+<h3 id="notla">Non-functional Jsonnet file</h3>
+<div class="outline-text-3" id="text-notla">
+<p>
+Let's start with some "non-functional" code (it works, but does not
+use a top-level function):
 </p>
 
 <div class="org-src-container">
@@ -370,10 +392,10 @@ result
 </div>
 
 <p>
-This is somewhat contrived.  The <code>var</code> will be our variable of interest.
-The <code>result</code> represents some intermediate structure construction,
-possibly very complex in a real world use.  The last line provides the
-value of the file as a whole.
+This example is rather contrived.  The <code>var</code> will be our variable of
+interest.  The <code>result</code> represents some intermediate structure
+construction, possibly very complex in a real world use.  The last
+line provides the value of the file as a whole.
 </p>
 
 <p>
@@ -389,10 +411,15 @@ We may compile this with <code>moo</code> or <code>jsonnet</code>:
 <pre class="src src-json"><span style="color: #e9b96e;">"hello"</span>
 </pre>
 </div>
+</div>
+</div>
 
+<div id="outline-container-tlfunc" class="outline-3">
+<h3 id="tlfunc">Refactor to top-level function</h3>
+<div class="outline-text-3" id="text-tlfunc">
 <p>
-To refactor we define a top-level <code>function</code> and move <code>var</code> into its
-argument list and its body holds the intermediate structure
+To refactor this code, we define a top-level <code>function</code> and move <code>var</code>
+into its argument list and its body holds the intermediate structure
 construction:
 </p>
 
@@ -405,13 +432,13 @@ construction:
 </div>
 
 <p>
-There are other ways to shape the function body.  What is shown here
-is the use of an "inside-out pattern".  The inner <code>result</code> value is used
-to hold the final construction in the context of an object.  We then
-set another value called <code>return</code> which is exposed as the value of the
-<code>function</code>.  This is admittedly overkill for this simple example but
-shows a common pattern used when the structure requires various
-intermediates.
+There are certainly other ways to "shape" the function body.  What is
+shown here is the use of an "inside-out pattern".  The inner <code>result</code>
+value is used to hold the final construction in the context of an
+object.  We then set another value called <code>return</code> which is exposed as
+the value of the <code>function</code>.  This is admittedly overkill for this
+simple example but shows a common pattern used when the structure
+requires various intermediates.
 </p>
 
 <p>
@@ -427,9 +454,14 @@ Because of the default value for the TLA we may compile it as before:
 <pre class="src src-json"><span style="color: #e9b96e;">"hello"</span>
 </pre>
 </div>
+</div>
+</div>
 
+<div id="outline-container-tlaoncli" class="outline-3">
+<h3 id="tlaoncli">Provide TLA value on CLI</h3>
+<div class="outline-text-3" id="text-tlaoncli">
 <p>
-And, finally, we may see how to provide a variant value:
+And, finally, we may see how to actually "inject" a variant value:
 </p>
 
 <div class="org-src-container">
@@ -441,10 +473,15 @@ And, finally, we may see how to provide a variant value:
 <pre class="src src-json"><span style="color: #e9b96e;">"hello world"</span>
 </pre>
 </div>
+</div>
+</div>
 
+<div id="outline-container-tlfuncinjsonnet" class="outline-3">
+<h3 id="tlfuncinjsonnet">Using top-level function from Jsonnet</h3>
+<div class="outline-text-3" id="text-tlfuncinjsonnet">
 <p>
-And one more example shows how we may reuse this same <code>tla.jsonnet</code> to
-build some higher-level structure.
+And one more example shows how we may reuse this same <code>tla.jsonnet</code> as
+ingredients to build yet higher-level structure in Jsonnet.
 </p>
 
 <div class="org-src-container">
@@ -474,6 +511,7 @@ Here is the exciting result:
 </div>
 </div>
 </div>
+</div>
 
 <div id="outline-container-mootla" class="outline-2">
 <h2 id="mootla">Taking TLA further with <b>moo</b></h2>
@@ -485,7 +523,15 @@ with values or structure provided in any support <b>moo</b> format.
 </p>
 
 <p>
-Some examples show the power.  First we may write some Jsonnet code
+Some examples follow to show the power.  
+</p>
+</div>
+
+<div id="outline-container-tlaclicode" class="outline-3">
+<h3 id="tlaclicode">TLA code on command line</h3>
+<div class="outline-text-3" id="text-tlaclicode">
+<p>
+First we may write some Jsonnet code
 directly on the command line.
 </p>
 
@@ -523,7 +569,12 @@ trivial function:
 }
 </pre>
 </div>
+</div>
+</div>
 
+<div id="outline-container-tlajsonnetfile" class="outline-3">
+<h3 id="tlajsonnetfile">TLA value from Jsonnet file</h3>
+<div class="outline-text-3" id="text-tlajsonnetfile">
 <p>
 <b>moo</b> goes even further and checks if the <code>-A</code> argument "looks like" a file.
 </p>
@@ -550,14 +601,22 @@ However, it allows for <b>moo</b> to provide one more trick.  Any TLA value
 which "looks like" a file to <b>moo</b> will be parsed and <b>moo</b> knows how to
 parse many languages (thanks to <a href="https://pypi.org/project/anyconfig/">anyconfig</a>).  
 </p>
+</div>
+</div>
 
+<div id="outline-container-tlaanyfile" class="outline-3">
+<h3 id="tlaanyfile">TLA value from any file</h3>
+<div class="outline-text-3" id="text-tlaanyfile">
 <p>
 This opens the door to a bit of craziness where one may supply data in
 JSON, INI, YAML, CSV, XLS spreadsheets or even XML:
 </p>
 
 <div class="org-src-container">
-<pre class="src src-xml">function(var={}) var
+<pre class="src src-xml">&lt;<span style="color: #fce94f;">data</span>&gt;
+  &lt;<span style="color: #fce94f;">a</span>&gt;42&lt;/<span style="color: #fce94f;">a</span>&gt;
+  &lt;<span style="color: #fce94f;">b</span>&gt;Hello from XML!&lt;/<span style="color: #fce94f;">b</span>&gt;
+&lt;/<span style="color: #fce94f;">data</span>&gt;
 </pre>
 </div>
 
@@ -577,42 +636,63 @@ JSON, INI, YAML, CSV, XLS spreadsheets or even XML:
 </div>
 </div>
 </div>
+</div>
 
 
 <div id="outline-container-guidance" class="outline-2">
 <h2 id="guidance">When or when not to use TLA</h2>
 <div class="outline-text-2" id="text-guidance">
 <p>
-There's almost never a wrong place to structure Jsonnet as a top-level
-function.  Even if one expects no use of TLAs the <code>function()</code> may have
-an empty argument list.  The only "cost" to the developer is wrapping
-what would otherwise be the return value in <code>function()</code>, maybe making
-use of the "inside-out pattern".
+It is almost never "wrong" to structure a Jsonnet file as a top-level
+function.  At most, it means wrapping the otherwise top-level result
+in a <code>function()</code> and maybe adding the "inside-out" pattern.  But this
+small cost makes the Jsonent file useful in more contexts.
 </p>
 
 <p>
-The real effort is in factoring the body so that any abstracted
-parameters may be provided by TLAs.  This factoring may lead to more
-Jsonnet files holding yet smaller functions.  Thus is the nature of
-well factored, functional programming.
+The real effort is of course in factoring the code itself.  But then,
+that's the point.  In the process of factoring one may find that parts
+can be abstracted into many files each providing a top-level
+<code>function()</code>.  Thus is the nature of well factored, functional
+programming.
 </p>
 
 <p>
-In applying TLA one should be sensitive to how the abstracted
-information will ultimately be provided.  In the context of a <a href="buildsys.html">build
-system</a> it may go into, eg, CMake files and one should evaluate if
-adding complexity there makes sense.  Or, one may provide one or more
-layers of outer Jsonnet scope to "whittle down" the amount of
-abstracted parameters by providing sane defaults.  An example from <b>moo</b>
-is how the <a href="oschema">omodel</a> is used to connect simple array of type schema to an
-overall schema expected by some of the codegen templates.
+One caution to consider.  In applying TLA one should be sensitive to
+how the abstracted information that will be fed back through TLAs will
+ultimately be provided.  In the context of a <a href="buildsys.html">build system</a> it may go
+into, eg, CMake files.  One should evaluate if adding complexity there
+makes sense.  To best provide an "external" TLA interface consider
+providing one or more layers of outer Jsonnet scope to "whittle down"
+the amount of abstracted parameters by providing sane defaults along
+the way.  
+</p>
+
+<p>
+One example of this layering from <b>moo</b> is how the <a href="oschema">omodel</a> is used to
+connect a simple array of type schema structures to an overall schema
+expected by some of the codegen templates.  The "model" is "just
+another Jsonnet" file and can house default values and bring together
+structure.  
+</p>
+
+<p>
+Both values and structure can be provided on the <code>moo</code> command line (see
+various main options to <code>moo</code>) but that puts more structure outside of
+Jsonnet which means the user must remember the right CLI args or the
+script or build system calling <code>moo</code> grows more complex, etc.  Striking
+a balance can take "trial and anger" to get right.  
+</p>
+
+<p>
+When in doubt, use TLAs and provide another layer of Jsonnet!
 </p>
 </div>
 </div>
 </div>
 <div id="postamble" class="status">
 <p class="author">Author: Brett Viren</p>
-<p class="date">Created: 2021-01-13 Wed 10:30</p>
+<p class="date">Created: 2021-01-13 Wed 10:53</p>
 <p class="validation"><a href="http://validator.w3.org/check?uri=referer">Validate</a></p>
 </div>
 </body>
