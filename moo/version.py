@@ -10,4 +10,4 @@ up to a release then A.B.CrcY ("Y" is literal) is used.
 This value is used in setup.py and available as moo.__version__ which
 is exported to the CLI via "moo version".
 '''
-version = "0.5.1"
+version = "0.5.x"

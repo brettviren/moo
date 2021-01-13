@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2021-01-11 Mon 11:38 -->
+<!-- 2021-01-13 Wed 10:25 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>moo 無 Model Oriented Objects</title>
@@ -261,19 +261,19 @@ for the JavaScript code in this tag.
 <ul>
 <li><a href="#overview">Overview</a>
 <ul>
-<li><a href="#org3961472">Taxonomy</a></li>
-<li><a href="#orgf9a49a0">Operations</a></li>
-<li><a href="#orgba4cdbb">Uses</a></li>
+<li><a href="#org4ea1559">Taxonomy</a></li>
+<li><a href="#orgb2d2554">Operations</a></li>
+<li><a href="#org047f808">Uses</a></li>
 </ul>
 </li>
 <li><a href="#version">Version</a></li>
-<li><a href="#org4c6b30e">License</a></li>
+<li><a href="#org39124b0">License</a></li>
 <li><a href="#install">Installation</a>
 <ul>
 <li><a href="#python-env">Python environment</a></li>
 <li><a href="#install-rel">Install a release</a></li>
 <li><a href="#install-dev">Install development</a></li>
-<li><a href="#org47d42d2">Testing</a></li>
+<li><a href="#org44a1fca">Testing</a></li>
 </ul>
 </li>
 <li><a href="#punt">Quick start</a></li>
@@ -301,9 +301,9 @@ for the JavaScript code in this tag.
 </p>
 </div>
 
-<div id="outline-container-org3961472" class="outline-3">
-<h3 id="org3961472">Taxonomy</h3>
-<div class="outline-text-3" id="text-org3961472">
+<div id="outline-container-org4ea1559" class="outline-3">
+<h3 id="org4ea1559">Taxonomy</h3>
+<div class="outline-text-3" id="text-org4ea1559">
 <p>
 <b>moo</b> defines a conceptual taxonmy
 </p>
@@ -320,9 +320,9 @@ for the JavaScript code in this tag.
 </div>
 </div>
 
-<div id="outline-container-orgf9a49a0" class="outline-3">
-<h3 id="orgf9a49a0">Operations</h3>
-<div class="outline-text-3" id="text-orgf9a49a0">
+<div id="outline-container-orgb2d2554" class="outline-3">
+<h3 id="orgb2d2554">Operations</h3>
+<div class="outline-text-3" id="text-orgb2d2554">
 <p>
 <b>moo</b> may operate on instances of the <b>moo</b> taxonomy in various ways
 </p>
@@ -336,9 +336,9 @@ for the JavaScript code in this tag.
 </div>
 </div>
 
-<div id="outline-container-orgba4cdbb" class="outline-3">
-<h3 id="orgba4cdbb">Uses</h3>
-<div class="outline-text-3" id="text-orgba4cdbb">
+<div id="outline-container-org047f808" class="outline-3">
+<h3 id="org047f808">Uses</h3>
+<div class="outline-text-3" id="text-org047f808">
 <p>
 <b>moo</b> can be used for many things
 </p>
@@ -367,7 +367,7 @@ The current <b>moo</b> version is&#x2026;
 </div>
 
 <pre class="example">
-0.5.1
+0.5.x
 </pre>
 
 <p>
@@ -377,9 +377,9 @@ definitive version.
 </div>
 </div>
 
-<div id="outline-container-org4c6b30e" class="outline-2">
-<h2 id="org4c6b30e">License</h2>
-<div class="outline-text-2" id="text-org4c6b30e">
+<div id="outline-container-org39124b0" class="outline-2">
+<h2 id="org39124b0">License</h2>
+<div class="outline-text-2" id="text-org39124b0">
 <p>
 <b>moo</b> is free software and may be used under the terms described in file
 <a href="COPYING">COPYING</a>.  These terms explicitly do NOT extend to any of your own
@@ -411,9 +411,9 @@ Python environment is to assure that.  Some suggestions:
 </p>
 </div>
 
-<div id="outline-container-org7bb778a" class="outline-4">
-<h4 id="org7bb778a">Python3 built in virtual environment</h4>
-<div class="outline-text-4" id="text-org7bb778a">
+<div id="outline-container-org91d7478" class="outline-4">
+<h4 id="org91d7478">Python3 built in virtual environment</h4>
+<div class="outline-text-4" id="text-org91d7478">
 <pre class="example">
 $ python3 -m venv venv
 $ source venv/bin/activiate
@@ -421,9 +421,9 @@ $ source venv/bin/activiate
 </div>
 </div>
 
-<div id="outline-container-orge385394" class="outline-4">
-<h4 id="orge385394">Direnv</h4>
-<div class="outline-text-4" id="text-orge385394">
+<div id="outline-container-org86321c9" class="outline-4">
+<h4 id="org86321c9">Direnv</h4>
+<div class="outline-text-4" id="text-org86321c9">
 <p>
 Install <code>direnv</code> and activate it in your shell, then:
 </p>
@@ -486,9 +486,9 @@ $ pyton -m pip install -e .
 </div>
 
 
-<div id="outline-container-org47d42d2" class="outline-3">
-<h3 id="org47d42d2">Testing</h3>
-<div class="outline-text-3" id="text-org47d42d2">
+<div id="outline-container-org44a1fca" class="outline-3">
+<h3 id="org44a1fca">Testing</h3>
+<div class="outline-text-3" id="text-org44a1fca">
 <p>
 <b>moo</b> source provides many types of tests.  Below shows how to run the
 different types of tests and their output from last time this document
@@ -497,9 +497,9 @@ documents runs various tests which are embedded as examples.
 </p>
 </div>
 
-<div id="outline-container-org44a4fbf" class="outline-4">
-<h4 id="org44a4fbf">Shell level tests</h4>
-<div class="outline-text-4" id="text-org44a4fbf">
+<div id="outline-container-org8f58640" class="outline-4">
+<h4 id="org8f58640">Shell level tests</h4>
+<div class="outline-text-4" id="text-org8f58640">
 <p>
 The shell-level tests require BATS and <a href="https://github.com/bats-core/bats-core/">bats-core</a> is the recommended
 implementation.
@@ -541,9 +541,9 @@ ok 25 test issue #2
 </div>
 </div>
 
-<div id="outline-container-org47d3a68" class="outline-4">
-<h4 id="org47d3a68">Python level tests</h4>
-<div class="outline-text-4" id="text-org47d3a68">
+<div id="outline-container-orgc41e945" class="outline-4">
+<h4 id="orgc41e945">Python level tests</h4>
+<div class="outline-text-4" id="text-orgc41e945">
 <p>
 The Python-level tests require pytest.  Note, developers should not
 disable warnings when running tests.  For the sake of brevity in this
@@ -609,13 +609,15 @@ See links below for documentation which provides various examples.
 <dt>documentation</dt><dd><ul class="org-ul">
 <li><a href="moo.html">moo high level documentation</a> (this file)</li>
 
-<li><a href="oschema.html">moo object schema paradigm</a> how to define schema and use it to validate models, apply models to templates</li>
+<li><a href="oschema.html">moo object schema paradigm</a> how to define <b>schema</b> and use it to validate models, apply <b>models</b> to <b>templates</b> for example to implement <b>codegen</b></li>
 
-<li><a href="otypes.html">moo object types</a> way to create valid-by-construction objects in Python</li>
+<li><a href="otypes.html">moo object types</a> way to <b>create objects</b> with a valid-by-construction pattern in <b>Python</b></li>
 
-<li><a href="ovalid.html">moo object validation</a> to strongly check if existing objects are valid against moo schema.</li>
+<li><a href="ovalid.html">moo object validation</a> to strongly check if existing objects are <b>valid against moo schema</b>.</li>
 
-<li><a href="buildsys.html">moo and build systems</a> how to integrate <b>moo</b> codegen into various build systems</li>
+<li><a href="buildsys.html">moo and build systems</a> how to integrate <b>moo</b> codegen into various <b>build systems</b></li>
+
+<li><a href="tla.html">moo and top-level arguments</a> flexible way to <b>inject values</b> into a Jsonnet program</li>
 
 <li><a href="wcup.html">moo as Wire-Cell user package generator</a> how <b>moo</b> can be used to generate a skeleton of an entire software project</li>
 
@@ -696,7 +698,7 @@ generation that effort gains multiplicative power.</dd>
 </div>
 <div id="postamble" class="status">
 <p class="author">Author: Brett Viren</p>
-<p class="date">Created: 2021-01-11 Mon 11:38</p>
+<p class="date">Created: 2021-01-13 Wed 10:25</p>
 <p class="validation"><a href="http://validator.w3.org/check?uri=referer">Validate</a></p>
 </div>
 </body>

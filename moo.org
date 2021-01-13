@@ -219,13 +219,15 @@ See links below for documentation which provides various examples.
 
   - [[file:moo.org][moo high level documentation]] (this file)
 
-  - [[file:oschema.org][moo object schema paradigm]] how to define schema and use it to validate models, apply models to templates
+  - [[file:oschema.org][moo object schema paradigm]] how to define *schema* and use it to validate models, apply *models* to *templates* for example to implement *codegen* 
 
-  - [[file:otypes.org][moo object types]] way to create valid-by-construction objects in Python
+  - [[file:otypes.org][moo object types]] way to *create objects* with a valid-by-construction pattern in *Python*
 
-  - [[file:ovalid.org][moo object validation]] to strongly check if existing objects are valid against moo schema.
+  - [[file:ovalid.org][moo object validation]] to strongly check if existing objects are *valid against moo schema*.
 
-  - [[file:buildsys.org][moo and build systems]] how to integrate *moo* codegen into various build systems
+  - [[file:buildsys.org][moo and build systems]] how to integrate *moo* codegen into various *build systems*
+
+  - [[file:tla.org][moo and top-level arguments]] flexible way to *inject values* into a Jsonnet program
 
   - [[file:wcup.org][moo as Wire-Cell user package generator]] how *moo* can be used to generate a skeleton of an entire software project
 
