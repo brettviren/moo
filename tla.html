@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2021-01-13 Wed 10:18 -->
+<!-- 2021-01-13 Wed 10:30 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>moo 無 tla</title>
@@ -262,18 +262,18 @@ for the JavaScript code in this tag.
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents">
 <ul>
-<li><a href="#org00f126a">Overview</a></li>
-<li><a href="#orga917481">External Variables</a></li>
-<li><a href="#org91df436">Top Level Arguments</a></li>
-<li><a href="#org0d5fea1">Taking TLA further with <b>moo</b></a></li>
-<li><a href="#org6b7c6b1">When or when not to use TLA</a></li>
+<li><a href="#overview">Overview</a></li>
+<li><a href="#extvar">External Variables</a></li>
+<li><a href="#tla">Top Level Arguments</a></li>
+<li><a href="#mootla">Taking TLA further with <b>moo</b></a></li>
+<li><a href="#guidance">When or when not to use TLA</a></li>
 </ul>
 </div>
 </div>
 
-<div id="outline-container-org00f126a" class="outline-2">
-<h2 id="org00f126a">Overview</h2>
-<div class="outline-text-2" id="text-org00f126a">
+<div id="outline-container-overview" class="outline-2">
+<h2 id="overview">Overview</h2>
+<div class="outline-text-2" id="text-overview">
 <p>
 When making a <b>moo</b> schema or other data structures in Jsonnet one often
 finds that some aspect can be nicely factored out so as to make the
@@ -287,9 +287,9 @@ information.  <b>moo</b> rejects the first approach for reasons explained.
 </div>
 </div>
 
-<div id="outline-container-orga917481" class="outline-2">
-<h2 id="orga917481">External Variables</h2>
-<div class="outline-text-2" id="text-orga917481">
+<div id="outline-container-extvar" class="outline-2">
+<h2 id="extvar">External Variables</h2>
+<div class="outline-text-2" id="text-extvar">
 <p>
 Jsonnet provides a useful mechanism called "external variables".  It
 is similar to querying the <code>os.environ</code> dictionary in Python.  You may
@@ -336,9 +336,9 @@ are applied.</li>
 </div>
 </div>
 
-<div id="outline-container-org91df436" class="outline-2">
-<h2 id="org91df436">Top Level Arguments</h2>
-<div class="outline-text-2" id="text-org91df436">
+<div id="outline-container-tla" class="outline-2">
+<h2 id="tla">Top Level Arguments</h2>
+<div class="outline-text-2" id="text-tla">
 <p>
 Happily, Jsonnet provides a second feature to "inject" values into
 Jsonnet code which addresses the problems with "external variables".
@@ -475,9 +475,9 @@ Here is the exciting result:
 </div>
 </div>
 
-<div id="outline-container-org0d5fea1" class="outline-2">
-<h2 id="org0d5fea1">Taking TLA further with <b>moo</b></h2>
-<div class="outline-text-2" id="text-org0d5fea1">
+<div id="outline-container-mootla" class="outline-2">
+<h2 id="mootla">Taking TLA further with <b>moo</b></h2>
+<div class="outline-text-2" id="text-mootla">
 <p>
 Jsonnet allows setting of TLAs to simple scalar values as well as
 Jsonnet structure and <b>moo</b> takes this further to allow TLAs to be set
@@ -579,9 +579,9 @@ JSON, INI, YAML, CSV, XLS spreadsheets or even XML:
 </div>
 
 
-<div id="outline-container-org6b7c6b1" class="outline-2">
-<h2 id="org6b7c6b1">When or when not to use TLA</h2>
-<div class="outline-text-2" id="text-org6b7c6b1">
+<div id="outline-container-guidance" class="outline-2">
+<h2 id="guidance">When or when not to use TLA</h2>
+<div class="outline-text-2" id="text-guidance">
 <p>
 There's almost never a wrong place to structure Jsonnet as a top-level
 function.  Even if one expects no use of TLAs the <code>function()</code> may have
@@ -612,7 +612,7 @@ overall schema expected by some of the codegen templates.
 </div>
 <div id="postamble" class="status">
 <p class="author">Author: Brett Viren</p>
-<p class="date">Created: 2021-01-13 Wed 10:18</p>
+<p class="date">Created: 2021-01-13 Wed 10:30</p>
 <p class="validation"><a href="http://validator.w3.org/check?uri=referer">Validate</a></p>
 </div>
 </body>

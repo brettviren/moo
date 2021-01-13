@@ -3,6 +3,10 @@
 #+setupfile: other/setup-topic.org
 
 * Overview
+  :PROPERTIES:
+  :CUSTOM_ID: overview
+  :END:
+
 
 When making a *moo* schema or other data structures in Jsonnet one often
 finds that some aspect can be nicely factored out so as to make the
@@ -12,6 +16,10 @@ Here we describe two ways that Jsonnet supports such factoring of
 information.  *moo* rejects the first approach for reasons explained.
 
 * External Variables
+  :PROPERTIES:
+  :CUSTOM_ID: extvar
+  :END:
+
 
 Jsonnet provides a useful mechanism called "external variables".  It
 is similar to querying the ~os.environ~ dictionary in Python.  You may
@@ -49,6 +57,10 @@ this are:
   are applied.
 
 * Top Level Arguments
+  :PROPERTIES:
+  :CUSTOM_ID: tla
+  :END:
+
 
 Happily, Jsonnet provides a second feature to "inject" values into
 Jsonnet code which addresses the problems with "external variables".
@@ -142,6 +154,10 @@ moo compile examples/tla/usetla.jsonnet
 #+end_src
 
 * Taking TLA further with *moo*
+  :PROPERTIES:
+  :CUSTOM_ID: mootla
+  :END:
+
 
 Jsonnet allows setting of TLAs to simple scalar values as well as
 Jsonnet structure and *moo* takes this further to allow TLAs to be set
@@ -219,6 +235,10 @@ moo -A var=examples/tla/data.xml compile examples/tla/passthrough.jsonnet
 
 
 * When or when not to use TLA
+  :PROPERTIES:
+  :CUSTOM_ID: guidance
+  :END:
+
 
 There's almost never a wrong place to structure Jsonnet as a top-level
 function.  Even if one expects no use of TLAs the ~function()~ may have
