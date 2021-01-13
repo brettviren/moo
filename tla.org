@@ -1,0 +1,243 @@
+#+title: moo 無 tla
+#+subtitle: Parameterized ~moo~ Jsonnet
+#+setupfile: other/setup-topic.org
+
+* Overview
+
+When making a *moo* schema or other data structures in Jsonnet one often
+finds that some aspect can be nicely factored out so as to make the
+Jsonnet file more general.
+
+Here we describe two ways that Jsonnet supports such factoring of
+information.  *moo* rejects the first approach for reasons explained.
+
+* External Variables
+
+Jsonnet provides a useful mechanism called "external variables".  It
+is similar to querying the ~os.environ~ dictionary in Python.  You may
+use it in Jsonnet anywhere you might use a value.  For example:
+
+#+begin_src jsonnet
+// extvar.jsonnet
+local myvar = std.extVar("MY_EXTERNAL_VARIABLE");
+{
+  abc: "Answer: %d" % myvar,
+  xyz: "Command line says, %s" % std.extVar("MY_OTHER_VARIABLE"),
+}
+#+end_src
+
+Using ~jsonnet~ directly you may compile this code with a command like:
+
+#+begin_example
+  $ jsonnet -V MY_OTHER_VARIABLE="hello" -V MY_EXTERNAL_VARIABLE=42 extvar.jsonnet
+#+end_example
+
+The ~std.extVar()~ form is very easy to use when writing Jsonnet but one
+quickly sees limitations.  This is one place where *moo* is opinionated
+and so does not offer an equivalent to ~jsonnet -V~.  The reasons for
+this are:
+
+- There is no way to provide a default value so the user *must always*
+  provide values.
+
+- There is no way to provide values internally in Jsonnet (the feature
+  is called *external variables* after all).  This limits ability to
+  compose the Jsonnet into ever higher order structure.
+
+- This is effectively a "global variable" anti-pattern.  One must
+  analyze the body of code to understand where the external variables
+  are applied.
+
+* Top Level Arguments
+
+Happily, Jsonnet provides a second feature to "inject" values into
+Jsonnet code which addresses the problems with "external variables".
+It is called "top-level arguments" or TLA.  *moo* not just supports TLA
+but embraces it.
+
+TLA works with a Jsonnet file that produces as its top-level result a
+Jsonnet ~function~ object.  It is the arguments to this top-level
+function which are the TLAs.  Jsonnet function arguments may be given
+default values and this removes one problem with the use of
+~std.extVar()~.  And, given that the Jsonnet ~function~ may be evaluated
+as the top-level compiled object or called from other higher-level
+Jsonnet removes the other.  Finally, since it is a functional
+programming pattern it is easy for developers to trace how the
+information is used.
+
+Okay, how to use it.  Let's start with a non-functional top-level code:
+
+#+include: examples/tla/notla.jsonnet src jsonnet
+
+This is somewhat contrived.  The ~var~ will be our variable of interest.
+The ~result~ represents some intermediate structure construction,
+possibly very complex in a real world use.  The last line provides the
+value of the file as a whole.
+
+We may compile this with ~moo~ or ~jsonnet~:
+
+#+begin_src shell :exports both :results output code :wrap "src json"
+moo compile examples/tla/notla.jsonnet
+#+end_src
+
+#+RESULTS:
+#+begin_src json
+"hello"
+#+end_src
+
+To refactor we define a top-level ~function~ and move ~var~ into its
+argument list and its body holds the intermediate structure
+construction:
+
+#+include: examples/tla/tla.jsonnet src jsonnet
+
+There are other ways to shape the function body.  What is shown here
+is the use of an "inside-out pattern".  The inner ~result~ value is used
+to hold the final construction in the context of an object.  We then
+set another value called ~return~ which is exposed as the value of the
+~function~.  This is admittedly overkill for this simple example but
+shows a common pattern used when the structure requires various
+intermediates.
+
+Because of the default value for the TLA we may compile it as before:
+
+#+begin_src shell :exports both :results output code :wrap "src json"
+moo compile examples/tla/tla.jsonnet
+#+end_src
+
+#+RESULTS:
+#+begin_src json
+"hello"
+#+end_src
+
+And, finally, we may see how to provide a variant value:
+
+#+begin_src shell :exports both :results output code :wrap "src json"
+moo -A var="hello world" compile examples/tla/tla.jsonnet
+#+end_src
+
+#+RESULTS:
+#+begin_src json
+"hello world"
+#+end_src
+
+And one more example shows how we may reuse this same ~tla.jsonnet~ to
+build some higher-level structure.
+
+#+include: examples/tla/usetla.jsonnet src jsonnet
+
+Here, we provide a hard-wired value for the ~var~.  Of course, this
+Jsonnet file also could instead provide a ~function~ with TLAs and we
+may continue the trend.  But, for simplicity we cap off the pattern. 
+
+Here is the exciting result:
+
+#+begin_src shell :exports both :results output code :wrap "src json"
+moo compile examples/tla/usetla.jsonnet
+#+end_src
+
+#+RESULTS:
+#+begin_src json
+"hi from inside Jsonnet!"
+#+end_src
+
+* Taking TLA further with *moo*
+
+Jsonnet allows setting of TLAs to simple scalar values as well as
+Jsonnet structure and *moo* takes this further to allow TLAs to be set
+with values or structure provided in any support *moo* format.  
+
+Some examples show the power.  First we may write some Jsonnet code
+directly on the command line.
+
+#+begin_src shell :exports both :results output code :wrap "src json"
+moo -A var="{a:42, b:'Jsonnet code from the CLI'}.b" compile examples/tla/tla.jsonnet
+#+end_src
+
+#+RESULTS:
+#+begin_src json
+"Jsonnet code from the CLI"
+#+end_src
+
+Here, we use the "inside-out pattern" again because ~tla.jsonnet~
+ultimately expects ~var~ to be a string.  Other Jsonnet TLA may expect
+some complex structure and we could supply that.  Take this most
+trivial function:
+
+#+include: examples/tla/passthrough.jsonnet src jsonnet
+
+#+begin_src shell :exports both :results output code :wrap "src json"
+moo -A var="{a:42, b:'Jsonnet code from the CLI'}" compile examples/tla/passthrough.jsonnet
+#+end_src
+
+#+RESULTS:
+#+begin_src json
+{
+    "a": 42,
+    "b": "Jsonnet code from the CLI"
+}
+#+end_src
+
+*moo* goes even further and checks if the ~-A~ argument "looks like" a file.
+
+#+begin_src shell :exports both :results output code :wrap "src json"
+moo -A var=examples/tla/notla.jsonnet compile examples/tla/passthrough.jsonnet
+#+end_src
+
+#+RESULTS:
+#+begin_src json
+"hello"
+#+end_src
+
+Here, we have reused the ~notla.jsonnet~ file but now its value is
+"injected" back into Jsonnet via ~var~.  Of course, compared to a
+pure-Jsonnet context this routing is very circuitous compared to using
+Jsonnet ~import~. 
+
+However, it allows for *moo* to provide one more trick.  Any TLA value
+which "looks like" a file to *moo* will be parsed and *moo* knows how to
+parse many languages (thanks to [[https://pypi.org/project/anyconfig/][anyconfig]]).  
+
+This opens the door to a bit of craziness where one may supply data in
+JSON, INI, YAML, CSV, XLS spreadsheets or even XML:
+
+#+include: examples/tla/passthrough.jsonnet src xml
+
+#+begin_src shell :exports both :results output code :wrap "src json"
+moo -A var=examples/tla/data.xml compile examples/tla/passthrough.jsonnet
+#+end_src
+
+#+RESULTS:
+#+begin_src json
+{
+    "data": {
+        "a": "42",
+        "b": "Hello from XML!"
+    }
+}
+#+end_src
+
+
+* When or when not to use TLA
+
+There's almost never a wrong place to structure Jsonnet as a top-level
+function.  Even if one expects no use of TLAs the ~function()~ may have
+an empty argument list.  The only "cost" to the developer is wrapping
+what would otherwise be the return value in ~function()~, maybe making
+use of the "inside-out pattern".
+
+The real effort is in factoring the body so that any abstracted
+parameters may be provided by TLAs.  This factoring may lead to more
+Jsonnet files holding yet smaller functions.  Thus is the nature of
+well factored, functional programming.
+
+In applying TLA one should be sensitive to how the abstracted
+information will ultimately be provided.  In the context of a [[file:buildsys.org][build
+system]] it may go into, eg, CMake files and one should evaluate if
+adding complexity there makes sense.  Or, one may provide one or more
+layers of outer Jsonnet scope to "whittle down" the amount of
+abstracted parameters by providing sane defaults.  An example from *moo*
+is how the [[file:oschema][omodel]] is used to connect simple array of type schema to an
+overall schema expected by some of the codegen templates.
+
+
