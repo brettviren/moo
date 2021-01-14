@@ -114,6 +114,27 @@ def deref_defs(ctx, defs):
     return ret
 
 
+def scalar_typify(val):
+    '''
+    Return tuple (value, iscode)
+
+    If iscode is true if value should be considered for tla_codes.
+
+    The value is turned into a string.
+    '''
+    if not isinstance(val, str):
+        return (str(val), True)
+    try:
+        junk = float(val)
+        return (val, True)
+    except ValueError:
+        pass
+    if val.lower() in ("true", "yes", "on"):
+        return ("true", True)
+    if val.lower() in ("false", "no", "off"):
+        return ("false", True)
+    return (val, False)
+
 def tla_pack(tlas, jpath):
     '''Pack list of things like var=value or var=file.jsonnet into
     keyword arguments suitable for passing to jsonnet.  A value is
@@ -121,22 +142,28 @@ def tla_pack(tlas, jpath):
     '''
     tla_vars = dict()
     tla_codes = dict()
-    for one in tlas:
+    for one in tlas:            # fixme: this could be done better
         key, val = one.split("=", 1)
-        chunks = val.split(".")
         if val[0] in '{["]}':   # inline code
             tla_codes[key] = val
-        elif len(chunks) > 1:
+            continue
+
+        chunks = val.split(".")
+        if len(chunks) > 1:   # maybe a file
             ext = chunks[-1]
             if ext in [".jsonnet", ".json"]:
                 fname = resolve(val, jpath)
                 tla_codes[key] = open(fname).read()
-            elif ext in moo.known_extensions:
+                continue
+            if ext in moo.known_extensions:
                 val = moo.io.load(val, jpath)
                 tla_codes[key] = json.dumps(val)
-            else:               # assume simple string happens to have .'s
-                tla_vars[key] = val
-        else:                   # string
+                continue
+        # some scalar value
+        val, iscode = scalar_typify(val)
+        if iscode:
+            tla_codes[key] = val
+        else:
             tla_vars[key] = val
 
     # these keywords are what jsonnet.evaluate_file() expects
