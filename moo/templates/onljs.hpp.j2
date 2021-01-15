@@ -10,8 +10,10 @@
 #define {{cppm.headerguard(model, tcname)}}
 
 // My structs
-{% if model.ctxpath %}
-#include "{{ model.path|relpath(model.ctxpath)|join("/") }}/Structs.hpp"
+{% set ctxpath = model.ctxpath or [] %}
+{% set prefix = model.path|relpath(ctxpath)|join("/") %}
+{% if prefix %}
+#include "{{ prefix }}/Structs.hpp"
 {% else %}
 #include "Structs.hpp"
 {% endif %}

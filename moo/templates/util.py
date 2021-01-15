@@ -12,6 +12,8 @@ def find_type(types, fqn):
 
 def listify(thing, delim="."):
     'Return thing as a list.  If string split on delim'
+    if not thing:
+        return list()
     if isinstance(thing, str):
         return thing.split(delim)
     return list(thing)
@@ -19,9 +21,9 @@ def listify(thing, delim="."):
 
 def relpath(longpath, starting):
     'Remove as much of starting from start of longpath as can before diverging'
+    longpath = listify(longpath)
     if not starting:
         return longpath
-    longpath = listify(longpath)
     starting = listify(starting)
     if longpath[0] != starting[0]:
         # err = f'paths do not share common prefix: f{longpath} / f{starting}'

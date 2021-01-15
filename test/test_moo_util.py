@@ -46,3 +46,4 @@ def test_graft():
     with pytest.raises(JsonPointerException):
         obj = graft(obj, "/b/c", 42)
     assert obj["a"] == 2
+
