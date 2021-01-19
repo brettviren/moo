@@ -165,8 +165,8 @@ We can see ~load_types()~ in action using a schema that is part of the
 #+end_src
 
 #+RESULTS:
-: <class 'app.Person'>, <record Person, fields: {email, counts, affil, mbti}>, Snooty U
-: {'email': 'foo@example.com', 'counts': [42], 'affil': 'Snooty U', 'mbti': 'judging'}
+: <class 'app.Person'>, <record Person, fields: {email, email2, counts, affil, mbti}>, Snooty U
+: {'email': 'foo@example.com', 'email2': 'me@example.com', 'counts': [42], 'affil': 'Snooty U', 'mbti': 'judging'}
 
 
 #+begin_note

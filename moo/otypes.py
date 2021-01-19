@@ -201,13 +201,11 @@ def field_default_value(value, pathname):
     '''
     Return value coerced into type given by pathname
     '''
-    if not value:
-        return value
     if isinstance(value, str):
-        if value[0] == "[" and value[-1] == "]":
+        if len(value) > 1 and value[0] == "[" and value[-1] == "]":
             # looks like a string rep of list/array
             return value
-        if value[0] == "{" and value[-1] == "}":
+        if len(value) > 1 and value[0] == "{" and value[-1] == "}":
             # looks like a string rep dict/object
             return value
         # I guess it is a simple string, let Python do some escaping.

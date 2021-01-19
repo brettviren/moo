@@ -17,6 +17,10 @@ local hier = {
     person: as.record("Person", [
         as.field("email",self.email,
                  doc="E-mail address"),
+        // note: if default given, it is subject to schema and "" is
+        // not a valid default for type Email.
+        as.field("email2",self.email, default="me@example.com",
+                 doc="E-mail address"),
         as.field("counts",self.counts,
                  doc="Count of some things"),
         as.field("affil", self.affil,

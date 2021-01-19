@@ -118,3 +118,21 @@ def test_load_types():
     print(per)
     assert per.counts[0] == 42
     print(per.affil)
+
+def test_issue10():
+    '''Check that record field of type string can have empty string as a
+    default for issue #10'''
+    path = "test.issue10"
+    schema = [
+        dict(name="Name", schema="string", path=path),
+        dict(name="YN", schema="boolean", path=path),
+        dict(name="Thing", schema="record",
+             fields=[
+                 dict(name="name", item=path+".Name", default=""),
+                 dict(name="yn", item=path+".YN", default=False),
+             ], path=path),
+    ]
+    moo.otypes.make_types(schema)
+    from test.issue10 import Thing
+    thing = Thing()
+    print(thing.pod())

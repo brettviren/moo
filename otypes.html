@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2021-01-19 Tue 13:01 -->
+<!-- 2021-01-19 Tue 13:44 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title><code>moo</code> 無 <i>otypes</i></title>
@@ -238,22 +238,22 @@
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents">
 <ul>
-<li><a href="#orgc031bcb">Overview</a></li>
-<li><a href="#org99c6bd0">Usage</a>
+<li><a href="#org5725f7e">Overview</a></li>
+<li><a href="#orgeed8607">Usage</a>
 <ul>
-<li><a href="#org53c3095">Individual type construction</a></li>
-<li><a href="#orgc347324">Schema structure array</a></li>
-<li><a href="#orgaa82906">Load types from file</a></li>
+<li><a href="#org78ba58f">Individual type construction</a></li>
+<li><a href="#orgd01da47">Schema structure array</a></li>
+<li><a href="#org24b7982">Load types from file</a></li>
 </ul>
 </li>
-<li><a href="#org2b00c82">Help</a></li>
+<li><a href="#org6479331">Help</a></li>
 </ul>
 </div>
 </div>
 
-<div id="outline-container-orgc031bcb" class="outline-2">
-<h2 id="orgc031bcb">Overview</h2>
-<div class="outline-text-2" id="text-orgc031bcb">
+<div id="outline-container-org5725f7e" class="outline-2">
+<h2 id="org5725f7e">Overview</h2>
+<div class="outline-text-2" id="text-org5725f7e">
 <p>
 <b>moo</b> <i>otypes</i> is way to produce instances of <i>oschema</i> types that tries to
 follow a <i>valid-by-construction</i> pattern.  In general, <i>otypes</i> are native
@@ -278,7 +278,7 @@ instantiating them as Python objects gain some <i>valid-by-construction</i>
 guarantees.
 </p>
 
-<div class="info" id="orge4d42aa">
+<div class="info" id="org4cb2364">
 <p>
 See also <a href="https://brettviren.github.io/dune-daq-repl/ddcmd.html">DUNE DAQ Command Object Creation</a> which describes <code>moo.otypes</code>
 in the context of one particular application.
@@ -288,9 +288,9 @@ in the context of one particular application.
 </div>
 </div>
 
-<div id="outline-container-org99c6bd0" class="outline-2">
-<h2 id="org99c6bd0">Usage</h2>
-<div class="outline-text-2" id="text-org99c6bd0">
+<div id="outline-container-orgeed8607" class="outline-2">
+<h2 id="orgeed8607">Usage</h2>
+<div class="outline-text-2" id="text-orgeed8607">
 <p>
 The <code>moo.otypes</code> module provides high level functions to construct types
 from <i>oschema</i>.  They make use of lower-level Python metaprogramming for
@@ -298,9 +298,9 @@ the actual type construction which is also in this module.
 </p>
 </div>
 
-<div id="outline-container-org53c3095" class="outline-3">
-<h3 id="org53c3095">Individual type construction</h3>
-<div class="outline-text-3" id="text-org53c3095">
+<div id="outline-container-org78ba58f" class="outline-3">
+<h3 id="org78ba58f">Individual type construction</h3>
+<div class="outline-text-3" id="text-org78ba58f">
 <p>
 We may make an individual type from <i>oschema</i> data structure which is
 expressed as keyword arguments to the <code>moo.otypes.make_type()</code> function.
@@ -327,7 +327,7 @@ print(f'{a.b.Age}, {myage2}, {myage2.pod()}')
 </pre>
 
 
-<div class="note" id="orgffbc150">
+<div class="note" id="org27b219e">
 <p>
 The <code>moo.otypes.make_type()</code> directly returns a Python type object (aka
 Python class) and it "places" the type object into the module tree
@@ -340,7 +340,7 @@ given the schema structure's <code>.path</code> attribute.
 We may try to use our otype with invalid data:
 </p>
 
-<pre class="example" id="org941d5c2">
+<pre class="example" id="org632ec14">
 myage = Age("older than the hills")
 </pre>
 
@@ -348,7 +348,7 @@ myage = Age("older than the hills")
 Which will return an error like:
 </p>
 
-<pre class="example" id="orgfc1a6d2">
+<pre class="example" id="orga5b6fd5">
 Traceback (most recent call last):
   File "&lt;stdin&gt;", line 8, in &lt;module&gt;
   File "&lt;number Age&gt;", line 13, in __init__
@@ -364,7 +364,7 @@ Rather, we the developer are immediately punished if we attempt to
 violate the schema.  
 </p>
 
-<div class="note" id="org4f2fbda">
+<div class="note" id="orge0e8f76">
 <p>
 We may also produce an object from these (or more generic) types and
 validate that object against schema.  It is important to know that the
@@ -379,9 +379,9 @@ that <code>moo.otypes</code> will miss during object construction.
 </div>
 
 
-<div id="outline-container-orgc347324" class="outline-3">
-<h3 id="orgc347324">Schema structure array</h3>
-<div class="outline-text-3" id="text-orgc347324">
+<div id="outline-container-orgd01da47" class="outline-3">
+<h3 id="orgd01da47">Schema structure array</h3>
+<div class="outline-text-3" id="text-orgd01da47">
 <p>
 Creation of a <i>system of related types</i> is done with an array of data
 structures describing its schema and the Python types are constructed
@@ -414,7 +414,7 @@ print(f'{Desk}, {desk}, {desk.pod()}, {desk.ontop}')
 </pre>
 
 
-<div class="note" id="orgd33ab89">
+<div class="note" id="orgde1f5c7">
 <p>
 The schema structure array is assumed to be sorted in topological
 order of type dependencies.  Here, this is implicitly assured by how
@@ -426,16 +426,16 @@ the <code>schema</code> array is formed.  In more complex code one may rely on
 </div>
 </div>
 
-<div id="outline-container-orgaa82906" class="outline-3">
-<h3 id="orgaa82906">Load types from file</h3>
-<div class="outline-text-3" id="text-orgaa82906">
+<div id="outline-container-org24b7982" class="outline-3">
+<h3 id="org24b7982">Load types from file</h3>
+<div class="outline-text-3" id="text-org24b7982">
 <p>
 The highest layer function is <code>moo.otypes.load_types()</code>.  It is a mere
 convenience function that combines the <b>moo</b> method to load a schema
 file and a call to <code>make_types()</code> on the result.  
 </p>
 
-<div class="note" id="org0cdd41d">
+<div class="note" id="org229bcf5">
 <p>
 Any file format that <b>moo</b> supports may be used to provide schema, while
 Jsonnet is recommended.  See the <a href="oschema.html">oschema</a> document for more details on
@@ -470,22 +470,22 @@ print(per.pod())
 </div>
 
 <pre class="example">
-&lt;class 'app.Person'&gt;, &lt;record Person, fields: {email, counts, affil, mbti}&gt;, Snooty U
-{'email': 'foo@example.com', 'counts': [42], 'affil': 'Snooty U', 'mbti': 'judging'}
+&lt;class 'app.Person'&gt;, &lt;record Person, fields: {email, email2, counts, affil, mbti}&gt;, Snooty U
+{'email': 'foo@example.com', 'email2': 'me@example.com', 'counts': [42], 'affil': 'Snooty U', 'mbti': 'judging'}
 </pre>
 
 
 
-<div class="note" id="orgcaefb5e">
+<div class="note" id="org000b87e">
 <p>
 In the above we give <code>load_types()</code> a file system path (ie, <code>[here]</code>) so
-that in the <b>moo</b> test suite directory will be located.  <b>moo</b> will search
+that files in the <b>moo</b> test directory will be located.  <b>moo</b> will search
 this path when a file is given as a relative path.
 </p>
 
 <p>
-When using <code>moo</code> Python module the application may set a default path
-instead of providing one to every <code>moo.io.load()</code> call (which
+When using the <code>moo</code> Python module the application may set a default
+path instead of providing one to every <code>moo.io.load()</code> call (which
 <code>load_types()</code> forwards to).  An example of this usage is given below.
 </p>
 
@@ -500,9 +500,9 @@ When using the <code>moo</code> CLI one may set the environment variable
 </div>
 
 
-<div id="outline-container-org2b00c82" class="outline-2">
-<h2 id="org2b00c82">Help</h2>
-<div class="outline-text-2" id="text-org2b00c82">
+<div id="outline-container-org6479331" class="outline-2">
+<h2 id="org6479331">Help</h2>
+<div class="outline-text-2" id="text-org6479331">
 <p>
 Type information and any <code>doc</code> strings given in the schema are reflected
 into the constructed Python types.  This information can be displayed
@@ -524,13 +524,13 @@ help(Person)
 </pre>
 </div>
 
-<pre class="example" id="orgc3faa42">
+<pre class="example" id="org79189df">
 Help on class Person in module app:
 
 class Person(moo.otypes.Record)
- |  Person(*args, email: app.Email = None, counts: app.Counts = None, affil: app.Affiliation = None, mbti: app.MBTI = 'introversion')
+ |  Person(*args, email: app.Email = None, email2: app.Email = 'me@example.com', counts: app.Counts = None, affil: app.Affiliation = None, mbti: app.MBTI = 'introversion')
  |  
- |  Record type Person with fields: "email", "counts", "affil", "mbti"
+ |  Record type Person with fields: "email", "email2", "counts", "affil", "mbti"
  |  
  |  Describe everything there is to know about an individual human
  |  
@@ -543,7 +543,7 @@ class Person(moo.otypes.Record)
  |  
  |  Methods defined here:
  |  
- |  __init__(self, *args, email: app.Email = None, counts: app.Counts = None, affil: app.Affiliation = None, mbti: app.MBTI = 'introversion')
+ |  __init__(self, *args, email: app.Email = None, email2: app.Email = 'me@example.com', counts: app.Counts = None, affil: app.Affiliation = None, mbti: app.MBTI = 'introversion')
  |      Create a record type of Person
  |  
  |  ----------------------------------------------------------------------
@@ -554,6 +554,8 @@ class Person(moo.otypes.Record)
  |  counts
  |  
  |  email
+ |  
+ |  email2
  |  
  |  mbti
  |  
@@ -616,7 +618,7 @@ class Person(moo.otypes.Record)
 </div>
 <div id="postamble" class="status">
 <p class="author">Author: Brett Viren</p>
-<p class="date">Created: 2021-01-19 Tue 13:01</p>
+<p class="date">Created: 2021-01-19 Tue 13:44</p>
 <p class="validation"><a href="https://validator.w3.org/check?uri=referer">Validate</a></p>
 </div>
 </body>

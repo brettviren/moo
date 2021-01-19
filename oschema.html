@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2020-11-25 Wed 17:15 -->
+<!-- 2021-01-19 Tue 13:45 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title><code>moo</code> 無 <code>oschema</code></title>
@@ -40,7 +40,7 @@
   }
   pre.src {
     position: relative;
-    overflow: visible;
+    overflow: auto;
     padding-top: 1.2em;
   }
   pre.src:before {
@@ -52,7 +52,7 @@
     padding: 3px;
     border: 1px solid black;
   }
-  pre.src:hover:before { display: inline;}
+  pre.src:hover:before { display: inline; margin-top: 14px;}
   /* Languages per Org manual */
   pre.src-asymptote:before { content: 'Asymptote'; }
   pre.src-awk:before { content: 'Awk'; }
@@ -202,54 +202,30 @@
 <style> #content{max-width:1800px;}</style>
 <style> p{max-width:800px;}</style>
 <style> li{max-width:800px;}</style>
-<style> pre.src{border-radius: 5px; background-color:#333; color:white;}</style>
-<style> pre.example{background-color:#333; color:white;}</style>
+<style> pre.src{border-radius: 5px; background-color:#333; color:#0f0;}</style>
+<style> pre.example{border-radius: 5px; background-color:#333; color:#0f0;}</style>
 <style> code{border-radius: 5px; background-color:#333; color:#0f0;}</style>
 <script type="text/javascript">
-/*
-@licstart  The following is the entire license notice for the
-JavaScript code in this tag.
-
-Copyright (C) 2012-2020 Free Software Foundation, Inc.
-
-The JavaScript code in this tag is free software: you can
-redistribute it and/or modify it under the terms of the GNU
-General Public License (GNU GPL) as published by the Free Software
-Foundation, either version 3 of the License, or (at your option)
-any later version.  The code is distributed WITHOUT ANY WARRANTY;
-without even the implied warranty of MERCHANTABILITY or FITNESS
-FOR A PARTICULAR PURPOSE.  See the GNU GPL for more details.
-
-As additional permission under GNU GPL version 3 section 7, you
-may distribute non-source (e.g., minimized or compacted) forms of
-that code without the copy of the GNU GPL normally required by
-section 4, provided you include this license notice and a URL
-through which recipients can access the Corresponding Source.
-
-
-@licend  The above is the entire license notice
-for the JavaScript code in this tag.
-*/
+// @license magnet:?xt=urn:btih:e95b018ef3580986a04669f1b5879592219e2a7a&dn=public-domain.txt Public Domain
 <!--/*--><![CDATA[/*><!--*/
- function CodeHighlightOn(elem, id)
- {
-   var target = document.getElementById(id);
-   if(null != target) {
-     elem.cacheClassElem = elem.className;
-     elem.cacheClassTarget = target.className;
-     target.className = "code-highlighted";
-     elem.className   = "code-highlighted";
-   }
- }
- function CodeHighlightOff(elem, id)
- {
-   var target = document.getElementById(id);
-   if(elem.cacheClassElem)
-     elem.className = elem.cacheClassElem;
-   if(elem.cacheClassTarget)
-     target.className = elem.cacheClassTarget;
- }
-/*]]>*///-->
+     function CodeHighlightOn(elem, id)
+     {
+       var target = document.getElementById(id);
+       if(null != target) {
+         elem.classList.add("code-highlighted");
+         target.classList.add("code-highlighted");
+       }
+     }
+     function CodeHighlightOff(elem, id)
+     {
+       var target = document.getElementById(id);
+       if(null != target) {
+         elem.classList.remove("code-highlighted");
+         target.classList.remove("code-highlighted");
+       }
+     }
+    /*]]>*///-->
+// @license-end
 </script>
 </head>
 <body>
@@ -298,7 +274,7 @@ type in turn defines the allowed structure and constraints of <b>models</b>
 dominant one is <i>oschema</i>.
 </p>
 
-<div class="note">
+<div class="note" id="org6a142ba">
 <p>
 The "o" stands for "object" as <i>oschema</i> describes a type using an
 object representation.  A lesser used <b>moo</b> schema system is <i>fschema</i>
@@ -416,10 +392,10 @@ We start by simply presenting the <code>sys</code> schema:
 </p>
 
 <div class="org-src-container">
-<pre class="src src-jsonnet"><span style="color: #73d216;">// examples/oschema/sys.jsonnet</span>
-<span style="color: #b4fa70;">local</span> moo = <span style="color: #b4fa70;">import</span> <span style="color: #e9b96e;">"moo.jsonnet"</span>;
-<span style="color: #b4fa70;">local</span> sys = moo.oschema.schema(<span style="color: #e9b96e;">"sys"</span>);
-[sys.number(<span style="color: #e9b96e;">"Count"</span>, <span style="color: #e9b96e;">"u4"</span>)]
+<pre class="src src-jsonnet">// examples/oschema/sys.jsonnet
+local moo = import "moo.jsonnet";
+local sys = moo.oschema.schema("sys");
+[sys.number("Count", "u4")]
 </pre>
 </div>
 
@@ -428,7 +404,7 @@ Let's walk through this short example line by line:
 </p>
 
 <div class="org-src-container">
-<pre class="src src-jsonnet"><span style="color: #b4fa70;">local</span> moo = <span style="color: #b4fa70;">import</span> <span style="color: #e9b96e;">"moo.jsonnet"</span>;
+<pre class="src src-jsonnet">local moo = import "moo.jsonnet";
 </pre>
 </div>
 
@@ -439,7 +415,7 @@ various Jsonnet functions and data that will help build our <i>oschema</i>.
 </p>
 
 <div class="org-src-container">
-<pre class="src src-jsonnet"><span style="color: #b4fa70;">local</span> sys = moo.oschema.schema(<span style="color: #e9b96e;">"sys"</span>);
+<pre class="src src-jsonnet">local sys = moo.oschema.schema("sys");
 </pre>
 </div>
 
@@ -451,7 +427,7 @@ provide sort of a "schema factory" that operates "in" the type path of
 </p>
 
 <div class="org-src-container">
-<pre class="src src-jsonnet">[sys.number(<span style="color: #e9b96e;">"Count"</span>, <span style="color: #e9b96e;">"u4"</span>)]
+<pre class="src src-jsonnet">[sys.number("Count", "u4")]
 </pre>
 </div>
 
@@ -461,7 +437,7 @@ of the entire <code>sys.jsonnet</code> file.  That is, this file "compiles" to a
 array holding a single <i>oschema</i> type.
 </p>
 
-<div class="note">
+<div class="note" id="orgcac8f46">
 <p>
 All <b>moo</b> "schema files" are expected to provide an
 array-of-type-objects.  We will later see how the order of this array
@@ -485,13 +461,13 @@ representation using <b>moo</b>:
 <div class="org-src-container">
 <pre class="src src-json">[
     {
-        <span style="color: #b4fa70;">"deps"</span>: [],
-        <span style="color: #b4fa70;">"dtype"</span>: <span style="color: #e9b96e;">"u4"</span>,
-        <span style="color: #b4fa70;">"name"</span>: <span style="color: #e9b96e;">"Count"</span>,
-        <span style="color: #b4fa70;">"path"</span>: [
-            <span style="color: #e9b96e;">"sys"</span>
+        "deps": [],
+        "dtype": "u4",
+        "name": "Count",
+        "path": [
+            "sys"
         ],
-        <span style="color: #b4fa70;">"schema"</span>: <span style="color: #e9b96e;">"number"</span>
+        "schema": "number"
     }
 ]
 </pre>
@@ -504,7 +480,7 @@ unsigned integer in four bytes <code>"u4"</code> and is in a context <code>path<
 <code>["sys"]</code>.
 </p>
 
-<div class="note">
+<div class="note" id="org0584b75">
 <p>
 The final structural form of <i>oschema</i> (ie, the JSON above) is not
 something that a developer of a schema strictly needs to know.  <b>moo</b>
@@ -521,52 +497,52 @@ Next, we imagine an application schema with a more rich set of types:
 </p>
 
 <div class="org-src-container">
-<pre class="src src-jsonnet"><span style="color: #73d216;">// examples/oschema/app.jsonnet</span>
-<span style="color: #b4fa70;">local</span> moo = <span style="color: #b4fa70;">import</span> <span style="color: #e9b96e;">"moo.jsonnet"</span>;
-<span style="color: #b4fa70;">local</span> sa = <span style="color: #b4fa70;">import</span> <span style="color: #e9b96e;">"sys.jsonnet"</span>;
-<span style="color: #b4fa70;">local</span> sh = moo.oschema.hier(sa);
-<span style="color: #b4fa70;">local</span> as = moo.oschema.schema(<span style="color: #e9b96e;">"app"</span>);
-<span style="color: #b4fa70;">local</span> hier = {
-    counts: as.sequence(<span style="color: #e9b96e;">"Counts"</span>,sh.sys.Count,
-                        doc=<span style="color: #e9b96e;">"All the counts"</span>),
+<pre class="src src-jsonnet">// examples/oschema/app.jsonnet
+local moo = import "moo.jsonnet";
+local sa = import "sys.jsonnet";
+local sh = moo.oschema.hier(sa);
+local as = moo.oschema.schema("app");
+local hier = {
+    counts: as.sequence("Counts",sh.sys.Count,
+                        doc="All the counts"),
 
-    email: as.string(<span style="color: #e9b96e;">"Email"</span>, format=<span style="color: #e9b96e;">"email"</span>,
-                    doc=<span style="color: #e9b96e;">"Electronic mail address"</span>),
-    affil: as.any(<span style="color: #e9b96e;">"Affiliation"</span>,
-                  doc=<span style="color: #e9b96e;">"An associated object of any type"</span>),
-    mbti: as.enum(<span style="color: #e9b96e;">"MBTI"</span>,[<span style="color: #e9b96e;">"introversion"</span>,<span style="color: #e9b96e;">"extroversion"</span>,
-                          <span style="color: #e9b96e;">"sensing"</span>,<span style="color: #e9b96e;">"intuition"</span>,
-                          <span style="color: #e9b96e;">"thinking"</span>,<span style="color: #e9b96e;">"feeling"</span>,
-                          <span style="color: #e9b96e;">"judging"</span>,<span style="color: #e9b96e;">"perceiving"</span>]),
-    make: as.string(<span style="color: #e9b96e;">"Make"</span>),
-    model: as.string(<span style="color: #e9b96e;">"Model"</span>),
-    autotype: as.enum(<span style="color: #e9b96e;">"VehicleClass"</span>, [<span style="color: #e9b96e;">"boring"</span>, <span style="color: #e9b96e;">"fun"</span>]),
-    vehicle : as.record(<span style="color: #e9b96e;">"Vehicle"</span>, [
-        as.field(<span style="color: #e9b96e;">"make"</span>, <span style="color: #b4fa70;">self</span>.make, default=<span style="color: #e9b96e;">"Subaru"</span>),
-        as.field(<span style="color: #e9b96e;">"model"</span>, <span style="color: #b4fa70;">self</span>.model, default=<span style="color: #e9b96e;">"WRX"</span>),
-        as.field(<span style="color: #e9b96e;">"type"</span>, <span style="color: #b4fa70;">self</span>.autotype, default=<span style="color: #e9b96e;">"fun"</span>)]),
+    email: as.string("Email", format="email",
+                    doc="Electronic mail address"),
+    affil: as.any("Affiliation",
+                  doc="An associated object of any type"),
+    mbti: as.enum("MBTI",["introversion","extroversion",
+                          "sensing","intuition",
+                          "thinking","feeling",
+                          "judging","perceiving"]),
+    make: as.string("Make"),
+    model: as.string("Model"),
+    autotype: as.enum("VehicleClass", ["boring", "fun"]),
+    vehicle : as.record("Vehicle", [
+        as.field("make", self.make, default="Subaru"),
+        as.field("model", self.model, default="WRX"),
+        as.field("type", self.autotype, default="fun")]),
 
-    person: as.record(<span style="color: #e9b96e;">"Person"</span>, [
-        as.field(<span style="color: #e9b96e;">"email"</span>,<span style="color: #b4fa70;">self</span>.email,
-                 doc=<span style="color: #e9b96e;">"E-mail address"</span>),
-        as.field(<span style="color: #e9b96e;">"email2"</span>,<span style="color: #b4fa70;">self</span>.email,
-                 doc=<span style="color: #e9b96e;">"E-mail address"</span>, default=<span style="color: #e9b96e;">"me@example.com"</span>),
-        as.field(<span style="color: #e9b96e;">"counts"</span>,<span style="color: #b4fa70;">self</span>.counts,
-                 doc=<span style="color: #e9b96e;">"Count of some things"</span>),
-        as.field(<span style="color: #e9b96e;">"counts2"</span>,<span style="color: #b4fa70;">self</span>.counts,
-                 doc=<span style="color: #e9b96e;">"Count of some things"</span>, default=[0,1,2]),
-        as.field(<span style="color: #e9b96e;">"affil"</span>, <span style="color: #b4fa70;">self</span>.affil,
-                 doc=<span style="color: #e9b96e;">"Some affiliation"</span>),
-        as.field(<span style="color: #e9b96e;">"mbti"</span>, <span style="color: #b4fa70;">self</span>.mbti,
-                 doc=<span style="color: #e9b96e;">"Personality"</span>),
-        as.field(<span style="color: #e9b96e;">"vehicle"</span>, <span style="color: #b4fa70;">self</span>.vehicle, doc=<span style="color: #e9b96e;">"Example of nested record"</span>),
-        as.field(<span style="color: #e9b96e;">"vehicle2"</span>, <span style="color: #b4fa70;">self</span>.vehicle, default={model:<span style="color: #e9b96e;">"CrossTrek"</span>, type:<span style="color: #e9b96e;">"boring"</span>},
-                 doc=<span style="color: #e9b96e;">"Example of nested record with default"</span>),
-        as.field(<span style="color: #e9b96e;">"vehicle2"</span>, <span style="color: #b4fa70;">self</span>.vehicle, default={model:<span style="color: #e9b96e;">"BRZ"</span>},
-                 doc=<span style="color: #e9b96e;">"Example of nested record with default"</span>),
-    ], doc=<span style="color: #e9b96e;">"Describe everything there is to know about an individual human"</span>),
+    person: as.record("Person", [
+        as.field("email",self.email,
+                 doc="E-mail address"),
+        as.field("email2",self.email,
+                 doc="E-mail address", default="me@example.com"),
+        as.field("counts",self.counts,
+                 doc="Count of some things"),
+        as.field("counts2",self.counts,
+                 doc="Count of some things", default=[0,1,2]),
+        as.field("affil", self.affil,
+                 doc="Some affiliation"),
+        as.field("mbti", self.mbti,
+                 doc="Personality"),
+        as.field("vehicle", self.vehicle, doc="Example of nested record"),
+        as.field("vehicle2", self.vehicle, default={model:"CrossTrek", type:"boring"},
+                 doc="Example of nested record with default"),
+        as.field("vehicle2", self.vehicle, default={model:"BRZ"},
+                 doc="Example of nested record with default"),
+    ], doc="Describe everything there is to know about an individual human"),
 };
-sa + moo.oschema.sort_select(hier, <span style="color: #e9b96e;">"app"</span>)
+sa + moo.oschema.sort_select(hier, "app")
 </pre>
 </div>
 
@@ -576,10 +552,10 @@ some of the forms.  Starting with the first few lines:
 </p>
 
 <div class="org-src-container">
-<pre class="src src-jsonnet"><span style="color: #b4fa70;">local</span> moo = <span style="color: #b4fa70;">import</span> <span style="color: #e9b96e;">"moo.jsonnet"</span>;
-<span style="color: #b4fa70;">local</span> sa = <span style="color: #b4fa70;">import</span> <span style="color: #e9b96e;">"sys.jsonnet"</span>;
-<span style="color: #b4fa70;">local</span> sh = moo.oschema.hier(sa);
-<span style="color: #b4fa70;">local</span> as = moo.oschema.schema(<span style="color: #e9b96e;">"app"</span>);
+<pre class="src src-jsonnet">local moo = import "moo.jsonnet";
+local sa = import "sys.jsonnet";
+local sh = moo.oschema.hier(sa);
+local as = moo.oschema.schema("app");
 </pre>
 </div>
 
@@ -608,9 +584,9 @@ in another.  Let's look at the start:
 </p>
 
 <div class="org-src-container">
-<pre class="src src-jsonnet"><span style="color: #b4fa70;">local</span> hier = {
-    counts: as.sequence(<span style="color: #e9b96e;">"Counts"</span>,sh.sys.Count,
-                        doc=<span style="color: #e9b96e;">"All the counts"</span>),
+<pre class="src src-jsonnet">local hier = {
+    counts: as.sequence("Counts",sh.sys.Count,
+                        doc="All the counts"),
 </pre>
 </div>
 
@@ -632,14 +608,14 @@ Next, let's jump to the definition of the <code>Person</code> type which begins 
 </p>
 
 <div class="org-src-container">
-<pre class="src src-jsonnet">email: as.string(<span style="color: #e9b96e;">"Email"</span>, format=<span style="color: #e9b96e;">"email"</span>,
-                doc=<span style="color: #e9b96e;">"Electronic mail address"</span>),
-affil: as.any(<span style="color: #e9b96e;">"Affiliation"</span>,
-              doc=<span style="color: #e9b96e;">"An associated object of any type"</span>),
-mbti: as.enum(<span style="color: #e9b96e;">"MBTI"</span>,[<span style="color: #e9b96e;">"introversion"</span>,<span style="color: #e9b96e;">"extroversion"</span>,
-                      <span style="color: #e9b96e;">"sensing"</span>,<span style="color: #e9b96e;">"intuition"</span>,
-                      <span style="color: #e9b96e;">"thinking"</span>,<span style="color: #e9b96e;">"feeling"</span>,
-                      <span style="color: #e9b96e;">"judging"</span>,<span style="color: #e9b96e;">"perceiving"</span>]),
+<pre class="src src-jsonnet">email: as.string("Email", format="email",
+                doc="Electronic mail address"),
+affil: as.any("Affiliation",
+              doc="An associated object of any type"),
+mbti: as.enum("MBTI",["introversion","extroversion",
+                      "sensing","intuition",
+                      "thinking","feeling",
+                      "judging","perceiving"]),
 </pre>
 </div>
 
@@ -648,13 +624,13 @@ Now we define an instance of the <code>record</code> schema class:
 </p>
 
 <div class="org-src-container">
-<pre class="src src-jsonnet">make: as.string(<span style="color: #e9b96e;">"Make"</span>),
-model: as.string(<span style="color: #e9b96e;">"Model"</span>),
-autotype: as.enum(<span style="color: #e9b96e;">"VehicleClass"</span>, [<span style="color: #e9b96e;">"boring"</span>, <span style="color: #e9b96e;">"fun"</span>]),
-vehicle : as.record(<span style="color: #e9b96e;">"Vehicle"</span>, [
-    as.field(<span style="color: #e9b96e;">"make"</span>, <span style="color: #b4fa70;">self</span>.make, default=<span style="color: #e9b96e;">"Subaru"</span>),
-    as.field(<span style="color: #e9b96e;">"model"</span>, <span style="color: #b4fa70;">self</span>.model, default=<span style="color: #e9b96e;">"WRX"</span>),
-    as.field(<span style="color: #e9b96e;">"type"</span>, <span style="color: #b4fa70;">self</span>.autotype, default=<span style="color: #e9b96e;">"fun"</span>)]),
+<pre class="src src-jsonnet">make: as.string("Make"),
+model: as.string("Model"),
+autotype: as.enum("VehicleClass", ["boring", "fun"]),
+vehicle : as.record("Vehicle", [
+    as.field("make", self.make, default="Subaru"),
+    as.field("model", self.model, default="WRX"),
+    as.field("type", self.autotype, default="fun")]),
 </pre>
 </div>
 
@@ -672,7 +648,7 @@ We end the <i>app</i> schema file by producing a "sorted" array of types:
 </p>
 
 <div class="org-src-container">
-<pre class="src src-jsonnet">sa + moo.oschema.sort_select(hier, <span style="color: #e9b96e;">"app"</span>)
+<pre class="src src-jsonnet">sa + moo.oschema.sort_select(hier, "app")
 </pre>
 </div>
 
@@ -691,11 +667,11 @@ Sparing the long output here, the full schema compiled to JSON can be
 produced with this command:
 </p>
 
-<pre class="example">
+<pre class="example" id="orgfc9c869">
 moo compile examples/oschema/app.jsonnet
 </pre>
 
-<div class="note">
+<div class="note" id="orgfc80d03">
 <p>
 While developing a schema, it is very useful to run <code>moo compile</code>
 frequently in order to check for Jsonnet syntax or logic errors.
@@ -757,14 +733,14 @@ Starting with the simple <i>sys</i> schema we can make something like:
 </p>
 
 <div class="org-src-container">
-<pre class="src src-python"><span style="color: #73d216;">#</span><span style="color: #73d216;">!/usr/bin/env python3</span>
-<span style="color: #b4fa70;">import</span> moo.oschema <span style="color: #b4fa70;">as</span> mo
-<span style="color: #fcaf3e;">ns</span> = mo.Namespace(<span style="color: #e9b96e;">"sys"</span>)
-<span style="color: #fcaf3e;">schema</span> = [ns.Number(<span style="color: #e9b96e;">"Count"</span>, <span style="color: #e9b96e;">"u4"</span>)]
+<pre class="src src-python">#!/usr/bin/env python3
+import moo.oschema as mo
+ns = mo.Namespace("sys")
+schema = [ns.Number("Count", "u4")]
 </pre>
 </div>
 
-<div class="note">
+<div class="note" id="org51201b3">
 <p>
 We name the module <code>systypes</code> to not conflict with Python's <code>sys</code> module.
 </p>
@@ -776,48 +752,48 @@ The <i>app</i> schema is structured similarly, if a fair bit longer.
 </p>
 
 <div class="org-src-container">
-<pre class="src src-python"><span style="color: #b4fa70;">import</span> moo.oschema <span style="color: #b4fa70;">as</span> mo
-<span style="color: #b4fa70;">import</span> systypes
+<pre class="src src-python">import moo.oschema as mo
+import systypes
 
-<span style="color: #fcaf3e;">ss</span> = {typ.name.lower(): typ <span style="color: #b4fa70;">for</span> typ <span style="color: #b4fa70;">in</span> systypes.schema}
+ss = {typ.name.lower(): typ for typ in systypes.schema}
 
-<span style="color: #fcaf3e;">ns</span> = mo.Namespace(<span style="color: #e9b96e;">"app"</span>)
+ns = mo.Namespace("app")
 
-<span style="color: #fcaf3e;">counts</span> = ns.sequence(<span style="color: #e9b96e;">"Counts"</span>, ss[<span style="color: #e9b96e;">'count'</span>])
-<span style="color: #fcaf3e;">email</span> = ns.string(<span style="color: #e9b96e;">"Email"</span>, <span style="color: #e090d7;">format</span>=<span style="color: #e9b96e;">"email"</span>,
-                  doc=<span style="color: #e9b96e;">"Electronic mail address"</span>)
-<span style="color: #fcaf3e;">affil</span> = ns.<span style="color: #e090d7;">any</span>(<span style="color: #e9b96e;">"Affiliation"</span>,
-               doc=<span style="color: #e9b96e;">"An associated object of any type"</span>)
-<span style="color: #fcaf3e;">mbti</span> = ns.enum(<span style="color: #e9b96e;">"MBTI"</span>, [<span style="color: #e9b96e;">"introversion"</span>, <span style="color: #e9b96e;">"extroversion"</span>,
-                        <span style="color: #e9b96e;">"sensing"</span>, <span style="color: #e9b96e;">"intuition"</span>,
-                        <span style="color: #e9b96e;">"thinking"</span>, <span style="color: #e9b96e;">"feeling"</span>,
-                        <span style="color: #e9b96e;">"judging"</span>, <span style="color: #e9b96e;">"perceiving"</span>])
+counts = ns.sequence("Counts", ss['count'])
+email = ns.string("Email", format="email",
+                  doc="Electronic mail address")
+affil = ns.any("Affiliation",
+               doc="An associated object of any type")
+mbti = ns.enum("MBTI", ["introversion", "extroversion",
+                        "sensing", "intuition",
+                        "thinking", "feeling",
+                        "judging", "perceiving"])
 
-<span style="color: #fcaf3e;">make</span> = ns.string(<span style="color: #e9b96e;">"Make"</span>)
-<span style="color: #fcaf3e;">model</span> = ns.string(<span style="color: #e9b96e;">"Model"</span>)
-<span style="color: #fcaf3e;">autotype</span> = ns.enum(<span style="color: #e9b96e;">"VehicleClass"</span>, [<span style="color: #e9b96e;">"boring"</span>, <span style="color: #e9b96e;">"fun"</span>])
-<span style="color: #fcaf3e;">vehicle</span> = ns.record(<span style="color: #e9b96e;">"Vehicle"</span>, [
-    ns.field(<span style="color: #e9b96e;">"make"</span>, make, default=<span style="color: #e9b96e;">"Subaru"</span>),
-    ns.field(<span style="color: #e9b96e;">"model"</span>, model, default=<span style="color: #e9b96e;">"WRX"</span>),
-    ns.field(<span style="color: #e9b96e;">"type"</span>, autotype, default=<span style="color: #e9b96e;">"fun"</span>)])
-
-
-<span style="color: #fcaf3e;">person</span> = ns.record(<span style="color: #e9b96e;">"Person"</span>, [
-    ns.field(<span style="color: #e9b96e;">"email"</span>, email, doc=<span style="color: #e9b96e;">"E-mail address"</span>),
-    ns.field(<span style="color: #e9b96e;">"email2"</span>, email, doc=<span style="color: #e9b96e;">"E-mail address"</span>, default=<span style="color: #e9b96e;">"me@example.com"</span>),
-    ns.field(<span style="color: #e9b96e;">"counts"</span>, counts, doc=<span style="color: #e9b96e;">"Count of some things"</span>),
-    ns.field(<span style="color: #e9b96e;">"counts2"</span>, counts, doc=<span style="color: #e9b96e;">"Count of some things"</span>, default=[0, 1, 2]),
-    ns.field(<span style="color: #e9b96e;">"affil"</span>, affil, doc=<span style="color: #e9b96e;">"Some affiliation"</span>),
-    ns.field(<span style="color: #e9b96e;">"mbti"</span>, mbti, doc=<span style="color: #e9b96e;">"Personality"</span>),
-    ns.field(<span style="color: #e9b96e;">"vehicle"</span>, vehicle, doc=<span style="color: #e9b96e;">"Example of nested record"</span>),
-    ns.field(<span style="color: #e9b96e;">"vehicle2"</span>, vehicle, default=<span style="color: #e090d7;">dict</span>(model=<span style="color: #e9b96e;">"CrossTrek"</span>, <span style="color: #e090d7;">type</span>=<span style="color: #e9b96e;">"boring"</span>),
-             doc=<span style="color: #e9b96e;">"Example of nested record with default"</span>),
-    ns.field(<span style="color: #e9b96e;">"vehicle2"</span>, vehicle, default=<span style="color: #e090d7;">dict</span>(model=<span style="color: #e9b96e;">"BRZ"</span>),
-             doc=<span style="color: #e9b96e;">"Example of nested record with default"</span>),
-], doc=<span style="color: #e9b96e;">"Describe everything there is to know about an individual human"</span>)
+make = ns.string("Make")
+model = ns.string("Model")
+autotype = ns.enum("VehicleClass", ["boring", "fun"])
+vehicle = ns.record("Vehicle", [
+    ns.field("make", make, default="Subaru"),
+    ns.field("model", model, default="WRX"),
+    ns.field("type", autotype, default="fun")])
 
 
-<span style="color: #fcaf3e;">schema</span> = systypes.schema + mo.depsort({k: v <span style="color: #b4fa70;">for</span> k, v <span style="color: #b4fa70;">in</span> <span style="color: #e090d7;">globals</span>().items() <span style="color: #b4fa70;">if</span> <span style="color: #e090d7;">isinstance</span>(v, mo.BaseType)})
+person = ns.record("Person", [
+    ns.field("email", email, doc="E-mail address"),
+    ns.field("email2", email, doc="E-mail address", default="me@example.com"),
+    ns.field("counts", counts, doc="Count of some things"),
+    ns.field("counts2", counts, doc="Count of some things", default=[0, 1, 2]),
+    ns.field("affil", affil, doc="Some affiliation"),
+    ns.field("mbti", mbti, doc="Personality"),
+    ns.field("vehicle", vehicle, doc="Example of nested record"),
+    ns.field("vehicle2", vehicle, default=dict(model="CrossTrek", type="boring"),
+             doc="Example of nested record with default"),
+    ns.field("vehicle2", vehicle, default=dict(model="BRZ"),
+             doc="Example of nested record with default"),
+], doc="Describe everything there is to know about an individual human")
+
+
+schema = systypes.schema + mo.depsort({k: v for k, v in globals().items() if isinstance(v, mo.BaseType)})
 </pre>
 </div>
 
@@ -833,9 +809,9 @@ the <i>oschema</i> type objects made in the module using a filter on
 </p>
 </div>
 
-<div id="outline-container-org15fae0b" class="outline-4">
-<h4 id="org15fae0b"><span class="todo TODO">TODO</span> call from moo.</h4>
-<div class="outline-text-4" id="text-org15fae0b">
+<div id="outline-container-org2d716d4" class="outline-4">
+<h4 id="org2d716d4"><span class="todo TODO">TODO</span> call from moo.</h4>
+<div class="outline-text-4" id="text-org2d716d4">
 <ul class="org-ul">
 <li>add an <code>import</code> based Python loader to <code>moo</code></li>
 </ul>
@@ -893,21 +869,21 @@ This simple example shows how TLAs work:
 </p>
 
 <div class="org-src-container">
-<pre class="src src-jsonnet"><span style="color: #b4fa70;">function</span>(arg=<span style="color: #e9b96e;">""</span>, def=<span style="color: #e9b96e;">"default"</span>) {
+<pre class="src src-jsonnet">function(arg="", def="default") {
     arg: arg, def:def,
 }
 </pre>
 </div>
 
 <div class="org-src-container">
-<pre class="src src-shell">moo -A <span style="color: #fcaf3e;">arg</span>=<span style="color: #e9b96e;">"hi"</span> compile examples/oschema/tla.jsonnet
+<pre class="src src-shell">moo -A arg="hi" compile examples/oschema/tla.jsonnet
 </pre>
 </div>
 
 <div class="org-src-container">
 <pre class="src src-json">{
-    <span style="color: #b4fa70;">"arg"</span>: <span style="color: #e9b96e;">"hi"</span>,
-    <span style="color: #b4fa70;">"def"</span>: <span style="color: #e9b96e;">"default"</span>
+    "arg": "hi",
+    "def": "default"
 }
 </pre>
 </div>
@@ -921,24 +897,24 @@ function.  Reusing the above example and the <code>sys</code> schema file:
 </p>
 
 <div class="org-src-container">
-<pre class="src src-shell">moo -A <span style="color: #fcaf3e;">arg</span>=examples/oschema/sys.jsonnet compile examples/oschema/tla.jsonnet
+<pre class="src src-shell">moo -A arg=examples/oschema/sys.jsonnet compile examples/oschema/tla.jsonnet
 </pre>
 </div>
 
 <div class="org-src-container">
 <pre class="src src-json">{
-    <span style="color: #b4fa70;">"arg"</span>: [
+    "arg": [
         {
-            <span style="color: #b4fa70;">"deps"</span>: [],
-            <span style="color: #b4fa70;">"dtype"</span>: <span style="color: #e9b96e;">"u4"</span>,
-            <span style="color: #b4fa70;">"name"</span>: <span style="color: #e9b96e;">"Count"</span>,
-            <span style="color: #b4fa70;">"path"</span>: [
-                <span style="color: #e9b96e;">"sys"</span>
+            "deps": [],
+            "dtype": "u4",
+            "name": "Count",
+            "path": [
+                "sys"
             ],
-            <span style="color: #b4fa70;">"schema"</span>: <span style="color: #e9b96e;">"number"</span>
+            "schema": "number"
         }
     ],
-    <span style="color: #b4fa70;">"def"</span>: <span style="color: #e9b96e;">"default"</span>
+    "def": "default"
 }
 </pre>
 </div>
@@ -957,8 +933,8 @@ Consider:
 </p>
 
 <div class="org-src-container">
-<pre class="src src-jsonnet"><span style="color: #b4fa70;">local</span> sys = <span style="color: #b4fa70;">import</span> <span style="color: #e9b96e;">"sys.jsonnet"</span>;
-<span style="color: #b4fa70;">local</span> tla = <span style="color: #b4fa70;">import</span> <span style="color: #e9b96e;">"tla.jsonnet"</span>;
+<pre class="src src-jsonnet">local sys = import "sys.jsonnet";
+local tla = import "tla.jsonnet";
 tla(sys)
 </pre>
 </div>
@@ -974,18 +950,18 @@ Thus we may get the same output with a simpler command:
 
 <div class="org-src-container">
 <pre class="src src-json">{
-    <span style="color: #b4fa70;">"arg"</span>: [
+    "arg": [
         {
-            <span style="color: #b4fa70;">"deps"</span>: [],
-            <span style="color: #b4fa70;">"dtype"</span>: <span style="color: #e9b96e;">"u4"</span>,
-            <span style="color: #b4fa70;">"name"</span>: <span style="color: #e9b96e;">"Count"</span>,
-            <span style="color: #b4fa70;">"path"</span>: [
-                <span style="color: #e9b96e;">"sys"</span>
+            "deps": [],
+            "dtype": "u4",
+            "name": "Count",
+            "path": [
+                "sys"
             ],
-            <span style="color: #b4fa70;">"schema"</span>: <span style="color: #e9b96e;">"number"</span>
+            "schema": "number"
         }
     ],
-    <span style="color: #b4fa70;">"def"</span>: <span style="color: #e9b96e;">"default"</span>
+    "def": "default"
 }
 </pre>
 </div>
@@ -1027,16 +1003,16 @@ illustrate a transformation applied to the <code>app</code> schema:
 </div>
 
 <div class="org-src-container">
-<pre class="src src-python">[&lt;Number <span style="color: #e9b96e;">"sys.Count"</span>&gt;,
- &lt;Any <span style="color: #e9b96e;">"app.Affiliation"</span>&gt;,
- &lt;Sequence <span style="color: #e9b96e;">"app.Counts"</span> items:sys.Count&gt;,
- &lt;String <span style="color: #e9b96e;">"app.Email"</span>&gt;,
- &lt;Enum <span style="color: #e9b96e;">"app.MBTI"</span>&gt;,
- &lt;String <span style="color: #e9b96e;">"app.Make"</span>&gt;,
- &lt;String <span style="color: #e9b96e;">"app.Model"</span>&gt;,
- &lt;Enum <span style="color: #e9b96e;">"app.VehicleClass"</span>&gt;,
- &lt;Record <span style="color: #e9b96e;">"app.Vehicle"</span> fields:{make, model, <span style="color: #e090d7;">type</span>}&gt;,
- &lt;Record <span style="color: #e9b96e;">"app.Person"</span> fields:{email, email2, counts, counts2, affil, mbti, vehicle, vehicle2, vehicle2}&gt;]
+<pre class="src src-python">[&lt;Number "sys.Count"&gt;,
+ &lt;Any "app.Affiliation"&gt;,
+ &lt;Sequence "app.Counts" items:sys.Count&gt;,
+ &lt;String "app.Email"&gt;,
+ &lt;Enum "app.MBTI"&gt;,
+ &lt;String "app.Make"&gt;,
+ &lt;String "app.Model"&gt;,
+ &lt;Enum "app.VehicleClass"&gt;,
+ &lt;Record "app.Vehicle" fields:{make, model, type}&gt;,
+ &lt;Record "app.Person" fields:{email, email2, counts, counts2, affil, mbti, vehicle, vehicle2, vehicle2}&gt;]
 </pre>
 </div>
 
@@ -1058,13 +1034,13 @@ are ordered from least dependent to most.
 </p>
 
 <div class="org-src-container">
-<pre class="src src-shell">moo -T examples/oschema -M examples/oschema <span style="color: #e9b96e;">\</span>
-    -t <span style="color: #e9b96e;">'moo.oschema.typify|moo.oschema.graph|moo.oschema.depsort'</span> <span style="color: #e9b96e;">\</span>
+<pre class="src src-shell">moo -T examples/oschema -M examples/oschema \
+    -t 'moo.oschema.typify|moo.oschema.graph|moo.oschema.depsort' \
       render app.jsonnet ool.txt.j2
 </pre>
 </div>
 
-<pre class="example">
+<pre class="example" id="orged643bc">
 Iterate over list of types:
 &lt;Number "sys.Count"&gt;
 &lt;Any "app.Affiliation"&gt;
@@ -1133,36 +1109,45 @@ The <code>omodel</code> contract is embodied in this Jsonnet file:
 </p>
 
 <div class="org-src-container">
-<pre class="src src-jsonnet"><span style="color: #b4fa70;">local</span> oschema = <span style="color: #b4fa70;">import</span> <span style="color: #e9b96e;">"oschema.jsonnet"</span>;
+<pre class="src src-jsonnet">local oschema = import "oschema.jsonnet";
 
-<span style="color: #b4fa70;">function</span>(os, path, ctxpath=[]) {
-    <span style="color: #73d216;">// The path/namespace this model "lives" in</span>
+function(os, path, ctxpath=[]) {
+
+    // The "path" determines which schema types in the "os" array will
+    // be considered to be directly "in" the model.  The "path" may be
+    // give either as a literal list of string or encoded as a
+    // dot-separated string.  It is used, eg, to form a surrounding
+    // C++ namespace containing the codegen'ed types.
     path: oschema.listify(path),
-    nspre: oschema.prepath(<span style="color: #b4fa70;">self</span>.path),
 
-    <span style="color: #73d216;">// The path/namespace this model is assumed to be in.  It should</span>
-    <span style="color: #73d216;">// be a leading part of the path</span>
+    // The "context path" is a prefix of the "path" to be removed when
+    // refering to this model from external resources and in a
+    // relative way.  Eg, the ctxpath is removed from the path when
+    // forming relative #include statements between "sibling" headers
+    // generated from this model.  It may either be a litteral list of
+    // strings or a list of string encoded as a dot-separated string.
     ctxpath: oschema.listify(ctxpath),
-    ctxpre: oschema.prepath(<span style="color: #b4fa70;">self</span>.ctxpath),
 
-    relpath: oschema.relpath(<span style="color: #b4fa70;">self</span>.path, <span style="color: #b4fa70;">self</span>.ctxpath),
+    // Select out the types which are "in" the path for consideration.
+    types: [t for t in os if oschema.isin(self.path, t.path)],
 
-    <span style="color: #73d216;">// Select out the types "in" this namespace.</span>
-    types: [t <span style="color: #b4fa70;">for</span> t <span style="color: #b4fa70;">in</span> os <span style="color: #b4fa70;">if</span> oschema.isin(<span style="color: #b4fa70;">self</span>.path, t.path)],
-
-    <span style="color: #73d216;">// all types, including types referred to by those in "types" array</span>
+    // Also provide the super set of all types so that referenced
+    // types may be resolved.  This super set should be complete to
+    // any type referenced by a type in the "types" array above.
     all_types: os,
 
-    <span style="color: #73d216;">// Reference full type by its FQN.</span>
-    byref: {[oschema.fqn(t)]:t <span style="color: #b4fa70;">for</span> t <span style="color: #b4fa70;">in</span> $.types},
+    // Reference any type by its FQN.
+    byref: {[oschema.fqn(t)]:t for t in $.all_types},
 
-    <span style="color: #73d216;">// Collect types by their schema class name</span>
-    byscn: {[tn]:[oschema.fqn(t) <span style="color: #b4fa70;">for</span> t <span style="color: #b4fa70;">in</span> $.types <span style="color: #b4fa70;">if</span> t.schema == tn]
-                   <span style="color: #b4fa70;">for</span> tn <span style="color: #b4fa70;">in</span> oschema.class_names},
-    <span style="color: #b4fa70;">local</span> extypref = [
-        d <span style="color: #b4fa70;">for</span> d <span style="color: #b4fa70;">in</span> std.flattenArrays([t.deps <span style="color: #b4fa70;">for</span> t <span style="color: #b4fa70;">in</span> $.types])
-          <span style="color: #b4fa70;">if</span> !oschema.isin($.path,oschema.listify(d))],
-    extrefs: std.uniq(std.sort([oschema.basepath(t) <span style="color: #b4fa70;">for</span> t <span style="color: #b4fa70;">in</span> extypref]))
+    // Collect the types of interest by their schema class name
+    byscn: {[tn]:[oschema.fqn(t) for t in $.types if t.schema == tn]
+                   for tn in oschema.class_names},
+
+    // Find external type references
+    local extypref = [
+        d for d in std.flattenArrays([t.deps for t in $.types])
+          if !oschema.isin($.path,oschema.listify(d))],
+    extrefs: std.uniq(std.sort([oschema.relpath(oschema.basepath(t), self.ctxpath) for t in extypref]))
 }
 </pre>
 </div>
@@ -1195,8 +1180,8 @@ We can test out some TLAs and test that the model compiles using the <code>moo</
 </p>
 
 <div class="org-src-container">
-<pre class="src src-shell">moo -M examples/oschema <span style="color: #e9b96e;">\</span>
-  -A <span style="color: #fcaf3e;">os</span>=<span style="color: #e9b96e;">'app.jsonnet'</span> -A <span style="color: #fcaf3e;">path</span>=<span style="color: #e9b96e;">'app'</span> <span style="color: #e9b96e;">\</span>
+<pre class="src src-shell">moo -M examples/oschema \
+  -A os='app.jsonnet' -A path='app' \
      compile omodel.jsonnet
 </pre>
 </div>
@@ -1209,9 +1194,9 @@ showing the output until the next example CLI.
 
 
 <div class="org-src-container">
-<pre class="src src-shell">moo -M examples/oschema <span style="color: #e9b96e;">\</span>
-  -A <span style="color: #fcaf3e;">os</span>=<span style="color: #e9b96e;">'app.jsonnet'</span> -A <span style="color: #fcaf3e;">path</span>=<span style="color: #e9b96e;">'app'</span> <span style="color: #e9b96e;">\</span>
-  -t <span style="color: #e9b96e;">'/types:moo.oschema.typify|moo.oschema.graph|moo.oschema.depsort'</span> <span style="color: #e9b96e;">\</span>
+<pre class="src src-shell">moo -M examples/oschema \
+  -A os='app.jsonnet' -A path='app' \
+  -t '/types:moo.oschema.typify|moo.oschema.graph|moo.oschema.depsort' \
      dump -f pretty omodel.jsonnet
 </pre>
 </div>
@@ -1226,24 +1211,21 @@ bring these in as a model "graft".
 
 
 <div class="org-src-container">
-<pre class="src src-shell">moo -g <span style="color: #e9b96e;">'/lang:ocpp.jsonnet'</span> <span style="color: #e9b96e;">\</span>
-    -M examples/oschema <span style="color: #e9b96e;">\</span>
-    -A <span style="color: #fcaf3e;">os</span>=<span style="color: #e9b96e;">'app.jsonnet'</span> -A <span style="color: #fcaf3e;">path</span>=<span style="color: #e9b96e;">'app'</span> <span style="color: #e9b96e;">\</span>
-    -t <span style="color: #e9b96e;">'/types:moo.oschema.typify|moo.oschema.graph|moo.oschema.depsort'</span> <span style="color: #e9b96e;">\</span>
+<pre class="src src-shell">moo -g '/lang:ocpp.jsonnet' \
+    -M examples/oschema \
+    -A os='app.jsonnet' -A path='app' \
+    -t '/types:moo.oschema.typify|moo.oschema.graph|moo.oschema.depsort' \
     dump -f types omodel.jsonnet
 </pre>
 </div>
 
-<pre class="example">
+<pre class="example" id="org9860845">
 all_types &lt;class 'list'&gt;
 byref &lt;class 'dict'&gt;
 byscn &lt;class 'dict'&gt;
 ctxpath &lt;class 'list'&gt;
-ctxpre &lt;class 'str'&gt;
 extrefs &lt;class 'list'&gt;
-nspre &lt;class 'str'&gt;
 path &lt;class 'list'&gt;
-relpath &lt;class 'str'&gt;
 types &lt;class 'list'&gt;
 lang &lt;class 'dict'&gt;
 </pre>
@@ -1293,150 +1275,150 @@ to <code>render</code> and adding the template file name.
 </p>
 
 <div class="org-src-container">
-<pre class="src src-shell">moo -g <span style="color: #e9b96e;">'/lang:ocpp.jsonnet'</span> <span style="color: #e9b96e;">\</span>
-    -M examples/oschema <span style="color: #e9b96e;">\</span>
-    -A <span style="color: #fcaf3e;">os</span>=<span style="color: #e9b96e;">'app.jsonnet'</span> -A <span style="color: #fcaf3e;">path</span>=<span style="color: #e9b96e;">'app'</span> <span style="color: #e9b96e;">\</span>
+<pre class="src src-shell">moo -g '/lang:ocpp.jsonnet' \
+    -M examples/oschema \
+    -A os='app.jsonnet' -A path='app' \
     render omodel.jsonnet ostructs.hpp.j2
 </pre>
 </div>
 
 <div class="org-src-container">
-<pre class="src src-c++"><span style="color: #73d216;">/*</span>
-<span style="color: #73d216;"> * This file is 100% generated.  Any manual edits will likely be lost.</span>
-<span style="color: #73d216;"> *</span>
-<span style="color: #73d216;"> * This contains struct and other type definitions for shema in </span>
-<span style="color: #73d216;"> * namespace app.</span>
-<span style="color: #73d216;"> */</span>
-<span style="color: #e090d7;">#if</span><span style="color: #e090d7;">n</span><span style="color: #e090d7;">def</span> APP_STRUCTS_HPP
-<span style="color: #e090d7;">#define</span> <span style="color: #fcaf3e;">APP_STRUCTS_HPP</span>
+<pre class="src src-c++">/*
+ * This file is 100% generated.  Any manual edits will likely be lost.
+ *
+ * This contains struct and other type definitions for shema in 
+ * namespace app.
+ */
+#ifndef APP_STRUCTS_HPP
+#define APP_STRUCTS_HPP
 
-<span style="color: #e090d7;">#include</span> <span style="color: #e9b96e;">&lt;cstdint&gt;</span>
-<span style="color: #e090d7;">#include</span> <span style="color: #e9b96e;">"sys/Structs.hpp"</span>
+#include &lt;cstdint&gt;
+#include "sys/Structs.hpp"
 
-<span style="color: #e090d7;">#include</span> <span style="color: #e9b96e;">&lt;nlohmann/json.hpp&gt;</span>
-<span style="color: #e090d7;">#include</span> <span style="color: #e9b96e;">&lt;vector&gt;</span>
-<span style="color: #e090d7;">#include</span> <span style="color: #e9b96e;">&lt;string&gt;</span>
+#include &lt;nlohmann/json.hpp&gt;
+#include &lt;vector&gt;
+#include &lt;string&gt;
 
-<span style="color: #b4fa70;">namespace</span> <span style="color: #e9b2e3;">app</span> {
+namespace app {
 
-    <span style="color: #73d216;">// </span><span style="color: #73d216;">@brief An associated object of any type</span>
-    <span style="color: #b4fa70;">using</span> <span style="color: #8cc4ff;">Affiliation</span> = <span style="color: #e9b2e3;">nlohmann</span>::json;
+    // @brief An associated object of any type
+    using Affiliation = nlohmann::json;
 
-    <span style="color: #73d216;">// </span><span style="color: #73d216;">@brief All the counts</span>
-    <span style="color: #b4fa70;">using</span> <span style="color: #8cc4ff;">Counts</span> = <span style="color: #e9b2e3;">std</span>::<span style="color: #8cc4ff;">vector</span>&lt;<span style="color: #e9b2e3;">sys</span>::Count&gt;;
+    // @brief All the counts
+    using Counts = std::vector&lt;sys::Count&gt;;
 
-    <span style="color: #73d216;">// </span><span style="color: #73d216;">@brief Electronic mail address</span>
-    <span style="color: #b4fa70;">using</span> <span style="color: #8cc4ff;">Email</span> = <span style="color: #e9b2e3;">std</span>::string;
+    // @brief Electronic mail address
+    using Email = std::string;
 
-    <span style="color: #73d216;">// </span><span style="color: #73d216;">@brief </span>
-    <span style="color: #b4fa70;">enum</span> <span style="color: #b4fa70;">class</span> <span style="color: #8cc4ff;">MBTI</span>: <span style="color: #8cc4ff;">unsigned</span> {
-        <span style="color: #fcaf3e;">introversion</span>,
-        <span style="color: #fcaf3e;">extroversion</span>,
-        <span style="color: #fcaf3e;">sensing</span>,
-        <span style="color: #fcaf3e;">intuition</span>,
-        <span style="color: #fcaf3e;">thinking</span>,
-        <span style="color: #fcaf3e;">feeling</span>,
-        <span style="color: #fcaf3e;">judging</span>,
-        <span style="color: #fcaf3e;">perceiving</span>,
+    // @brief 
+    enum class MBTI: unsigned {
+        introversion,
+        extroversion,
+        sensing,
+        intuition,
+        thinking,
+        feeling,
+        judging,
+        perceiving,
     };
-    <span style="color: #73d216;">// </span><span style="color: #73d216;">return a string representation of a MBTI.</span>
-    <span style="color: #b4fa70;">inline</span>
-    <span style="color: #b4fa70;">const</span> <span style="color: #8cc4ff;">char</span>* <span style="color: #fce94f;">str</span>(<span style="color: #8cc4ff;">MBTI</span> <span style="color: #fcaf3e;">val</span>) {
-        <span style="color: #b4fa70;">if</span> (val == <span style="color: #e9b2e3;">MBTI</span>::introversion) { <span style="color: #b4fa70;">return</span> <span style="color: #e9b96e;">"introversion"</span> ;}
-        <span style="color: #b4fa70;">if</span> (val == <span style="color: #e9b2e3;">MBTI</span>::extroversion) { <span style="color: #b4fa70;">return</span> <span style="color: #e9b96e;">"extroversion"</span> ;}
-        <span style="color: #b4fa70;">if</span> (val == <span style="color: #e9b2e3;">MBTI</span>::sensing) { <span style="color: #b4fa70;">return</span> <span style="color: #e9b96e;">"sensing"</span> ;}
-        <span style="color: #b4fa70;">if</span> (val == <span style="color: #e9b2e3;">MBTI</span>::intuition) { <span style="color: #b4fa70;">return</span> <span style="color: #e9b96e;">"intuition"</span> ;}
-        <span style="color: #b4fa70;">if</span> (val == <span style="color: #e9b2e3;">MBTI</span>::thinking) { <span style="color: #b4fa70;">return</span> <span style="color: #e9b96e;">"thinking"</span> ;}
-        <span style="color: #b4fa70;">if</span> (val == <span style="color: #e9b2e3;">MBTI</span>::feeling) { <span style="color: #b4fa70;">return</span> <span style="color: #e9b96e;">"feeling"</span> ;}
-        <span style="color: #b4fa70;">if</span> (val == <span style="color: #e9b2e3;">MBTI</span>::judging) { <span style="color: #b4fa70;">return</span> <span style="color: #e9b96e;">"judging"</span> ;}
-        <span style="color: #b4fa70;">if</span> (val == <span style="color: #e9b2e3;">MBTI</span>::perceiving) { <span style="color: #b4fa70;">return</span> <span style="color: #e9b96e;">"perceiving"</span> ;}
-        <span style="color: #b4fa70;">return</span> <span style="color: #e9b96e;">""</span>;                  <span style="color: #73d216;">// </span><span style="color: #73d216;">should not reach</span>
+    // return a string representation of a MBTI.
+    inline
+    const char* str(MBTI val) {
+        if (val == MBTI::introversion) { return "introversion" ;}
+        if (val == MBTI::extroversion) { return "extroversion" ;}
+        if (val == MBTI::sensing) { return "sensing" ;}
+        if (val == MBTI::intuition) { return "intuition" ;}
+        if (val == MBTI::thinking) { return "thinking" ;}
+        if (val == MBTI::feeling) { return "feeling" ;}
+        if (val == MBTI::judging) { return "judging" ;}
+        if (val == MBTI::perceiving) { return "perceiving" ;}
+        return "";                  // should not reach
     }
-    <span style="color: #b4fa70;">inline</span>
-    <span style="color: #8cc4ff;">MBTI</span> <span style="color: #fce94f;">parse_MBTI</span>(<span style="color: #e9b2e3;">std</span>::<span style="color: #8cc4ff;">string</span> <span style="color: #fcaf3e;">val</span>, <span style="color: #8cc4ff;">MBTI</span> <span style="color: #fcaf3e;">def</span> = <span style="color: #e9b2e3;">MBTI</span>::introversion) {
-        <span style="color: #b4fa70;">if</span> (val == <span style="color: #e9b96e;">"introversion"</span>) { <span style="color: #b4fa70;">return</span> <span style="color: #e9b2e3;">MBTI</span>::introversion; }
-        <span style="color: #b4fa70;">if</span> (val == <span style="color: #e9b96e;">"extroversion"</span>) { <span style="color: #b4fa70;">return</span> <span style="color: #e9b2e3;">MBTI</span>::extroversion; }
-        <span style="color: #b4fa70;">if</span> (val == <span style="color: #e9b96e;">"sensing"</span>) { <span style="color: #b4fa70;">return</span> <span style="color: #e9b2e3;">MBTI</span>::sensing; }
-        <span style="color: #b4fa70;">if</span> (val == <span style="color: #e9b96e;">"intuition"</span>) { <span style="color: #b4fa70;">return</span> <span style="color: #e9b2e3;">MBTI</span>::intuition; }
-        <span style="color: #b4fa70;">if</span> (val == <span style="color: #e9b96e;">"thinking"</span>) { <span style="color: #b4fa70;">return</span> <span style="color: #e9b2e3;">MBTI</span>::thinking; }
-        <span style="color: #b4fa70;">if</span> (val == <span style="color: #e9b96e;">"feeling"</span>) { <span style="color: #b4fa70;">return</span> <span style="color: #e9b2e3;">MBTI</span>::feeling; }
-        <span style="color: #b4fa70;">if</span> (val == <span style="color: #e9b96e;">"judging"</span>) { <span style="color: #b4fa70;">return</span> <span style="color: #e9b2e3;">MBTI</span>::judging; }
-        <span style="color: #b4fa70;">if</span> (val == <span style="color: #e9b96e;">"perceiving"</span>) { <span style="color: #b4fa70;">return</span> <span style="color: #e9b2e3;">MBTI</span>::perceiving; }
-        <span style="color: #b4fa70;">return</span> def;
-    }
-
-    <span style="color: #73d216;">// </span><span style="color: #73d216;">@brief </span>
-    <span style="color: #b4fa70;">using</span> <span style="color: #8cc4ff;">Make</span> = <span style="color: #e9b2e3;">std</span>::string;
-
-    <span style="color: #73d216;">// </span><span style="color: #73d216;">@brief </span>
-    <span style="color: #b4fa70;">using</span> <span style="color: #8cc4ff;">Model</span> = <span style="color: #e9b2e3;">std</span>::string;
-
-    <span style="color: #73d216;">// </span><span style="color: #73d216;">@brief </span>
-    <span style="color: #b4fa70;">enum</span> <span style="color: #b4fa70;">class</span> <span style="color: #8cc4ff;">VehicleClass</span>: <span style="color: #8cc4ff;">unsigned</span> {
-        <span style="color: #fcaf3e;">boring</span>,
-        <span style="color: #fcaf3e;">fun</span>,
-    };
-    <span style="color: #73d216;">// </span><span style="color: #73d216;">return a string representation of a VehicleClass.</span>
-    <span style="color: #b4fa70;">inline</span>
-    <span style="color: #b4fa70;">const</span> <span style="color: #8cc4ff;">char</span>* <span style="color: #fce94f;">str</span>(<span style="color: #8cc4ff;">VehicleClass</span> <span style="color: #fcaf3e;">val</span>) {
-        <span style="color: #b4fa70;">if</span> (val == <span style="color: #e9b2e3;">VehicleClass</span>::boring) { <span style="color: #b4fa70;">return</span> <span style="color: #e9b96e;">"boring"</span> ;}
-        <span style="color: #b4fa70;">if</span> (val == <span style="color: #e9b2e3;">VehicleClass</span>::fun) { <span style="color: #b4fa70;">return</span> <span style="color: #e9b96e;">"fun"</span> ;}
-        <span style="color: #b4fa70;">return</span> <span style="color: #e9b96e;">""</span>;                  <span style="color: #73d216;">// </span><span style="color: #73d216;">should not reach</span>
-    }
-    <span style="color: #b4fa70;">inline</span>
-    <span style="color: #8cc4ff;">VehicleClass</span> <span style="color: #fce94f;">parse_VehicleClass</span>(<span style="color: #e9b2e3;">std</span>::<span style="color: #8cc4ff;">string</span> <span style="color: #fcaf3e;">val</span>, <span style="color: #8cc4ff;">VehicleClass</span> <span style="color: #fcaf3e;">def</span> = <span style="color: #e9b2e3;">VehicleClass</span>::boring) {
-        <span style="color: #b4fa70;">if</span> (val == <span style="color: #e9b96e;">"boring"</span>) { <span style="color: #b4fa70;">return</span> <span style="color: #e9b2e3;">VehicleClass</span>::boring; }
-        <span style="color: #b4fa70;">if</span> (val == <span style="color: #e9b96e;">"fun"</span>) { <span style="color: #b4fa70;">return</span> <span style="color: #e9b2e3;">VehicleClass</span>::fun; }
-        <span style="color: #b4fa70;">return</span> def;
+    inline
+    MBTI parse_MBTI(std::string val, MBTI def = MBTI::introversion) {
+        if (val == "introversion") { return MBTI::introversion; }
+        if (val == "extroversion") { return MBTI::extroversion; }
+        if (val == "sensing") { return MBTI::sensing; }
+        if (val == "intuition") { return MBTI::intuition; }
+        if (val == "thinking") { return MBTI::thinking; }
+        if (val == "feeling") { return MBTI::feeling; }
+        if (val == "judging") { return MBTI::judging; }
+        if (val == "perceiving") { return MBTI::perceiving; }
+        return def;
     }
 
-    <span style="color: #73d216;">// </span><span style="color: #73d216;">@brief </span>
-    <span style="color: #b4fa70;">struct</span> <span style="color: #8cc4ff;">Vehicle</span> {
+    // @brief 
+    using Make = std::string;
 
-        <span style="color: #73d216;">// </span><span style="color: #73d216;">@brief </span>
-        <span style="color: #8cc4ff;">Make</span> <span style="color: #fcaf3e;">make</span> = <span style="color: #e9b96e;">"Subaru"</span>;
+    // @brief 
+    using Model = std::string;
 
-        <span style="color: #73d216;">// </span><span style="color: #73d216;">@brief </span>
-        <span style="color: #8cc4ff;">Model</span> <span style="color: #fcaf3e;">model</span> = <span style="color: #e9b96e;">"WRX"</span>;
+    // @brief 
+    enum class VehicleClass: unsigned {
+        boring,
+        fun,
+    };
+    // return a string representation of a VehicleClass.
+    inline
+    const char* str(VehicleClass val) {
+        if (val == VehicleClass::boring) { return "boring" ;}
+        if (val == VehicleClass::fun) { return "fun" ;}
+        return "";                  // should not reach
+    }
+    inline
+    VehicleClass parse_VehicleClass(std::string val, VehicleClass def = VehicleClass::boring) {
+        if (val == "boring") { return VehicleClass::boring; }
+        if (val == "fun") { return VehicleClass::fun; }
+        return def;
+    }
 
-        <span style="color: #73d216;">// </span><span style="color: #73d216;">@brief </span>
-        <span style="color: #8cc4ff;">VehicleClass</span> <span style="color: #fcaf3e;">type</span> = <span style="color: #e9b2e3;">app</span>::<span style="color: #e9b2e3;">VehicleClass</span>::fun;
+    // @brief 
+    struct Vehicle {
+
+        // @brief 
+        Make make = "Subaru";
+
+        // @brief 
+        Model model = "WRX";
+
+        // @brief 
+        VehicleClass type = app::VehicleClass::fun;
     };
 
-    <span style="color: #73d216;">// </span><span style="color: #73d216;">@brief Describe everything there is to know about an individual human</span>
-    <span style="color: #b4fa70;">struct</span> <span style="color: #8cc4ff;">Person</span> {
+    // @brief Describe everything there is to know about an individual human
+    struct Person {
 
-        <span style="color: #73d216;">// </span><span style="color: #73d216;">@brief E-mail address</span>
-        <span style="color: #8cc4ff;">Email</span> <span style="color: #fcaf3e;">email</span> = <span style="color: #e9b96e;">""</span>;
+        // @brief E-mail address
+        Email email = "";
 
-        <span style="color: #73d216;">// </span><span style="color: #73d216;">@brief E-mail address</span>
-        <span style="color: #8cc4ff;">Email</span> <span style="color: #fcaf3e;">email2</span> = <span style="color: #e9b96e;">"me@example.com"</span>;
+        // @brief E-mail address
+        Email email2 = "me@example.com";
 
-        <span style="color: #73d216;">// </span><span style="color: #73d216;">@brief Count of some things</span>
-        <span style="color: #8cc4ff;">Counts</span> <span style="color: #fcaf3e;">counts</span> = {};
+        // @brief Count of some things
+        Counts counts = {};
 
-        <span style="color: #73d216;">// </span><span style="color: #73d216;">@brief Count of some things</span>
-        <span style="color: #8cc4ff;">Counts</span> <span style="color: #fcaf3e;">counts2</span> = {0, 1, 2};
+        // @brief Count of some things
+        Counts counts2 = {0, 1, 2};
 
-        <span style="color: #73d216;">// </span><span style="color: #73d216;">@brief Some affiliation</span>
-        <span style="color: #8cc4ff;">Affiliation</span> <span style="color: #fcaf3e;">affil</span> = {};
+        // @brief Some affiliation
+        Affiliation affil = {};
 
-        <span style="color: #73d216;">// </span><span style="color: #73d216;">@brief Personality</span>
-        <span style="color: #8cc4ff;">MBTI</span> <span style="color: #fcaf3e;">mbti</span> = <span style="color: #e9b2e3;">app</span>::<span style="color: #e9b2e3;">MBTI</span>::introversion;
+        // @brief Personality
+        MBTI mbti = app::MBTI::introversion;
 
-        <span style="color: #73d216;">// </span><span style="color: #73d216;">@brief Example of nested record</span>
-        <span style="color: #8cc4ff;">Vehicle</span> <span style="color: #fcaf3e;">vehicle</span> = {<span style="color: #e9b96e;">"Subaru"</span>, <span style="color: #e9b96e;">"WRX"</span>, <span style="color: #e9b2e3;">app</span>::<span style="color: #e9b2e3;">VehicleClass</span>::fun};
+        // @brief Example of nested record
+        Vehicle vehicle = {"Subaru", "WRX", app::VehicleClass::fun};
 
-        <span style="color: #73d216;">// </span><span style="color: #73d216;">@brief Example of nested record with default</span>
-        <span style="color: #8cc4ff;">Vehicle</span> <span style="color: #fcaf3e;">vehicle2</span> = {<span style="color: #e9b96e;">"Subaru"</span>, <span style="color: #e9b96e;">"CrossTrek"</span>, <span style="color: #e9b2e3;">app</span>::<span style="color: #e9b2e3;">VehicleClass</span>::boring};
+        // @brief Example of nested record with default
+        Vehicle vehicle2 = {"Subaru", "CrossTrek", app::VehicleClass::boring};
 
-        <span style="color: #73d216;">// </span><span style="color: #73d216;">@brief Example of nested record with default</span>
-        <span style="color: #8cc4ff;">Vehicle</span> <span style="color: #fcaf3e;">vehicle2</span> = {<span style="color: #e9b96e;">"Subaru"</span>, <span style="color: #e9b96e;">"BRZ"</span>, <span style="color: #e9b2e3;">app</span>::<span style="color: #e9b2e3;">VehicleClass</span>::fun};
+        // @brief Example of nested record with default
+        Vehicle vehicle2 = {"Subaru", "BRZ", app::VehicleClass::fun};
     };
 
-} <span style="color: #73d216;">// </span><span style="color: #73d216;">namespace app</span>
+} // namespace app
 
-<span style="color: #e090d7;">#endif</span> <span style="color: #73d216;">// </span><span style="color: #73d216;">APP_STRUCTS_HPP</span>
+#endif // APP_STRUCTS_HPP
 </pre>
 </div>
 
@@ -1447,102 +1429,99 @@ model.
 </p>
 
 <div class="org-src-container">
-<pre class="src src-shell">moo -g <span style="color: #e9b96e;">'/lang:ocpp.jsonnet'</span> <span style="color: #e9b96e;">\</span>
-    -M examples/oschema <span style="color: #e9b96e;">\</span>
-    -A <span style="color: #fcaf3e;">os</span>=<span style="color: #e9b96e;">'app.jsonnet'</span> -A <span style="color: #fcaf3e;">path</span>=<span style="color: #e9b96e;">'app'</span> <span style="color: #e9b96e;">\</span>
+<pre class="src src-shell">moo -g '/lang:ocpp.jsonnet' \
+    -M examples/oschema \
+    -A os='app.jsonnet' -A path='app' \
     render omodel.jsonnet onljs.hpp.j2
 </pre>
 </div>
 
 <div class="org-src-container">
-<pre class="src src-c++"><span style="color: #73d216;">/*</span>
-<span style="color: #73d216;"> * This file is 100% generated.  Any manual edits will likely be lost.</span>
-<span style="color: #73d216;"> *</span>
-<span style="color: #73d216;"> * This contains functions struct and other type definitions for shema in </span>
-<span style="color: #73d216;"> * namespace app to be serialized via nlohmann::json.</span>
-<span style="color: #73d216;"> */</span>
-<span style="color: #e090d7;">#if</span><span style="color: #e090d7;">n</span><span style="color: #e090d7;">def</span> APP_NLJS_HPP
-<span style="color: #e090d7;">#define</span> <span style="color: #fcaf3e;">APP_NLJS_HPP</span>
+<pre class="src src-c++">/*
+ * This file is 100% generated.  Any manual edits will likely be lost.
+ *
+ * This contains functions struct and other type definitions for shema in 
+ * namespace app to be serialized via nlohmann::json.
+ */
+#ifndef APP_NLJS_HPP
+#define APP_NLJS_HPP
 
+// My structs
+#include "app/Structs.hpp"
 
-<span style="color: #e090d7;">#include</span> <span style="color: #e9b96e;">"app/Structs.hpp"</span>
+// Nljs for externally referenced schema
+#include "sys/Nljs.hpp"
 
-<span style="color: #e090d7;">#include</span> <span style="color: #e9b96e;">"sys/Nljs.hpp"</span>
+#include &lt;nlohmann/json.hpp&gt;
 
-<span style="color: #e090d7;">#include</span> <span style="color: #e9b96e;">&lt;nlohmann/json.hpp&gt;</span>
+namespace app {
 
-<span style="color: #b4fa70;">namespace</span> <span style="color: #e9b2e3;">app</span> {
-
-    <span style="color: #b4fa70;">using</span> <span style="color: #8cc4ff;">data_t</span> = <span style="color: #e9b2e3;">nlohmann</span>::json;
-
-    NLOHMANN_JSON_SERIALIZE_ENUM( MBTI, {
-            { <span style="color: #e9b2e3;">app</span>::<span style="color: #e9b2e3;">MBTI</span>::introversion, <span style="color: #e9b96e;">"introversion"</span> },
-            { <span style="color: #e9b2e3;">app</span>::<span style="color: #e9b2e3;">MBTI</span>::extroversion, <span style="color: #e9b96e;">"extroversion"</span> },
-            { <span style="color: #e9b2e3;">app</span>::<span style="color: #e9b2e3;">MBTI</span>::sensing, <span style="color: #e9b96e;">"sensing"</span> },
-            { <span style="color: #e9b2e3;">app</span>::<span style="color: #e9b2e3;">MBTI</span>::intuition, <span style="color: #e9b96e;">"intuition"</span> },
-            { <span style="color: #e9b2e3;">app</span>::<span style="color: #e9b2e3;">MBTI</span>::thinking, <span style="color: #e9b96e;">"thinking"</span> },
-            { <span style="color: #e9b2e3;">app</span>::<span style="color: #e9b2e3;">MBTI</span>::feeling, <span style="color: #e9b96e;">"feeling"</span> },
-            { <span style="color: #e9b2e3;">app</span>::<span style="color: #e9b2e3;">MBTI</span>::judging, <span style="color: #e9b96e;">"judging"</span> },
-            { <span style="color: #e9b2e3;">app</span>::<span style="color: #e9b2e3;">MBTI</span>::perceiving, <span style="color: #e9b96e;">"perceiving"</span> },
+    using data_t = nlohmann::json;    NLOHMANN_JSON_SERIALIZE_ENUM( MBTI, {
+            { app::MBTI::introversion, "introversion" },
+            { app::MBTI::extroversion, "extroversion" },
+            { app::MBTI::sensing, "sensing" },
+            { app::MBTI::intuition, "intuition" },
+            { app::MBTI::thinking, "thinking" },
+            { app::MBTI::feeling, "feeling" },
+            { app::MBTI::judging, "judging" },
+            { app::MBTI::perceiving, "perceiving" },
         })
     NLOHMANN_JSON_SERIALIZE_ENUM( VehicleClass, {
-            { <span style="color: #e9b2e3;">app</span>::<span style="color: #e9b2e3;">VehicleClass</span>::boring, <span style="color: #e9b96e;">"boring"</span> },
-            { <span style="color: #e9b2e3;">app</span>::<span style="color: #e9b2e3;">VehicleClass</span>::fun, <span style="color: #e9b96e;">"fun"</span> },
+            { app::VehicleClass::boring, "boring" },
+            { app::VehicleClass::fun, "fun" },
         })
 
 
-    <span style="color: #b4fa70;">inline</span> <span style="color: #8cc4ff;">void</span> <span style="color: #fce94f;">to_json</span>(<span style="color: #8cc4ff;">data_t</span>&amp; <span style="color: #fcaf3e;">j</span>, <span style="color: #b4fa70;">const</span> <span style="color: #8cc4ff;">Vehicle</span>&amp; <span style="color: #fcaf3e;">obj</span>) {
-        j[<span style="color: #e9b96e;">"make"</span>] = obj.make;
-        j[<span style="color: #e9b96e;">"model"</span>] = obj.model;
-        j[<span style="color: #e9b96e;">"type"</span>] = obj.type;
+    inline void to_json(data_t&amp; j, const Vehicle&amp; obj) {
+        j["make"] = obj.make;
+        j["model"] = obj.model;
+        j["type"] = obj.type;
     }
 
-    <span style="color: #b4fa70;">inline</span> <span style="color: #8cc4ff;">void</span> <span style="color: #fce94f;">from_json</span>(<span style="color: #b4fa70;">const</span> <span style="color: #8cc4ff;">data_t</span>&amp; <span style="color: #fcaf3e;">j</span>, <span style="color: #8cc4ff;">Vehicle</span>&amp; <span style="color: #fcaf3e;">obj</span>) {
-        <span style="color: #b4fa70;">if</span> (j.contains(<span style="color: #e9b96e;">"make"</span>))
-            j.at(<span style="color: #e9b96e;">"make"</span>).get_to(obj.make);    
-        <span style="color: #b4fa70;">if</span> (j.contains(<span style="color: #e9b96e;">"model"</span>))
-            j.at(<span style="color: #e9b96e;">"model"</span>).get_to(obj.model);    
-        <span style="color: #b4fa70;">if</span> (j.contains(<span style="color: #e9b96e;">"type"</span>))
-            j.at(<span style="color: #e9b96e;">"type"</span>).get_to(obj.type);    
+    inline void from_json(const data_t&amp; j, Vehicle&amp; obj) {
+        if (j.contains("make"))
+            j.at("make").get_to(obj.make);    
+        if (j.contains("model"))
+            j.at("model").get_to(obj.model);    
+        if (j.contains("type"))
+            j.at("type").get_to(obj.type);    
     }
 
-    <span style="color: #b4fa70;">inline</span> <span style="color: #8cc4ff;">void</span> <span style="color: #fce94f;">to_json</span>(<span style="color: #8cc4ff;">data_t</span>&amp; <span style="color: #fcaf3e;">j</span>, <span style="color: #b4fa70;">const</span> <span style="color: #8cc4ff;">Person</span>&amp; <span style="color: #fcaf3e;">obj</span>) {
-        j[<span style="color: #e9b96e;">"email"</span>] = obj.email;
-        j[<span style="color: #e9b96e;">"email2"</span>] = obj.email2;
-        j[<span style="color: #e9b96e;">"counts"</span>] = obj.counts;
-        j[<span style="color: #e9b96e;">"counts2"</span>] = obj.counts2;
-        j[<span style="color: #e9b96e;">"affil"</span>] = obj.affil;
-        j[<span style="color: #e9b96e;">"mbti"</span>] = obj.mbti;
-        j[<span style="color: #e9b96e;">"vehicle"</span>] = obj.vehicle;
-        j[<span style="color: #e9b96e;">"vehicle2"</span>] = obj.vehicle2;
-        j[<span style="color: #e9b96e;">"vehicle2"</span>] = obj.vehicle2;
+    inline void to_json(data_t&amp; j, const Person&amp; obj) {
+        j["email"] = obj.email;
+        j["email2"] = obj.email2;
+        j["counts"] = obj.counts;
+        j["counts2"] = obj.counts2;
+        j["affil"] = obj.affil;
+        j["mbti"] = obj.mbti;
+        j["vehicle"] = obj.vehicle;
+        j["vehicle2"] = obj.vehicle2;
+        j["vehicle2"] = obj.vehicle2;
     }
 
-    <span style="color: #b4fa70;">inline</span> <span style="color: #8cc4ff;">void</span> <span style="color: #fce94f;">from_json</span>(<span style="color: #b4fa70;">const</span> <span style="color: #8cc4ff;">data_t</span>&amp; <span style="color: #fcaf3e;">j</span>, <span style="color: #8cc4ff;">Person</span>&amp; <span style="color: #fcaf3e;">obj</span>) {
-        <span style="color: #b4fa70;">if</span> (j.contains(<span style="color: #e9b96e;">"email"</span>))
-            j.at(<span style="color: #e9b96e;">"email"</span>).get_to(obj.email);    
-        <span style="color: #b4fa70;">if</span> (j.contains(<span style="color: #e9b96e;">"email2"</span>))
-            j.at(<span style="color: #e9b96e;">"email2"</span>).get_to(obj.email2);    
-        <span style="color: #b4fa70;">if</span> (j.contains(<span style="color: #e9b96e;">"counts"</span>))
-            j.at(<span style="color: #e9b96e;">"counts"</span>).get_to(obj.counts);    
-        <span style="color: #b4fa70;">if</span> (j.contains(<span style="color: #e9b96e;">"counts2"</span>))
-            j.at(<span style="color: #e9b96e;">"counts2"</span>).get_to(obj.counts2);    
-        obj.affil = j.at(<span style="color: #e9b96e;">"affil"</span>);
-        <span style="color: #b4fa70;">if</span> (j.contains(<span style="color: #e9b96e;">"mbti"</span>))
-            j.at(<span style="color: #e9b96e;">"mbti"</span>).get_to(obj.mbti);    
-        <span style="color: #b4fa70;">if</span> (j.contains(<span style="color: #e9b96e;">"vehicle"</span>))
-            j.at(<span style="color: #e9b96e;">"vehicle"</span>).get_to(obj.vehicle);    
-        <span style="color: #b4fa70;">if</span> (j.contains(<span style="color: #e9b96e;">"vehicle2"</span>))
-            j.at(<span style="color: #e9b96e;">"vehicle2"</span>).get_to(obj.vehicle2);    
-        <span style="color: #b4fa70;">if</span> (j.contains(<span style="color: #e9b96e;">"vehicle2"</span>))
-            j.at(<span style="color: #e9b96e;">"vehicle2"</span>).get_to(obj.vehicle2);    
+    inline void from_json(const data_t&amp; j, Person&amp; obj) {
+        if (j.contains("email"))
+            j.at("email").get_to(obj.email);    
+        if (j.contains("email2"))
+            j.at("email2").get_to(obj.email2);    
+        if (j.contains("counts"))
+            j.at("counts").get_to(obj.counts);    
+        if (j.contains("counts2"))
+            j.at("counts2").get_to(obj.counts2);    
+        obj.affil = j.at("affil");
+        if (j.contains("mbti"))
+            j.at("mbti").get_to(obj.mbti);    
+        if (j.contains("vehicle"))
+            j.at("vehicle").get_to(obj.vehicle);    
+        if (j.contains("vehicle2"))
+            j.at("vehicle2").get_to(obj.vehicle2);    
+        if (j.contains("vehicle2"))
+            j.at("vehicle2").get_to(obj.vehicle2);    
     }
 
-    <span style="color: #73d216;">// </span><span style="color: #73d216;">fixme: add support for MessagePack serializers (at least)</span>
+} // namespace app
 
-} <span style="color: #73d216;">// </span><span style="color: #73d216;">namespace app</span>
-
-<span style="color: #e090d7;">#endif</span> <span style="color: #73d216;">// </span><span style="color: #73d216;">APP_NLJS_HPP</span>
+#endif // APP_NLJS_HPP
 </pre>
 </div>
 </div>
@@ -1565,8 +1544,8 @@ the <code>moo.otypes</code> module.
 </div>
 <div id="postamble" class="status">
 <p class="author">Author: Brett Viren</p>
-<p class="date">Created: 2020-11-25 Wed 17:15</p>
-<p class="validation"><a href="http://validator.w3.org/check?uri=referer">Validate</a></p>
+<p class="date">Created: 2021-01-19 Tue 13:45</p>
+<p class="validation"><a href="https://validator.w3.org/check?uri=referer">Validate</a></p>
 </div>
 </body>
 </html>
