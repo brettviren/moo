@@ -93,6 +93,7 @@ the JSON Schema based validation on a final object will catch mistakes
 that ~moo.otypes~ will miss during object construction.
 #+end_note
 
+
 ** Schema structure array 
 
 Creation of a /system of related types/ is done with an array of data
@@ -167,12 +168,19 @@ We can see ~load_types()~ in action using a schema that is part of the
 : <class 'app.Person'>, <record Person, fields: {email, counts, affil, mbti}>, Snooty U
 : {'email': 'foo@example.com', 'counts': [42], 'affil': 'Snooty U', 'mbti': 'judging'}
 
-In the above we give ~load_types()~ a file system path to find the *moo*
-test suite area relative to where we execute the example code (assumed
-in top-directory of *moo* git repo).  *moo* will search this path when a
-file is given as a relative path.  The current working directory ("~.~")
-will also be checked and failing that, any directories listed in the
-environment variable ~MOO_MODEL_PATH~ will be searched.
+
+#+begin_note
+In the above we give ~load_types()~ a file system path (ie, ~[here]~) so
+that files in the *moo* test directory will be located.  *moo* will search
+this path when a file is given as a relative path.
+
+When using the ~moo~ Python module the application may set a default
+path instead of providing one to every ~moo.io.load()~ call (which
+~load_types()~ forwards to).  An example of this usage is given below.
+
+When using the ~moo~ CLI one may set the environment variable
+~MOO_LOAD_PATH~ to equivalently provide this default load path.
+#+end_note
 
 
 * Help
@@ -184,9 +192,11 @@ using usual Python meta interrogation methods.  For example:
 #+begin_src python :exports both :results output
   import os
   import moo.otypes
+  import moo.io
 
   here = os.path.join(os.path.dirname(__file__), "test")
-  types = moo.otypes.load_types("test-ogen-oschema.jsonnet", [here])
+  moo.io.default_load_path = [here]
+  types = moo.otypes.load_types("test-ogen-oschema.jsonnet")
 
   from app import Person
 

@@ -113,8 +113,14 @@ specified independently via command line arguments:
         render a/relative/model.jsonnet /an/absolute/template.xyz.j2
 #+end_example
 
-One may also set these search paths by setting ~MOO_MODEL_PATH~ and
-~MOO_TEMPLATE_PATH~ environment variables.
+When using the ~moo~ CLI, one may also set these search paths by setting
+~MOO_LOAD_PATH~ and ~MOO_TEMPLATE_PATH~ environment variables.
+
+#+begin_example
+  $ export MOO_LOAD_PATH=/path/to/models:/path/to/more/models
+  $ export MOO_TEMPLATE_PATH=/path/to/templates:/path/to/more/templates
+  $ moo render a/relative/model.jsonnet /an/absolute/template.xyz.j2
+#+end_example
 
 Besides explicit files provided as ~moo~ command arguments (as above
 example) ~moo~ may also receive inputs via two other channels:

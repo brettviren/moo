@@ -636,7 +636,7 @@ def make_types(schema):
     also become available via usual Python "import" with their ".path"
     forming the module tree.
 
-    >>> make_otypes(schema)
+    >>> make_types(schema)
     >>> from my.schema.path import MyType
     >>> myobj = MyType()
 
@@ -647,35 +647,15 @@ def make_types(schema):
         ret[typ.__module__ + '.' + typ.__name__] = typ
     return ret
 
-def default_schema_paths():
-    '''Return list of file system paths from which to locate schema files.
-
-    This returns a list with the current working directory and any
-    entries in the environment variable MOO_MODEL_PATH.
-    '''
-    maybe = [
-        ".",
-        os.environ.get("MOO_MODEL_PATH"),
-    ]
-    return [one for one in maybe if one]
-
 
 def load_types(filename, path=()):
     '''Load Python types from an oschema file.
 
     The named file may be provided in any format supported by moo.
 
-    See make_otypes() for more info on resulting types.
+    See make_types() for more info on resulting types.
 
-    Formats for which moo supports an "import" idiom will search
-    directories given by the "path" argument followed by a default
-    path.
-
-    See default_schema_paths() for more information.
-
-    Note, the directory holding the current file being loaded is
-    implicitly checked.
-
+    See moo.io.load() for use of "paths".
     '''
-    types = load_file(filename, list(path) + default_schema_paths())
+    types = load_file(filename, list(path))
     return make_types(types)

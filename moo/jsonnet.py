@@ -57,6 +57,7 @@ def load(fname, paths=(), **kwds):
     - native_callbacks :: call python from Jsonnet
     - import_callbacks ::  help find imports
 
+    Application code should consider using moo.io.load().
     '''
     paths = clean_paths(paths)
     fname = resolve(fname, paths)

@@ -7,14 +7,25 @@ from moo.util import clean_paths, resolve, select_path
 import moo.jsonnet
 import anyconfig
 
+# Application may set this.  It is a fallback which will be consulted
+# if a file to be loaded is not otherwise located.  See load().
+default_load_path = ()
+
 def load(filename, fpath=(), dpath = None, **kwds):
     '''Load a file and return its data structure.  
 
-    If dpath given, return substructure at that path.
+    If dpath given, return substructure at that "path" in the
+    resulting data structure.
 
-    If fpath is given, it is used as a file search path.
+    If filename is not absolute, it will be searched for first in the
+    current working directory, then moo's built-in directory, then in
+    any user-provided paths in "fpath" and finally in directories
+    provided by moo.io.default_load_path.  The application is free to
+    provide this fallback.  When moo is used from its CLI the
+    MOO_LOAD_PATH environment variable is consulted.
+
     '''
-    paths = clean_paths(fpath)
+    paths = clean_paths(fpath) + list(default_load_path)
     filename = resolve(filename, paths)
     
     if filename.endswith(".jsonnet"):

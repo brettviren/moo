@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2020-11-25 Wed 17:40 -->
+<!-- 2021-01-19 Tue 12:57 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>moo 無 build</title>
@@ -40,7 +40,7 @@
   }
   pre.src {
     position: relative;
-    overflow: visible;
+    overflow: auto;
     padding-top: 1.2em;
   }
   pre.src:before {
@@ -52,7 +52,7 @@
     padding: 3px;
     border: 1px solid black;
   }
-  pre.src:hover:before { display: inline;}
+  pre.src:hover:before { display: inline; margin-top: 14px;}
   /* Languages per Org manual */
   pre.src-asymptote:before { content: 'Asymptote'; }
   pre.src-awk:before { content: 'Awk'; }
@@ -206,50 +206,26 @@
 <style> pre.example{border-radius: 5px; background-color:#333; color:#0f0;}</style>
 <style> code{border-radius: 5px; background-color:#333; color:#0f0;}</style>
 <script type="text/javascript">
-/*
-@licstart  The following is the entire license notice for the
-JavaScript code in this tag.
-
-Copyright (C) 2012-2020 Free Software Foundation, Inc.
-
-The JavaScript code in this tag is free software: you can
-redistribute it and/or modify it under the terms of the GNU
-General Public License (GNU GPL) as published by the Free Software
-Foundation, either version 3 of the License, or (at your option)
-any later version.  The code is distributed WITHOUT ANY WARRANTY;
-without even the implied warranty of MERCHANTABILITY or FITNESS
-FOR A PARTICULAR PURPOSE.  See the GNU GPL for more details.
-
-As additional permission under GNU GPL version 3 section 7, you
-may distribute non-source (e.g., minimized or compacted) forms of
-that code without the copy of the GNU GPL normally required by
-section 4, provided you include this license notice and a URL
-through which recipients can access the Corresponding Source.
-
-
-@licend  The above is the entire license notice
-for the JavaScript code in this tag.
-*/
+// @license magnet:?xt=urn:btih:e95b018ef3580986a04669f1b5879592219e2a7a&dn=public-domain.txt Public Domain
 <!--/*--><![CDATA[/*><!--*/
- function CodeHighlightOn(elem, id)
- {
-   var target = document.getElementById(id);
-   if(null != target) {
-     elem.cacheClassElem = elem.className;
-     elem.cacheClassTarget = target.className;
-     target.className = "code-highlighted";
-     elem.className   = "code-highlighted";
-   }
- }
- function CodeHighlightOff(elem, id)
- {
-   var target = document.getElementById(id);
-   if(elem.cacheClassElem)
-     elem.className = elem.cacheClassElem;
-   if(elem.cacheClassTarget)
-     target.className = elem.cacheClassTarget;
- }
-/*]]>*///-->
+     function CodeHighlightOn(elem, id)
+     {
+       var target = document.getElementById(id);
+       if(null != target) {
+         elem.classList.add("code-highlighted");
+         target.classList.add("code-highlighted");
+       }
+     }
+     function CodeHighlightOff(elem, id)
+     {
+       var target = document.getElementById(id);
+       if(null != target) {
+         elem.classList.remove("code-highlighted");
+         target.classList.remove("code-highlighted");
+       }
+     }
+    /*]]>*///-->
+// @license-end
 </script>
 </head>
 <body>
@@ -296,7 +272,7 @@ it must integrate into code build systems and this note collects
 methods to do just that.
 </p>
 
-<div class="note">
+<div class="note" id="orgd9c28f7">
 <p>
 <code>moo</code> can also be used in generating a build system.  See for example
 the <a href="wcup.html">wcup</a> document which describes the use of <code>moo</code>
@@ -420,16 +396,22 @@ given absolute "search paths".  Template and model search paths are
 specified independently via command line arguments:
 </p>
 
-<pre class="example">
+<pre class="example" id="orgf8d20c8">
 $ moo -M /path/to/models -M /path/to/more/models \
       -T /path/to/templates -T /path/to/more/templates \
       render a/relative/model.jsonnet /an/absolute/template.xyz.j2
 </pre>
 
 <p>
-One may also set these search paths by setting <code>MOO_MODEL_PATH</code> and
-<code>MOO_TEMPLATE_PATH</code> environment variables.
+When using the <code>moo</code> CLI, one may also set these search paths by setting
+<code>MOO_LOAD_PATH</code> and <code>MOO_TEMPLATE_PATH</code> environment variables.
 </p>
+
+<pre class="example" id="orgfef9f45">
+$ export MOO_LOAD_PATH=/path/to/models:/path/to/more/models
+$ export MOO_TEMPLATE_PATH=/path/to/templates:/path/to/more/templates
+$ moo render a/relative/model.jsonnet /an/absolute/template.xyz.j2
+</pre>
 
 <p>
 Besides explicit files provided as <code>moo</code> command arguments (as above
@@ -442,9 +424,9 @@ and the other two are simple objects.
 </p>
 
 <div class="org-src-container">
-<pre class="src src-shell"><span style="color: #e090d7;">echo</span> <span style="color: #e9b96e;">'function(a=42) {x:a}'</span> &gt; buildsys/a.jsonnet
-<span style="color: #e090d7;">echo</span> <span style="color: #e9b96e;">'{b:69}'</span> &gt; buildsys/b.jsonnet
-<span style="color: #e090d7;">echo</span> <span style="color: #e9b96e;">'{c:"hello"}'</span> &gt; buildsys/c.jsonnet
+<pre class="src src-shell">echo 'function(a=42) {x:a}' &gt; buildsys/a.jsonnet
+echo '{b:69}' &gt; buildsys/b.jsonnet
+echo '{c:"hello"}' &gt; buildsys/c.jsonnet
 </pre>
 </div>
 
@@ -459,9 +441,9 @@ Here is an example of grafting:
 
 <div class="org-src-container">
 <pre class="src src-json">{
-    <span style="color: #b4fa70;">"b"</span>: <span style="color: #e9b2e3;">69</span>,
-    <span style="color: #b4fa70;">"greetings"</span>: {
-        <span style="color: #b4fa70;">"c"</span>: <span style="color: #e9b96e;">"hello"</span>
+    "b": 69,
+    "greetings": {
+        "c": "hello"
     }
 }
 </pre>
@@ -473,14 +455,14 @@ a model search path set by <code>-M</code>.
 </p>
 
 <div class="org-src-container">
-<pre class="src src-shell">moo -M buildsys -A <span style="color: #fcaf3e;">a</span>=b.jsonnet compile buildsys/a.jsonnet
+<pre class="src src-shell">moo -M buildsys -A a=b.jsonnet compile buildsys/a.jsonnet
 </pre>
 </div>
 
 <div class="org-src-container">
 <pre class="src src-json">{
-    <span style="color: #b4fa70;">"x"</span>: {
-        <span style="color: #b4fa70;">"b"</span>: <span style="color: #e9b2e3;">69</span>
+    "x": {
+        "b": 69
     }
 }
 </pre>
@@ -491,14 +473,14 @@ Here is an example where we supply the injected data as a literal representation
 </p>
 
 <div class="org-src-container">
-<pre class="src src-shell">moo -A <span style="color: #fcaf3e;">a</span>=<span style="color: #e9b96e;">'{name:"moo"}'</span> compile buildsys/a.jsonnet
+<pre class="src src-shell">moo -A a='{name:"moo"}' compile buildsys/a.jsonnet
 </pre>
 </div>
 
 <div class="org-src-container">
 <pre class="src src-json">{
-    <span style="color: #b4fa70;">"x"</span>: {
-        <span style="color: #b4fa70;">"name"</span>: <span style="color: #e9b96e;">"moo"</span>
+    "x": {
+        "name": "moo"
     }
 }
 </pre>
@@ -534,8 +516,8 @@ the implicit dependencies:
 </p>
 
 <div class="org-src-container">
-<pre class="src src-shell"><span style="color: #e090d7;">echo</span> <span style="color: #e9b96e;">'local a = import "b.jsonnet"; a'</span> &gt; buildsys/top.jsonnet
-<span style="color: #e090d7;">echo</span> <span style="color: #e9b96e;">'{b:69}'</span> &gt; buildsys/b.jsonnet
+<pre class="src src-shell">echo 'local a = import "b.jsonnet"; a' &gt; buildsys/top.jsonnet
+echo '{b:69}' &gt; buildsys/b.jsonnet
 </pre>
 </div>
 
@@ -544,7 +526,7 @@ the implicit dependencies:
 </pre>
 </div>
 
-<pre class="example">
+<pre class="example" id="orgb6a3e30">
 /home/bv/dev/moo/buildsys/b.jsonnet
 </pre>
 
@@ -555,11 +537,11 @@ satisfied when the <code>compile</code>, <code>render</code> or <code>imports</c
 </p>
 
 <div class="org-src-container">
-<pre class="src src-shell">moo -A <span style="color: #fcaf3e;">more</span>=less imports buildsys/topf.jsonnet
+<pre class="src src-shell">moo -A more=less imports buildsys/topf.jsonnet
 </pre>
 </div>
 
-<pre class="example">
+<pre class="example" id="org067e195">
 /home/bv/dev/moo/buildsys/b.jsonnet
 /home/bv/dev/moo/buildsys/top.jsonnet
 </pre>
@@ -574,7 +556,7 @@ such if its file name ends in <code>.j2</code>.
 </pre>
 </div>
 
-<pre class="example">
+<pre class="example" id="org29a8568">
 /home/bv/dev/moo/buildsys/hi.txt.j2
 </pre>
 
@@ -615,7 +597,7 @@ standard output but can also write to an explicit file given with the
 <code>-o</code> command option.  A minimal example to show the command line is:
 </p>
 
-<pre class="example">
+<pre class="example" id="org5303ca8">
 moo render -o output.hpp model.jsonnet template.hpp.j2
 </pre>
 </div>
@@ -658,34 +640,34 @@ Here is the <code>wscript</code> file:
 </p>
 
 <div class="org-src-container">
-<pre class="src src-python"><span style="color: #73d216;">#</span><span style="color: #73d216;">!/usr/bin/env waf</span>
-<span style="color: #e9b96e;">'''</span>
-<span style="color: #e9b96e;">An example waf wscript file for exercising moo as a command</span>
-<span style="color: #e9b96e;">'''</span>
+<pre class="src src-python">#!/usr/bin/env waf
+'''
+An example waf wscript file for exercising moo as a command
+'''
 
-<span style="color: #b4fa70;">from</span> subprocess <span style="color: #b4fa70;">import</span> check_output
-<span style="color: #b4fa70;">from</span> waflib.Utils <span style="color: #b4fa70;">import</span> subst_vars
+from subprocess import check_output
+from waflib.Utils import subst_vars
 
-<span style="color: #b4fa70;">def</span> <span style="color: #fce94f;">configure</span>(cfg):
-    cfg.find_program(<span style="color: #e9b96e;">'moo'</span>, var=<span style="color: #e9b96e;">'MOO'</span>, mandatory=<span style="color: #e9b2e3;">True</span>)
+def configure(cfg):
+    cfg.find_program('moo', var='MOO', mandatory=True)
 
-<span style="color: #b4fa70;">def</span> <span style="color: #fce94f;">import_scanner</span>(task):
-    <span style="color: #fcaf3e;">deps</span> = []
-    <span style="color: #b4fa70;">for</span> node <span style="color: #b4fa70;">in</span> task.inputs:
-        <span style="color: #fcaf3e;">cmd</span> = <span style="color: #e9b96e;">"${MOO} imports %s"</span> % node.abspath()
-        <span style="color: #fcaf3e;">cmd</span> = subst_vars(cmd, task.env)
-        <span style="color: #73d216;">#</span><span style="color: #73d216;">out = task.exec_command(cmd)</span>
-        <span style="color: #fcaf3e;">out</span> = check_output(cmd.split()).decode()
-        <span style="color: #fcaf3e;">deps</span> += out.split(<span style="color: #e9b96e;">"\n"</span>)
+def import_scanner(task):
+    deps = []
+    for node in task.inputs:
+        cmd = "${MOO} imports %s" % node.abspath()
+        cmd = subst_vars(cmd, task.env)
+        #out = task.exec_command(cmd)
+        out = check_output(cmd.split()).decode()
+        deps += out.split("\n")
 
-    <span style="color: #fcaf3e;">deps</span> = [task.generator.bld.path.find_or_declare(d) <span style="color: #b4fa70;">for</span> d <span style="color: #b4fa70;">in</span> deps <span style="color: #b4fa70;">if</span> d]
-    <span style="color: #b4fa70;">print</span>(deps)
-    <span style="color: #b4fa70;">return</span> (deps, [])
+    deps = [task.generator.bld.path.find_or_declare(d) for d in deps if d]
+    print(deps)
+    return (deps, [])
 
-<span style="color: #b4fa70;">def</span> <span style="color: #fce94f;">build</span>(bld):
-    bld(rule=<span style="color: #e9b96e;">"${MOO} render -o ${TGT} ${SRC}"</span>,
-        source=<span style="color: #e9b96e;">"model.jsonnet dump.txt.j2"</span>,
-        target=<span style="color: #e9b96e;">"model-dump.txt"</span>,
+def build(bld):
+    bld(rule="${MOO} render -o ${TGT} ${SRC}",
+        source="model.jsonnet dump.txt.j2",
+        target="model-dump.txt",
         scan=import_scanner)
 </pre>
 </div>
@@ -697,25 +679,25 @@ rebuild and notice that indeed the change is noticed.
 </p>
 
 <div class="org-src-container">
-<pre class="src src-shell"><span style="color: #e090d7;">cd</span> buildsys/waf/cmd/
+<pre class="src src-shell">cd buildsys/waf/cmd/
 waf distclean configure 
-sed -i <span style="color: #e9b96e;">'s/fortran/FORTRAN/'</span> sub/sub.jsonnet
-<span style="color: #e090d7;">echo</span> -e <span style="color: #e9b96e;">"\nfirst build\n"</span>
+sed -i 's/fortran/FORTRAN/' sub/sub.jsonnet
+echo -e "\nfirst build\n"
 waf
-<span style="color: #e090d7;">echo</span> -e <span style="color: #e9b96e;">"\nsecond build, no rebuild\n"</span>
+echo -e "\nsecond build, no rebuild\n"
 waf
-<span style="color: #e090d7;">echo</span> -e <span style="color: #e9b96e;">"\nmodify intermediate dependency, see it rebuild\n"</span>
-sed -i <span style="color: #e9b96e;">'s/FORTRAN/fortran/'</span> sub/sub.jsonnet
+echo -e "\nmodify intermediate dependency, see it rebuild\n"
+sed -i 's/FORTRAN/fortran/' sub/sub.jsonnet
 waf
 </pre>
 </div>
 
-<pre class="example">
+<pre class="example" id="org41ae83e">
 'distclean' finished successfully (0.002s)
 Setting top to                           : /home/bv/dev/moo/buildsys/waf/cmd 
 Setting out to                           : /home/bv/dev/moo/buildsys/waf/cmd/build 
 Checking for program 'moo'               : /home/bv/dev/moo/.direnv/python-venv-3.8.0/bin/moo 
-'configure' finished successfully (0.003s)
+'configure' finished successfully (0.002s)
 
 first build
 
@@ -723,13 +705,13 @@ Waf: Entering directory `/home/bv/dev/moo/buildsys/waf/cmd/build'
 [/home/bv/dev/moo/buildsys/waf/cmd/sub.jsonnet, /home/bv/dev/moo/buildsys/waf/cmd/sub/sub.jsonnet]
 [1/1] Processing model-dump.txt: model.jsonnet dump.txt.j2 -&gt; build/model-dump.txt
 Waf: Leaving directory `/home/bv/dev/moo/buildsys/waf/cmd/build'
-'build' finished successfully (1.598s)
+'build' finished successfully (1.531s)
 
 second build, no rebuild
 
 Waf: Entering directory `/home/bv/dev/moo/buildsys/waf/cmd/build'
 Waf: Leaving directory `/home/bv/dev/moo/buildsys/waf/cmd/build'
-'build' finished successfully (0.020s)
+'build' finished successfully (0.013s)
 
 modify intermediate dependency, see it rebuild
 
@@ -737,7 +719,7 @@ Waf: Entering directory `/home/bv/dev/moo/buildsys/waf/cmd/build'
 [/home/bv/dev/moo/buildsys/waf/cmd/sub.jsonnet, /home/bv/dev/moo/buildsys/waf/cmd/sub/sub.jsonnet]
 [1/1] Processing model-dump.txt: model.jsonnet dump.txt.j2 -&gt; build/model-dump.txt
 Waf: Leaving directory `/home/bv/dev/moo/buildsys/waf/cmd/build'
-'build' finished successfully (1.561s)
+'build' finished successfully (1.527s)
 </pre>
 </div>
 </div>
@@ -757,47 +739,47 @@ Here is the <code>wscript</code> file for the "mod" example:
 </p>
 
 <div class="org-src-container">
-<pre class="src src-python"><span style="color: #73d216;">#</span><span style="color: #73d216;">!/usr/bin/env waf</span>
-<span style="color: #e9b96e;">'''</span>
-<span style="color: #e9b96e;">An example waf wscript file for exercising moo as a Python module</span>
+<pre class="src src-python">#!/usr/bin/env waf
+'''
+An example waf wscript file for exercising moo as a Python module
 
-<span style="color: #e9b96e;">This should be improved by turning the moo parts into a Waf tool!</span>
-<span style="color: #e9b96e;">'''</span>
-
-
-
-<span style="color: #b4fa70;">import</span> moo
-
-<span style="color: #b4fa70;">def</span> <span style="color: #fce94f;">import_scanner</span>(task):
-    <span style="color: #fcaf3e;">srcdir</span> = task.generator.bld.path.abspath()
-    <span style="color: #fcaf3e;">deps</span> = []
-    <span style="color: #b4fa70;">for</span> node <span style="color: #b4fa70;">in</span> task.inputs:
-        <span style="color: #fcaf3e;">deps</span> += moo.imports(node.abspath(), srcdir)
-    <span style="color: #fcaf3e;">deps</span> = [task.generator.bld.path.find_or_declare(d) <span style="color: #b4fa70;">for</span> d <span style="color: #b4fa70;">in</span> deps <span style="color: #b4fa70;">if</span> d]
-    <span style="color: #b4fa70;">print</span>(deps)
-    <span style="color: #b4fa70;">return</span> (deps, [])
+This should be improved by turning the moo parts into a Waf tool!
+'''
 
 
-<span style="color: #b4fa70;">def</span> <span style="color: #fce94f;">render</span>(task):
-    <span style="color: #e9b96e;">"${MOO} render -o ${TGT} ${SRC}"</span>,
-    <span style="color: #fcaf3e;">srcdir</span> = task.generator.bld.path.abspath()
-    <span style="color: #fcaf3e;">out</span> = task.outputs[0]
-    <span style="color: #fcaf3e;">model</span> = moo.io.load(task.inputs[0].abspath())
-    <span style="color: #fcaf3e;">templ</span> = task.inputs[1].abspath()
 
-    <span style="color: #73d216;"># </span><span style="color: #73d216;">keep compatibility with moo render</span>
-    <span style="color: #fcaf3e;">helper</span> = moo.io.load(moo.util.resolve(<span style="color: #e9b96e;">"moo.jsonnet"</span>))
-    out.write(moo.templates.render(templ, <span style="color: #e090d7;">dict</span>(model=model, moo=helper)))
+import moo
 
-
-<span style="color: #b4fa70;">def</span> <span style="color: #fce94f;">configure</span>(cfg):
-    <span style="color: #b4fa70;">pass</span>
+def import_scanner(task):
+    srcdir = task.generator.bld.path.abspath()
+    deps = []
+    for node in task.inputs:
+        deps += moo.imports(node.abspath(), srcdir)
+    deps = [task.generator.bld.path.find_or_declare(d) for d in deps if d]
+    print(deps)
+    return (deps, [])
 
 
-<span style="color: #b4fa70;">def</span> <span style="color: #fce94f;">build</span>(bld):
+def render(task):
+    "${MOO} render -o ${TGT} ${SRC}",
+    srcdir = task.generator.bld.path.abspath()
+    out = task.outputs[0]
+    model = moo.io.load(task.inputs[0].abspath())
+    templ = task.inputs[1].abspath()
+
+    # keep compatibility with moo render
+    helper = moo.io.load(moo.util.resolve("moo.jsonnet"))
+    out.write(moo.templates.render(templ, dict(model=model, moo=helper)))
+
+
+def configure(cfg):
+    pass
+
+
+def build(bld):
     bld(rule=render,
-        source=<span style="color: #e9b96e;">"model.jsonnet dump.txt.j2"</span>,
-        target=<span style="color: #e9b96e;">"model-dump.txt"</span>,
+        source="model.jsonnet dump.txt.j2",
+        target="model-dump.txt",
         scan=import_scanner)
 </pre>
 </div>
@@ -807,24 +789,24 @@ And, here it is being exercised:
 </p>
 
 <div class="org-src-container">
-<pre class="src src-shell"><span style="color: #e090d7;">cd</span> buildsys/waf/mod/
+<pre class="src src-shell">cd buildsys/waf/mod/
 waf distclean configure 
-sed -i <span style="color: #e9b96e;">'s/fortran/FORTRAN/'</span> sub/sub.jsonnet
-<span style="color: #e090d7;">echo</span> -e <span style="color: #e9b96e;">"\nfirst build\n"</span>
+sed -i 's/fortran/FORTRAN/' sub/sub.jsonnet
+echo -e "\nfirst build\n"
 waf
-<span style="color: #e090d7;">echo</span> -e <span style="color: #e9b96e;">"\nsecond build, no rebuild\n"</span>
+echo -e "\nsecond build, no rebuild\n"
 waf
-<span style="color: #e090d7;">echo</span> -e <span style="color: #e9b96e;">"\nmodify intermediate dependency, see it rebuild\n"</span>
-sed -i <span style="color: #e9b96e;">'s/FORTRAN/fortran/'</span> sub/sub.jsonnet
+echo -e "\nmodify intermediate dependency, see it rebuild\n"
+sed -i 's/FORTRAN/fortran/' sub/sub.jsonnet
 waf
 </pre>
 </div>
 
-<pre class="example">
+<pre class="example" id="orge8c4353">
 'distclean' finished successfully (0.002s)
 Setting top to                           : /home/bv/dev/moo/buildsys/waf/mod 
 Setting out to                           : /home/bv/dev/moo/buildsys/waf/mod/build 
-'configure' finished successfully (0.003s)
+'configure' finished successfully (0.002s)
 
 first build
 
@@ -832,13 +814,13 @@ Waf: Entering directory `/home/bv/dev/moo/buildsys/waf/mod/build'
 [/home/bv/dev/moo/buildsys/waf/mod/sub.jsonnet, /home/bv/dev/moo/buildsys/waf/mod/sub/sub.jsonnet]
 [1/1] Processing model-dump.txt: model.jsonnet dump.txt.j2 -&gt; build/model-dump.txt
 Waf: Leaving directory `/home/bv/dev/moo/buildsys/waf/mod/build'
-'build' finished successfully (0.374s)
+'build' finished successfully (0.348s)
 
 second build, no rebuild
 
 Waf: Entering directory `/home/bv/dev/moo/buildsys/waf/mod/build'
 Waf: Leaving directory `/home/bv/dev/moo/buildsys/waf/mod/build'
-'build' finished successfully (0.015s)
+'build' finished successfully (0.017s)
 
 modify intermediate dependency, see it rebuild
 
@@ -846,7 +828,7 @@ Waf: Entering directory `/home/bv/dev/moo/buildsys/waf/mod/build'
 [/home/bv/dev/moo/buildsys/waf/mod/sub.jsonnet, /home/bv/dev/moo/buildsys/waf/mod/sub/sub.jsonnet]
 [1/1] Processing model-dump.txt: model.jsonnet dump.txt.j2 -&gt; build/model-dump.txt
 Waf: Leaving directory `/home/bv/dev/moo/buildsys/waf/mod/build'
-'build' finished successfully (0.369s)
+'build' finished successfully (0.355s)
 </pre>
 </div>
 </div>
@@ -869,9 +851,9 @@ The <code>Makefile</code>:
 </p>
 
 <div class="org-src-container">
-<pre class="src src-makefile"><span style="color: #fce94f;">model-dump.txt</span> : model.jsonnet dump.txt.j2 
-        moo render -o <span style="color: #fce94f;">$</span><span style="color: #e9b2e3;">@</span> $<span style="color: #e9b2e3;">^</span>
-<span style="color: #fce94f;">clean</span>:
+<pre class="src src-makefile">model-dump.txt : model.jsonnet dump.txt.j2 
+        moo render -o $@ $^
+clean:
         rm -f model-dump.txt
 </pre>
 </div>
@@ -881,21 +863,21 @@ And it getting exercised:
 </p>
 
 <div class="org-src-container">
-<pre class="src src-shell"><span style="color: #e090d7;">cd</span> buildsys/make
+<pre class="src src-shell">cd buildsys/make
 make clean
-sed -i <span style="color: #e9b96e;">'s/fortran/FORTRAN/'</span> sub/sub.jsonnet
+sed -i 's/fortran/FORTRAN/' sub/sub.jsonnet
 make
-<span style="color: #e090d7;">echo</span> -e <span style="color: #e9b96e;">'\nNext we edit the intermediate files and note no rebuild\n'</span>
-sed -i <span style="color: #e9b96e;">'s/FORTRAN/fortran/'</span> sub/sub.jsonnet
+echo -e '\nNext we edit the intermediate files and note no rebuild\n'
+sed -i 's/FORTRAN/fortran/' sub/sub.jsonnet
 make
-<span style="color: #e090d7;">echo</span> -e <span style="color: #e9b96e;">'\nIn any case, first build gave us:\n'</span>
+echo -e '\nIn any case, first build gave us:\n'
 ls -l model-dump.txt
 cat model-dump.txt
 
 </pre>
 </div>
 
-<pre class="example">
+<pre class="example" id="orgc3cf29d">
 rm -f model-dump.txt
 moo render -o model-dump.txt model.jsonnet dump.txt.j2
 
@@ -905,7 +887,7 @@ make: 'model-dump.txt' is up to date.
 
 In any case, first build gave us:
 
--rw-rw-r-- 1 bv bv 93 Nov 25 17:40 model-dump.txt
+-rw-rw-r-- 1 bv bv 93 Jan 19 12:57 model-dump.txt
 sub = {'a': 1, 'b': 2, 'c': 'hello'}
 subsub = {'a': 1, 'b': 2, 'c': 'hello', 'd': 'FORTRAN'}
 </pre>
@@ -923,7 +905,7 @@ build graph in a way that respects intermediate dependencies using <code>moo
 imports</code> like the <a href="#waf">Waf</a> examples.  
 </p>
 
-<div class="note">
+<div class="note" id="org0b57400">
 <p>
 Currently the CMake code is provided merely as an example which is
 found in <a href="buildsys/cmake/moo.cmake">moo.cmake</a>.  The goal is to
@@ -942,19 +924,19 @@ The current example <code>CMakeLists.txt</code> file using the <code>moo</code> 
 </p>
 
 <div class="org-src-container">
-<pre class="src src-cmake"><span style="color: #fce94f;">project</span>(<span style="color: #e9b96e;">"moo-buildsys-cmake"</span>)
-<span style="color: #fce94f;">cmake_minimum_required</span>(VERSION 3.4...3.17) <span style="color: #73d216;"># older may also work</span>
+<pre class="src src-cmake">project("moo-buildsys-cmake")
+cmake_minimum_required(VERSION 3.4...3.17) # older may also work
 
-<span style="color: #73d216;"># fixme: needs to turn into a find_package(moo)!</span>
-<span style="color: #fce94f;">list</span>(APPEND CMAKE_MODULE_PATH ${<span style="color: #fcaf3e;">CMAKE_CURRENT_LIST_DIR</span>})
-<span style="color: #fce94f;">include</span>(moo)
+# fixme: needs to turn into a find_package(moo)!
+list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR})
+include(moo)
 
-<span style="color: #fce94f;">moo_codegen</span>(MODEL model.jsonnet TEMPL dump.txt.j2 CODEGEN model-dump.txt)
+moo_codegen(MODEL model.jsonnet TEMPL dump.txt.j2 CODEGEN model-dump.txt)
 
-<span style="color: #73d216;">## We need some target to trigger the codegen.  Normally, this would</span>
-<span style="color: #73d216;">## be done by some "real" code target depending on the CODEGEN output.</span>
-<span style="color: #73d216;">##   cmake --build build/ -t DOIT</span>
-<span style="color: #fce94f;">add_custom_target</span>(DOIT ALL DEPENDS model-dump.txt)
+## We need some target to trigger the codegen.  Normally, this would
+## be done by some "real" code target depending on the CODEGEN output.
+##   cmake --build build/ -t DOIT
+add_custom_target(DOIT ALL DEPENDS model-dump.txt)
 </pre>
 </div>
 
@@ -963,40 +945,40 @@ And, here it is getting exercised:
 </p>
 
 <div class="org-src-container">
-<pre class="src src-shell"><span style="color: #e090d7;">cd</span> buildsys/cmake
+<pre class="src src-shell">cd buildsys/cmake
 rm -rf build
-<span style="color: #e090d7;">echo</span> <span style="color: #e9b96e;">'{a:1,b:2,c:"hello"}'</span> &gt; sub.jsonnet
+echo '{a:1,b:2,c:"hello"}' &gt; sub.jsonnet
 cmake -B build -S .
 
-<span style="color: #e090d7;">echo</span> -e <span style="color: #e9b96e;">'\nDo initial build\n'</span>  
-sed -i <span style="color: #e9b96e;">'s/fortran/FORTRAN/'</span> sub/sub.jsonnet
+echo -e '\nDo initial build\n'  
+sed -i 's/fortran/FORTRAN/' sub/sub.jsonnet
 cmake --build build
 ls -l --full-time build/model-dump.txt
 
-<span style="color: #e090d7;">echo</span> -e <span style="color: #e9b96e;">'\nNext we edit the intermediate files and notice a rebuild\n'</span>
-sed -i <span style="color: #e9b96e;">'s/FORTRAN/fortran/'</span> sub/sub.jsonnet
+echo -e '\nNext we edit the intermediate files and notice a rebuild\n'
+sed -i 's/FORTRAN/fortran/' sub/sub.jsonnet
 cmake --build build
 ls -l --full-time build/model-dump.txt
 
-<span style="color: #e090d7;">echo</span> -e <span style="color: #e9b96e;">'\nDo do a second build, output is not rebuilt\n'</span>  
+echo -e '\nDo do a second build, output is not rebuilt\n'  
 cmake --build build
 ls -l --full-time build/model-dump.txt
 
-<span style="color: #e090d7;">echo</span> -e <span style="color: #e9b96e;">'\nAdd new implicit dependency, which should cause a rebuild\n'</span>  
-<span style="color: #e090d7;">echo</span> -e <span style="color: #e9b96e;">'local ss = import "sub/sub2.jsonnet";\nss'</span> &gt; sub.jsonnet
-<span style="color: #e090d7;">echo</span> <span style="color: #e9b96e;">'{a:1,b:2,c:"hello"}'</span> &gt; sub/sub2.jsonnet
+echo -e '\nAdd new implicit dependency, which should cause a rebuild\n'  
+echo -e 'local ss = import "sub/sub2.jsonnet";\nss' &gt; sub.jsonnet
+echo '{a:1,b:2,c:"hello"}' &gt; sub/sub2.jsonnet
 cmake --build build
 ls -l --full-time build/model-dump.txt
 
-<span style="color: #e090d7;">echo</span> -e <span style="color: #e9b96e;">'\nUpdate new implicit dependency, which should cause a rebuild\n'</span>  
-<span style="color: #e090d7;">echo</span> <span style="color: #e9b96e;">'{a:1,b:2,c:"see me"}'</span> &gt; sub/sub2.jsonnet
+echo -e '\nUpdate new implicit dependency, which should cause a rebuild\n'  
+echo '{a:1,b:2,c:"see me"}' &gt; sub/sub2.jsonnet
 cmake --build build
 ls -l --full-time build/model-dump.txt
 
 </pre>
 </div>
 
-<pre class="example">
+<pre class="example" id="org3213585">
 -- The C compiler identification is GNU 7.5.0
 -- The CXX compiler identification is GNU 7.5.0
 -- Check for working C compiler: /usr/bin/cc
@@ -1020,29 +1002,29 @@ Do initial build
 Scanning dependencies of target DOIT
 [100%] generate code model-dump.txt
 [100%] Built target DOIT
--rw-rw-r-- 1 bv bv 93 2020-11-25 17:40:13.136135978 -0500 build/model-dump.txt
+-rw-rw-r-- 1 bv bv 93 2021-01-19 12:57:36.255784696 -0500 build/model-dump.txt
 
 Next we edit the intermediate files and notice a rebuild
 
 [100%] generate code model-dump.txt
 [100%] Built target DOIT
--rw-rw-r-- 1 bv bv 93 2020-11-25 17:40:13.860126929 -0500 build/model-dump.txt
+-rw-rw-r-- 1 bv bv 93 2021-01-19 12:57:37.007763611 -0500 build/model-dump.txt
 
 Do do a second build, output is not rebuilt
 
 [100%] Built target DOIT
--rw-rw-r-- 1 bv bv 93 2020-11-25 17:40:13.860126929 -0500 build/model-dump.txt
+-rw-rw-r-- 1 bv bv 93 2021-01-19 12:57:37.007763611 -0500 build/model-dump.txt
 
 Add new implicit dependency, which should cause a rebuild
 
 [100%] generate code model-dump.txt
 [100%] Built target DOIT
--rw-rw-r-- 1 bv bv 93 2020-11-25 17:40:14.616117467 -0500 build/model-dump.txt
+-rw-rw-r-- 1 bv bv 93 2021-01-19 12:57:37.751742750 -0500 build/model-dump.txt
 
 Update new implicit dependency, which should cause a rebuild
 
 [100%] Built target DOIT
--rw-rw-r-- 1 bv bv 93 2020-11-25 17:40:14.616117467 -0500 build/model-dump.txt
+-rw-rw-r-- 1 bv bv 93 2021-01-19 12:57:37.751742750 -0500 build/model-dump.txt
 </pre>
 </div>
 </div>
@@ -1050,8 +1032,8 @@ Update new implicit dependency, which should cause a rebuild
 </div>
 <div id="postamble" class="status">
 <p class="author">Author: Brett Viren</p>
-<p class="date">Created: 2020-11-25 Wed 17:40</p>
-<p class="validation"><a href="http://validator.w3.org/check?uri=referer">Validate</a></p>
+<p class="date">Created: 2021-01-19 Tue 12:57</p>
+<p class="validation"><a href="https://validator.w3.org/check?uri=referer">Validate</a></p>
 </div>
 </body>
 </html>

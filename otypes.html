@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2021-01-06 Wed 12:50 -->
+<!-- 2021-01-19 Tue 13:01 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title><code>moo</code> 無 <i>otypes</i></title>
@@ -40,7 +40,7 @@
   }
   pre.src {
     position: relative;
-    overflow: visible;
+    overflow: auto;
     padding-top: 1.2em;
   }
   pre.src:before {
@@ -52,7 +52,7 @@
     padding: 3px;
     border: 1px solid black;
   }
-  pre.src:hover:before { display: inline;}
+  pre.src:hover:before { display: inline; margin-top: 14px;}
   /* Languages per Org manual */
   pre.src-asymptote:before { content: 'Asymptote'; }
   pre.src-awk:before { content: 'Awk'; }
@@ -206,50 +206,26 @@
 <style> pre.example{border-radius: 5px; background-color:#333; color:#0f0;}</style>
 <style> code{border-radius: 5px; background-color:#333; color:#0f0;}</style>
 <script type="text/javascript">
-/*
-@licstart  The following is the entire license notice for the
-JavaScript code in this tag.
-
-Copyright (C) 2012-2020 Free Software Foundation, Inc.
-
-The JavaScript code in this tag is free software: you can
-redistribute it and/or modify it under the terms of the GNU
-General Public License (GNU GPL) as published by the Free Software
-Foundation, either version 3 of the License, or (at your option)
-any later version.  The code is distributed WITHOUT ANY WARRANTY;
-without even the implied warranty of MERCHANTABILITY or FITNESS
-FOR A PARTICULAR PURPOSE.  See the GNU GPL for more details.
-
-As additional permission under GNU GPL version 3 section 7, you
-may distribute non-source (e.g., minimized or compacted) forms of
-that code without the copy of the GNU GPL normally required by
-section 4, provided you include this license notice and a URL
-through which recipients can access the Corresponding Source.
-
-
-@licend  The above is the entire license notice
-for the JavaScript code in this tag.
-*/
+// @license magnet:?xt=urn:btih:e95b018ef3580986a04669f1b5879592219e2a7a&dn=public-domain.txt Public Domain
 <!--/*--><![CDATA[/*><!--*/
- function CodeHighlightOn(elem, id)
- {
-   var target = document.getElementById(id);
-   if(null != target) {
-     elem.cacheClassElem = elem.className;
-     elem.cacheClassTarget = target.className;
-     target.className = "code-highlighted";
-     elem.className   = "code-highlighted";
-   }
- }
- function CodeHighlightOff(elem, id)
- {
-   var target = document.getElementById(id);
-   if(elem.cacheClassElem)
-     elem.className = elem.cacheClassElem;
-   if(elem.cacheClassTarget)
-     target.className = elem.cacheClassTarget;
- }
-/*]]>*///-->
+     function CodeHighlightOn(elem, id)
+     {
+       var target = document.getElementById(id);
+       if(null != target) {
+         elem.classList.add("code-highlighted");
+         target.classList.add("code-highlighted");
+       }
+     }
+     function CodeHighlightOff(elem, id)
+     {
+       var target = document.getElementById(id);
+       if(null != target) {
+         elem.classList.remove("code-highlighted");
+         target.classList.remove("code-highlighted");
+       }
+     }
+    /*]]>*///-->
+// @license-end
 </script>
 </head>
 <body>
@@ -262,22 +238,22 @@ for the JavaScript code in this tag.
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents">
 <ul>
-<li><a href="#orgbc60d2e">Overview</a></li>
-<li><a href="#orgeea298d">Usage</a>
+<li><a href="#orgc031bcb">Overview</a></li>
+<li><a href="#org99c6bd0">Usage</a>
 <ul>
-<li><a href="#org91ec73f">Individual type construction</a></li>
-<li><a href="#orgd03cf20">Schema structure array</a></li>
-<li><a href="#orgfd1519e">Load types from file</a></li>
+<li><a href="#org53c3095">Individual type construction</a></li>
+<li><a href="#orgc347324">Schema structure array</a></li>
+<li><a href="#orgaa82906">Load types from file</a></li>
 </ul>
 </li>
-<li><a href="#orgaffee09">Help</a></li>
+<li><a href="#org2b00c82">Help</a></li>
 </ul>
 </div>
 </div>
 
-<div id="outline-container-orgbc60d2e" class="outline-2">
-<h2 id="orgbc60d2e">Overview</h2>
-<div class="outline-text-2" id="text-orgbc60d2e">
+<div id="outline-container-orgc031bcb" class="outline-2">
+<h2 id="orgc031bcb">Overview</h2>
+<div class="outline-text-2" id="text-orgc031bcb">
 <p>
 <b>moo</b> <i>otypes</i> is way to produce instances of <i>oschema</i> types that tries to
 follow a <i>valid-by-construction</i> pattern.  In general, <i>otypes</i> are native
@@ -302,7 +278,7 @@ instantiating them as Python objects gain some <i>valid-by-construction</i>
 guarantees.
 </p>
 
-<div class="info">
+<div class="info" id="orge4d42aa">
 <p>
 See also <a href="https://brettviren.github.io/dune-daq-repl/ddcmd.html">DUNE DAQ Command Object Creation</a> which describes <code>moo.otypes</code>
 in the context of one particular application.
@@ -312,9 +288,9 @@ in the context of one particular application.
 </div>
 </div>
 
-<div id="outline-container-orgeea298d" class="outline-2">
-<h2 id="orgeea298d">Usage</h2>
-<div class="outline-text-2" id="text-orgeea298d">
+<div id="outline-container-org99c6bd0" class="outline-2">
+<h2 id="org99c6bd0">Usage</h2>
+<div class="outline-text-2" id="text-org99c6bd0">
 <p>
 The <code>moo.otypes</code> module provides high level functions to construct types
 from <i>oschema</i>.  They make use of lower-level Python metaprogramming for
@@ -322,9 +298,9 @@ the actual type construction which is also in this module.
 </p>
 </div>
 
-<div id="outline-container-org91ec73f" class="outline-3">
-<h3 id="org91ec73f">Individual type construction</h3>
-<div class="outline-text-3" id="text-org91ec73f">
+<div id="outline-container-org53c3095" class="outline-3">
+<h3 id="org53c3095">Individual type construction</h3>
+<div class="outline-text-3" id="text-org53c3095">
 <p>
 We may make an individual type from <i>oschema</i> data structure which is
 expressed as keyword arguments to the <code>moo.otypes.make_type()</code> function.
@@ -332,15 +308,15 @@ For example:
 </p>
 
 <div class="org-src-container">
-<pre class="src src-python"><span style="color: #b4fa70;">import</span> moo.otypes
-<span style="color: #fcaf3e;">Age</span> = moo.otypes.make_type(
-    name=<span style="color: #e9b96e;">"Age"</span>, doc=<span style="color: #e9b96e;">"An age in years"</span>,
-    schema=<span style="color: #e9b96e;">"number"</span>, dtype=<span style="color: #e9b96e;">'i4'</span>, path=<span style="color: #e9b96e;">'a.b'</span>)
-<span style="color: #fcaf3e;">myage</span> = Age(42)  <span style="color: #73d216;"># </span><span style="color: #73d216;">my forever age</span>
-<span style="color: #b4fa70;">print</span>(f<span style="color: #e9b96e;">'{Age}, {myage}, {myage.pod()}'</span>)
-<span style="color: #b4fa70;">import</span> a.b
-<span style="color: #fcaf3e;">myage2</span> = Age(18)
-<span style="color: #b4fa70;">print</span>(f<span style="color: #e9b96e;">'{a.b.Age}, {myage2}, {myage2.pod()}'</span>)
+<pre class="src src-python">import moo.otypes
+Age = moo.otypes.make_type(
+    name="Age", doc="An age in years",
+    schema="number", dtype='i4', path='a.b')
+myage = Age(42)  # my forever age
+print(f'{Age}, {myage}, {myage.pod()}')
+import a.b
+myage2 = Age(18)
+print(f'{a.b.Age}, {myage2}, {myage2.pod()}')
 
 </pre>
 </div>
@@ -351,7 +327,7 @@ For example:
 </pre>
 
 
-<div class="note">
+<div class="note" id="orgffbc150">
 <p>
 The <code>moo.otypes.make_type()</code> directly returns a Python type object (aka
 Python class) and it "places" the type object into the module tree
@@ -364,7 +340,7 @@ given the schema structure's <code>.path</code> attribute.
 We may try to use our otype with invalid data:
 </p>
 
-<pre class="example">
+<pre class="example" id="org941d5c2">
 myage = Age("older than the hills")
 </pre>
 
@@ -372,7 +348,7 @@ myage = Age("older than the hills")
 Which will return an error like:
 </p>
 
-<pre class="example">
+<pre class="example" id="orgfc1a6d2">
 Traceback (most recent call last):
   File "&lt;stdin&gt;", line 8, in &lt;module&gt;
   File "&lt;number Age&gt;", line 13, in __init__
@@ -388,7 +364,7 @@ Rather, we the developer are immediately punished if we attempt to
 violate the schema.  
 </p>
 
-<div class="note">
+<div class="note" id="org4f2fbda">
 <p>
 We may also produce an object from these (or more generic) types and
 validate that object against schema.  It is important to know that the
@@ -402,9 +378,10 @@ that <code>moo.otypes</code> will miss during object construction.
 </div>
 </div>
 
-<div id="outline-container-orgd03cf20" class="outline-3">
-<h3 id="orgd03cf20">Schema structure array</h3>
-<div class="outline-text-3" id="text-orgd03cf20">
+
+<div id="outline-container-orgc347324" class="outline-3">
+<h3 id="orgc347324">Schema structure array</h3>
+<div class="outline-text-3" id="text-orgc347324">
 <p>
 Creation of a <i>system of related types</i> is done with an array of data
 structures describing its schema and the Python types are constructed
@@ -412,23 +389,23 @@ with the plural function <code>moo.otypes.make_types()</code>.  For example:
 </p>
 
 <div class="org-src-container">
-<pre class="src src-python"><span style="color: #b4fa70;">import</span> moo.otypes
-<span style="color: #fcaf3e;">schema</span> = [<span style="color: #e090d7;">dict</span>(name=<span style="color: #e9b96e;">"Pet"</span>, schema=<span style="color: #e9b96e;">"enum"</span>,
-               symbols=[<span style="color: #e9b96e;">"cat"</span>, <span style="color: #e9b96e;">"dog"</span>, <span style="color: #e9b96e;">"early personal computer"</span>],
-               default=<span style="color: #e9b96e;">"cat"</span>,
-               path=<span style="color: #e9b96e;">"my.home.office"</span>,
-               doc=<span style="color: #e9b96e;">"A kind of pet"</span>),
-          <span style="color: #e090d7;">dict</span>(name=<span style="color: #e9b96e;">"Desk"</span>, schema=<span style="color: #e9b96e;">"record"</span>,
+<pre class="src src-python">import moo.otypes
+schema = [dict(name="Pet", schema="enum",
+               symbols=["cat", "dog", "early personal computer"],
+               default="cat",
+               path="my.home.office",
+               doc="A kind of pet"),
+          dict(name="Desk", schema="record",
                fields=[
-                   <span style="color: #e090d7;">dict</span>(name=<span style="color: #e9b96e;">"ontop"</span>, item=<span style="color: #e9b96e;">"my.home.office.Pet"</span>),
+                   dict(name="ontop", item="my.home.office.Pet"),
                ],
-               path=<span style="color: #e9b96e;">"my.home.office"</span>,
-               doc=<span style="color: #e9b96e;">"Model my desk"</span>)]
+               path="my.home.office",
+               doc="Model my desk")]
 moo.otypes.make_types(schema)
 
-<span style="color: #b4fa70;">from</span> my.home.office <span style="color: #b4fa70;">import</span> Desk, Pet
-<span style="color: #fcaf3e;">desk</span> = Desk(ontop=<span style="color: #e9b96e;">"cat"</span>)
-<span style="color: #b4fa70;">print</span>(f<span style="color: #e9b96e;">'{Desk}, {desk}, {desk.pod()}, {desk.ontop}'</span>)
+from my.home.office import Desk, Pet
+desk = Desk(ontop="cat")
+print(f'{Desk}, {desk}, {desk.pod()}, {desk.ontop}')
 </pre>
 </div>
 
@@ -437,7 +414,7 @@ moo.otypes.make_types(schema)
 </pre>
 
 
-<div class="note">
+<div class="note" id="orgd33ab89">
 <p>
 The schema structure array is assumed to be sorted in topological
 order of type dependencies.  Here, this is implicitly assured by how
@@ -449,16 +426,16 @@ the <code>schema</code> array is formed.  In more complex code one may rely on
 </div>
 </div>
 
-<div id="outline-container-orgfd1519e" class="outline-3">
-<h3 id="orgfd1519e">Load types from file</h3>
-<div class="outline-text-3" id="text-orgfd1519e">
+<div id="outline-container-orgaa82906" class="outline-3">
+<h3 id="orgaa82906">Load types from file</h3>
+<div class="outline-text-3" id="text-orgaa82906">
 <p>
 The highest layer function is <code>moo.otypes.load_types()</code>.  It is a mere
 convenience function that combines the <b>moo</b> method to load a schema
 file and a call to <code>make_types()</code> on the result.  
 </p>
 
-<div class="note">
+<div class="note" id="org0cdd41d">
 <p>
 Any file format that <b>moo</b> supports may be used to provide schema, while
 Jsonnet is recommended.  See the <a href="oschema.html">oschema</a> document for more details on
@@ -473,22 +450,22 @@ We can see <code>load_types()</code> in action using a schema that is part of th
 </p>
 
 <div class="org-src-container">
-<pre class="src src-python"><span style="color: #b4fa70;">import</span> os
-<span style="color: #b4fa70;">import</span> moo.otypes
+<pre class="src src-python">import os
+import moo.otypes
 
-<span style="color: #73d216;"># </span><span style="color: #73d216;">Directly make a type in Python to use for an "any" below</span>
-moo.otypes.make_type(schema=<span style="color: #e9b96e;">"string"</span>, name=<span style="color: #e9b96e;">"Uni"</span>, path=<span style="color: #e9b96e;">"test.basetypes"</span>)
-<span style="color: #b4fa70;">from</span> test.basetypes <span style="color: #b4fa70;">import</span> Uni
+# Directly make a type in Python to use for an "any" below
+moo.otypes.make_type(schema="string", name="Uni", path="test.basetypes")
+from test.basetypes import Uni
 
-<span style="color: #73d216;"># </span><span style="color: #73d216;">We locate and load a test schema file</span>
-<span style="color: #fcaf3e;">here</span> = os.path.join(os.path.dirname(__file__), <span style="color: #e9b96e;">"test"</span>)
-<span style="color: #fcaf3e;">types</span> = moo.otypes.load_types(<span style="color: #e9b96e;">"test-ogen-oschema.jsonnet"</span>, [here])
+# We locate and load a test schema file
+here = os.path.join(os.path.dirname(__file__), "test")
+types = moo.otypes.load_types("test-ogen-oschema.jsonnet", [here])
 
-<span style="color: #b4fa70;">from</span> app <span style="color: #b4fa70;">import</span> Person
-<span style="color: #fcaf3e;">per</span> = Person(email=<span style="color: #e9b96e;">"foo@example.com"</span>, counts=[42],
-             affil=Uni(<span style="color: #e9b96e;">"Snooty U"</span>), mbti=<span style="color: #e9b96e;">"judging"</span>)
-<span style="color: #b4fa70;">print</span>(f<span style="color: #e9b96e;">'{Person}, {per}, {per.affil}'</span>)
-<span style="color: #b4fa70;">print</span>(per.pod())
+from app import Person
+per = Person(email="foo@example.com", counts=[42],
+             affil=Uni("Snooty U"), mbti="judging")
+print(f'{Person}, {per}, {per.affil}')
+print(per.pod())
 </pre>
 </div>
 
@@ -498,22 +475,34 @@ moo.otypes.make_type(schema=<span style="color: #e9b96e;">"string"</span>, name=
 </pre>
 
 
+
+<div class="note" id="orgcaefb5e">
 <p>
-In the above we give <code>load_types()</code> a file system path to find the <b>moo</b>
-test suite area relative to where we execute the example code (assumed
-in top-directory of <b>moo</b> git repo).  <b>moo</b> will search this path when a
-file is given as a relative path.  The current working directory ("<code>.</code>")
-will also be checked and failing that, any directories listed in the
-environment variable <code>MOO_MODEL_PATH</code> will be searched.
+In the above we give <code>load_types()</code> a file system path (ie, <code>[here]</code>) so
+that in the <b>moo</b> test suite directory will be located.  <b>moo</b> will search
+this path when a file is given as a relative path.
 </p>
+
+<p>
+When using <code>moo</code> Python module the application may set a default path
+instead of providing one to every <code>moo.io.load()</code> call (which
+<code>load_types()</code> forwards to).  An example of this usage is given below.
+</p>
+
+<p>
+When using the <code>moo</code> CLI one may set the environment variable
+<code>MOO_LOAD_PATH</code> to equivalently provide this default load path.
+</p>
+
+</div>
 </div>
 </div>
 </div>
 
 
-<div id="outline-container-orgaffee09" class="outline-2">
-<h2 id="orgaffee09">Help</h2>
-<div class="outline-text-2" id="text-orgaffee09">
+<div id="outline-container-org2b00c82" class="outline-2">
+<h2 id="org2b00c82">Help</h2>
+<div class="outline-text-2" id="text-org2b00c82">
 <p>
 Type information and any <code>doc</code> strings given in the schema are reflected
 into the constructed Python types.  This information can be displayed
@@ -521,19 +510,21 @@ using usual Python meta interrogation methods.  For example:
 </p>
 
 <div class="org-src-container">
-<pre class="src src-python"><span style="color: #b4fa70;">import</span> os
-<span style="color: #b4fa70;">import</span> moo.otypes
+<pre class="src src-python">import os
+import moo.otypes
+import moo.io
 
-<span style="color: #fcaf3e;">here</span> = os.path.join(os.path.dirname(__file__), <span style="color: #e9b96e;">"test"</span>)
-<span style="color: #fcaf3e;">types</span> = moo.otypes.load_types(<span style="color: #e9b96e;">"test-ogen-oschema.jsonnet"</span>, [here])
+here = os.path.join(os.path.dirname(__file__), "test")
+moo.io.default_load_path = [here]
+types = moo.otypes.load_types("test-ogen-oschema.jsonnet")
 
-<span style="color: #b4fa70;">from</span> app <span style="color: #b4fa70;">import</span> Person
+from app import Person
 
-<span style="color: #e090d7;">help</span>(Person)
+help(Person)
 </pre>
 </div>
 
-<pre class="example">
+<pre class="example" id="orgc3faa42">
 Help on class Person in module app:
 
 class Person(moo.otypes.Record)
@@ -625,8 +616,8 @@ class Person(moo.otypes.Record)
 </div>
 <div id="postamble" class="status">
 <p class="author">Author: Brett Viren</p>
-<p class="date">Created: 2021-01-06 Wed 12:50</p>
-<p class="validation"><a href="http://validator.w3.org/check?uri=referer">Validate</a></p>
+<p class="date">Created: 2021-01-19 Tue 13:01</p>
+<p class="validation"><a href="https://validator.w3.org/check?uri=referer">Validate</a></p>
 </div>
 </body>
 </html>

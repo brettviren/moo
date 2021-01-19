@@ -45,25 +45,33 @@ def validate(model, schema, validator="jsonschema"):
     raise ValueError(f"unknown validator: {validator}")
 
 
-def clean_paths(paths):
-    '''Return list of paths made absolute with cwd as first.
+def clean_paths(paths, add_cwd=True):
+    '''Return list of paths made absolute with cwd as first .
 
-    Input may be :-separated string or list'''
+    Input "paths" may be a ":"-separated string or list of string.
+
+    If add_cwd is True and if cwd is not already in paths, it will be
+    prepended.
+
+    '''
     if isinstance(paths, str):
         paths = paths.split(":")
     paths = [os.path.realpath(p) for p in paths]
-    cwd = os.path.realpath(os.path.curdir)
-    if cwd not in paths:
-        paths.insert(0, cwd)
+
+    if add_cwd:
+        cwd = os.path.realpath(os.path.curdir)
+        if cwd not in paths:
+            paths.insert(0, cwd)
 
     return paths
 
 
 def resolve(filename, paths=()):
-    '''
-    Resolve filename against paths.
+    '''Resolve filename against moo built-in directories and any
+    user-provided list in "paths".
 
-    Return None if fail to locate file.
+    Raise ValueError if fail.
+
     '''
     paths = list(paths)
     if not filename:

@@ -92,12 +92,12 @@ class Context:
 @click.group()
 @click.option('-D', '--dpath', default="",
               help="Specify a selection path into the model data structure")
-@click.option('-M', '--mpath', envvar='MOO_MODEL_PATH', multiple=True,
+@click.option('-M', '--mpath', envvar='MOO_LOAD_PATH', multiple=True,
               type=click.Path(exists=True, dir_okay=True, file_okay=False),
-              help="Add directory to model file search paths")
+              help="Add directory to data file search paths (can use MOO_LOAD_PATH env var)")
 @click.option('-T', '--tpath', envvar='MOO_TEMPLATE_PATH', multiple=True,
               type=click.Path(exists=True, dir_okay=True, file_okay=False),
-              help="Add directory to template file search paths")
+              help="Add directory to template file search paths (can use_TEMPLATE_PATH env var)")
 @click.option('-A', '--tla', multiple=True,
               help="Specify a 'top-level argument' to a functional model as a var=string or var=file.jsonnet")
 @click.option('-g', '--graft', multiple=True, type=str,
