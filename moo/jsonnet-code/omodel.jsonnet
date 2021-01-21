@@ -1,6 +1,6 @@
 local oschema = import "oschema.jsonnet";
 
-function(os, path, ctxpath=[]) {
+function(os, path=[], ctxpath=[]) {
 
     // The "path" determines which schema types in the "os" array will
     // be considered to be directly "in" the model.  The "path" may be

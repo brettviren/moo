@@ -28,6 +28,7 @@
     imports: {          // ie, the ... in #include <...>
         sequence: ["vector"],
         string: ["string"],
+        enum: ["string"],
         anyof: ["variant"],
         any: ["nlohmann/json.hpp"],
     }
