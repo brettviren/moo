@@ -9,7 +9,7 @@ import anyconfig
 
 # Application may set this.  It is a fallback which will be consulted
 # if a file to be loaded is not otherwise located.  See load().
-default_load_path = ()
+default_load_path = []
 
 def load(filename, fpath=(), dpath = None, **kwds):
     '''Load a file and return its data structure.  

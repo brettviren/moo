@@ -473,7 +473,13 @@ class Number(BaseType):
     def pod(self):
         if self._value is None:
             raise ValueError("number %s is unset" % self.__class__.__name__)
-        return self._value.item()
+        val = self._value.item()
+
+        # this is pretty sketchy but it's to satisfy issue #11.
+        if self._value.dtype == numpy.dtype('f4'):
+            return float('%.6e'%val)
+        return val
+
 
     def update(self, val):
         dtype = self.ost["dtype"]
