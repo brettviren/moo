@@ -17,12 +17,12 @@ awk "$re" "$file"
   :CUSTOM_ID: concepts
   :END:
 
-
-In general, a *schema system* (aka meta schema) defines ways in which we
-may define *schema*.  Each schema describes one or more *types*.  And each
-type in turn defines the allowed structure and constraints of *models*
-(aka "values").  *moo* supports a number of schema systems but the
-dominant one is /oschema/.
+A *schema* defines information about the *type* of some *value*.  It may
+describe an atomic type ("integer", "boolean") or types which are
+aggregates of other types ("record", "sequence").  The language forms
+we choose to use to provide this information defines a *schema system*
+(essentially itself a "meta schema").  *moo* supports a number of schema
+systems but the dominant one is called /oschema/.
 
 #+begin_note
 The "o" stands for "object" as /oschema/ describes a type using an
@@ -36,7 +36,13 @@ Schema (itself expressed as JSON).  *moo* /oschema/ system is defined
 in terms of a transient representation (structured data in memory).
 Thus, a large number of persistent representations may be used to
 provide /oschema/ schema.  Users may select file formats they know and
-love if they wish.  Below we will describe two (Jsonnet and Python).
+love if they wish.  Below we will describe two (Jsonnet and Python) for which *moo* provides direct support.
+
+** Schema classes
+   :PROPERTIES:
+   :CUSTOM_ID: classes
+   :END:
+
 
 *moo* /oschema/ is defined conceptually starting with a fixed set of
 *schema classes* that are listed below.  A *moo* /oschema/ *type*
@@ -44,14 +50,14 @@ love if they wish.  Below we will describe two (Jsonnet and Python).
 of exactly one *schema class*.  Dropping down one rung of the semantic
 ladder, a *model* (aka "value") is an instance of a *type*.
 
-The *moo* /oschema/ schema classes are:
+The *moo* /oschema/ schema classes are summarized:
 
 - ~boolean~ :: a type which may take value "true" or "false"
 - ~number~ :: a numeric type of given format and size
 - ~string~ :: a character string type possibly matching some pattern or format
 - ~sequence~ :: an array or vector with elements of one type
 - ~tuple~ :: (not yet supported, but you can guess what it will be)
-- ~record~ :: a collection of named types, (eg such as a ~class~ or ~struct~)
+- ~record~ :: a collection of ~fields~ (named type references) directly held or indirectly held by zero or more records named as ~bases~.
 - ~enum~ :: a type that may take one value from a predefined, limited set of values
 - ~any~ :: a type that may take a value of any type (eg such as ~void*~, ~boost::any~, ~nlohmann::json~)
 - ~anyOf~ :: a type that may take a value of any type in a predefined, limited set of types.
@@ -71,13 +77,60 @@ schema classes and may be required or optional:
   representing the absolute context of the type (eg as a C++
   ~namespace~ or Python module path).
 
-Some *types* must *reference* one or more other types.  These include
-instances of the schema classes: ~sequence~, ~record~, ~namespace~,
-and ~anyOf~.  A *type reference* is represented as a /fully-qualified
-type name/ (FQTN) which is formed as the dot-separated concatenation
-of the elements of ~path~ (if any) and the ~name~.  A FQTN shall not
-begin nor end with a period.  As the ~path~ is absolute there is no
-concept of a "relative" type reference.
+The following sections go through this list of schema classes in more
+detail.
+
+** Atomic types
+   :PROPERTIES:
+   :CUSTOM_ID: atomic
+   :END:
+
+A type in *moo* schema is considered /atomic/ if it holds no references to
+other types.  Some details of the atomic types are provided in this
+section.
+
+*** Boolean
+    :PROPERTIES:
+    :CUSTOM_ID: boolean
+    :END:
+
+An instance of the ~boolean~ schema class is a type that may hold a /true/
+or /false/ value. 
+
+#+begin_note
+Like all schema classes, the user is free to make multiple instances
+of ~boolean~.  However, unlike the other schema classes, these types
+will not actually provide any variety of meaning.  One ~boolean~ type is
+like any other even if they are differentiated by their type name.
+#+end_note
+
+*** Number
+    :PROPERTIES:
+    :CUSTOM_ID: number
+    :END:
+
+*** String
+    :PROPERTIES:
+    :CUSTOM_ID: string
+    :END:
+
+*** Enum
+    :PROPERTIES:
+    :CUSTOM_ID: enum
+    :END:
+
+** Aggregate types
+   :PROPERTIES:
+   :CUSTOM_ID: aggregate
+   :END:
+
+Some types will hold *references* to one or more other types.  These are
+/aggregate/ types.  A *type reference* is represented as a /fully-qualified
+type name/ (FQTN) which is formed as the dot-separated concatenation of
+the elements of ~path~ (if any) and the ~name~.  A FQTN shall not begin
+nor end with a period.  As the ~path~ is absolute there is no concept of
+a "relative" type reference.  See the section [[Namespace]] below for
+related concepts.
 
 Thus, every *type* exists at an absolutely determined location in a
 name hierarchy, and it carries this location with it as ~path~ +
@@ -88,9 +141,131 @@ be available in order to match the type reference against possible
 *complete* if every type referenced by any of the schema's types are
 also included.
 
+*** Sequence
+    :PROPERTIES:
+    :CUSTOM_ID: sequence
+    :END:
 
 
-* Schema
+*** Record
+    :PROPERTIES:
+    :CUSTOM_ID: record
+    :END:
+
+The *moo* ~record~ schema class is analogous to Python ~class~ or C++ ~struct~
+but with it we may only define data members, which in *moo* are called
+~fields~, and not methods.
+
+Each ~field~ is itself a small data structure but *moo* does not
+considered it a first class "type".  A ~field~ merely associates the
+following information in the context of the ~record~:
+
+- ~name~ :: unique identifier (native type string type)
+- ~item~ :: reference the type of the value that the field represents.
+- ~default~ :: optionally provide a value directly in the schema (see
+  note)
+- ~doc~ :: optionally provide a brief description of the field.
+- ~optional~ :: optionally indicate if this field is optional (~true~ value) or required (~false~).
+
+When optional values are not provided, the attribute will be omitted
+from the resulting ~record~ structure.
+
+#+begin_note
+A field may be given a ~default~ value expressed literally in the
+language used to define the schema (ie, Jsonnet or Python).  This
+value may be used by whatever consumes the schema (eg, a template) to
+provide a value for the field.
+
+When providing a ~default~ value, care must be given to assure it is in
+a valid form for the ~field~ type held by ~item~.  In particular, when a
+~field~ is itself of a type ~record~ type, a full and matching object must
+be provided.
+
+Special care is typically needed when handling a ~default~ value by the
+consumer of a schema due to its representation as a literal value.
+For example, a ~default~ value which is an empty string does not itself
+carry any quotes.
+#+end_note
+
+A ~record~ may also be constructed with an attribute called ~bases~ which
+provides an array of zero or more references to other ~record~ types.
+The ~fields~ of all ~record~ types referenced in ~bases~ should be
+considered held by the ~record~ itself.  That is, ~bases~ provides a
+simple form of object inheritance.
+
+Like all aspects of schema, it is up to a consumer of the schema to
+determine how to reflect this inheritance information.  As examples,
+the ~ostructs.hpp.j2~ template, described more below, directly reflects
+~bases~ into a list of base ~struct~'s in simple C++ inheritance.
+Somewhat differently the ~onljs.hpp.j2~ template which provides
+serialization an ~ostruct.hpp.j2~ generated ~struct~ and ~nlohman::json~
+representations interpret ~bases~ simply as providing additional fields.
+Thus it enacts a "duck-typed" interface between the type-free JSON
+object and the strongly-typed C++ ~struct~.
+
+
+*** Any
+    :PROPERTIES:
+    :CUSTOM_ID: any
+    :END:
+
+The ~any~ schema class provides the "type erasure" pattern.  That is an
+~any~ type may hold any type.  It is like a ~void*~ in C or a ~std::any~ in
+C++.  As it may represent any type it holds no type information other
+than ~name~ and ~doc~.
+
+With the ~ostructs.hpp.j2~ and ~onljs.hpp.j2~ templates, the ~any~ type is
+mapped to a ~nlohmann::json~ type.  This can be used to delay
+serialization of specific parts of a ~record~ type until the instance
+can be passed into some more specifically typed C++ context.
+
+
+*** xxxOf
+    :PROPERTIES:
+    :CUSTOM_ID: xxxof
+    :END:
+
+Three similar aggregate schema classes are: ~anyOf~, ~allOf~ and ~oneOf~.
+Each type is a collection of references to other types for which
+
+- ~anyOf~ :: any may apply
+- ~allOf~ :: all apply
+- ~oneOf~ :: exactly one may apply
+
+As always, how they reflect depends on the consumers and not all may
+have useful meanings in all contexts.  Generally, all three have
+meaningful reflections in a validation context.  Indeed they are in
+*moo* in order to support JSON Schema validation.  The ~oneOf~ could be
+considered to map to union types such as ~std::variant~.  The ~allOf~
+could be considered to represent a component with all of the required
+interfaces.  Given those two definitions, ~anyOf~ lacks an obvious use
+for code generation.
+
+** Type containers
+
+*** Namespace
+    :PROPERTIES:
+    :CUSTOM_ID: namespace
+    :END:
+
+Every type is defined in a context called a ~path~.  Conceptually, a
+~namespace~ is a ~path~ shared by all types "in" or "under" the namespace.
+*moo* provides Python and Jsonnet helper code which provides a ~namespace~
+as a type factory constructing types in a given namespace.
+
+*** Schema array
+    :PROPERTIES:
+    :CUSTOM_ID: schema-array
+    :END:
+
+The most simple way to express a set of *moo* types is as a /schema
+array/.  This is simply a Jsonnet or JSON array or Python ~list~ holding
+*moo* type structures.  Generally, schema arrays must be /topologically
+sorted/ so that no type structure references any other type later than
+itself in the array.  *moo* provides Python and Jsonnet code to perform
+this topological sort and examples are given below.
+
+* Schema Examples
   :PROPERTIES:
   :CUSTOM_ID: Schema
   :END:

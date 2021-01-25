@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2021-01-19 Tue 13:45 -->
+<!-- 2021-01-25 Mon 17:16 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title><code>moo</code> 無 <code>oschema</code></title>
@@ -238,8 +238,15 @@
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents">
 <ul>
-<li><a href="#concepts">Concepts</a></li>
-<li><a href="#Schema">Schema</a>
+<li><a href="#concepts">Concepts</a>
+<ul>
+<li><a href="#classes">Schema classes</a></li>
+<li><a href="#atomic">Atomic types</a></li>
+<li><a href="#aggregate">Aggregate types</a></li>
+<li><a href="#org9978bc6">Type containers</a></li>
+</ul>
+</li>
+<li><a href="#Schema">Schema Examples</a>
 <ul>
 <li><a href="#schema-in-jsonnet">Jsonnet</a></li>
 <li><a href="#schema-in-python">Python</a></li>
@@ -267,14 +274,15 @@
 <h2 id="concepts">Concepts</h2>
 <div class="outline-text-2" id="text-concepts">
 <p>
-In general, a <b>schema system</b> (aka meta schema) defines ways in which we
-may define <b>schema</b>.  Each schema describes one or more <b>types</b>.  And each
-type in turn defines the allowed structure and constraints of <b>models</b>
-(aka "values").  <b>moo</b> supports a number of schema systems but the
-dominant one is <i>oschema</i>.
+A <b>schema</b> defines information about the <b>type</b> of some <b>value</b>.  It may
+describe an atomic type ("integer", "boolean") or types which are
+aggregates of other types ("record", "sequence").  The language forms
+we choose to use to provide this information defines a <b>schema system</b>
+(essentially itself a "meta schema").  <b>moo</b> supports a number of schema
+systems but the dominant one is called <i>oschema</i>.
 </p>
 
-<div class="note" id="org6a142ba">
+<div class="note" id="org842353c">
 <p>
 The "o" stands for "object" as <i>oschema</i> describes a type using an
 object representation.  A lesser used <b>moo</b> schema system is <i>fschema</i>
@@ -290,9 +298,13 @@ Schema (itself expressed as JSON).  <b>moo</b> <i>oschema</i> system is defined
 in terms of a transient representation (structured data in memory).
 Thus, a large number of persistent representations may be used to
 provide <i>oschema</i> schema.  Users may select file formats they know and
-love if they wish.  Below we will describe two (Jsonnet and Python).
+love if they wish.  Below we will describe two (Jsonnet and Python) for which <b>moo</b> provides direct support.
 </p>
+</div>
 
+<div id="outline-container-classes" class="outline-3">
+<h3 id="classes">Schema classes</h3>
+<div class="outline-text-3" id="text-classes">
 <p>
 <b>moo</b> <i>oschema</i> is defined conceptually starting with a fixed set of
 <b>schema classes</b> that are listed below.  A <b>moo</b> <i>oschema</i> <b>type</b>
@@ -302,7 +314,7 @@ ladder, a <b>model</b> (aka "value") is an instance of a <b>type</b>.
 </p>
 
 <p>
-The <b>moo</b> <i>oschema</i> schema classes are:
+The <b>moo</b> <i>oschema</i> schema classes are summarized:
 </p>
 
 <dl class="org-dl">
@@ -311,7 +323,7 @@ The <b>moo</b> <i>oschema</i> schema classes are:
 <dt><code>string</code></dt><dd>a character string type possibly matching some pattern or format</dd>
 <dt><code>sequence</code></dt><dd>an array or vector with elements of one type</dd>
 <dt><code>tuple</code></dt><dd>(not yet supported, but you can guess what it will be)</dd>
-<dt><code>record</code></dt><dd>a collection of named types, (eg such as a <code>class</code> or <code>struct</code>)</dd>
+<dt><code>record</code></dt><dd>a collection of <code>fields</code> (named type references) directly held or indirectly held by zero or more records named as <code>bases</code>.</dd>
 <dt><code>enum</code></dt><dd>a type that may take one value from a predefined, limited set of values</dd>
 <dt><code>any</code></dt><dd>a type that may take a value of any type (eg such as <code>void*</code>, <code>boost::any</code>, <code>nlohmann::json</code>)</dd>
 <dt><code>anyOf</code></dt><dd>a type that may take a value of any type in a predefined, limited set of types.</dd>
@@ -337,13 +349,72 @@ representing the absolute context of the type (eg as a C++
 </dl>
 
 <p>
-Some <b>types</b> must <b>reference</b> one or more other types.  These include
-instances of the schema classes: <code>sequence</code>, <code>record</code>, <code>namespace</code>,
-and <code>anyOf</code>.  A <b>type reference</b> is represented as a <i>fully-qualified
-type name</i> (FQTN) which is formed as the dot-separated concatenation
-of the elements of <code>path</code> (if any) and the <code>name</code>.  A FQTN shall not
-begin nor end with a period.  As the <code>path</code> is absolute there is no
-concept of a "relative" type reference.
+The following sections go through this list of schema classes in more
+detail.
+</p>
+</div>
+</div>
+
+<div id="outline-container-atomic" class="outline-3">
+<h3 id="atomic">Atomic types</h3>
+<div class="outline-text-3" id="text-atomic">
+<p>
+A type in <b>moo</b> schema is considered <i>atomic</i> if it holds no references to
+other types.  Some details of the atomic types are provided in this
+section.
+</p>
+</div>
+
+<div id="outline-container-boolean" class="outline-4">
+<h4 id="boolean">Boolean</h4>
+<div class="outline-text-4" id="text-boolean">
+<p>
+An instance of the <code>boolean</code> schema class is a type that may hold a <i>true</i>
+or <i>false</i> value. 
+</p>
+
+<div class="note" id="orgdf6b725">
+<p>
+Like all schema classes, the user is free to make multiple instances
+of <code>boolean</code>.  However, unlike the other schema classes, these types
+will not actually provide any variety of meaning.  One <code>boolean</code> type is
+like any other even if they are differentiated by their type name.
+</p>
+
+</div>
+</div>
+</div>
+
+<div id="outline-container-number" class="outline-4">
+<h4 id="number">Number</h4>
+<div class="outline-text-4" id="text-number">
+</div>
+</div>
+
+<div id="outline-container-string" class="outline-4">
+<h4 id="string">String</h4>
+<div class="outline-text-4" id="text-string">
+</div>
+</div>
+
+<div id="outline-container-enum" class="outline-4">
+<h4 id="enum">Enum</h4>
+<div class="outline-text-4" id="text-enum">
+</div>
+</div>
+</div>
+
+<div id="outline-container-aggregate" class="outline-3">
+<h3 id="aggregate">Aggregate types</h3>
+<div class="outline-text-3" id="text-aggregate">
+<p>
+Some types will hold <b>references</b> to one or more other types.  These are
+<i>aggregate</i> types.  A <b>type reference</b> is represented as a <i>fully-qualified
+type name</i> (FQTN) which is formed as the dot-separated concatenation of
+the elements of <code>path</code> (if any) and the <code>name</code>.  A FQTN shall not begin
+nor end with a period.  As the <code>path</code> is absolute there is no concept of
+a "relative" type reference.  See the section <a href="#namespace">Namespace</a> below for
+related concepts.
 </p>
 
 <p>
@@ -357,12 +428,172 @@ be available in order to match the type reference against possible
 also included.
 </p>
 </div>
+
+<div id="outline-container-sequence" class="outline-4">
+<h4 id="sequence">Sequence</h4>
+<div class="outline-text-4" id="text-sequence">
+</div>
 </div>
 
 
+<div id="outline-container-record" class="outline-4">
+<h4 id="record">Record</h4>
+<div class="outline-text-4" id="text-record">
+<p>
+The <b>moo</b> <code>record</code> schema class is analogous to Python <code>class</code> or C++ <code>struct</code>
+but with it we may only define data members, which in <b>moo</b> are called
+<code>fields</code>, and not methods.
+</p>
+
+<p>
+Each <code>field</code> is itself a small data structure but <b>moo</b> does not
+considered it a first class "type".  A <code>field</code> merely associates the
+following information in the context of the <code>record</code>:
+</p>
+
+<dl class="org-dl">
+<dt><code>name</code></dt><dd>unique identifier (native type string type)</dd>
+<dt><code>item</code></dt><dd>reference the type of the value that the field represents.</dd>
+<dt><code>default</code></dt><dd>optionally provide a value directly in the schema (see
+note)</dd>
+<dt><code>doc</code></dt><dd>optionally provide a brief description of the field.</dd>
+<dt><code>optional</code></dt><dd>optionally indicate if this field is optional (<code>true</code> value) or required (<code>false</code>).</dd>
+</dl>
+
+<p>
+When optional values are not provided, the attribute will be omitted
+from the resulting <code>record</code> structure.
+</p>
+
+<div class="note" id="org067649f">
+<p>
+A field may be given a <code>default</code> value expressed literally in the
+language used to define the schema (ie, Jsonnet or Python).  This
+value may be used by whatever consumes the schema (eg, a template) to
+provide a value for the field.
+</p>
+
+<p>
+When providing a <code>default</code> value, care must be given to assure it is in
+a valid form for the <code>field</code> type held by <code>item</code>.  In particular, when a
+<code>field</code> is itself of a type <code>record</code> type, a full and matching object must
+be provided.
+</p>
+
+<p>
+Special care is typically needed when handling a <code>default</code> value by the
+consumer of a schema due to its representation as a literal value.
+For example, a <code>default</code> value which is an empty string does not itself
+carry any quotes.
+</p>
+
+</div>
+
+<p>
+A <code>record</code> may also be constructed with an attribute called <code>bases</code> which
+provides an array of zero or more references to other <code>record</code> types.
+The <code>fields</code> of all <code>record</code> types referenced in <code>bases</code> should be
+considered held by the <code>record</code> itself.  That is, <code>bases</code> provides a
+simple form of object inheritance.
+</p>
+
+<p>
+Like all aspects of schema, it is up to a consumer of the schema to
+determine how to reflect this inheritance information.  As examples,
+the <code>ostructs.hpp.j2</code> template, described more below, directly reflects
+<code>bases</code> into a list of base <code>struct</code>'s in simple C++ inheritance.
+Somewhat differently the <code>onljs.hpp.j2</code> template which provides
+serialization an <code>ostruct.hpp.j2</code> generated <code>struct</code> and <code>nlohman::json</code>
+representations interpret <code>bases</code> simply as providing additional fields.
+Thus it enacts a "duck-typed" interface between the type-free JSON
+object and the strongly-typed C++ <code>struct</code>.
+</p>
+</div>
+</div>
+
+
+<div id="outline-container-any" class="outline-4">
+<h4 id="any">Any</h4>
+<div class="outline-text-4" id="text-any">
+<p>
+The <code>any</code> schema class provides the "type erasure" pattern.  That is an
+<code>any</code> type may hold any type.  It is like a <code>void*</code> in C or a <code>std::any</code> in
+C++.  As it may represent any type it holds no type information other
+than <code>name</code> and <code>doc</code>.
+</p>
+
+<p>
+With the <code>ostructs.hpp.j2</code> and <code>onljs.hpp.j2</code> templates, the <code>any</code> type is
+mapped to a <code>nlohmann::json</code> type.  This can be used to delay
+serialization of specific parts of a <code>record</code> type until the instance
+can be passed into some more specifically typed C++ context.
+</p>
+</div>
+</div>
+
+
+<div id="outline-container-xxxof" class="outline-4">
+<h4 id="xxxof">xxxOf</h4>
+<div class="outline-text-4" id="text-xxxof">
+<p>
+Three similar aggregate schema classes are: <code>anyOf</code>, <code>allOf</code> and <code>oneOf</code>.
+Each type is a collection of references to other types for which
+</p>
+
+<dl class="org-dl">
+<dt><code>anyOf</code></dt><dd>any may apply</dd>
+<dt><code>allOf</code></dt><dd>all apply</dd>
+<dt><code>oneOf</code></dt><dd>exactly one may apply</dd>
+</dl>
+
+<p>
+As always, how they reflect depends on the consumers and not all may
+have useful meanings in all contexts.  Generally, all three have
+meaningful reflections in a validation context.  Indeed they are in
+<b>moo</b> in order to support JSON Schema validation.  The <code>oneOf</code> could be
+considered to map to union types such as <code>std::variant</code>.  The <code>allOf</code>
+could be considered to represent a component with all of the required
+interfaces.  Given those two definitions, <code>anyOf</code> lacks an obvious use
+for code generation.
+</p>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org9978bc6" class="outline-3">
+<h3 id="org9978bc6">Type containers</h3>
+<div class="outline-text-3" id="text-org9978bc6">
+</div>
+<div id="outline-container-namespace" class="outline-4">
+<h4 id="namespace">Namespace</h4>
+<div class="outline-text-4" id="text-namespace">
+<p>
+Every type is defined in a context called a <code>path</code>.  Conceptually, a
+<code>namespace</code> is a <code>path</code> shared by all types "in" or "under" the namespace.
+<b>moo</b> provides Python and Jsonnet helper code which provides a <code>namespace</code>
+as a type factory constructing types in a given namespace.
+</p>
+</div>
+</div>
+
+<div id="outline-container-schema-array" class="outline-4">
+<h4 id="schema-array">Schema array</h4>
+<div class="outline-text-4" id="text-schema-array">
+<p>
+The most simple way to express a set of <b>moo</b> types is as a <i>schema
+array</i>.  This is simply a Jsonnet or JSON array or Python <code>list</code> holding
+<b>moo</b> type structures.  Generally, schema arrays must be <i>topologically
+sorted</i> so that no type structure references any other type later than
+itself in the array.  <b>moo</b> provides Python and Jsonnet code to perform
+this topological sort and examples are given below.
+</p>
+</div>
+</div>
+</div>
+</div>
 
 <div id="outline-container-Schema" class="outline-2">
-<h2 id="Schema">Schema</h2>
+<h2 id="Schema">Schema Examples</h2>
 <div class="outline-text-2" id="text-Schema">
 <p>
 This section describes how to define a schema using either the
@@ -437,7 +668,7 @@ of the entire <code>sys.jsonnet</code> file.  That is, this file "compiles" to a
 array holding a single <i>oschema</i> type.
 </p>
 
-<div class="note" id="orgcac8f46">
+<div class="note" id="org65f8e28">
 <p>
 All <b>moo</b> "schema files" are expected to provide an
 array-of-type-objects.  We will later see how the order of this array
@@ -480,7 +711,7 @@ unsigned integer in four bytes <code>"u4"</code> and is in a context <code>path<
 <code>["sys"]</code>.
 </p>
 
-<div class="note" id="org0584b75">
+<div class="note" id="orgb38c137">
 <p>
 The final structural form of <i>oschema</i> (ie, the JSON above) is not
 something that a developer of a schema strictly needs to know.  <b>moo</b>
@@ -667,11 +898,11 @@ Sparing the long output here, the full schema compiled to JSON can be
 produced with this command:
 </p>
 
-<pre class="example" id="orgfc9c869">
+<pre class="example" id="orgae3f5ee">
 moo compile examples/oschema/app.jsonnet
 </pre>
 
-<div class="note" id="orgfc80d03">
+<div class="note" id="orgb43fafb">
 <p>
 While developing a schema, it is very useful to run <code>moo compile</code>
 frequently in order to check for Jsonnet syntax or logic errors.
@@ -740,7 +971,7 @@ schema = [ns.Number("Count", "u4")]
 </pre>
 </div>
 
-<div class="note" id="org51201b3">
+<div class="note" id="org38ced8b">
 <p>
 We name the module <code>systypes</code> to not conflict with Python's <code>sys</code> module.
 </p>
@@ -809,9 +1040,9 @@ the <i>oschema</i> type objects made in the module using a filter on
 </p>
 </div>
 
-<div id="outline-container-org2d716d4" class="outline-4">
-<h4 id="org2d716d4"><span class="todo TODO">TODO</span> call from moo.</h4>
-<div class="outline-text-4" id="text-org2d716d4">
+<div id="outline-container-org4c51da6" class="outline-4">
+<h4 id="org4c51da6"><span class="todo TODO">TODO</span> call from moo.</h4>
+<div class="outline-text-4" id="text-org4c51da6">
 <ul class="org-ul">
 <li>add an <code>import</code> based Python loader to <code>moo</code></li>
 </ul>
@@ -1040,7 +1271,7 @@ are ordered from least dependent to most.
 </pre>
 </div>
 
-<pre class="example" id="orged643bc">
+<pre class="example" id="org1248d92">
 Iterate over list of types:
 &lt;Number "sys.Count"&gt;
 &lt;Any "app.Affiliation"&gt;
@@ -1111,7 +1342,7 @@ The <code>omodel</code> contract is embodied in this Jsonnet file:
 <div class="org-src-container">
 <pre class="src src-jsonnet">local oschema = import "oschema.jsonnet";
 
-function(os, path, ctxpath=[]) {
+function(os, path=[], ctxpath=[]) {
 
     // The "path" determines which schema types in the "os" array will
     // be considered to be directly "in" the model.  The "path" may be
@@ -1219,7 +1450,7 @@ bring these in as a model "graft".
 </pre>
 </div>
 
-<pre class="example" id="org9860845">
+<pre class="example" id="orgdd92b23">
 all_types &lt;class 'list'&gt;
 byref &lt;class 'dict'&gt;
 byscn &lt;class 'dict'&gt;
@@ -1296,6 +1527,7 @@ to <code>render</code> and adding the template file name.
 #include "sys/Structs.hpp"
 
 #include &lt;nlohmann/json.hpp&gt;
+#include &lt;string&gt;
 #include &lt;vector&gt;
 #include &lt;string&gt;
 
@@ -1544,7 +1776,7 @@ the <code>moo.otypes</code> module.
 </div>
 <div id="postamble" class="status">
 <p class="author">Author: Brett Viren</p>
-<p class="date">Created: 2021-01-19 Tue 13:45</p>
+<p class="date">Created: 2021-01-25 Mon 17:16</p>
 <p class="validation"><a href="https://validator.w3.org/check?uri=referer">Validate</a></p>
 </div>
 </body>
