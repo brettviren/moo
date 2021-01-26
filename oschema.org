@@ -219,6 +219,13 @@ mapped to a ~nlohmann::json~ type.  This can be used to delay
 serialization of specific parts of a ~record~ type until the instance
 can be passed into some more specifically typed C++ context.
 
+#+begin_note
+The ~any~ type must hold a value which is itself of a type under the
+schema.  As there is currently no support in *moo* to /realize/ moo schema
+types in Jsonnet there is no way to provide a ~default~ value to a
+~record~ with a ~field~ of type ~any~.  See the /otypes/ document for details
+about realizing types and their values in Python.
+#+end_note
 
 *** xxxOf
     :PROPERTIES:

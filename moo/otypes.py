@@ -104,11 +104,8 @@ class Record(BaseType):
         # print(self.field_names)
         ret = dict()
         for fname, field in self.fields.items():
-            try:
-                ret[fname] = getattr(self, fname)
-            except AttributeError:
-                pass
-            else:
+            if fname in self._value:
+                ret[fname] = getattr(self, fname) # this calls pod() on attr
                 continue
             if "default" in field:
                 item = get_type(field['item'])
@@ -480,7 +477,6 @@ class Number(BaseType):
             return float('%.6e'%val)
         return val
 
-
     def update(self, val):
         dtype = self.ost["dtype"]
         dtype = numpy.dtype(dtype)
@@ -598,7 +594,8 @@ class Any(BaseType):
             self._value = val
             return
         cname = self.__class__.__name__
-        raise ValueError(f'any type {cname} requires oschema type')
+        typ = type(val)
+        raise ValueError(f'any type {cname} requires oschema type, got {typ}')
 
 
 def any_class(**ost):
