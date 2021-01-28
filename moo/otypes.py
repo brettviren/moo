@@ -180,8 +180,14 @@ class Record(BaseType):
                 continue
 
             # intern as type
-            item = get_type(field['item'])
-            self._value[fname] = item(fval)
+            ItemType = get_type(field['item'])
+
+            if isinstance(fval, BaseType) and not isinstance(fval, ItemType) and not issubclass(ItemType, Any):
+                cname = self.__class__.__name__
+                tname = type(fval)
+                raise ValueError(f'{cname}.{fname}: got {tname}, want {ItemType}')
+
+            self._value[fname] = ItemType(fval)
 
     def _from_self(self, other):
         # we don't invoke pod() here as we allow incomplete records
