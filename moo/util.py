@@ -66,6 +66,17 @@ def clean_paths(paths, add_cwd=True):
     return paths
 
 
+def search_path(filename, paths=None):
+    paths = list(paths or list())
+
+    if filename.endswith("jsonnet"):
+        paths.insert(0, os.path.join(os.path.dirname(__file__),
+                                     "jsonnet-code"))
+    if filename.endswith("j2"):
+        paths.insert(0, os.path.join(os.path.dirname(__file__),
+                                     "templates"))
+    return [os.path.abspath(p) for p in paths]
+
 def resolve(filename, paths=()):
     '''Resolve filename against moo built-in directories and any
     user-provided list in "paths".
@@ -73,17 +84,11 @@ def resolve(filename, paths=()):
     Raise ValueError if fail.
 
     '''
-    paths = list(paths)
     if not filename:
         raise ValueError("no file name provided")
     if filename.startswith('/'):
         return filename
-    if filename.endswith(".jsonnet"):
-        paths.insert(0, os.path.join(os.path.dirname(__file__),
-                                     "jsonnet-code"))
-    if filename.endswith(".j2"):
-        paths.insert(0, os.path.join(os.path.dirname(__file__),
-                                     "templates"))
+    paths = search_path(filename, paths)
 
     for maybe in clean_paths(paths):
         fp = os.path.join(maybe, filename)

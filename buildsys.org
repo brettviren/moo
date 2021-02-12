@@ -192,6 +192,86 @@ Here is an example where we supply the injected data as a literal representation
 give a tour of the commands relevant to a build system and their
 output files.
 
+** ~paths~
+
+When integrating ~moo~ to a build system it can be useful to query what
+search paths ~moo~ will use to locate a given file and ~moo path~ will
+report these.  
+
+It is important to know that ~moo~ builds a search path depending on the
+type of file to be found.  For now, there are two classes of file
+search paths: those to locate data files (includes both /model/ and
+/schema/ files) and those to locate template files.  The latter are
+identified by a file name ending in ~j2~ and any other ending will be
+considered a data file.
+
+In addition, for either class of files, the complete search path is
+composed of a /builtin/ path and augmented with any additional path
+given by the user.
+
+Some examples makes this clear.  First, display the /builtin/ search
+paths:
+
+#+begin_src shell :exports both :results output code :wrap "example"
+  moo path j2
+#+end_src
+
+#+RESULTS:
+#+begin_example
+/home/bv/dev/moo/moo/templates
+#+end_example
+
+#+begin_src shell :exports both :results output code :wrap "example"
+  moo path jsonnet
+#+end_src
+
+#+RESULTS:
+#+begin_example
+/home/bv/dev/moo/moo/templates
+#+end_example
+
+Next we show how the user may augment the search paths.
+
+#+begin_src shell :exports both :results output code :wrap "example"
+  moo -M /tmp path jsonnet
+#+end_src
+
+#+RESULTS:
+#+begin_example
+/home/bv/dev/moo/moo/jsonnet-code
+/tmp
+#+end_example
+   
+#+begin_src shell :exports both :results output code :wrap "example"
+  moo -T $HOME/dev/moo/test path j2
+#+end_src
+
+#+RESULTS:
+#+begin_example
+/home/bv/dev/moo/moo/templates
+/home/bv/dev/moo/test
+#+end_example
+
+** ~resolve~
+
+Like the ~path~ command, a build system integrator may wish to test if a
+file is properly found without necessarily processing anything.  The
+~moo resolve~ command goes the extra step:
+
+#+begin_src shell :exports both :results output code :wrap "example"
+  moo resolve ocpp.hpp.j2
+  moo resolve moo.jsonnet
+  moo -M $HOME/dev/moo/test resolve test-any.jsonnet
+#+end_src
+
+#+RESULTS:
+#+begin_example
+/home/bv/dev/moo/moo/templates/ocpp.hpp.j2
+/home/bv/dev/moo/moo/jsonnet-code/moo.jsonnet
+/home/bv/dev/moo/test/test-any.jsonnet
+#+end_example
+
+
 ** ~imports~
    :PROPERTIES:
    :CUSTOM_ID: imports

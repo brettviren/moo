@@ -3,6 +3,7 @@
 @test "compile with default TLA" {
     run moo -M test compile issue8.jsonnet
     echo "$output"
+    [ "$status" -eq 0 ]
     [ "$(echo "$output"| jq .val)" = "10" ]
     [ "$(echo "$output"| jq .typ)" = '"number"' ]
 }
@@ -13,6 +14,7 @@ do_one() {
     val="${1:-$var}" 
     run moo -M test -A var="$var" compile issue8.jsonnet
     echo "$output"
+    [ "$status" -eq 0 ]
     [ "$(echo "$output"| jq .val)" = "$val" ]
     [ "$(echo "$output"| jq .typ)" = "\"$typ\"" ]
 }
@@ -32,6 +34,7 @@ do_one() {
 @test "compile with TLA from CLI with file" {
     run moo -M test -A var=issue8.jsonnet compile issue8.jsonnet
     echo "$output"
+    [ "$status" -eq 0 ]
     [ "$(echo "$output"| jq .typ)" = '"object"' ]    
     [ "$(echo "$output"| jq .val.typ)" = '"number"' ]    
     [ "$(echo "$output"| jq .val.val)" = "10" ]    

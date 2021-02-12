@@ -1,0 +1,4 @@
+{% import 'ocpp.hpp.j2' as cppm %}
+{% set model = {"path":["a","b"]} %}
+{{ cppm.headerguard(model, "issue18") }}
+

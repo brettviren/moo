@@ -16,30 +16,30 @@ class Context:
     '''
     def __init__(self, dpath="", mpath=(), tpath=(),
                  tla=(), transform=(), graft=()):
-        self.dpath = dpath
-        self.mpath = mpath
-        self.tpath = tpath
-        self.tlas = dict()
+        self.dpath = dpath # return substructure at this data object path
+        self.mpath = mpath # search path for models (data)
+        self.tpath = tpath # search path for templates
+        self.tlas = dict() # top level arguments
         if tla:
             self.tlas = moo.util.tla_pack(tla, mpath)
         self.transforms = transform
         self.grafts = graft
 
-    def just_load(self, filename, mpath=None, dpath=None):
+    def just_load(self, filename, dpath=None):
         '''
-        Simple load.
+        Simple load with path search and dpath reduction
         '''
         return moo.io.load(self.resolve(filename),
-                           mpath or self.mpath,
+                           self.search_path(filename),
                            dpath or self.dpath, **self.tlas)
 
-    def load(self, filename, mpath=None, dpath=None):
+    def load(self, filename, dpath=None):
         '''
         Load a data structure from a file.
 
         Search mpath for file and return substructure at dpath.
         '''
-        model = self.just_load(filename, mpath, dpath)
+        model = self.just_load(filename, dpath)
         model = self.graft(model)
         model = self.transform(model)
         return model
@@ -58,18 +58,21 @@ class Context:
             model = moo.util.transform(model, transforms + self.transforms)
         return model
 
-    def resolve(self, filename, fpath=None):
+    def search_path(self, fname):
         '''
-        Resolve a filename to absolute path searching fpath.
+        Return search path for given file name or extension
+        '''
+        if fname.endswith('j2'):
+            return moo.util.search_path(fname, self.tpath)
+        return moo.util.search_path(fname, self.mpath)
+
+    def resolve(self, filename):
+        '''
+        Resolve a filename to absolute path.
         '''
         ret = None
 
-        if filename.endswith('.jsonnet'):
-            ret = moo.util.resolve(filename, fpath or self.mpath)
-        elif filename.endswith('.j2'):
-            ret = moo.util.resolve(filename, fpath or self.tpath)
-        else:
-            ret = moo.util.resolve(filename, fpath or self.mpath)
+        ret = moo.util.resolve(filename, self.search_path(filename))
         if ret is None:
             raise RuntimeError(f'can not resolve {filename}')
         return ret
@@ -78,16 +81,23 @@ class Context:
         '''
         Render model against template in templ_file.
         '''
-        templ = self.resolve(templ_file, self.tpath)
+        templ = self.resolve(templ_file)
         helper = self.just_load("moo.jsonnet", dpath="templ")
-        return moo.templates.render(templ, dict(model=model, moo=helper))
+        # this provides the variables that the template sees:
+        params = dict(model=model, moo=helper)
+        tpath = self.search_path(templ_file)
+        return moo.templates.render(templ, params, tpath)
 
     def imports(self, filename):
         '''
         Return list of files the given file imports
         '''
         filename = self.resolve(filename)
-        return moo.imports(filename, self.mpath+self.tpath, **self.tlas)
+        if filename.endswith('.j2'):
+            fpath = self.tpath
+        else:
+            fpath = self.mpath
+        return moo.imports(filename, fpath, **self.tlas)
 
 @click.group()
 @click.option('-D', '--dpath', default="",
@@ -127,6 +137,17 @@ def resolve(ctx, filename):
         click.echo(filename)
 
 
+@cli.command("path")
+@click.argument('filename')
+@click.pass_context
+def path(ctx, filename):
+    '''
+    Print search path for representative file or file extension name
+    '''
+    p = ctx.obj.search_path(filename)
+    click.echo('\n'.join(p))
+
+
 @cli.command("validate")
 @click.option('-o', '--output', default="/dev/stdout",
               type=click.Path(exists=False, dir_okay=False, file_okay=True),
@@ -149,7 +170,7 @@ def cmd_validate(ctx, output, spath, schema, sequence, passfail, validator, mode
     '''
     Validate a model against a schema
     '''
-    sche = ctx.obj.just_load(schema, ctx.obj.mpath, spath)
+    sche = ctx.obj.just_load(schema, spath)
     data = ctx.obj.load(model)
 
     if not sequence:
@@ -192,7 +213,7 @@ def cmd_regex(ctx, validator, only, rpath, regex, string):
     Validate a string against a regex
     '''
     if rpath:
-        regex = ctx.obj.just_load(regex, ctx.obj.mpath, rpath)
+        regex = ctx.obj.just_load(regex, rpath)
 
     if only:
         if regex[0] != '^':

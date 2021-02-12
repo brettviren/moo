@@ -24,13 +24,13 @@ def get_style(filename):
 
 
 
-def make_env(path):
+def make_env(path, **kwds):
     'Create and return Jinja environment for template at path'
     env = Environment(loader=FileSystemLoader(path),
                       trim_blocks=True,
                       lstrip_blocks=True,
                       extensions=['jinja2.ext.do', 'jinja2.ext.loopcontrols'],
-                      **get_style(path))
+                      **kwds)
     env.filters["listify"] = listify
     env.filters["relpath"] = relpath
     env.globals.update(find_type=find_type,
@@ -38,18 +38,31 @@ def make_env(path):
     return env
 
 
-def render(template, params):
-    'Render template against dictionary of parameters'
-    path = os.path.dirname(os.path.realpath(template))
-    env = make_env(path)
+def make_path(template, tpath = None):
+    'Build template search path from representative template and existing'
+    path = tpath or list()
+    path = list(path)
+    path.insert(0, os.path.dirname(os.path.realpath(template)))
+    return path
+
+def render(template, model, tpath=None):
+    'Render template against dictionary of model parameters'
+    path = make_path(template, tpath)
+    style_params = get_style(template)
+    env = make_env(path, **style_params)
     tmpl = env.get_template(os.path.basename(template))
-    return tmpl.render(**params)
+    return tmpl.render(**model)
 
 
+from moo.util import resolve
 def imports(template, tpath=None):
     'Return all files imported by template'
-    path = os.path.dirname(os.path.realpath(template))
-    env = make_env(path)
+    # env = env_from_tmplfile(template, tpath)
+    # ...
+    path = make_path(template, tpath)
+    style_params = get_style(template)
+    env = make_env(path, **style_params)
     ast = env.parse(open(template, 'rb').read().decode())
     subs = meta.find_referenced_templates(ast)
-    return [os.path.join(path, one) for one in subs]
+    ret = [resolve(one) for one in subs]
+    return ret

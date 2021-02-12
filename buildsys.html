@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2021-01-19 Tue 12:57 -->
+<!-- 2021-02-12 Fri 10:48 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>moo 無 build</title>
@@ -247,6 +247,8 @@
 <li><a href="#inputs">Inputs</a></li>
 <li><a href="#outputs">Outputs</a>
 <ul>
+<li><a href="#org01be92e"><code>paths</code></a></li>
+<li><a href="#org8bc77f2"><code>resolve</code></a></li>
 <li><a href="#imports"><code>imports</code></a></li>
 <li><a href="#compile"><code>compile</code></a></li>
 <li><a href="#render"><code>render</code></a></li>
@@ -272,7 +274,7 @@ it must integrate into code build systems and this note collects
 methods to do just that.
 </p>
 
-<div class="note" id="orgd9c28f7">
+<div class="note" id="org2f6b927">
 <p>
 <code>moo</code> can also be used in generating a build system.  See for example
 the <a href="wcup.html">wcup</a> document which describes the use of <code>moo</code>
@@ -396,7 +398,7 @@ given absolute "search paths".  Template and model search paths are
 specified independently via command line arguments:
 </p>
 
-<pre class="example" id="orgf8d20c8">
+<pre class="example" id="orgd64a9f3">
 $ moo -M /path/to/models -M /path/to/more/models \
       -T /path/to/templates -T /path/to/more/templates \
       render a/relative/model.jsonnet /an/absolute/template.xyz.j2
@@ -407,7 +409,7 @@ When using the <code>moo</code> CLI, one may also set these search paths by sett
 <code>MOO_LOAD_PATH</code> and <code>MOO_TEMPLATE_PATH</code> environment variables.
 </p>
 
-<pre class="example" id="orgfef9f45">
+<pre class="example" id="orgb8a0242">
 $ export MOO_LOAD_PATH=/path/to/models:/path/to/more/models
 $ export MOO_TEMPLATE_PATH=/path/to/templates:/path/to/more/templates
 $ moo render a/relative/model.jsonnet /an/absolute/template.xyz.j2
@@ -499,6 +501,104 @@ output files.
 </p>
 </div>
 
+<div id="outline-container-org01be92e" class="outline-3">
+<h3 id="org01be92e"><code>paths</code></h3>
+<div class="outline-text-3" id="text-org01be92e">
+<p>
+When integrating <code>moo</code> to a build system it can be useful to query what
+search paths <code>moo</code> will use to locate a given file and <code>moo path</code> will
+report these.  
+</p>
+
+<p>
+It is important to know that <code>moo</code> builds a search path depending on the
+type of file to be found.  For now, there are two classes of file
+search paths: those to locate data files (includes both <i>model</i> and
+<i>schema</i> files) and those to locate template files.  The latter are
+identified by a file name ending in <code>j2</code> and any other ending will be
+considered a data file.
+</p>
+
+<p>
+In addition, for either class of files, the complete search path is
+composed of a <i>builtin</i> path and augmented with any additional path
+given by the user.
+</p>
+
+<p>
+Some examples makes this clear.  First, display the <i>builtin</i> search
+paths:
+</p>
+
+<div class="org-src-container">
+<pre class="src src-shell">moo path j2
+</pre>
+</div>
+
+<pre class="example" id="org01b0b6f">
+/home/bv/dev/moo/moo/templates
+</pre>
+
+<div class="org-src-container">
+<pre class="src src-shell">moo path jsonnet
+</pre>
+</div>
+
+<pre class="example" id="orgd92c444">
+/home/bv/dev/moo/moo/jsonnet-code
+</pre>
+
+<p>
+Next we show how the user may augment the search paths.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-shell">moo -M /tmp path jsonnet
+</pre>
+</div>
+
+<pre class="example" id="org873eedb">
+/home/bv/dev/moo/moo/jsonnet-code
+/tmp
+</pre>
+
+<div class="org-src-container">
+<pre class="src src-shell">moo -T $HOME/dev/moo/test path j2
+</pre>
+</div>
+
+<pre class="example" id="org5267c0a">
+/home/bv/dev/moo/moo/templates
+/home/bv/dev/moo/test
+</pre>
+</div>
+</div>
+
+<div id="outline-container-org8bc77f2" class="outline-3">
+<h3 id="org8bc77f2"><code>resolve</code></h3>
+<div class="outline-text-3" id="text-org8bc77f2">
+<p>
+Like the <code>path</code> command, a build system integrator may wish to test if a
+file is properly found without necessarily processing anything.  The
+<code>moo resolve</code> command goes the extra step:
+</p>
+
+<div class="org-src-container">
+<pre class="src src-shell">moo resolve ocpp.hpp.j2
+moo resolve moo.jsonnet
+moo -M $HOME/dev/moo/test resolve test-any.jsonnet
+</pre>
+</div>
+
+<pre class="example" id="orga2b665e">
+/home/bv/dev/moo/moo/templates/ocpp.hpp.j2
+/home/bv/dev/moo/moo/jsonnet-code/moo.jsonnet
+/home/bv/dev/moo/test/test-any.jsonnet
+</pre>
+</div>
+</div>
+
+
 <div id="outline-container-imports" class="outline-3">
 <h3 id="imports"><code>imports</code></h3>
 <div class="outline-text-3" id="text-imports">
@@ -526,7 +626,7 @@ echo '{b:69}' &gt; buildsys/b.jsonnet
 </pre>
 </div>
 
-<pre class="example" id="orgb6a3e30">
+<pre class="example" id="orgf3efae4">
 /home/bv/dev/moo/buildsys/b.jsonnet
 </pre>
 
@@ -541,7 +641,7 @@ satisfied when the <code>compile</code>, <code>render</code> or <code>imports</c
 </pre>
 </div>
 
-<pre class="example" id="org067e195">
+<pre class="example" id="org12a0f9b">
 /home/bv/dev/moo/buildsys/b.jsonnet
 /home/bv/dev/moo/buildsys/top.jsonnet
 </pre>
@@ -556,8 +656,8 @@ such if its file name ends in <code>.j2</code>.
 </pre>
 </div>
 
-<pre class="example" id="org29a8568">
-/home/bv/dev/moo/buildsys/hi.txt.j2
+<pre class="example" id="org8e760a0">
+
 </pre>
 
 <p>
@@ -597,7 +697,7 @@ standard output but can also write to an explicit file given with the
 <code>-o</code> command option.  A minimal example to show the command line is:
 </p>
 
-<pre class="example" id="org5303ca8">
+<pre class="example" id="orgc9ceadb">
 moo render -o output.hpp model.jsonnet template.hpp.j2
 </pre>
 </div>
@@ -692,8 +792,8 @@ waf
 </pre>
 </div>
 
-<pre class="example" id="org41ae83e">
-'distclean' finished successfully (0.002s)
+<pre class="example" id="org3861a1a">
+'distclean' finished successfully (0.044s)
 Setting top to                           : /home/bv/dev/moo/buildsys/waf/cmd 
 Setting out to                           : /home/bv/dev/moo/buildsys/waf/cmd/build 
 Checking for program 'moo'               : /home/bv/dev/moo/.direnv/python-venv-3.8.0/bin/moo 
@@ -705,13 +805,13 @@ Waf: Entering directory `/home/bv/dev/moo/buildsys/waf/cmd/build'
 [/home/bv/dev/moo/buildsys/waf/cmd/sub.jsonnet, /home/bv/dev/moo/buildsys/waf/cmd/sub/sub.jsonnet]
 [1/1] Processing model-dump.txt: model.jsonnet dump.txt.j2 -&gt; build/model-dump.txt
 Waf: Leaving directory `/home/bv/dev/moo/buildsys/waf/cmd/build'
-'build' finished successfully (1.531s)
+'build' finished successfully (1.564s)
 
 second build, no rebuild
 
 Waf: Entering directory `/home/bv/dev/moo/buildsys/waf/cmd/build'
 Waf: Leaving directory `/home/bv/dev/moo/buildsys/waf/cmd/build'
-'build' finished successfully (0.013s)
+'build' finished successfully (0.006s)
 
 modify intermediate dependency, see it rebuild
 
@@ -719,7 +819,7 @@ Waf: Entering directory `/home/bv/dev/moo/buildsys/waf/cmd/build'
 [/home/bv/dev/moo/buildsys/waf/cmd/sub.jsonnet, /home/bv/dev/moo/buildsys/waf/cmd/sub/sub.jsonnet]
 [1/1] Processing model-dump.txt: model.jsonnet dump.txt.j2 -&gt; build/model-dump.txt
 Waf: Leaving directory `/home/bv/dev/moo/buildsys/waf/cmd/build'
-'build' finished successfully (1.527s)
+'build' finished successfully (1.514s)
 </pre>
 </div>
 </div>
@@ -802,8 +902,8 @@ waf
 </pre>
 </div>
 
-<pre class="example" id="orge8c4353">
-'distclean' finished successfully (0.002s)
+<pre class="example" id="org9dcb937">
+'distclean' finished successfully (0.055s)
 Setting top to                           : /home/bv/dev/moo/buildsys/waf/mod 
 Setting out to                           : /home/bv/dev/moo/buildsys/waf/mod/build 
 'configure' finished successfully (0.002s)
@@ -820,7 +920,7 @@ second build, no rebuild
 
 Waf: Entering directory `/home/bv/dev/moo/buildsys/waf/mod/build'
 Waf: Leaving directory `/home/bv/dev/moo/buildsys/waf/mod/build'
-'build' finished successfully (0.017s)
+'build' finished successfully (0.013s)
 
 modify intermediate dependency, see it rebuild
 
@@ -828,7 +928,7 @@ Waf: Entering directory `/home/bv/dev/moo/buildsys/waf/mod/build'
 [/home/bv/dev/moo/buildsys/waf/mod/sub.jsonnet, /home/bv/dev/moo/buildsys/waf/mod/sub/sub.jsonnet]
 [1/1] Processing model-dump.txt: model.jsonnet dump.txt.j2 -&gt; build/model-dump.txt
 Waf: Leaving directory `/home/bv/dev/moo/buildsys/waf/mod/build'
-'build' finished successfully (0.355s)
+'build' finished successfully (0.354s)
 </pre>
 </div>
 </div>
@@ -877,7 +977,7 @@ cat model-dump.txt
 </pre>
 </div>
 
-<pre class="example" id="orgc3cf29d">
+<pre class="example" id="org06c0e93">
 rm -f model-dump.txt
 moo render -o model-dump.txt model.jsonnet dump.txt.j2
 
@@ -887,7 +987,7 @@ make: 'model-dump.txt' is up to date.
 
 In any case, first build gave us:
 
--rw-rw-r-- 1 bv bv 93 Jan 19 12:57 model-dump.txt
+-rw-rw-r-- 1 bv bv 93 Feb 12 10:48 model-dump.txt
 sub = {'a': 1, 'b': 2, 'c': 'hello'}
 subsub = {'a': 1, 'b': 2, 'c': 'hello', 'd': 'FORTRAN'}
 </pre>
@@ -905,7 +1005,7 @@ build graph in a way that respects intermediate dependencies using <code>moo
 imports</code> like the <a href="#waf">Waf</a> examples.  
 </p>
 
-<div class="note" id="org0b57400">
+<div class="note" id="org7c09794">
 <p>
 Currently the CMake code is provided merely as an example which is
 found in <a href="buildsys/cmake/moo.cmake">moo.cmake</a>.  The goal is to
@@ -978,7 +1078,7 @@ ls -l --full-time build/model-dump.txt
 </pre>
 </div>
 
-<pre class="example" id="org3213585">
+<pre class="example" id="org0e9b7ce">
 -- The C compiler identification is GNU 7.5.0
 -- The CXX compiler identification is GNU 7.5.0
 -- Check for working C compiler: /usr/bin/cc
@@ -1002,29 +1102,29 @@ Do initial build
 Scanning dependencies of target DOIT
 [100%] generate code model-dump.txt
 [100%] Built target DOIT
--rw-rw-r-- 1 bv bv 93 2021-01-19 12:57:36.255784696 -0500 build/model-dump.txt
+-rw-rw-r-- 1 bv bv 93 2021-02-12 10:48:18.200301614 -0500 build/model-dump.txt
 
 Next we edit the intermediate files and notice a rebuild
 
 [100%] generate code model-dump.txt
 [100%] Built target DOIT
--rw-rw-r-- 1 bv bv 93 2021-01-19 12:57:37.007763611 -0500 build/model-dump.txt
+-rw-rw-r-- 1 bv bv 93 2021-02-12 10:48:18.900282558 -0500 build/model-dump.txt
 
 Do do a second build, output is not rebuilt
 
 [100%] Built target DOIT
--rw-rw-r-- 1 bv bv 93 2021-01-19 12:57:37.007763611 -0500 build/model-dump.txt
+-rw-rw-r-- 1 bv bv 93 2021-02-12 10:48:18.900282558 -0500 build/model-dump.txt
 
 Add new implicit dependency, which should cause a rebuild
 
 [100%] generate code model-dump.txt
 [100%] Built target DOIT
--rw-rw-r-- 1 bv bv 93 2021-01-19 12:57:37.751742750 -0500 build/model-dump.txt
+-rw-rw-r-- 1 bv bv 93 2021-02-12 10:48:19.632262630 -0500 build/model-dump.txt
 
 Update new implicit dependency, which should cause a rebuild
 
 [100%] Built target DOIT
--rw-rw-r-- 1 bv bv 93 2021-01-19 12:57:37.751742750 -0500 build/model-dump.txt
+-rw-rw-r-- 1 bv bv 93 2021-02-12 10:48:19.632262630 -0500 build/model-dump.txt
 </pre>
 </div>
 </div>
@@ -1032,7 +1132,7 @@ Update new implicit dependency, which should cause a rebuild
 </div>
 <div id="postamble" class="status">
 <p class="author">Author: Brett Viren</p>
-<p class="date">Created: 2021-01-19 Tue 12:57</p>
+<p class="date">Created: 2021-02-12 Fri 10:48</p>
 <p class="validation"><a href="https://validator.w3.org/check?uri=referer">Validate</a></p>
 </div>
 </body>
