@@ -193,6 +193,9 @@ give a tour of the commands relevant to a build system and their
 output files.
 
 ** ~paths~
+   :PROPERTIES:
+   :CUSTOM_ID: paths
+   :END:
 
 When integrating ~moo~ to a build system it can be useful to query what
 search paths ~moo~ will use to locate a given file and ~moo path~ will
@@ -253,6 +256,10 @@ Next we show how the user may augment the search paths.
 #+end_example
 
 ** ~resolve~
+   :PROPERTIES:
+   :CUSTOM_ID: resolve
+   :END:
+
 
 Like the ~path~ command, a build system integrator may wish to test if a
 file is properly found without necessarily processing anything.  The
