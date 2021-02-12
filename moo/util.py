@@ -69,6 +69,8 @@ def clean_paths(paths, add_cwd=True):
 def search_path(filename, paths=None):
     paths = list(paths or list())
 
+    paths.insert(0, os.path.realpath("."))
+
     if filename.endswith("jsonnet"):
         paths.insert(0, os.path.join(os.path.dirname(__file__),
                                      "jsonnet-code"))

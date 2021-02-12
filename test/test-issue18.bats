@@ -5,7 +5,7 @@
     echo "$output"
     [ "$status" -eq 0 ]
     [ -n "$output" ]
-    [ "$(echo -e "$output" | wc -l)" -eq 1 ]
+    [ "$(echo -e "$output" | wc -l)" -eq 2 ]
 }
 
 @test "template paths user" {
@@ -13,7 +13,7 @@
     echo "$output"
     [ "$status" -eq 0 ]
     [ -n "$output" ]
-    [ "$(echo -e "$output" | wc -l)" -eq 2 ]
+    [ "$(echo -e "$output" | wc -l)" -eq 3 ]
 }
 
 @test "model paths" {
@@ -21,7 +21,7 @@
     echo "$output"
     [ "$status" -eq 0 ]
     [ -n "$output" ]
-    [ "$(echo -e "$output" | wc -l)" -eq 1 ]
+    [ "$(echo -e "$output" | wc -l)" -eq 2 ]
 }
 
 @test "model paths user" {
@@ -29,7 +29,7 @@
     echo "$output"
     [ "$status" -eq 0 ]
     [ -n "$output" ]
-    [ "$(echo -e "$output" | wc -l)" -eq 2 ]
+    [ "$(echo -e "$output" | wc -l)" -eq 3 ]
 }
 
 @test "resolve builtin template" {

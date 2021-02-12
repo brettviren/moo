@@ -222,6 +222,7 @@ paths:
 #+RESULTS:
 #+begin_example
 /home/bv/dev/moo/moo/templates
+/home/bv/dev/moo
 #+end_example
 
 #+begin_src shell :exports both :results output code :wrap "example"
@@ -230,7 +231,8 @@ paths:
 
 #+RESULTS:
 #+begin_example
-/home/bv/dev/moo/moo/templates
+/home/bv/dev/moo/moo/jsonnet-code
+/home/bv/dev/moo
 #+end_example
 
 Next we show how the user may augment the search paths.
