@@ -16,6 +16,10 @@ local _tsmod = import "toposort.jsonnet";
 local is(x) = std.type(x) != "null";
 local isr(x,r) = if std.type(x) != "null" then r;
 
+// return true if only one or other argument is non-null
+local not_both(a,b) = 
+    ! (std.type(a) != "null" && std.type(b) != "null");
+
 {
     // Return the leading part of a dotpath p with the leaf removed
     basepath(p) :: {
@@ -54,6 +58,56 @@ local isr(x,r) = if std.type(x) != "null" then r;
                   "any", "anyOf", "allOf", "oneOf",      // unions
                   "namespace"],                          // quasi-supported
 
+    // Not a type but a constructor for the "constraints" argument
+    // to number() constructor.  This need not strictly be used
+    // but assures correct spelling of key names at the Jsonnet
+    // level.  JSON Schema equivalents are given in parenthesis.
+    numeric_constraints(
+        // set to 1.0 to assure integral value
+        multipleOf=null,
+        // value is strictly less than given
+        exclusiveMaximum=null,
+        // value is strictly greater than given 
+        exclusiveMinimum=null,
+        // value is less or equal to given
+        maximum=null,
+        // value is greater or equal to given
+        minimum=null)
+    :: {
+        assert not_both(minimum, exclusiveMinimum),
+        assert not_both(maximum, exclusiveMaximum),
+        [isr(multipleOf, "multipleOf")]: multipleOf,
+        [isr(exclusiveMaximum, "exclusiveMaximum")]: exclusiveMaximum,
+        [isr(exclusiveMinimum, "exclusiveMinimum")]: exclusiveMinimum,
+        [isr(maximum, "maximum")]: maximum,
+        [isr(minimum, "minimum")]: minimum,
+    },
+
+    // A field provides an attribute for a record.  We do not
+    // consider a field itself as a type but rather a holder of a
+    // name, a type an (optional) default value and an optional
+    // marker.  Some rules for fields:
+    //
+    // - the "default" should be provided as literal JSON data
+    // which is consistent with the schema for the type of the
+    // field.  Eg, a string is "hi", a number is 42, a field which
+    // is itself a record is a JSON object.
+    //
+    // - if "optional" is set to true then targets may accept a
+    // record lacking this field.  By default, a field is
+    // required.
+    field(name, type, default=null, optional=null, doc=null) :: {
+        local defres = if std.type(default) == "null" && std.objectHas(type,"default") then type.default else default,
+        res: {
+            name: name,
+            item: $.fqn(type),
+            [isr(optional,"optional")]: optional,
+            [isr(defres,"default")] : defres,
+            [isr(doc,"doc")]: doc,
+        }
+    }.res,
+
+
     schema(ctx=[]) :: {
         local namepath = $.listify(ctx),
         // Set common attributes for every type, call as self.type(...)
@@ -73,6 +127,9 @@ local isr(x,r) = if std.type(x) != "null" then r;
             [isr(format,"format")]: format,
         },
 
+        // shorthand
+        nc :: $.numeric_constraints,
+
         number(name, dtype, constraints=null, doc=null)
         :: self.type(name, "number", doc) {
             dtype: dtype,
@@ -85,29 +142,8 @@ local isr(x,r) = if std.type(x) != "null" then r;
             items: self.deps[0],
         },
         
-        // A field provides an attribute for a record.  We do not
-        // consider a field itself as a type but rather a holder of a
-        // name, a type an (optional) default value and an optional
-        // marker.  Some rules for fields:
-        //
-        // - the "default" should be provided as literal JSON data
-        // which is consistent with the schema for the type of the
-        // field.  Eg, a string is "hi", a number is 42, a field which
-        // is itself a record is a JSON object.
-        //
-        // - if "optional" is set to true then targets may accept a
-        // record lacking this field.  By default, a field is
-        // required.
-        field(name, type, default=null, optional=null, doc=null) :: {
-            local defres = if std.type(default) == "null" && std.objectHas(type,"default") then type.default else default,
-            res: {
-                name: name,
-                item: $.fqn(type),
-                [isr(optional,"optional")]: optional,
-                [isr(defres,"default")] : defres,
-                [isr(doc,"doc")]: doc,
-            }
-        }.res,
+        // shorthand 
+        field :: $.field,
 
         // A record is a collection of fields.  It may have a zero or
         // more "base" records.

@@ -21,8 +21,8 @@ A *schema* defines information about the *type* of some *value*.  It may
 describe an atomic type ("integer", "boolean") or types which are
 aggregates of other types ("record", "sequence").  The language forms
 we choose to use to provide this information defines a *schema system*
-(essentially itself a "meta schema").  *moo* supports a number of schema
-systems but the dominant one is called /oschema/.
+(essentially itself a "meta schema").  *moo* supports a multiple schema
+systems but the predominant one is called /oschema/.
 
 #+begin_note
 The "o" stands for "object" as /oschema/ describes a type using an
@@ -34,7 +34,7 @@ Many schema systems will specify a persistent representation (file
 format) for expressing a schema.  Eg, XML has XSD and JSON has JSON
 Schema (itself expressed as JSON).  *moo* /oschema/ system is defined
 in terms of a transient representation (structured data in memory).
-Thus, a large number of persistent representations may be used to
+Thus, a variety of persistent representations may be used to
 provide /oschema/ schema.  Users may select file formats they know and
 love if they wish.  Below we will describe two (Jsonnet and Python) for which *moo* provides direct support.
 
@@ -53,7 +53,7 @@ ladder, a *model* (aka "value") is an instance of a *type*.
 The *moo* /oschema/ schema classes are summarized:
 
 - ~boolean~ :: a type which may take value "true" or "false"
-- ~number~ :: a numeric type of given format and size
+- ~number~ :: a numeric type of given format and size and optional numeric constraints
 - ~string~ :: a character string type possibly matching some pattern or format
 - ~sequence~ :: an array or vector with elements of one type
 - ~tuple~ :: (not yet supported, but you can guess what it will be)
@@ -108,6 +108,45 @@ like any other even if they are differentiated by their type name.
     :PROPERTIES:
     :CUSTOM_ID: number
     :END:
+
+Instances of the moo ~number~ schema class describe numeric types in
+terms of representation size, format and optional constraints.
+
+The size and format is specified as code which should be a valid
+~numpy.dtype~.  For example, ~i8~ is a 8 *byte* (not bit!) signed integer
+type and ~f4~ is a single-precision floating point type.  Numpy supports
+a wide variety of "spelling" of the format and size codes however *moo*
+schema is restricted to 2-character ~dtype~ codes.
+
+The ~dtype~ is intended for codegen.  For validation, a ~number~ schema
+instance may also supply numeric constraints with names matching those
+from [[https://json-schema.org/understanding-json-schema/reference/numeric.html][JSON Schema numeric types]].  Specifically: 
+
+- ~multipleOf~ :: a valid value must be a multiple of the given number
+- ~exclusiveMaximum~ :: a valid value must be strictly less than the given number
+- ~exclusiveMinimum~ :: a valid value must be strictly more than the given number
+- ~maximum~ :: a valid value must be less than or equal to the given number
+- ~minimum~ :: a valid value must be more than or equal to the given number
+
+#+begin_tip
+To produce a schema that validates a number has having an integral
+value, specify the constraint ~multipleOf=1~.
+#+end_tip
+
+#+begin_note
+The JSON Schema "draft 4" interpretation of the exclusive variants is
+rejected.  That is, all numeric constraints themselves take a numeric
+value and not Boolean.
+#+end_note
+
+#+begin_warning
+Numeric constraints are given as literal numeric values and thus are
+subject to limitations of the language in which they are specified.
+In particular, Jsonnet treats all numeric values as IEEE754 64-bit
+floating point numbers.
+#+end_warning
+
+
 
 *** String
     :PROPERTIES:

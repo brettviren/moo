@@ -37,4 +37,11 @@ local re = import "schema/re.jsonnet";
     // keep this alias for now so existing schema doesn't break
     schema : self.fschema,
     
+
+    // Return true if all in arr are true
+    alltrue(arr) :: std.foldl(function(a,b) a && b, arr, true),
+    // Return true if any in arr are true
+    anytrue(arr) :: std.foldl(function(a,b) a || b, arr, false),
+
+
 }

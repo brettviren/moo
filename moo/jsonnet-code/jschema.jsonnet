@@ -7,13 +7,13 @@ local select(obj, keys) = {
 };
 
 {
-    dtypes: {
-        i8: { type:"integer", maximum: std.pow(2,63)-1, minimum: -std.pow(2,63) },
-        i4: { type:"integer", maximum: std.pow(2,31)-1, minimum: -std.pow(2,31) },
-        i2: { type:"integer", maximum: std.pow(2,15)-1, minimum: -std.pow(2,15) },
-        u8: { type:"integer", minimum: 0, maximum: std.pow(2,64)-1 },
-        u4: { type:"integer", minimum: 0, maximum: std.pow(2,32)-1 },
-        u2: { type:"integer", minimum: 0, maximum: std.pow(2,16)-1 },
+    dtypes: {                  // fixme: add these as default while honor only one min/max
+        i8: { type:"integer"}, // maximum: std.pow(2,63)-1, minimum: -std.pow(2,63) },
+        i4: { type:"integer"}, // maximum: std.pow(2,31)-1, minimum: -std.pow(2,31) },
+        i2: { type:"integer"}, // maximum: std.pow(2,15)-1, minimum: -std.pow(2,15) },
+        u8: { type:"integer"}, // minimum: 0, maximum: std.pow(2,64)-1 },
+        u4: { type:"integer"}, // minimum: 0, maximum: std.pow(2,32)-1 },
+        u2: { type:"integer"}, // minimum: 0, maximum: std.pow(2,16)-1 },
         f4: { type:"number" },
         f8: { type:"number" },
     },

@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2021-01-25 Mon 17:16 -->
+<!-- 2021-02-16 Tue 15:20 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title><code>moo</code> 無 <code>oschema</code></title>
@@ -243,7 +243,7 @@
 <li><a href="#classes">Schema classes</a></li>
 <li><a href="#atomic">Atomic types</a></li>
 <li><a href="#aggregate">Aggregate types</a></li>
-<li><a href="#org9978bc6">Type containers</a></li>
+<li><a href="#orgb3ec06c">Type containers</a></li>
 </ul>
 </li>
 <li><a href="#Schema">Schema Examples</a>
@@ -278,11 +278,11 @@ A <b>schema</b> defines information about the <b>type</b> of some <b>value</b>. 
 describe an atomic type ("integer", "boolean") or types which are
 aggregates of other types ("record", "sequence").  The language forms
 we choose to use to provide this information defines a <b>schema system</b>
-(essentially itself a "meta schema").  <b>moo</b> supports a number of schema
-systems but the dominant one is called <i>oschema</i>.
+(essentially itself a "meta schema").  <b>moo</b> supports a multiple schema
+systems but the predominant one is called <i>oschema</i>.
 </p>
 
-<div class="note" id="org842353c">
+<div class="note" id="org5674b0b">
 <p>
 The "o" stands for "object" as <i>oschema</i> describes a type using an
 object representation.  A lesser used <b>moo</b> schema system is <i>fschema</i>
@@ -296,7 +296,7 @@ Many schema systems will specify a persistent representation (file
 format) for expressing a schema.  Eg, XML has XSD and JSON has JSON
 Schema (itself expressed as JSON).  <b>moo</b> <i>oschema</i> system is defined
 in terms of a transient representation (structured data in memory).
-Thus, a large number of persistent representations may be used to
+Thus, a variety of persistent representations may be used to
 provide <i>oschema</i> schema.  Users may select file formats they know and
 love if they wish.  Below we will describe two (Jsonnet and Python) for which <b>moo</b> provides direct support.
 </p>
@@ -319,7 +319,7 @@ The <b>moo</b> <i>oschema</i> schema classes are summarized:
 
 <dl class="org-dl">
 <dt><code>boolean</code></dt><dd>a type which may take value "true" or "false"</dd>
-<dt><code>number</code></dt><dd>a numeric type of given format and size</dd>
+<dt><code>number</code></dt><dd>a numeric type of given format and size and optional numeric constraints</dd>
 <dt><code>string</code></dt><dd>a character string type possibly matching some pattern or format</dd>
 <dt><code>sequence</code></dt><dd>an array or vector with elements of one type</dd>
 <dt><code>tuple</code></dt><dd>(not yet supported, but you can guess what it will be)</dd>
@@ -373,7 +373,7 @@ An instance of the <code>boolean</code> schema class is a type that may hold a <
 or <i>false</i> value. 
 </p>
 
-<div class="note" id="orgdf6b725">
+<div class="note" id="org88d3e89">
 <p>
 Like all schema classes, the user is free to make multiple instances
 of <code>boolean</code>.  However, unlike the other schema classes, these types
@@ -388,8 +388,62 @@ like any other even if they are differentiated by their type name.
 <div id="outline-container-number" class="outline-4">
 <h4 id="number">Number</h4>
 <div class="outline-text-4" id="text-number">
+<p>
+Instances of the moo <code>number</code> schema class describe numeric types in
+terms of representation size, format and optional constraints.
+</p>
+
+<p>
+The size and format is specified as code which should be a valid
+<code>numpy.dtype</code>.  For example, <code>i8</code> is a 8 <b>byte</b> (not bit!) signed integer
+type and <code>f4</code> is a single-precision floating point type.  Numpy supports
+a wide variety of "spelling" of the format and size codes however <b>moo</b>
+schema is restricted to 2-character <code>dtype</code> codes.
+</p>
+
+<p>
+The <code>dtype</code> is intended for codegen.  For validation, a <code>number</code> schema
+instance may also supply numeric constraints with names matching those
+from <a href="https://json-schema.org/understanding-json-schema/reference/numeric.html">JSON Schema numeric types</a>.  Specifically: 
+</p>
+
+<dl class="org-dl">
+<dt><code>multipleOf</code></dt><dd>a valid value must be a multiple of the given number</dd>
+<dt><code>exclusiveMaximum</code></dt><dd>a valid value must be strictly less than the given number</dd>
+<dt><code>exclusiveMinimum</code></dt><dd>a valid value must be strictly more than the given number</dd>
+<dt><code>maximum</code></dt><dd>a valid value must be less than or equal to the given number</dd>
+<dt><code>minimum</code></dt><dd>a valid value must be more than or equal to the given number</dd>
+</dl>
+
+<div class="note" id="orga41fe91">
+<p>
+The JSON Schema "draft 4" interpretation of the exclusive variants is
+rejected.  That is, all numeric constraints themselves take a numeric
+value and not Boolean.
+</p>
+
+</div>
+
+<div class="warning" id="org70bf663">
+<p>
+Numeric constraints are given as literal numeric values and thus are
+subject to limitations of the language in which they are specified.
+In particular, Jsonnet treats all numeric values as IEEE754 64-bit
+floating point numbers.
+</p>
+
+</div>
+
+<div class="tip" id="orga69a659">
+<p>
+To specify an integer, besides a <code>dtype</code> code starting with "i" or "u"
+you may specify a constraint <code>multipleOf=1.0</code>.
+</p>
+
 </div>
 </div>
+</div>
+
 
 <div id="outline-container-string" class="outline-4">
 <h4 id="string">String</h4>
@@ -465,7 +519,7 @@ When optional values are not provided, the attribute will be omitted
 from the resulting <code>record</code> structure.
 </p>
 
-<div class="note" id="org067649f">
+<div class="note" id="org51419ea">
 <p>
 A field may be given a <code>default</code> value expressed literally in the
 language used to define the schema (ie, Jsonnet or Python).  This
@@ -528,9 +582,19 @@ mapped to a <code>nlohmann::json</code> type.  This can be used to delay
 serialization of specific parts of a <code>record</code> type until the instance
 can be passed into some more specifically typed C++ context.
 </p>
-</div>
-</div>
 
+<div class="note" id="org1a147ec">
+<p>
+The <code>any</code> type must hold a value which is itself of a type under the
+schema.  As there is currently no support in <b>moo</b> to <i>realize</i> moo schema
+types in Jsonnet there is no way to provide a <code>default</code> value to a
+<code>record</code> with a <code>field</code> of type <code>any</code>.  See the <i>otypes</i> document for details
+about realizing types and their values in Python.
+</p>
+
+</div>
+</div>
+</div>
 
 <div id="outline-container-xxxof" class="outline-4">
 <h4 id="xxxof">xxxOf</h4>
@@ -560,9 +624,9 @@ for code generation.
 </div>
 </div>
 
-<div id="outline-container-org9978bc6" class="outline-3">
-<h3 id="org9978bc6">Type containers</h3>
-<div class="outline-text-3" id="text-org9978bc6">
+<div id="outline-container-orgb3ec06c" class="outline-3">
+<h3 id="orgb3ec06c">Type containers</h3>
+<div class="outline-text-3" id="text-orgb3ec06c">
 </div>
 <div id="outline-container-namespace" class="outline-4">
 <h4 id="namespace">Namespace</h4>
@@ -668,7 +732,7 @@ of the entire <code>sys.jsonnet</code> file.  That is, this file "compiles" to a
 array holding a single <i>oschema</i> type.
 </p>
 
-<div class="note" id="org65f8e28">
+<div class="note" id="org69470c4">
 <p>
 All <b>moo</b> "schema files" are expected to provide an
 array-of-type-objects.  We will later see how the order of this array
@@ -711,7 +775,7 @@ unsigned integer in four bytes <code>"u4"</code> and is in a context <code>path<
 <code>["sys"]</code>.
 </p>
 
-<div class="note" id="orgb38c137">
+<div class="note" id="orgd4766df">
 <p>
 The final structural form of <i>oschema</i> (ie, the JSON above) is not
 something that a developer of a schema strictly needs to know.  <b>moo</b>
@@ -898,11 +962,11 @@ Sparing the long output here, the full schema compiled to JSON can be
 produced with this command:
 </p>
 
-<pre class="example" id="orgae3f5ee">
+<pre class="example" id="org82c7a7b">
 moo compile examples/oschema/app.jsonnet
 </pre>
 
-<div class="note" id="orgb43fafb">
+<div class="note" id="org0577a2d">
 <p>
 While developing a schema, it is very useful to run <code>moo compile</code>
 frequently in order to check for Jsonnet syntax or logic errors.
@@ -971,7 +1035,7 @@ schema = [ns.Number("Count", "u4")]
 </pre>
 </div>
 
-<div class="note" id="org38ced8b">
+<div class="note" id="org2777f12">
 <p>
 We name the module <code>systypes</code> to not conflict with Python's <code>sys</code> module.
 </p>
@@ -1040,9 +1104,9 @@ the <i>oschema</i> type objects made in the module using a filter on
 </p>
 </div>
 
-<div id="outline-container-org4c51da6" class="outline-4">
-<h4 id="org4c51da6"><span class="todo TODO">TODO</span> call from moo.</h4>
-<div class="outline-text-4" id="text-org4c51da6">
+<div id="outline-container-org71c6404" class="outline-4">
+<h4 id="org71c6404"><span class="todo TODO">TODO</span> call from moo.</h4>
+<div class="outline-text-4" id="text-org71c6404">
 <ul class="org-ul">
 <li>add an <code>import</code> based Python loader to <code>moo</code></li>
 </ul>
@@ -1271,7 +1335,7 @@ are ordered from least dependent to most.
 </pre>
 </div>
 
-<pre class="example" id="org1248d92">
+<pre class="example" id="orgabcc2e7">
 Iterate over list of types:
 &lt;Number "sys.Count"&gt;
 &lt;Any "app.Affiliation"&gt;
@@ -1450,7 +1514,7 @@ bring these in as a model "graft".
 </pre>
 </div>
 
-<pre class="example" id="orgdd92b23">
+<pre class="example" id="org6d0ca49">
 all_types &lt;class 'list'&gt;
 byref &lt;class 'dict'&gt;
 byscn &lt;class 'dict'&gt;
@@ -1776,7 +1840,7 @@ the <code>moo.otypes</code> module.
 </div>
 <div id="postamble" class="status">
 <p class="author">Author: Brett Viren</p>
-<p class="date">Created: 2021-01-25 Mon 17:16</p>
+<p class="date">Created: 2021-02-16 Tue 15:20</p>
 <p class="validation"><a href="https://validator.w3.org/check?uri=referer">Validate</a></p>
 </div>
 </body>
