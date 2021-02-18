@@ -3,15 +3,22 @@ This provides support for templates that produce C++ code.
 
 See also ocpp.jsonnet and ocpp.hpp.j2.
 '''
-
+import sys
 from .util import find_type
 from moo.oschema import untypify
+import numpy
 
+# fixme: this reproduces some bits that are also in otypes.
 
 def literal_value(types, fqn, val):
     '''Convert val of type typ to a C++ literal syntax.'''
     typ = find_type(types, fqn)
     schema = typ['schema']
+
+    if schema == "boolean":
+        if not val:
+            return 'false'
+        return 'true'
 
     if schema == "sequence":
         if val is None:
@@ -20,9 +27,9 @@ def literal_value(types, fqn, val):
         return '{%s}' % seq
 
     if schema == "number":
-        # fixme truncate if int?
-        if val is None:
-            return "0"
+        dtype = typ["dtype"]
+        dtype = numpy.dtype(dtype)
+        val = numpy.array(val or 0, dtype).item() # coerce
         return f'{val}'
 
     if schema == "string":
@@ -52,6 +59,7 @@ def literal_value(types, fqn, val):
     if schema == "any":
         return '{}'
 
+    sys.stderr.write(f'warning: unsupported default CPP record field type {schema} for {fqn} using native value')
     return val                  # go fish
 
 
