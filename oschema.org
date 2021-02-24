@@ -603,6 +603,9 @@ the /oschema/ type objects made in the module using a filter on
 
 
 ** JSON Schema
+   :PROPERTIES:
+   :CUSTOM_ID: json-schema
+   :END:
 
 *moo* provides support to convert a moo /oschema/ into [[https://json-schema.org/understanding-json-schema/][JSON Schema]] schema
 form.  To do this, we must specify the fully-qualified type reference,

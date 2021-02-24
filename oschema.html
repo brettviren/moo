@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2021-02-24 Wed 14:24 -->
+<!-- 2021-02-24 Wed 15:25 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title><code>moo</code> 無 <code>oschema</code></title>
@@ -243,14 +243,14 @@
 <li><a href="#classes">Schema classes</a></li>
 <li><a href="#atomic">Atomic types</a></li>
 <li><a href="#aggregate">Aggregate types</a></li>
-<li><a href="#org61449b9">Type containers</a></li>
+<li><a href="#org28b3dd8">Type containers</a></li>
 </ul>
 </li>
 <li><a href="#Schema">Schema Examples</a>
 <ul>
 <li><a href="#schema-in-jsonnet">Jsonnet</a></li>
 <li><a href="#schema-in-python">Python</a></li>
-<li><a href="#orgf0da034">JSON Schema</a></li>
+<li><a href="#json-schema">JSON Schema</a></li>
 </ul>
 </li>
 <li><a href="#transforms">Models</a>
@@ -283,7 +283,7 @@ we choose to use to provide this information defines a <b>schema system</b>
 systems but the predominant one is called <i>oschema</i>.
 </p>
 
-<div class="note" id="org8c84869">
+<div class="note" id="org8b25ebb">
 <p>
 The "o" stands for "object" as <i>oschema</i> describes a type using an
 object representation.  A lesser used <b>moo</b> schema system is <i>fschema</i>
@@ -374,7 +374,7 @@ An instance of the <code>boolean</code> schema class is a type that may hold a <
 or <i>false</i> value. 
 </p>
 
-<div class="note" id="org75249b9">
+<div class="note" id="orgd6f2c22">
 <p>
 Like all schema classes, the user is free to make multiple instances
 of <code>boolean</code>.  However, unlike the other schema classes, these types
@@ -416,7 +416,7 @@ from <a href="https://json-schema.org/understanding-json-schema/reference/numeri
 <dt><code>minimum</code></dt><dd>a valid value must be more than or equal to the given number</dd>
 </dl>
 
-<div class="tip" id="orgad2bb41">
+<div class="tip" id="org99a5bfa">
 <p>
 To produce a schema that validates a number has having an integral
 value, specify the constraint <code>multipleOf=1</code>.
@@ -424,7 +424,7 @@ value, specify the constraint <code>multipleOf=1</code>.
 
 </div>
 
-<div class="note" id="org50a5e22">
+<div class="note" id="org77b1640">
 <p>
 The JSON Schema "draft 4" interpretation of the exclusive variants is
 rejected.  That is, all numeric constraints themselves take a numeric
@@ -433,7 +433,7 @@ value and not Boolean.
 
 </div>
 
-<div class="warning" id="orgd686835">
+<div class="warning" id="orgaad1507">
 <p>
 Numeric constraints are given as literal numeric values and thus are
 subject to limitations of the language in which they are specified.
@@ -521,7 +521,7 @@ When optional values are not provided, the attribute will be omitted
 from the resulting <code>record</code> structure.
 </p>
 
-<div class="note" id="orgc52bb9d">
+<div class="note" id="org8360be9">
 <p>
 A field may be given a <code>default</code> value expressed literally in the
 language used to define the schema (ie, Jsonnet or Python).  This
@@ -585,7 +585,7 @@ serialization of specific parts of a <code>record</code> type until the instance
 can be passed into some more specifically typed C++ context.
 </p>
 
-<div class="note" id="org7b8c180">
+<div class="note" id="org98275c4">
 <p>
 The <code>any</code> type must hold a value which is itself of a type under the
 schema.  As there is currently no support in <b>moo</b> to <i>realize</i> moo schema
@@ -626,9 +626,9 @@ for code generation.
 </div>
 </div>
 
-<div id="outline-container-org61449b9" class="outline-3">
-<h3 id="org61449b9">Type containers</h3>
-<div class="outline-text-3" id="text-org61449b9">
+<div id="outline-container-org28b3dd8" class="outline-3">
+<h3 id="org28b3dd8">Type containers</h3>
+<div class="outline-text-3" id="text-org28b3dd8">
 </div>
 <div id="outline-container-namespace" class="outline-4">
 <h4 id="namespace">Namespace</h4>
@@ -739,7 +739,7 @@ of the entire <code>sys.jsonnet</code> file.  That is, this file "compiles" to a
 array holding a single <i>oschema</i> type.
 </p>
 
-<div class="note" id="org3c48404">
+<div class="note" id="org7825af8">
 <p>
 All <b>moo</b> "schema files" are expected to provide an
 array-of-type-objects.  We will later see how the order of this array
@@ -782,7 +782,7 @@ unsigned integer in four bytes <code>"u4"</code> and is in a context <code>path<
 <code>["sys"]</code>.
 </p>
 
-<div class="note" id="org52d66db">
+<div class="note" id="org2204da8">
 <p>
 The final structural form of <i>oschema</i> (ie, the JSON above) is not
 something that a developer of a schema strictly needs to know.  <b>moo</b>
@@ -969,11 +969,11 @@ Sparing the long output here, the full schema compiled to JSON can be
 produced with this command:
 </p>
 
-<pre class="example" id="org54fdfba">
+<pre class="example" id="org4450887">
 moo compile examples/oschema/app.jsonnet
 </pre>
 
-<div class="note" id="org1f16d6b">
+<div class="note" id="orgb81a10e">
 <p>
 While developing a schema, it is very useful to run <code>moo compile</code>
 frequently in order to check for Jsonnet syntax or logic errors.
@@ -1042,7 +1042,7 @@ schema = [ns.Number("Count", "u4")]
 </pre>
 </div>
 
-<div class="note" id="org5f43d64">
+<div class="note" id="org17a0d13">
 <p>
 We name the module <code>systypes</code> to not conflict with Python's <code>sys</code> module.
 </p>
@@ -1111,9 +1111,9 @@ the <i>oschema</i> type objects made in the module using a filter on
 </p>
 </div>
 
-<div id="outline-container-org25798e5" class="outline-4">
-<h4 id="org25798e5"><span class="todo TODO">TODO</span> call from moo.</h4>
-<div class="outline-text-4" id="text-org25798e5">
+<div id="outline-container-orgf1372b2" class="outline-4">
+<h4 id="orgf1372b2"><span class="todo TODO">TODO</span> call from moo.</h4>
+<div class="outline-text-4" id="text-orgf1372b2">
 <ul class="org-ul">
 <li>add an <code>import</code> based Python loader to <code>moo</code></li>
 </ul>
@@ -1122,9 +1122,9 @@ the <i>oschema</i> type objects made in the module using a filter on
 </div>
 
 
-<div id="outline-container-orgf0da034" class="outline-3">
-<h3 id="orgf0da034">JSON Schema</h3>
-<div class="outline-text-3" id="text-orgf0da034">
+<div id="outline-container-json-schema" class="outline-3">
+<h3 id="json-schema">JSON Schema</h3>
+<div class="outline-text-3" id="text-json-schema">
 <p>
 <b>moo</b> provides support to convert a moo <i>oschema</i> into <a href="https://json-schema.org/understanding-json-schema/">JSON Schema</a> schema
 form.  To do this, we must specify the fully-qualified type reference,
@@ -1377,7 +1377,7 @@ are ordered from least dependent to most.
 </pre>
 </div>
 
-<pre class="example" id="org764e643">
+<pre class="example" id="org76d5717">
 Iterate over list of types:
 &lt;Number "sys.Count"&gt;
 &lt;Any "app.Affiliation"&gt;
@@ -1556,7 +1556,7 @@ bring these in as a model "graft".
 </pre>
 </div>
 
-<pre class="example" id="orgc68d3ed">
+<pre class="example" id="org3be15a6">
 all_types &lt;class 'list'&gt;
 byref &lt;class 'dict'&gt;
 byscn &lt;class 'dict'&gt;
@@ -1882,7 +1882,7 @@ the <code>moo.otypes</code> module.
 </div>
 <div id="postamble" class="status">
 <p class="author">Author: Brett Viren</p>
-<p class="date">Created: 2021-02-24 Wed 14:24</p>
+<p class="date">Created: 2021-02-24 Wed 15:25</p>
 <p class="validation"><a href="https://validator.w3.org/check?uri=referer">Validate</a></p>
 </div>
 </body>
