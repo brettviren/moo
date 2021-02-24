@@ -316,9 +316,12 @@ this topological sort and examples are given below.
   :CUSTOM_ID: Schema
   :END:
 
-This section describes how to define a schema using either the
-*Jsonnet* or the *Python* programming language as a persistent
-representation.  To illustrate some of the patterns seen in real,
+This section describes how to define a schema using either the *Jsonnet*
+or the *Python* programming language as a persistent representation.  It
+also describes how to convert moo schema (from any format) into other
+schema systems in particular *JSON Schema*.
+
+To illustrate some of the patterns seen in real,
 large-scale projects the example will factor the schema into two
 parts:
 
@@ -597,6 +600,31 @@ the /oschema/ type objects made in the module using a filter on
 *** TODO call from moo.
 
 - add an ~import~ based Python loader to ~moo~ 
+
+
+** JSON Schema
+
+*moo* provides support to convert a moo /oschema/ into [[https://json-schema.org/understanding-json-schema/][JSON Schema]] schema
+form.  To do this, we must specify the fully-qualified type reference,
+a moo schema array containing the referenced type and any others it
+references.  An instance of a JSON Schema may also specify an [[https://json-schema.org/understanding-json-schema/basics.html#declaring-a-unique-identifier][unique
+identifier]] usually in the form of a URL.
+
+On the command line this may look like:
+
+#+begin_src shell :exports both :results output code :wrap "src json"
+    moo -A msa=examples/oschema/app.jsonnet \
+        -A typeref=app.Person \
+        compile moo2jschema.jsonnet | jq '."$ref"'                    
+#+end_src
+
+#+RESULTS:
+#+begin_src json
+"#/definitions/app/Person"
+#+end_src
+
+Here we pipe to ~jq~ just to filter down the rather verbose result and
+show the command works.
 
 
 * Models

@@ -39,7 +39,7 @@ local hier = {
         as.field("vehicle", self.vehicle, doc="Example of nested record"),
         as.field("vehicle2", self.vehicle, default={model:"CrossTrek", type:"boring"},
                  doc="Example of nested record with default"),
-        as.field("vehicle2", self.vehicle, default={model:"BRZ"},
+        as.field("vehicle3", self.vehicle, default={model:"BRZ"},
                  doc="Example of nested record with default"),
     ], doc="Describe everything there is to know about an individual human"),
 };

@@ -158,7 +158,10 @@ def tla_pack(tlas, jpath):
     tla_vars = dict()
     tla_codes = dict()
     for one in tlas:            # fixme: this could be done better
-        key, val = one.split("=", 1)
+        try:
+            key, val = one.split("=", 1)
+        except ValueError as err:
+            raise ValueError("Did you forget to specify the TLA variable?") from err
         if val[0] in '{["]}':   # inline code
             tla_codes[key] = val
             continue

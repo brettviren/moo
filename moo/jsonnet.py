@@ -62,7 +62,10 @@ def load(fname, paths=(), **kwds):
     paths = clean_paths(paths)
     fname = resolve(fname, paths)
     ic = ImportCallback(paths)
-    text = evaluate_file(fname, import_callback=ic, **kwds)
+    try:
+        text = evaluate_file(fname, import_callback=ic, **kwds)
+    except RuntimeError as err:
+        raise RuntimeError(f"in file: {fname}") from err
     return json.loads(text)
 
 
