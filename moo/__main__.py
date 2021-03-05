@@ -99,6 +99,20 @@ class Context:
             fpath = self.mpath
         return moo.imports(filename, fpath, **self.tlas)
 
+    def save(self, filename, data):
+        '''Save data to named file.  If intermediate path is missing, it will
+        be created.
+        '''
+        absdir = os.path.dirname(os.path.realpath(filename))
+        if not os.path.exists(absdir):
+            os.makedirs(absdir)
+        dotext = os.path.splitext(filename)[-1]
+        if isinstance(data, str):
+            data = data.encode()
+        with open(filename, 'wb') as fp:
+            fp.write(data)
+            
+
 @click.group()
 @click.option('-D', '--dpath', default="",
               help="Specify a selection path into the model data structure")
@@ -193,8 +207,7 @@ def cmd_validate(ctx, output, spath, schema, sequence, passfail, validator, mode
     if not sequence:
         res = res[0]
     text = json.dumps(res, indent=4)
-    with open(output, 'wb') as fp:
-        fp.write(text.encode())
+    ctx.obj.save(output, text)
 
 
 @cli.command("regex")
@@ -228,14 +241,6 @@ def cmd_regex(ctx, validator, only, rpath, regex, string):
         print(res)
 
 
-def writeit(data, output, need_dump=True):
-    'Helper for compileit'
-    if need_dump:
-        data = json.dumps(data, indent=4)
-    with open(output, 'wb') as fp:
-        fp.write(data.encode())
-
-
 @cli.command("compile")
 @click.option('-m', '--multi', default="",
               help="Write multiple output files")
@@ -255,9 +260,13 @@ def compileit(ctx, multi, output, string, model):
         os.makedirs(multi, exist_ok=True)
         for one, dat in data.items():
             one = os.path.join(multi, one)
-            writeit(dat, one, not string)
+            if not string:
+                dat = json.dumps(dat, indent=4)
+            ctx.obj.save(one, dat)
     else:
-        writeit(data, output, not string)
+        if not string:
+            data = json.dumps(data, indent=4)
+        ctx.obj.save(output, data)
 
 
 @cli.command()
@@ -306,9 +315,7 @@ def render(ctx, output, model, templ):
     '''
     data = ctx.obj.load(model)
     text = ctx.obj.render(templ, data)
-    with open(output, 'wb') as fp:
-        fp.write(text.encode())
-
+    ctx.obj.save(output, text)
 
 
 @cli.command('render-many')
@@ -333,8 +340,7 @@ def render_many(ctx, outdir, model):
         odir = os.path.dirname(output)
         if not os.path.exists(odir):
             os.makedirs(odir)
-        with open(output, 'wb') as fp:
-            fp.write(text.encode())
+        ctx.obj.save(output, text)
 
 
 @cli.command()
@@ -357,8 +363,7 @@ def imports(ctx, output, filename):
         text = '\n'.join(lines)
     else:
         text = '\n'.join(deps)
-    with open(output, 'wb') as fp:
-        fp.write(text.encode())
+    ctx.obj.save(output, text)
 
 
 @cli.command()
