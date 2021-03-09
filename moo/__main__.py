@@ -306,17 +306,29 @@ def dump(ctx, output, format, model):
 @click.option('-o', '--output', default="/dev/stdout",
               type=click.Path(exists=False, dir_okay=False, file_okay=True),
               help="Output file, default is stdout")
+@click.option('-d', '--depend', default=None,
+              type=click.Path(exists=False, dir_okay=False, file_okay=True),
+              help="Output file of dependencies, a la gcc -MD")
 @click.argument('model')
 @click.argument('templ')
 @click.pass_context
-def render(ctx, output, model, templ):
+def render(ctx, output, depend, model, templ):
     '''
     Render a template against a model.
     '''
     data = ctx.obj.load(model)
     text = ctx.obj.render(templ, data)
     ctx.obj.save(output, text)
+    
+    if depend:
+        model_deps = ctx.obj.imports(model)
+        templ_deps = ctx.obj.imports(templ)
+        deps_string = f'{output}: '
+        deps_string += " ".join(templ_deps)
+        deps_string += " "
+        deps_string += " ".join(model_deps)
 
+        ctx.obj.save(depend, deps_string)
 
 @cli.command('render-many')
 @click.option('-o', '--outdir', default=".",
