@@ -32,3 +32,4 @@ CMakeCache.txt
 CMakeFiles
 *.moved
 notes.org
+buildsys/make/model-dump.txt.d

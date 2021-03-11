@@ -491,8 +491,7 @@ Waf: Leaving directory `/home/bv/dev/moo/buildsys/waf/mod/build'
    :CUSTOM_ID: make
    :END:
 
-Ah, venerable ~make~.  This example currently does not capture
-intermediate dependencies.  Contributions/fixes welcome.
+Ah, venerable ~make~.  We use ~moo render-deps~ to capture intermediate dependencies.
 
 
 The ~Makefile~:
@@ -506,7 +505,9 @@ And it getting exercised:
   make clean
   sed -i 's/fortran/FORTRAN/' sub/sub.jsonnet
   make
-  echo -e '\nNext we edit the intermediate files and note no rebuild\n'
+  echo -e '\nA second build without changes does nothing\n'
+  make
+  echo -e '\nNext we edit the intermediate files and note that we see a rebuild\n'
   sed -i 's/FORTRAN/fortran/' sub/sub.jsonnet
   make
   echo -e '\nIn any case, first build gave us:\n'
@@ -539,8 +540,10 @@ subsub = {'a': 1, 'b': 2, 'c': 'hello', 'd': 'FORTRAN'}
 
 This section describes one way to integrate ~moo~ with a CMake-based
 build.  It shows what one must do to insert a code generator into the
-build graph in a way that respects intermediate dependencies using ~moo
-imports~ like the [[Waf]] examples.  
+build graph in a way that respects intermediate dependencies using
+~moo imports~ like the [[Waf]] examples. If using the ~ninja~ generator
+(or CMake >3.20 with the Makefile generator), another method using
+~moo render-deps~ is available, described below
 
 #+begin_note
 Currently the CMake code is provided merely as an example which is
@@ -640,6 +643,45 @@ Update new implicit dependency, which should cause a rebuild
 -rw-rw-r-- 1 bv bv 93 2020-11-25 17:39:57.200332410 -0500 build/model-dump.txt
 #+end_example
 
+
+With the ~ninja~ backend, we can use ~moo render-deps~ as follows:
+
+#+include: buildsys/cmake-deps-ninja/CMakeLists.txt src cmake
+
+And, here it is getting exercised:
+
+#+begin_src shell :exports both :results output code :wrap "example"
+  cd buildsys/cmake-deps-ninja
+  rm -rf build
+  echo '{a:1,b:2,c:"hello"}' > sub.jsonnet
+  cmake -B build -S . -G Ninja
+
+  echo -e '\nDo initial build\n'
+  sed -i 's/fortran/FORTRAN/' sub/sub.jsonnet
+  cmake --build build
+  ls -l --full-time build/model-dump.txt
+
+  echo -e '\nNext we edit the intermediate files and notice a rebuild\n'
+  sed -i 's/FORTRAN/fortran/' sub/sub.jsonnet
+  cmake --build build
+  ls -l --full-time build/model-dump.txt
+
+  echo -e '\nDo do a second build, output is not rebuilt\n'
+  cmake --build build
+  ls -l --full-time build/model-dump.txt
+
+  echo -e '\nAdd new implicit dependency, which should cause a rebuild\n'
+  echo -e 'local ss = import "sub/sub2.jsonnet";\nss' > sub.jsonnet
+  echo '{a:1,b:2,c:"hello"}' > sub/sub2.jsonnet
+  cmake --build build
+  ls -l --full-time build/model-dump.txt
+
+  echo -e '\nUpdate new implicit dependency, which should cause a rebuild\n'
+  echo '{a:1,b:2,c:"see me"}' > sub/sub2.jsonnet
+  cmake --build build
+  ls -l --full-time build/model-dump.txt
+
+#+end_src
 
 
 
