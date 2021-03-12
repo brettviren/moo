@@ -3,13 +3,13 @@
 
 #+OPTIONS:   H:4 num:nil toc:2
 
-#+HTML_HEAD: <link rel="stylesheet" type="text/css" href="other/readtheorg/css/htmlize.css"/>
-#+HTML_HEAD: <link rel="stylesheet" type="text/css" href="other/readtheorg/css/readtheorg.css"/>
+#+HTML_HEAD: <link rel="stylesheet" type="text/css" href="https://brettviren.github.io/moo/other/readtheorg/css/htmlize.css"/>
+#+HTML_HEAD: <link rel="stylesheet" type="text/css" href="https://brettviren.github.io/moo/other/readtheorg/css/readtheorg.css"/>
 
-#+HTML_HEAD: <script type="text/javascript" src="other/lib/js/jquery.min.js"></script>
-#+HTML_HEAD: <script type="text/javascript" src="other/lib/js/bootstrap.min.js"></script>
-#+HTML_HEAD: <script type="text/javascript" src="other/lib/js/jquery.stickytableheaders.min.js"></script>
-#+HTML_HEAD: <script type="text/javascript" src="other/readtheorg/js/readtheorg.js"></script>
+#+HTML_HEAD: <script type="text/javascript" src="https://brettviren.github.io/moo/other/lib/js/jquery.min.js"></script>
+#+HTML_HEAD: <script type="text/javascript" src="https://brettviren.github.io/moo/other/lib/js/bootstrap.min.js"></script>
+#+HTML_HEAD: <script type="text/javascript" src="https://brettviren.github.io/moo/other/lib/js/jquery.stickytableheaders.min.js"></script>
+#+HTML_HEAD: <script type="text/javascript" src="https://brettviren.github.io/moo/other/readtheorg/js/readtheorg.js"></script>
 
 #+HTML_HEAD: <style> #content{max-width:1800px;}</style>
 #+HTML_HEAD: <style> p{max-width:800px;}</style>
