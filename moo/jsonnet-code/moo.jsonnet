@@ -7,6 +7,8 @@ local re = import "schema/re.jsonnet";
     oschema: oschema,
     // Make JSON Schema from oschema types
     jschema: jschema,
+    // Make special JSON Schema -like output for jsonform
+    jform: import "jform.jsonnet",
 
     // A bunch of regular expressions matching common patterns.  A
     // pattern may be provided to a String schema as the "pattern"

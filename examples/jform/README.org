@@ -1,0 +1,208 @@
+#+title: Use moo to build jsonform forms
+#+EXPORT_FILE_NAME: index.html
+#+setupfile: ../../other/setup-topic.org
+
+* Overview
+
+The [[https://github.com/jsonform/jsonform][jsonform]] (singular) provides a way to create web forms using
+javascript parsing JSON which is /almost/ in JSON Schema v4.
+~moo~ has support for generating this schema form which *moo* calls ~jform~.
+
+* Example
+
+Run from inside the directory holding this file we may do like:
+
+#+begin_src shell :exports both :results output code :wrap "src json"
+  moo  -M ../../examples/oschema \
+       -A typeref=app.Person \
+       -A types=app.jsonnet \
+       compile moo2jsonform.jsonnet
+#+end_src
+
+#+RESULTS:
+#+begin_src json
+{
+    "schema": {
+        "description": "Describe everything there is to know about an individual human",
+        "properties": {
+            "affil": {
+                "description": "Some affiliation",
+                "title": "affil",
+                "type": "any"
+            },
+            "counts": {
+                "description": "Count of some things",
+                "items": {
+                    "title": "Count",
+                    "type": "integer"
+                },
+                "title": "counts",
+                "type": "array"
+            },
+            "counts2": {
+                "default": [
+                    0,
+                    1,
+                    2
+                ],
+                "description": "Count of some things",
+                "items": {
+                    "title": "Count",
+                    "type": "integer"
+                },
+                "title": "counts2",
+                "type": "array"
+            },
+            "email": {
+                "description": "E-mail address",
+                "format": "email",
+                "title": "email",
+                "type": "string"
+            },
+            "email2": {
+                "default": "me@example.com",
+                "description": "E-mail address",
+                "format": "email",
+                "title": "email2",
+                "type": "string"
+            },
+            "mbti": {
+                "default": "introversion",
+                "description": "Personality",
+                "enum": [
+                    "introversion",
+                    "extroversion",
+                    "sensing",
+                    "intuition",
+                    "thinking",
+                    "feeling",
+                    "judging",
+                    "perceiving"
+                ],
+                "title": "mbti",
+                "type": "string"
+            },
+            "vehicle": {
+                "description": "Example of nested record",
+                "properties": {
+                    "make": {
+                        "default": "Subaru",
+                        "title": "make",
+                        "type": "string"
+                    },
+                    "model": {
+                        "default": "WRX",
+                        "title": "model",
+                        "type": "string"
+                    },
+                    "type": {
+                        "default": "fun",
+                        "enum": [
+                            "boring",
+                            "fun"
+                        ],
+                        "title": "type",
+                        "type": "string"
+                    }
+                },
+                "title": "vehicle",
+                "type": "object"
+            },
+            "vehicle2": {
+                "default": {
+                    "model": "CrossTrek",
+                    "type": "boring"
+                },
+                "description": "Example of nested record with default",
+                "properties": {
+                    "make": {
+                        "default": "Subaru",
+                        "title": "make",
+                        "type": "string"
+                    },
+                    "model": {
+                        "default": "WRX",
+                        "title": "model",
+                        "type": "string"
+                    },
+                    "type": {
+                        "default": "fun",
+                        "enum": [
+                            "boring",
+                            "fun"
+                        ],
+                        "title": "type",
+                        "type": "string"
+                    }
+                },
+                "title": "vehicle2",
+                "type": "object"
+            },
+            "vehicle3": {
+                "default": {
+                    "model": "BRZ"
+                },
+                "description": "Example of nested record with default",
+                "properties": {
+                    "make": {
+                        "default": "Subaru",
+                        "title": "make",
+                        "type": "string"
+                    },
+                    "model": {
+                        "default": "WRX",
+                        "title": "model",
+                        "type": "string"
+                    },
+                    "type": {
+                        "default": "fun",
+                        "enum": [
+                            "boring",
+                            "fun"
+                        ],
+                        "title": "type",
+                        "type": "string"
+                    }
+                },
+                "title": "vehicle3",
+                "type": "object"
+            }
+        },
+        "title": "Person",
+        "type": "object"
+    }
+}
+#+end_src
+
+As can be seen, ~jsonform~ wants the schema under a ~schema~ attribute.
+It may also accept additional guidance under a top ~form~ attribute.
+~moo~ does not provide any special support for constructing the ~form~
+value but you may inject it into the conversion:
+
+#+begin_example
+$ moo -A form=.... \
+  ....other.args.as.above....
+#+end_example
+
+* Testing
+
+It may be convenience to install ~jsonform~ for testing like:
+
+#+begin_example
+cd ~/public_html/
+git clone git@github.com:jsonform/jsonform.git
+#+end_example
+
+Visit http://localhost/~user/jsonform/playground/
+
+You may then either hack the source to properly add an additional
+example to the playground or just overwrite an existing one.  For
+example from top directory of ~moo/~:
+
+#+begin_example
+$ moo -M examples/oschema \
+      -A typeref=app.Person \
+      -A types=app.jsonnet \
+      compile moo2jsonform.jsonnet \
+      > ~/public_html/jsonform/playground/examples/gettingstarted.json
+#+end_example

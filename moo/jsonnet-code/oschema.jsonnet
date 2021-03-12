@@ -53,6 +53,11 @@ local not_both(a,b) =
     // Place types into their path/name hierachy
     hier(types) :: std.foldl(function(p,t) std.mergePatch(p,$.place(t,t.path)), types, {}),
 
+    // Provide flat object of types keyed by their dotted fully
+    // qualified type names.
+    flathier(types) :: {[$.fqn(t)]:t for t in types},
+
+    // The moo schema class names
     class_names: ["boolean", "string", "number", "enum", // scalars
                   "sequence", "record", "assoc",         // collections
                   "any", "anyOf", "allOf", "oneOf",      // unions
