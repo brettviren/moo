@@ -317,6 +317,38 @@ def render(ctx, output, model, templ):
     text = ctx.obj.render(templ, data)
     ctx.obj.save(output, text)
 
+@cli.command('render-deps')
+@click.option('-t', '--target', required=True,
+              type=click.Path(exists=False, dir_okay=False, file_okay=True),
+              help="Name of target in the .d file")
+@click.option('-o', '--output', default="/dev/stdout",
+              type=click.Path(exists=False, dir_okay=False, file_okay=True),
+              help="Dependency output file, default is stdout")
+@click.argument('model')
+@click.argument('templ')
+@click.pass_context
+def render_deps(ctx, target, output, model, templ):
+    '''Produce a .d dependencies file for the corresponding call to "render"
+
+    Produce a .d dependencies file in the style of `gcc -MD` to be
+    used by a build system (Makefile or ninja), corresponding to a
+    call to "moo render". The arguments to "moo render-deps" should be
+    the same as the arguments to the corresponding call to "moo
+    render", with the following exceptions:
+
+    * The -t option to "moo render-deps" is typically taken from the -o option to "moo render"
+    * The -o option to "moo render-deps" is the name of the .d file that should be output
+
+    '''
+    model_deps = ctx.obj.imports(model)
+    templ_deps = ctx.obj.imports(templ)
+    deps_string = f'{target}: '
+    deps_string += " ".join(templ_deps)
+    deps_string += " "
+    deps_string += " ".join(model_deps)
+    deps_string += "\n"
+    ctx.obj.save(output, deps_string)
+
 
 @cli.command('render-many')
 @click.option('-o', '--outdir', default=".",
@@ -354,7 +386,7 @@ def imports(ctx, output, filename):
     Emit a list of imports required by the model
     '''
     deps = ctx.obj.imports(filename)
-    if output.endswith(".cmake"):  # special output format
+    if output.endswith(".cmake"):  # special output format, cmake
         basename = os.path.splitext(os.path.basename(output))[0]
         varname = re.sub("[^a-zA-Z0-9]", "_", basename).upper()
         lines = [f'set({varname}']
