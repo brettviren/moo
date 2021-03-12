@@ -1,0 +1,7 @@
+#+title: Use moo to define jobs
+#+EXPORT_FILE_NAME: index.html
+#+setupfile: ../../other/setup-topic.org
+
+This example shows one way that moo schema may be used to build a
+"frontend" to a job executor/scheduler "backend" (such as Nomad).
+

@@ -1,0 +1,215 @@
+#+title: Boot Command Schema
+#+subtitle: And a mocked Process Manager
+#+author: Brett Viren
+#+email: bv@bnl.gov
+#+STARTUP: beamer
+#+options: ':t
+#+LaTeX_CLASS: beamer
+#+latex_header: \usepackage{pdfpages}
+#+latex_header: \usepackage{xcolor}
+#+latex_header: \usepackage{graphicx}
+#+latex_header: \usepackage{xspace}
+#+latex_header: \usepackage{libertine}
+#+latex_header: \usepackage{fontawesome}
+#+latex_header: \mode<beamer>{\usetheme{Boadilla}}
+#+latex_header: \setbeamertemplate{navigation symbols}{}
+#+latex_header: \hypersetup{colorlinks}
+#+latex_header: \setbeamerfont{alerted text}{series=\bfseries}
+
+
+* Goals
+
+- Develop and initial schema for a ~boot~ command.
+  - Exercise it with a mock up of a Process Manager that matches my understanding of Nomad.
+- Collect feedback for revision.
+
+* The ~boot~ command
+
+#+begin_quote
+The CCM ~boot~ command provides *high-level* description of the *desired set of
+processes* in a *DAQ partition* of a *particular type*.
+#+end_quote
+
+\vfill
+
+Note, *type* here means ~boot~ provides the general "shape" of the partition.
+- a realized partition means a set of running processes or /tasks/
+
+\vfill
+
+The ~boot~ does *not* provide:
+- specific process construction/identity (that is in ~init~)
+- specific process/module configuration (that is in ~conf~)
+- a run number (that is in ~start~)
+
+
+* Expectations/assumptions
+
+#+begin_center
+RC($\{cmds\}$) \to [boot] \to PM(env) \to $\{tasks\}$
+
+RC \leftarrow (resolution info) \leftarrow PM
+
+RC \to [init] \to $\{tasks\}$
+
+RC \to [conf] \to $\{tasks\}$
+#+end_center
+
+- Human operators write ~boot~ objects.
+  - initially by-hand/script, eventually with help of web UI
+- RC will deliver ~boot~ to the Process Manager[fn:nomad] (PM)
+- PM *realizes* the partition by an "inner join" of ~boot~ info with *DAQ
+  environment* info (computers, users, resources).
+- PM must *provide back* information *resolved* from the abstracted.
+  - In part, allows RC to find REST CF of $\{tasks\}$
+
+[fn:nomad] Assume PM is something like Nomad.
+
+* Top ~boot~ schema
+
+So far, just two attributes:
+
+- ~ident~ :: A unique identifier for the *type* of partition.  For now a
+  free ~string~.  Could be ~record~.  Could express version information.
+- ~jobs~ :: A sequence of ~job~ objects which describe the desired partition.
+
+* What is a CCM ~job~ object?
+
+#+begin_quote
+A CCM ~job~ object provides *high-level* description of some *desired state* realized as a related *set of tasks* (processes).
+#+end_quote
+
+- Takes Nomad's definition of "job".
+- Is defined in abstract terms.
+- PM will realize as a set of running processes (/tasks/).
+
+* The ~job~ schema
+
+A ~job~ object so far has these top attributes:
+
+- ~ident~ :: Uniquely identify the ~job~ in the partition (ie, in ~boot~).
+- ~roles~ :: A sequence of identifiers from a known set.
+- ~cardinality~ :: The number of tasks to realize for this job.
+- ~parameters~ :: Sequence of key/value role qualifiers.
+
+\vfill
+
+\scriptsize As I write this, maybe ~cardinality~ should be subsumed into a ~parameter~ for a ~role="multiple"~...
+
+* The ~job.roles~
+
+#+begin_quote
+A CCM ~role~ describes an aspect of a ~job~'s task for which it plays the part.
+#+end_quote
+
+- We must develop a ~role~ taxonomy as we develop the DAQ.
+- A ~job~'s set of ~roles~ is interpreted by PM to realize the ~job~'s /tasks/.
+- Each ~role~ value implies:
+  - a set of ~parameters~ which may be included in the ~job~ and which
+    provide *qualifying information*.
+  - a *data structure* (following schema) provided by PM back to RC
+    giving any and all info *resolved* from the abstract ~role~ and
+    ~parameters~
+
+* Example ~role~ values
+
+- ~"appfwk"~ translates to a ~daq_application~ command line and implies PM must return the ~hostname~ and ~port~ for the REST Command Facility of each task.
+
+- ~"zoned"~ translates to requesting some class of resource and may influence how PM selects ~hostname~ and ~port~ and how/where it launches the processes.  The ~job~ may provide a ~parameter~: ~zone="local"~ or ~zone="upstream", affinity="APA42"~.
+
+Just examples, I'm sure a lot of bikeshedding and more serious
+invention will be required.
+
+* The ~boot~ schema
+
+Current try at a ~boot~ schema as described is a ~moo~ example:
+
+#+begin_center
+[[https://github.com/brettviren/moo/blob/master/examples/still/still-boot-schema.jsonnet][~moo/examples/still/still-boot-schema.jsonnet~]]
+#+end_center
+
+* Goals of the "still" mock up
+
+- Not intended to be actually used
+
+- Tries to mimic how I think input to Nomad works
+  - I may have it wrong, expect to iterate
+
+- Wanted something concrete to sanity check the schema
+
+- Details don't really matter here, but I include them
+
+#+begin_example
+  $ cd moo
+  $ python examples/still/mkboot.py
+  $ python examples/still/fakepm.py p42-boot.json
+#+end_example
+
+Details in backup if there is interest.
+
+* Summary and next steps
+
+- An description of the scope of ~boot~ is given here.
+- An initial matching schema is available.
+- A mock up for how Nomad will consume ~boot~ exists.
+- If there are no show stoppers we next:
+  - implement ~boot~ for actual jobs
+  - "impedance match" schema with Nomad expectations
+  - implement initial Nomad consumption and realization
+  - over time, extend schema with new ~roles~ and ~parameters~
+  - add ~boot~ object creation to Web UI scope
+
+* Mock produce a ~boot~
+
+A mock of eventual scripts and web UI:
+#+begin_example
+$ python examples/still/mkboot.py
+wrote: p42-boot.json
+#+end_example
+
+- Produced file holds a ~boot~ object.
+
+- The mock includes 2 ~job~ objects with cardinality $>1$ 
+
+- One job simply specifies a role interpreted simply run ~sleep~ commands.
+
+- One run specifies ~roles=["appfwk", "zoned"]~ with ~"zone"~ parameter
+  ~"remote"~.
+
+* Mock consume a ~boot~ - realize partition
+
+A mock of my partition realization by creating a foreman/shoreman Procfile:
+
+#+begin_example
+$ python examples/still/fakepm.py p42-boot.json
+wrote: Procfile.p42
+wrote: p42-data.json
+$ shoreman Procfile.p42
+#+end_example
+
+The ~shoreman~ script simply runs the listed tasks, maybe SSH'ing for any ~zone="remote"~.
+
+\scriptsize Again, I try to mimic how I think Nomad works, but with less bells and whistles. 
+
+
+* Mock consume a ~boot~ - resolved info
+
+Mock Nomad by creating a JSON file holding the "resolved" information.
+
+#+begin_example
+$ jq '.[0][0].params' < p42-data.json
+{
+  "zone": "local",
+  "sleeps": "20",
+  "user": "bv",
+  "port": 9001,
+  "hostname": "localhost"
+}
+#+end_example
+
+RC would then use this to, /eg/, learn REST Command Facility URL.
+
+
+
+
+
