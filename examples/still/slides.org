@@ -32,8 +32,9 @@ processes* in a *DAQ partition* of a *particular type*.
 
 \vfill
 
-Note, *type* here means ~boot~ provides the general "shape" of the partition.
-- a realized partition means a set of running processes or /tasks/
+Notes
+- A ~boot~ may be "realized" by starting a number of processes or /tasks/.
+- Use of *type* means ~boot~ describes the general makeup of a partition.
 
 \vfill
 
@@ -43,7 +44,7 @@ The ~boot~ does *not* provide:
 - a run number (that is in ~start~)
 
 
-* Expectations/assumptions
+* Expectations/assumptions of use of ~boot~
 
 #+begin_center
 RC($\{cmds\}$) \to [boot] \to PM(env) \to $\{tasks\}$
@@ -55,22 +56,23 @@ RC \to [init] \to $\{tasks\}$
 RC \to [conf] \to $\{tasks\}$
 #+end_center
 
-- Human operators write ~boot~ objects.
+- Human operators write ~boot~ and other command objects.
   - initially by-hand/script, eventually with help of web UI
 - RC will deliver ~boot~ to the Process Manager[fn:nomad] (PM)
 - PM *realizes* the partition by an "inner join" of ~boot~ info with *DAQ
-  environment* info (computers, users, resources).
-- PM must *provide back* information *resolved* from the abstracted.
-  - In part, allows RC to find REST CF of $\{tasks\}$
+  environment* info.
+  - /eg/, available computers and other resources, user accounts
+- PM must *provide back* information it *resolves* in the process of *realizing* the ~boot~.
+  - In part, info to allow RC to find REST CF's of the $\{tasks\}$
 
 [fn:nomad] Assume PM is something like Nomad.
 
 * Top ~boot~ schema
 
-So far, just two attributes:
+So far, ~boot~ object has two attributes:
 
-- ~ident~ :: A unique identifier for the *type* of partition.  For now a
-  free ~string~.  Could be ~record~.  Could express version information.
+- ~ident~ :: A unique identifier for the *type* of partition.
+  - \scriptsize For now a free ~string~.  Could encode aggregate values, or be an explicit ~record~.  Could express version information.
 - ~jobs~ :: A sequence of ~job~ objects which describe the desired partition.
 
 * What is a CCM ~job~ object?
@@ -80,8 +82,10 @@ A CCM ~job~ object provides *high-level* description of some *desired state* rea
 #+end_quote
 
 - Takes Nomad's definition of "job".
-- Is defined in abstract terms.
-- PM will realize as a set of running processes (/tasks/).
+- Is defined in abstracted terms.
+  - no specific user or host names / ports
+- PM will *realize* a ~job~ object as a set of running processes (/tasks/).
+  - in the process, *resolve* specific user/host/port/etc.
 
 * The ~job~ schema
 
@@ -99,17 +103,21 @@ A ~job~ object so far has these top attributes:
 * The ~job.roles~
 
 #+begin_quote
-A CCM ~role~ describes an aspect of a ~job~'s task for which it plays the part.
+A CCM ~role~ names an *aspect* of the ~job~'s tasks.  A ~role~ may have zero or more ~parameters~.
 #+end_quote
 
 - We must develop a ~role~ taxonomy as we develop the DAQ.
+
 - A ~job~'s set of ~roles~ is interpreted by PM to realize the ~job~'s /tasks/.
-- Each ~role~ value implies:
-  - a set of ~parameters~ which may be included in the ~job~ and which
+
+- Each ~role~ a ~job~ asserts implies:
+  - a set of ~parameters~ which may be included in the ~job~ to
     provide *qualifying information*.
-  - a *data structure* (following schema) provided by PM back to RC
+    - a ~role~ is effectively a functional transformation on the ~job~ and the parameters are functional arguments
+  - a *data structure* (following a schema) provided by PM back to RC
     giving any and all info *resolved* from the abstract ~role~ and
     ~parameters~
+    - again, /eg/, giving host/port of REST CF
 
 * Example ~role~ values
 
@@ -128,32 +136,43 @@ Current try at a ~boot~ schema as described is a ~moo~ example:
 [[https://github.com/brettviren/moo/blob/master/examples/still/still-boot-schema.jsonnet][~moo/examples/still/still-boot-schema.jsonnet~]]
 #+end_center
 
+Reflects what was just described.
+
 * Goals of the "still" mock up
 
-- Not intended to be actually used
+- Not intended for actual use outside initial schema vetting
 
-- Tries to mimic how I think input to Nomad works
+- Tries to mimic how I think input to Nomad will work
   - I may have it wrong, expect to iterate
 
 - Wanted something concrete to sanity check the schema
 
-- Details don't really matter here, but I include them
+- The mock's details are not so important but are in backup slides
 
+\footnotesize
 #+begin_example
   $ cd moo
-  $ python examples/still/mkboot.py
+
+  # make boot object for "partition type 42"
+  $ python examples/still/mkboot.py  
+
+  # make PM->RC return object and tasks' command lines
   $ python examples/still/fakepm.py p42-boot.json
+
+  $ cat p42-data.json      # "run control" goes here
+
+  # realize the partition
+  $ shoreman Procfile.p42  #  "process management"
 #+end_example
 
-Details in backup if there is interest.
 
 * Summary and next steps
 
-- An description of the scope of ~boot~ is given here.
+- A description of ~boot~ is given.  Agreement?
 - An initial matching schema is available.
 - A mock up for how Nomad will consume ~boot~ exists.
 - If there are no show stoppers we next:
-  - implement ~boot~ for actual jobs
+  - implement ~boot~ for actual partition types
   - "impedance match" schema with Nomad expectations
   - implement initial Nomad consumption and realization
   - over time, extend schema with new ~roles~ and ~parameters~
