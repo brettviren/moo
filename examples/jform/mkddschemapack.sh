@@ -15,11 +15,11 @@ To use, make sure moo is in your path and:
 EOF
     exit -1
 }
-
-srcdir="$1" ; shift
 if [ -z "$1" ] ; then
     usage
 fi
+
+srcdir="$1" ; shift
 
 outdir="${1:-.}"
 outdir="$(realpath $outdir)"
