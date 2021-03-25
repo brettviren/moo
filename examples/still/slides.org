@@ -96,10 +96,6 @@ A ~job~ object so far has these top attributes:
 - ~cardinality~ :: The number of tasks to realize for this job.
 - ~parameters~ :: Sequence of key/value role qualifiers.
 
-\vfill
-
-\scriptsize As I write this, maybe ~cardinality~ should be subsumed into a ~parameter~ for a ~role="multiple"~...
-
 * The ~job.roles~
 
 #+begin_quote

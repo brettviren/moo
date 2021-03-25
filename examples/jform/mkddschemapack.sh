@@ -11,6 +11,7 @@ To use, make sure moo is in your path and:
 
   $ git clone --recursive git@github.com:brettviren/dunedaqsrc.git
   $ mkddschemapack.sh dunedaqsrc for-webui
+  $ tar -xzvf for-webui.tar.gz for-webui
 
 EOF
     exit -1

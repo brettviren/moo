@@ -467,6 +467,7 @@ class Number(BaseType):
     '''
     The oschema number class
     '''
+    _eps = 1e-6
 
     def __repr__(self):
         if self._value is None:
@@ -487,14 +488,45 @@ class Number(BaseType):
         dtype = self.ost["dtype"]
         dtype = numpy.dtype(dtype)
 
-        if type(val) in (int, float, str):
-            self._value = numpy.array(val, dtype)
-            return
-        if isinstance(val, self.__class__):
-            self._value = numpy.array(val.pod(), dtype)
-            return
         cname = self.__class__.__name__
-        raise ValueError(f'illegal {cname} number type: {type(val)}')
+
+        if type(val) in (int, float, str):
+            value = numpy.array(val, dtype)
+        elif isinstance(val, self.__class__):
+            value = numpy.array(val.pod(), dtype)
+        else:
+            raise ValueError(f'illegal {cname} number type: {type(val)}')
+
+        nc = self.ost.get("constraints", None)
+        if nc:                  # run the gauntlet
+            v = value.item()
+
+            mof = nc.get("multipleOf", None)
+            if mof is not None:
+                if abs(v/mof - int(round(v/mof))) > self._eps:
+                    raise ValueError(f'illegal {cname} number {v} not multiple of {mof}')
+
+            emaxi = nc.get("exclusiveMaximum", None)
+            if emaxi is not None:
+                if not v < emaxi:
+                   raise ValueError(f'illegal {cname} number {v} not strictly less than {emaxi}')
+               
+            emini = nc.get("exclusiveMinimum", None)
+            if emini is not None:
+                if not v > emini:
+                   raise ValueError(f'illegal {cname} number {v} not strictly greater than {emini}')
+               
+            maxi = nc.get("maximum", None)
+            if maxi is not None:
+                if not v <= maxi:
+                   raise ValueError(f'illegal {cname} number {v} not less than or equal {maxi}')
+               
+            mini = nc.get("minimum", None)
+            if mini is not None:
+                if not v >= mini:
+                   raise ValueError(f'illegal {cname} number {v} not greater than or equal {mini}')
+
+        self._value = value
 
 
 def number_class(**ost):
