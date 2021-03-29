@@ -59,6 +59,18 @@ DAQ schema the first try has these inadequacies:
 
 This section includes development notes for a better system
 
+** tl;dr:
+
+Maybe this "Just Works(TM)":
+
+#+begin_example
+git clone --recursive git@github.com:brettviren/dunedaqsrc.git
+./ddmunge.sh monolith dunedaqsrc > monolith.json
+python ddforms.py monolith -c ddforms monolith.json > ddforms-trial.json
+#+end_example
+
+The rest is random developer notes.
+
 ** Goals
 
 The goals of the second try:

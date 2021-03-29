@@ -74,7 +74,7 @@ def modconfs(monolith):
     jforms = [dict(schema=jfschema(lofs, typeref))
               for typeref in modrefs]
 
-    ret = dict(category="modconf",
+    ret = dict(name="modconf",
                title="Module-level configuration",
                description="A portion of one 'conf' command object providing one modules configuration",
                forms=jforms)
