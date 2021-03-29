@@ -1,0 +1,229 @@
+#+title: Jsonform for DUNE DAQ
+
+* Intro
+
+Besides the generic example described in the local [[file:README.org][README]] file, this example holds example specific to DUNE DAQ schema and the web UI in development.
+
+* First try
+
+The first try resulted in a hacky shell script:
+
+#+begin_src shell :exports both :results output code :wrap "example"
+  ./mkddschemapack.sh || true
+#+end_src
+
+#+RESULTS:
+#+begin_example
+Make a "schema pack" holding DUNE DAQ schema converted to jsonform and in a layout for the WEB UI.  This is an utter hack.
+
+To use, make sure moo is in your path and:
+
+  $ git clone --recursive git@github.com:brettviren/dunedaqsrc.git
+  $ mkddschemapack.sh dunedaqsrc for-webui
+  $ tar -xzvf for-webui.tar.gz for-webui
+
+#+end_example
+
+It results in a tar file of a directory tree that mirrors the schema ~path~ tree and each leaf is a JSON file holding a jsonform object with ~schema~ attribute.  It uses *moo*'s initial, built in ~moo2jsonform.jsonnet~.
+
+An example leaf file output:
+
+#+begin_src json
+  {
+      "schema": {
+          "description": "FakeTrigDecEmu configuration",
+          "properties": {
+              "sleep_msec_while_running": {
+                  "default": 1000,
+                  "description": "Millisecs to sleep between generating data",
+                  "title": "sleep_msec_while_running",
+                  "type": "integer"
+              }
+          },
+          "title": "Conf",
+          "type": "object"
+      }
+  }
+#+end_src
+
+After better understanding jsonform and issues with the growing DUNE
+DAQ schema the first try has these inadequacies:
+
+- produces just the ~schema~ attribute needed by jsonform while it is now clear that moo schema info is needed to build the ~form~ attribute
+
+- finds module-level "conf" command sub-object schema ("modconf") based on a faulty assumption that such schema is universally named "Conf"
+
+- does not say anything about larger scale web UI forms needed.
+
+* Second try
+
+This section includes development notes for a better system
+
+** Goals
+
+The goals of the second try:
+
+- [ ] generate both of jsonform's ~schema~ and ~form~ attributes
+
+- [ ] regularize any domain-specific hairy structure by providing higher-level structure (eg, collect "modconf" schema)
+
+- [ ] provide a general purpose ~moo~ CLI command to produce the required jsonform, hopefully by simply reusing ~compile~ and maybe updating ~moo2jsonform.jsonnet~.
+
+- [ ] support a few different interpretations of some schema, in particular ~anyOf~ depending on the context in which it is found.
+
+- [ ] provide input to jsonform so that the web app does not have to implement any domain-specific hair.
+
+
+** DUNE DAQ patterns
+
+Nice new [[https://dune-daq-sw.readthedocs.io/en/latest/packages/daq-cmake/SchemaAndCodeGen/][RTDs]] tell me a fixed pattern in the source as:
+
+#+begin_example
+<package>/schema/<package>/<label>/*.jsonnet
+#+end_example
+
+Where, ~<label>~ is free(?) but seems to match lower-cased plugin name.
+
+** New script
+
+#+begin_src shell :exports both :results output code :wrap "example"
+  ./ddmunge.sh || true
+#+end_src
+
+#+RESULTS:
+#+begin_example
+Build elements of global module-level configuration schema.
+
+To use, make sure moo is in your path and:
+
+  $ git clone --recursive git@github.com:brettviren/dunedaqsrc.git
+
+and maybe
+
+  $ cd dunedaqsrc
+  $ git submodule foreach git pull origin develop
+
+or, pick a certain meta release tag/branch if there is one.
+
+Then:
+
+  $ ./ddmunge.sh [cmd] [opts]
+
+With commands:
+	monolith
+	help
+#+end_example
+
+
+*** Monolith
+
+A monolith holding all schema can be made
+
+#+begin_src shell :exports both :results output code :wrap "example"
+  ./ddmunge.sh monolith dunedaqsrc > monolith.jsonnet 2>moo_env.sh
+  ls -l monolith.jsonnet moo_env.sh
+#+end_src
+
+#+RESULTS:
+#+begin_example
+-rw-rw-r-- 1 bv bv 6657 Mar 26 13:46 monolith.jsonnet
+-rw-rw-r-- 1 bv bv 1044 Mar 26 13:46 moo_env.sh
+#+end_example
+
+The ~monolith~ sends to stderr shell setting for ~moo~
+
+#+begin_example
+  . moo_env.sh && moo compile monolith.jsonnet
+#+end_example
+
+This gives an array of objects with keys ~package~, ~plugin~ and ~schema~.
+The last gives the schema array for the package and its plugin.
+
+*** Module-level schema
+
+The ~monolith~ command does not know the "purpose" or "class" or
+"category" of each schema.  In order to produce schema covering just,
+say, ~DAQModule~ level configuration sub-objects one must filter this
+array.
+
+This can be done by editing the generated ~monolith.jsonnet~ or by
+~import~ it into another Jsonnet file and do filtering there.  In the
+latter case, a mechanism to hand-edit a single Jsonnet file with
+desired package/plugin pairs could concentrate the human manual
+effort.
+
+For now we will use an ugly hack to remove some known non-module schema:
+
+#+begin_src shell :exports both :results output code :wrap "example"
+./ddmunge.sh winnow monolith.jsonnet > modconf.jsonnet
+ls -l modconf.jsonnet
+#+end_src
+
+#+RESULTS:
+#+begin_example
+-rw-rw-r-- 1 bv bv 6233 Mar 26 13:57 modconf.jsonnet
+#+end_example
+
+* Classes of web forms
+
+A few *classes* of web forms are defined in DUNE DAQ terms :
+
+- modconf :: produce an object valid against a module-level "conf"
+  command sub-objects (modconfs).
+
+- confcmd :: produce an "conf" command object as an aggregation of
+  previously produced modconf objects.  The schema given and thus the
+  form should limit and be used to limit what modconf objects are
+  candidates for inclusion.
+
+- initcmd :: produce an "init" command object associated with a
+  confcmd.  The two must have some mutual correlations for module,
+  queue and eventually socket info.
+
+- bootcmd :: produce a "boot" command object as an aggregation of init
+  and conf objects.
+
+** anyOf 
+
+In some schema there will appear a type of schema class ~anyOf~.  An ~anyOf~ carries an ordered list of other types.  We wish to interpret an ~anyOf~ in different ways depending on the intention of the overall form.
+
+- constructive entry :: the user directly provides a value
+
+- aggregating entry :: the user selects from a set of previously constructed values 
+
+The type of ~anyOf~ entry to use must be determined by top-down context.  For example, a *constructive* ~anyOf~ is used when encountered as part of a modconf type.  A *aggregating* ~anyOf~ is used when creating a "conf" command object from previously constructed modconf objects.
+
+** modconf
+
+A *modconf* form is two-stage.  The first stage provides:
+
+-  modconf type :: a drop-down selection list which shows a modconf type reference (eg, ~dundaq.package.plugin.Conf~) and the ~doc~ string for each known module-level conf types.  It yields the type reference.
+
+Based on the selected type reference the second stage provides:
+
+- ident :: an object instance name unique at least across all objects from the selected type reference.
+
+- modconf object :: a sub-form based on the selected type schema
+
+Open issues:
+
+- [ ] we would like the ability to recall a previous object instance by its *ident* in order to seed the *modconf object* sub-form with values BUT upon changing any value require a new *ident*
+
+** confcmd and initcmd
+
+- confcmd :: multistage aggregation of modconfs
+- initcmd :: aggregation module instance names
+- correlate :: both require matching module and queue instance names
+
+* Produce input for web UI app
+
+The web UI app requires jsonform JSON and related metadata.  It is
+provided as a *single JSON file* containing any and all information that
+can be derived from DUNE DAQ moo schema.  The file consists of a
+single object with these fields:
+
+
+
+
+
+

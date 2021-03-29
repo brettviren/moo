@@ -539,19 +539,32 @@ def depsort(g):
 
 
 def namespacify(data):
-    '''Turn array of type data structures into in a namespace hiearchy of
+    '''
+    Turn array of type data structures into in a namespace hiearchy of
     schema objects based on their paths.
 
     This is suitable for use with CLI:
 
-        moo [...] render -t moo.oschema.namespacify [...]
-
+    moo [...] render -t moo.oschema.namespacify [...]
     '''
     top = Namespace("")
     for dat in data:
         typ = from_dict(dat)
         top.add(typ)
     return top
+
+
+def typeref(s):
+    '''
+    Return the typeref for the schema
+    '''
+    return ".".join(s['path'] + [s['name']])
+
+def fqnhier(lofs):
+    '''
+    Return dictionary keyed by fqn given list of schema
+    '''
+    return {typeref(s):s for s in lofs}
 
 
 def test():
