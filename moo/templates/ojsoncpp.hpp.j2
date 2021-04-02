@@ -1,0 +1,66 @@
+{% import 'ocpp.hpp.j2' as cppm %}
+{% set tcname = "JsonCpp" %}
+/*
+ * This file is 100% generated.  Any manual edits will likely be lost.
+ *
+ * This contains functions struct and other type definitions for schema in 
+ * {{cppm.ns(model)}} to be serialized via {{tcname}}.
+ */
+#ifndef {{cppm.headerguard(model, tcname)}}
+#define {{cppm.headerguard(model, tcname)}}
+
+// My structs
+{% set ctxpath = model.ctxpath or [] %}
+{% set prefix = model.path|relpath(ctxpath)|join("/") %}
+{% if prefix %}
+#include "{{ prefix }}/Structs.hpp"
+{% else %}
+#include "Structs.hpp"
+{% endif %}
+
+{% if model.extrefs %}
+// {{tcname}} serialization for externally referenced schema
+{% endif %}
+{% for ep in model.extrefs %}
+{% if ep %}
+#include "{{ep|listify|join("/")}}/{{tcname}}.hpp"
+{% else %}
+#include "{{tcname}}.hpp"
+{% endif %}
+{% endfor %}
+
+#include <json/json.h>
+
+{{ cppm.ns(model) }} {
+
+    using data_t = Json::Value;
+    {% for fqn in model.byscn.record %}    
+    {% set r = model.byref[fqn] %}
+    {% set n = fqn|listify|relpath(model.path)|join("::") %}
+    inline void to_json(data_t& j, const {{n}}& obj) {
+        {% for b in r.fields if b.name.startswith("_base_") %}
+        to_json(j, (const {{b.type}}&)obj);
+        {% endfor %}
+        {% for f in r.fields if not f.name.startswith("_base_") %}
+        j["{{f.name}}"] = obj.{{f.name}};
+        {% endfor%}
+    }
+    
+    inline void from_json(const data_t& j, {{r.name}}& obj) {
+        {% for b in r.fields if b.name.startswith("_base_") %}
+        from_json(j, ({{b.type}}&)obj);
+        {% endfor %}
+        {% for f in r.fields if not f.name.startswith("_base_") %}
+        {% if f.item in model.byscn.any %}
+        obj.{{f.name}} = j.at("{{f.name}}"); // need explicit asType()
+        {% else %}
+        if (j.isMember("{{f.name}}"))
+            obj.{{f.name}} = j["{{f.name}}"]{{ asType(f.item) }};
+        {% endif %}
+        {% endfor%}
+    }
+    {% endfor %}
+
+
+} // {{ cppm.ns(model) }}
+#endif // {{cppm.headerguard(model, tcname)}}

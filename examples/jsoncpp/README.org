@@ -1,0 +1,70 @@
+#+title: moo and JsonCpp
+#+EXPORT_FILE_NAME: index.html
+#+setupfile: ../../other/setup-topic.org
+
+* Overview
+
+[[http://open-source-parsers.github.io/jsoncpp-docs/doxygen/class_json_1_1_value.html][JsonCPP]] is a venerable C++ library for JSON.  Today, [[https://github.com/nlohmann/json][~nlohmann::json~]]
+has many benefits but older C++ code tends to use JsonCPP.  *moo*
+provides support for both.
+
+Like with the nljs support we:
+
+- define a schema
+- codegen C++ ~struct~ and other types
+- codegen JsonCpp serialization functions for these types
+
+We take a tip from nljs and call these functions ~to_json()~ and
+~from_json()~.
+
+* Codegen
+
+#+begin_src shell :exports both :results output code :wrap "example"
+  mkdir -p app sys
+  moo -g '/lang:ocpp-jsoncpp.jsonnet'  \
+      -M ../oschema \
+      -A path=sys -A os=sys.jsonnet \
+      render omodel.jsonnet ostructs.hpp.j2 > sys/Structs.hpp
+  moo -g '/lang:ocpp-jsoncpp.jsonnet'  \
+      -M ../oschema \
+      -A path=app -A os=app.jsonnet \
+      render omodel.jsonnet ostructs.hpp.j2 > app/Structs.hpp
+  ls -l {app,sys}/Structs.hpp
+#+end_src
+
+#+RESULTS:
+#+begin_example
+-rw-r--r-- 1 bv bv 3900 Apr  1 20:02 app/Structs.hpp
+-rw-r--r-- 1 bv bv  351 Apr  1 20:02 sys/Structs.hpp
+#+end_example
+
+Almost the same commands for the serialization functions but with
+different template files.
+
+#+begin_src shell :exports both :results output code :wrap "example"
+  mkdir -p app sys
+  moo -g '/lang:ocpp-jsoncpp.jsonnet'  \
+      -M ../oschema \
+      -A path=sys -A os=sys.jsonnet \
+      render omodel.jsonnet ojsoncpp.hpp.j2 > sys/JsonCpp.hpp
+  moo -g '/lang:ocpp-jsoncpp.jsonnet'  \
+      -M ../oschema \
+      -A path=app -A os=app.jsonnet \
+      render omodel.jsonnet ojsoncpp.hpp.j2 > app/JsonCpp.hpp
+  ls -l {app,sys}/JsonCpp.hpp
+#+end_src
+
+#+RESULTS:
+#+begin_example
+-rw-r--r-- 1 bv bv 1997 Apr  1 20:02 app/JsonCpp.hpp
+-rw-r--r-- 1 bv bv  415 Apr  1 20:02 sys/JsonCpp.hpp
+#+end_example
+
+#+begin_note
+One thing needs care.  In this example the "app" schema uses the "sys"
+schema and thus the headers from the latter need to be ~#include~'ed
+into the former.  And, that requires that we name and place files as
+they are referred to in the templates.
+#+end_note
+
+
