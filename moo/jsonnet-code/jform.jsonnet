@@ -82,7 +82,7 @@ local select(obj, keys) = {
 
     // Boolean combos
     xxxOf(of, a, hier) :: self.jform(a) {
-        [of] : [$.type(t, hier) for t in a.types]
+        [of] : [$.type(hier[t], hier) for t in a.types]
     },
     anyOf(a, hier) :: self.xxxOf("anyOf", a, hier),
     allOf(a, hier) :: self.xxxOf("allOf", a, hier),

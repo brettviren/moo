@@ -234,8 +234,25 @@ provided as a *single JSON file* containing any and all information that
 can be derived from DUNE DAQ moo schema.  The file consists of a
 single object with these fields:
 
+tbd
 
+* Small example
 
+The file [[file:small.jsonnet]] builds a minimal schema as may be found
+as some modconf which itself as a sub-plugin.
 
+A jsonform JSON Schema can be made from it:
+
+#+begin_src shell :exports both :results output code :wrap "example"
+  moo -A typeref=small.Conf \
+      -A types=small.jsonnet \
+      compile moo2jsonform.jsonnet > small-jform.json
+  ls -l small-jform.json
+#+end_src
+
+#+RESULTS:
+#+begin_example
+-rw-rw-r-- 1 bv bv 2689 Mar 31 14:36 small-jform.json
+#+end_example
 
 

@@ -1,4 +1,5 @@
-// support for converting oschema to JSON Schema
+// Support for converting oschema to JSON Schema.
+// See moo2jschema.jsonnet for more CLI-convenience.
 
 local maybe(obj, key, def=null) = if std.objectHas(obj, key) then obj[key] else def;
 
