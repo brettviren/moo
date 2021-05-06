@@ -65,5 +65,3 @@ def load_schema(uri, fpath, dpath=None):
         return {"$ref": f'https://json-schema.org/draft/{uri}/schema'}
     raise ValueError(f'can not load schema "{uri}"')
 
-
-

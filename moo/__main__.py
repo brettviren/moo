@@ -16,9 +16,12 @@ class Context:
     '''
     def __init__(self, dpath="", mpath=(), tpath=(),
                  tla=(), transform=(), graft=()):
-        self.dpath = dpath # return substructure at this data object path
-        self.mpath = mpath # search path for models (data)
-        self.tpath = tpath # search path for templates
+        # use substructure at this data object path
+        self.dpath = dpath 
+        # search path for models (data)
+        self.mpath = moo.util.existing_paths(mpath, True) 
+        # search path for templates
+        self.tpath = moo.util.existing_paths(tpath, True) 
         self.tlas = dict() # top level arguments
         if tla:
             self.tlas = moo.util.tla_pack(tla, mpath)
@@ -117,10 +120,10 @@ class Context:
 @click.option('-D', '--dpath', default="",
               help="Specify a selection path into the model data structure")
 @click.option('-M', '--mpath', envvar='MOO_LOAD_PATH', multiple=True,
-              type=click.Path(exists=True, dir_okay=True, file_okay=False),
+              type=click.Path(exists=False, dir_okay=True, file_okay=False),
               help="Add directory to data file search paths (can use MOO_LOAD_PATH env var)")
 @click.option('-T', '--tpath', envvar='MOO_TEMPLATE_PATH', multiple=True,
-              type=click.Path(exists=True, dir_okay=True, file_okay=False),
+              type=click.Path(exists=False, dir_okay=True, file_okay=False),
               help="Add directory to template file search paths (can use_TEMPLATE_PATH env var)")
 @click.option('-A', '--tla', multiple=True,
               help="Specify a 'top-level argument' to a functional model as a var=string or var=file.jsonnet")

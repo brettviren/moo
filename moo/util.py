@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import os
+import sys
 import moo
 import importlib
 import json
@@ -43,6 +44,23 @@ def validate(model, schema, validator="jsonschema"):
         from fastjsonschema import validate as fjs_validate
         return fjs_validate(schema, model)
     raise ValueError(f"unknown validator: {validator}")
+
+
+
+def existing_paths(paths, warn=False):
+    '''
+    Return list of path elements which exist as directories.
+    '''
+    if isinstance(paths, str):
+        paths = [paths]
+    ret = list()
+    for path in paths:
+        if os.path.isdir(path):
+            ret.append(path)
+            continue
+        if warn:
+            sys.stderr.write(f'path does not exist: {path}\n')
+    return ret
 
 
 def clean_paths(paths, add_cwd=True):
