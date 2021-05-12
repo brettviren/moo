@@ -80,14 +80,18 @@ class Context:
             raise RuntimeError(f'can not resolve {filename}')
         return ret
 
-    def render(self, templ_file, model):
+    def render(self, templ_file, model = None):
         '''
-        Render model against template in templ_file.
+        Render a template in templ_file.
+
+        If model is given provide its data to the template.
         '''
         templ = self.resolve(templ_file)
         helper = self.just_load("moo.jsonnet", dpath="templ")
         # this provides the variables that the template sees:
-        params = dict(model=model, moo=helper)
+        params = dict(moo=helper)
+        if model:
+            params['model'] = model
         tpath = self.search_path(templ_file)
         return moo.templates.render(templ, params, tpath)
 
@@ -315,8 +319,12 @@ def dump(ctx, output, format, model):
 def render(ctx, output, model, templ):
     '''
     Render a template against a model.
+
+    An empty model may be given (ie, with "" on shell command line).
     '''
-    data = ctx.obj.load(model)
+    data = None
+    if model:
+        data = ctx.obj.load(model)
     text = ctx.obj.render(templ, data)
     ctx.obj.save(output, text)
 

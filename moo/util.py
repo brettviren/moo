@@ -84,18 +84,49 @@ def clean_paths(paths, add_cwd=True):
     return paths
 
 
-def search_path(filename, paths=None):
-    paths = list(paths or list())
+def search_path_models():
+    return [os.path.join(os.path.dirname(__file__), "jsonnet-code")]
+def search_path_templates():
+    return [os.path.join(os.path.dirname(__file__), "templates")]
 
-    paths.insert(0, os.path.realpath("."))
+def search_path(likename, paths=None):
+    '''
+    Produce a list of absolute directories from which to search for
+    files like the given file name given by 'likename'.
 
-    if filename.endswith("jsonnet"):
-        paths.insert(0, os.path.join(os.path.dirname(__file__),
-                                     "jsonnet-code"))
-    if filename.endswith("j2"):
-        paths.insert(0, os.path.join(os.path.dirname(__file__),
-                                     "templates"))
-    return [os.path.abspath(p) for p in paths]
+    List is prepended with cwd and directory holding likename followed
+    by any given by user in 'paths' followed by built-in directories
+    provided by moo.  Thus, user may override built-in files.
+    '''
+    user = list(paths or list())
+    sp = list()
+
+    # these go first to adhere to principle of least surprise
+    sp += [ os.path.realpath(".") ]
+
+    parent = os.path.dirname(os.path.realpath(likename))
+    if parent not in sp:
+        sp.append(parent)
+
+    # next, add user paths
+    for up in user:
+        up = os.path.realpath(up)
+        if up in sp:
+            continue
+        sp.append(up)
+
+    # Finally apply built-ins at end to allow for user override
+    bis = list()
+    if likename.endswith("jsonnet"):
+        bis = search_path_models()
+    if likename.endswith("j2"):
+        bis = search_path_templates()
+    for bi in bis:
+        if bi in sp:
+            continue
+        sp.append(bi)
+
+    return sp
 
 def resolve(filename, paths=()):
     '''Resolve filename against moo built-in directories and any
