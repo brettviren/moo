@@ -3,6 +3,13 @@
 
 local maybe(obj, key, def=null) = if std.objectHas(obj, key) then obj[key] else def;
 
+local capitalize_first(str) = std.asciiUpper(str[0]) + str[1:];
+
+local last_item(str, delim=".") = {
+    local parts = std.split(str, delim),
+    res: parts[std.length(parts)-1]
+}.res;
+
 local select(obj, keys) = {
     [if std.objectHas(obj, k) then k]:obj[k] for k in keys
 };
@@ -35,7 +42,11 @@ local select(obj, keys) = {
 
     sequence(s) :: { type: "array", items: {"$ref": $.ref(s.items)}},
 
-    field(f) :: { "$ref": $.ref(f.item) },
+    field(f) :: {
+        "$ref": $.ref(f.item),
+        title: capitalize_first(std.strReplace(f.name, "_", " ")),
+        description: "%s (type: %s)" % [ maybe(f, "doc", self.title), last_item(f.item, ".") ],
+    },
 
     record(r) :: { type: "object", properties :{
         [f.name]: $.field(f) for f in r.fields
