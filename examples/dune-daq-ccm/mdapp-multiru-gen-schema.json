@@ -1,0 +1,155 @@
+{
+    "$id": "",
+    "$ref": "#/definitions/minidaqapp/mdapp_multiru_gen",
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "definitions": {
+        "minidaqapp": {
+            "mdapp_multiru_gen": {
+                "ArgbPath": {
+                    "pattern": "[a-zA-Z0-9.]([a-zA-Z0-9._+\\-])?",
+                    "type": "string"
+                },
+                "Flag": {
+                    "type": "boolean"
+                },
+                "Float": {
+                    "multipleOf": 1,
+                    "type": "number"
+                },
+                "Host": {
+                    "pattern": "([a-zA-Z0-9]([a-zA-Z0-9\\-]*[a-zA-Z0-9])?(\\.[a-zA-Z0-9]([a-zA-Z0-9\\-]*[a-zA-Z0-9])?)*|[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3})",
+                    "type": "string"
+                },
+                "Hosts": {
+                    "items": {
+                        "$ref": "#/definitions/minidaqapp/mdapp_multiru_gen/Host"
+                    },
+                    "type": "array"
+                },
+                "Int": {
+                    "multipleOf": 1,
+                    "type": "integer"
+                },
+                "MdappMultiruGen": {
+                    "properties": {
+                        "data_file": {
+                            "$ref": "#/definitions/minidaqapp/mdapp_multiru_gen/Path",
+                            "description": "Data file (type: Path)",
+                            "title": "Data file"
+                        },
+                        "data_rate_slowdown_factor": {
+                            "$ref": "#/definitions/minidaqapp/mdapp_multiru_gen/Float",
+                            "description": "Data rate slowdown factor (type: Float)",
+                            "title": "Data rate slowdown factor"
+                        },
+                        "emulator_mode": {
+                            "$ref": "#/definitions/minidaqapp/mdapp_multiru_gen/Flag",
+                            "description": "Emulator mode (type: Flag)",
+                            "title": "Emulator mode"
+                        },
+                        "enable_raw_recording": {
+                            "$ref": "#/definitions/minidaqapp/mdapp_multiru_gen/Flag",
+                            "description": "Enable raw recording (type: Flag)",
+                            "title": "Enable raw recording"
+                        },
+                        "enable_trace": {
+                            "$ref": "#/definitions/minidaqapp/mdapp_multiru_gen/Flag",
+                            "description": "Enable trace (type: Flag)",
+                            "title": "Enable trace"
+                        },
+                        "enabled_hsi_signals": {
+                            "$ref": "#/definitions/minidaqapp/mdapp_multiru_gen/Int",
+                            "description": "Enabled hsi signals (type: Int)",
+                            "title": "Enabled hsi signals"
+                        },
+                        "host_df": {
+                            "$ref": "#/definitions/minidaqapp/mdapp_multiru_gen/Host",
+                            "description": "Host df (type: Host)",
+                            "title": "Host df"
+                        },
+                        "host_hsi": {
+                            "$ref": "#/definitions/minidaqapp/mdapp_multiru_gen/Host",
+                            "description": "Host hsi (type: Host)",
+                            "title": "Host hsi"
+                        },
+                        "host_ru": {
+                            "$ref": "#/definitions/minidaqapp/mdapp_multiru_gen/Hosts",
+                            "description": "This option is repeatable, with each repetition adding an additional ru process. (type: Hosts)",
+                            "title": "Host ru"
+                        },
+                        "host_trigger": {
+                            "$ref": "#/definitions/minidaqapp/mdapp_multiru_gen/Host",
+                            "description": "Host trigger (type: Host)",
+                            "title": "Host trigger"
+                        },
+                        "hsi_device_id": {
+                            "$ref": "#/definitions/minidaqapp/mdapp_multiru_gen/Int",
+                            "description": "Hsi device id (type: Int)",
+                            "title": "Hsi device id"
+                        },
+                        "hsi_event_period": {
+                            "$ref": "#/definitions/minidaqapp/mdapp_multiru_gen/Float",
+                            "description": "Hsi event period (type: Float)",
+                            "title": "Hsi event period"
+                        },
+                        "hsi_signal_emulation_mode": {
+                            "$ref": "#/definitions/minidaqapp/mdapp_multiru_gen/Int",
+                            "description": "Hsi signal emulation mode (type: Int)",
+                            "title": "Hsi signal emulation mode"
+                        },
+                        "json_dir": {
+                            "$ref": "#/definitions/minidaqapp/mdapp_multiru_gen/ArgbPath",
+                            "description": "Json dir (type: ArgbPath)",
+                            "title": "Json dir"
+                        },
+                        "mean_hsi_signal_multiplicity": {
+                            "$ref": "#/definitions/minidaqapp/mdapp_multiru_gen/Float",
+                            "description": "Mean hsi signal multiplicity (type: Float)",
+                            "title": "Mean hsi signal multiplicity"
+                        },
+                        "number_of_data_producers": {
+                            "$ref": "#/definitions/minidaqapp/mdapp_multiru_gen/Int",
+                            "description": "Number of links to use, either per ru (<10) or total. If total is given, will be adjusted to the closest multiple of the number of rus (type: Int)",
+                            "title": "Number of data producers"
+                        },
+                        "output_path": {
+                            "$ref": "#/definitions/minidaqapp/mdapp_multiru_gen/Path",
+                            "description": "Output path (type: Path)",
+                            "title": "Output path"
+                        },
+                        "raw_recording_output_dir": {
+                            "$ref": "#/definitions/minidaqapp/mdapp_multiru_gen/Path",
+                            "description": "Raw recording output dir (type: Path)",
+                            "title": "Raw recording output dir"
+                        },
+                        "run_number": {
+                            "$ref": "#/definitions/minidaqapp/mdapp_multiru_gen/Int",
+                            "description": "Run number (type: Int)",
+                            "title": "Run number"
+                        },
+                        "token_count": {
+                            "$ref": "#/definitions/minidaqapp/mdapp_multiru_gen/Int",
+                            "description": "Token count (type: Int)",
+                            "title": "Token count"
+                        },
+                        "trigger_rate_hz": {
+                            "$ref": "#/definitions/minidaqapp/mdapp_multiru_gen/Float",
+                            "description": "Trigger rate hz (type: Float)",
+                            "title": "Trigger rate hz"
+                        },
+                        "use_felix": {
+                            "$ref": "#/definitions/minidaqapp/mdapp_multiru_gen/Flag",
+                            "description": "Use felix (type: Flag)",
+                            "title": "Use felix"
+                        }
+                    },
+                    "type": "object"
+                },
+                "Path": {
+                    "pattern": "[a-zA-Z0-9.]([a-zA-Z0-9._+\\-])?",
+                    "type": "string"
+                }
+            }
+        }
+    }
+}
