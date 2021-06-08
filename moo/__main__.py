@@ -351,14 +351,16 @@ def render_deps(ctx, target, output, model, templ):
     * The -o option to "moo render-deps" is the name of the .d file that should be output
 
     '''
+    # fixme: this code should move into a module method
+
     model_deps = ctx.obj.imports(model)
     templ_deps = ctx.obj.imports(templ)
-    deps_string = f'{target}: '
-    deps_string += " ".join(templ_deps)
-    deps_string += " "
-    deps_string += " ".join(model_deps)
-    deps_string += "\n"
-    ctx.obj.save(output, deps_string)
+
+    deps = [os.path.realpath(model), os.path.realpath(templ)]
+    deps += templ_deps + model_deps
+    deps_string = ' '.join(deps)
+    result = f'{target}: {deps_string}\n'
+    ctx.obj.save(output, result)
 
 
 @cli.command('render-many')
