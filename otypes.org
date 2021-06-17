@@ -207,23 +207,23 @@ using usual Python meta interrogation methods.  For example:
 #+begin_example
 Help on class Person in module app:
 
-class Person(moo.otypes.Record)
- |  Person(*args, email: app.Email = None, counts: app.Counts = None, affil: app.Affiliation = None, mbti: app.MBTI = 'introversion')
+class Person(moo.otypes._Record)
+ |  Person(*args, email: app.Email = None, email2: app.Email = 'me@example.com', counts: app.Counts = None, affil: app.Affiliation = None, mbti: app.MBTI = 'introversion')
  |  
- |  Record type Person with fields: "email", "counts", "affil", "mbti"
+ |  Record type Person with fields: "email", "email2", "counts", "affil", "mbti"
  |  
  |  Describe everything there is to know about an individual human
  |  
  |  Method resolution order:
  |      Person
- |      moo.otypes.Record
+ |      moo.otypes._Record
  |      moo.otypes.BaseType
  |      abc.ABC
  |      builtins.object
  |  
  |  Methods defined here:
  |  
- |  __init__(self, *args, email: app.Email = None, counts: app.Counts = None, affil: app.Affiliation = None, mbti: app.MBTI = 'introversion')
+ |  __init__(self, *args, email: app.Email = None, email2: app.Email = 'me@example.com', counts: app.Counts = None, affil: app.Affiliation = None, mbti: app.MBTI = 'introversion')
  |      Create a record type of Person
  |  
  |  ----------------------------------------------------------------------
@@ -235,6 +235,8 @@ class Person(moo.otypes.Record)
  |  
  |  email
  |  
+ |  email2
+ |  
  |  mbti
  |  
  |  ----------------------------------------------------------------------
@@ -243,7 +245,7 @@ class Person(moo.otypes.Record)
  |  __abstractmethods__ = frozenset()
  |  
  |  ----------------------------------------------------------------------
- |  Methods inherited from moo.otypes.Record:
+ |  Methods inherited from moo.otypes._Record:
  |  
  |  __repr__(self)
  |      Return repr(self).
@@ -267,7 +269,7 @@ class Person(moo.otypes.Record)
  |      or a typed object consistent with the field type.
  |  
  |  ----------------------------------------------------------------------
- |  Readonly properties inherited from moo.otypes.Record:
+ |  Readonly properties inherited from moo.otypes._Record:
  |  
  |  field_names
  |      Return list of field names

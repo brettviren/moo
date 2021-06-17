@@ -86,7 +86,7 @@ class BaseType(ABC):
         return dict(self._ost)
 
 
-class Record(BaseType):
+class _Record(BaseType):
     '''
     The oschema record class in Python.
     '''
@@ -182,7 +182,7 @@ class Record(BaseType):
             # intern as type
             ItemType = get_type(field['item'])
 
-            if isinstance(fval, BaseType) and not isinstance(fval, ItemType) and not issubclass(ItemType, Any):
+            if isinstance(fval, BaseType) and not isinstance(fval, ItemType) and not issubclass(ItemType, _Any):
                 cname = self.__class__.__name__
                 tname = type(fval)
                 raise ValueError(f'{cname}.{fname}: got {tname}, want {ItemType}')
@@ -240,7 +240,7 @@ def record_class(**ost):
     # make class def + init via compile/exec in order to get rich meta
     # info / docstrings.
     class_source = '''
-class {name}(Record):
+class {name}(_Record):
     """
     Record type {name} with fields: {field_name_list}
 
@@ -278,7 +278,7 @@ class {name}(Record):
     return classify(source, **ost)
 
 
-class Sequence(BaseType):
+class _Sequence(BaseType):
 
     def __repr__(self):
         return '<sequence %s %d:[%s]>' % \
@@ -319,7 +319,7 @@ def sequence_class(**ost):
     '''
     ost.setdefault("doc", "")
     class_source = '''
-class {name}(Sequence):
+class {name}(_Sequence):
     """
     A {name} sequence holding type {items}.
     {doc}
@@ -335,7 +335,7 @@ class {name}(Sequence):
     return classify(class_source, **ost)
 
 
-class String(BaseType):
+class _String(BaseType):
     '''
     String schema class
     '''
@@ -387,7 +387,7 @@ def string_class(**ost):
     ost.setdefault("format", None)
     ost.setdefault("pattern", None)
     class_source = '''
-class {name}(String):
+class {name}(_String):
     """
     A {name} string type.
     - format : {format}
@@ -405,7 +405,7 @@ class {name}(String):
     return classify(class_source, **ost)
 
 
-class Boolean(BaseType):
+class _Boolean(BaseType):
     '''
     The oschema boolean class
     '''
@@ -448,7 +448,7 @@ def boolean_class(**ost):
     '''
     ost.setdefault("doc", "")
     class_source = '''
-class {name}(Boolean):
+class {name}(_Boolean):
     """
     A {name} boolean type.
     {doc}
@@ -463,7 +463,7 @@ class {name}(Boolean):
     return classify(class_source, **ost)
 
 
-class Number(BaseType):
+class _Number(BaseType):
     '''
     The oschema number class
     '''
@@ -485,6 +485,8 @@ class Number(BaseType):
         return val
 
     def update(self, val):
+        print(list(self.ost.keys()))
+        print(self.ost)
         dtype = self.ost["dtype"]
         dtype = numpy.dtype(dtype)
 
@@ -538,7 +540,7 @@ def number_class(**ost):
 
     ost.setdefault("doc", "")
     class_source = '''
-class {name}(Number):
+class {name}(_Number):
     """
     A number type {name} dtype {dtype}
     {doc}
@@ -553,7 +555,7 @@ class {name}(Number):
     return classify(class_source, **ost)
 
 
-class Enum(BaseType):
+class _Enum(BaseType):
     '''
     The oschema enum class
     '''
@@ -590,7 +592,7 @@ def enum_class(**ost):
     '''
     ost.setdefault("doc", "")
     class_source = '''
-class {name}(Enum):
+class {name}(_Enum):
     """
     An enum type {name} in {symbols}
     {doc}
@@ -606,7 +608,7 @@ class {name}(Enum):
     return classify(class_source, **ost)
 
 
-class Any(BaseType):
+class _Any(BaseType):
     '''
     The oschema any class
     '''
@@ -626,7 +628,7 @@ class Any(BaseType):
         if isinstance(val, self.__class__):
             self._value = val._value
             return
-        if isinstance(val, Any):
+        if isinstance(val, _Any):
             raise ValueError("cross Any updates not allowed")
         if isinstance(val, BaseType):
             self._value = val
@@ -642,7 +644,7 @@ def any_class(**ost):
     '''
     ost.setdefault("doc", "")
     class_source = '''
-class {name}(Any):
+class {name}(_Any):
     """
     An any type {name}.
     {doc}
