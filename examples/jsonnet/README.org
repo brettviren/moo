@@ -43,10 +43,12 @@ constructor functions.  We'll show the full result for the ~app~ schema.
 The ~sys~ schema is short and boring.
 
 #+begin_info
-The generated ~app.jsonnet~ file will ~import~ the genreated ~sys.jsonnet~.
-For this to work, we *must* assure that our ~moo~ command uses the same
-file naming convention as assumed by the ~constructors.jsonnet.j2~
-template.
+When one schema depends on another (as ~app~ depends on ~sys~) its
+constructor file must import the constructor file generated from its
+dependency.  The example below assumes that these files are named
+after the schema namespace (plus ~.jsonnet~) extension.  Later we will
+show to handle the case that files must be named in some manner
+derived from the namespace.
 #+end_info
 
 #+begin_src shell :exports both :results output code :wrap "src jsonnet"
@@ -222,5 +224,39 @@ jsonnet objects.jsonnet
 }
 #+end_src
 
-* Caveats and todo
 
+* Caveats
+
+** Differing file and namespace names
+
+As described in more detail in the ~oschema~ doc, every type has a path
+and all types "in" a schema share a common path prefix with the path
+of the schema itself.  In order to allow a type in one schema to
+reference a type in another schema we must map schema namespace paths
+in at least two contexts:
+
+1. within the Jsonnet data structure
+2. on the file system to form Jsonnet ~import~ statements
+
+This mapping must be carried through the generation of constructor
+function Jsonnet files.  In the example above, to construct a Record
+type in ~app~ which relies on a type in ~sys~ the file defining the ~app~
+constructors needs to know how to ~import~ the file containing the ~sys~
+constructors.
+
+Above we made this map essentially degenerate because:
+
+- the namespace paths involved all have a single entry
+- we made that entry the file name (plus a ~.jsonnet~ extension)
+- we rely on ~moo~ load paths to find the files
+- we do not get overly concerned by having different types of files
+  (eg schema and ctor) with the same name but held in different
+  directories.
+
+In a real system the namespace paths will have multiple entries and
+some non-trivial transformation is needed to map them to file/path
+names.
+
+For now, ~moo~ punts the solution to the end user by suggesting to copy
+the ~ctor.jsonnet.j2~ and ~constructors.jsonnet.j2~ templates and modify
+them locally.
