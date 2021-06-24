@@ -1,0 +1,61 @@
+{#
+ This provides some helper macros for Jsonnet ctor templates.
+ For each moo schema class there is a ctor_<class> macro.
+ See ocpp.hpp.j2 as an example of another file like this one.
+
+ Each ctor function is assumed to exist in the context of an object.
+#}
+
+{% macro ctor_namespace_beg(model) %}
+{{ ": {".join(model.path) }}: {
+{%- endmacro -%}
+{% macro ctor_namespace_end(model) %}
+{% for p in model.path %} } {% endfor %}
+{%- endmacro -%}
+
+{% macro ctor_boolean(model, t) %}
+{{ t.name }}(val) :: assert(std.type(val)=='boolean');assert(val == true || val == false) val,
+{%- endmacro -%}
+
+{# fixme: add checks for pattern/format #}
+{% macro ctor_string(model, s) %}
+{{ s.name }}(val) :: assert(std.type(val)=='string'); val,
+{%- endmacro -%}
+
+{# fixme: add checks for dtype and contraints #}
+{% macro ctor_number(model, n) %}
+{{ n.name }}(val) :: assert(std.type(val)=='number'); val,
+{%- endmacro -%}
+
+{# note: nothing really to check for any... #}
+{% macro ctor_any(model, a) %}
+{{ a.name }}(val) :: val,
+{%- endmacro -%}
+
+{# fixme: add checks that e is in enum list #}
+{% macro ctor_enum(model, e) %}
+{{ e.name }}(val) :: assert(std.type(val)=='string'); val,
+{%- endmacro -%}
+
+{% macro ctor_sequence(model, s) %}
+{{ s.name }}(val) :: assert(std.type(val)=='array'); [$.{{s["items"]}}(v) for v in val],
+{%- endmacro -%}
+
+{% macro ctor_field_default_eq(model, field) %}
+{{jsonnet.field_default(model.all_types, field)}}
+{%- endmacro -%}
+
+{% macro ctor_arglist(model, fields) %}
+{% for f in fields %}{{f.name}}={{ctor_field_default_eq(model, f)}}{{ ", " if not loop.last }}{% endfor%}
+{%- endmacro -%}
+
+{% macro ctor_record(model, r) %}
+{{ r.name }}(obj=null, {{ctor_arglist(model, r.fields)}}) :: {
+    assert(std.setMember(std.type(obj), ["null", "object"])),
+    res: if std.type(obj) == 'object' then obj else {
+        {% for f in r.fields %}
+        {{f.name}}: $.{{f.item}}({{f.name}}),
+        {% endfor %}
+    },
+}.res,
+{%- endmacro -%}

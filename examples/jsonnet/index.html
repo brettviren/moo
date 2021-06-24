@@ -1,0 +1,537 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+<!-- 2021-06-24 Thu 13:53 -->
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Generate Jsonnet constructor functions</title>
+<meta name="generator" content="Org mode" />
+<meta name="author" content="Brett Viren" />
+<style type="text/css">
+ <!--/*--><![CDATA[/*><!--*/
+  .title  { text-align: center;
+             margin-bottom: .2em; }
+  .subtitle { text-align: center;
+              font-size: medium;
+              font-weight: bold;
+              margin-top:0; }
+  .todo   { font-family: monospace; color: red; }
+  .done   { font-family: monospace; color: green; }
+  .priority { font-family: monospace; color: orange; }
+  .tag    { background-color: #eee; font-family: monospace;
+            padding: 2px; font-size: 80%; font-weight: normal; }
+  .timestamp { color: #bebebe; }
+  .timestamp-kwd { color: #5f9ea0; }
+  .org-right  { margin-left: auto; margin-right: 0px;  text-align: right; }
+  .org-left   { margin-left: 0px;  margin-right: auto; text-align: left; }
+  .org-center { margin-left: auto; margin-right: auto; text-align: center; }
+  .underline { text-decoration: underline; }
+  #postamble p, #preamble p { font-size: 90%; margin: .2em; }
+  p.verse { margin-left: 3%; }
+  pre {
+    border: 1px solid #ccc;
+    box-shadow: 3px 3px 3px #eee;
+    padding: 8pt;
+    font-family: monospace;
+    overflow: auto;
+    margin: 1.2em;
+  }
+  pre.src {
+    position: relative;
+    overflow: auto;
+    padding-top: 1.2em;
+  }
+  pre.src:before {
+    display: none;
+    position: absolute;
+    background-color: white;
+    top: -10px;
+    right: 10px;
+    padding: 3px;
+    border: 1px solid black;
+  }
+  pre.src:hover:before { display: inline; margin-top: 14px;}
+  /* Languages per Org manual */
+  pre.src-asymptote:before { content: 'Asymptote'; }
+  pre.src-awk:before { content: 'Awk'; }
+  pre.src-C:before { content: 'C'; }
+  /* pre.src-C++ doesn't work in CSS */
+  pre.src-clojure:before { content: 'Clojure'; }
+  pre.src-css:before { content: 'CSS'; }
+  pre.src-D:before { content: 'D'; }
+  pre.src-ditaa:before { content: 'ditaa'; }
+  pre.src-dot:before { content: 'Graphviz'; }
+  pre.src-calc:before { content: 'Emacs Calc'; }
+  pre.src-emacs-lisp:before { content: 'Emacs Lisp'; }
+  pre.src-fortran:before { content: 'Fortran'; }
+  pre.src-gnuplot:before { content: 'gnuplot'; }
+  pre.src-haskell:before { content: 'Haskell'; }
+  pre.src-hledger:before { content: 'hledger'; }
+  pre.src-java:before { content: 'Java'; }
+  pre.src-js:before { content: 'Javascript'; }
+  pre.src-latex:before { content: 'LaTeX'; }
+  pre.src-ledger:before { content: 'Ledger'; }
+  pre.src-lisp:before { content: 'Lisp'; }
+  pre.src-lilypond:before { content: 'Lilypond'; }
+  pre.src-lua:before { content: 'Lua'; }
+  pre.src-matlab:before { content: 'MATLAB'; }
+  pre.src-mscgen:before { content: 'Mscgen'; }
+  pre.src-ocaml:before { content: 'Objective Caml'; }
+  pre.src-octave:before { content: 'Octave'; }
+  pre.src-org:before { content: 'Org mode'; }
+  pre.src-oz:before { content: 'OZ'; }
+  pre.src-plantuml:before { content: 'Plantuml'; }
+  pre.src-processing:before { content: 'Processing.js'; }
+  pre.src-python:before { content: 'Python'; }
+  pre.src-R:before { content: 'R'; }
+  pre.src-ruby:before { content: 'Ruby'; }
+  pre.src-sass:before { content: 'Sass'; }
+  pre.src-scheme:before { content: 'Scheme'; }
+  pre.src-screen:before { content: 'Gnu Screen'; }
+  pre.src-sed:before { content: 'Sed'; }
+  pre.src-sh:before { content: 'shell'; }
+  pre.src-sql:before { content: 'SQL'; }
+  pre.src-sqlite:before { content: 'SQLite'; }
+  /* additional languages in org.el's org-babel-load-languages alist */
+  pre.src-forth:before { content: 'Forth'; }
+  pre.src-io:before { content: 'IO'; }
+  pre.src-J:before { content: 'J'; }
+  pre.src-makefile:before { content: 'Makefile'; }
+  pre.src-maxima:before { content: 'Maxima'; }
+  pre.src-perl:before { content: 'Perl'; }
+  pre.src-picolisp:before { content: 'Pico Lisp'; }
+  pre.src-scala:before { content: 'Scala'; }
+  pre.src-shell:before { content: 'Shell Script'; }
+  pre.src-ebnf2ps:before { content: 'ebfn2ps'; }
+  /* additional language identifiers per "defun org-babel-execute"
+       in ob-*.el */
+  pre.src-cpp:before  { content: 'C++'; }
+  pre.src-abc:before  { content: 'ABC'; }
+  pre.src-coq:before  { content: 'Coq'; }
+  pre.src-groovy:before  { content: 'Groovy'; }
+  /* additional language identifiers from org-babel-shell-names in
+     ob-shell.el: ob-shell is the only babel language using a lambda to put
+     the execution function name together. */
+  pre.src-bash:before  { content: 'bash'; }
+  pre.src-csh:before  { content: 'csh'; }
+  pre.src-ash:before  { content: 'ash'; }
+  pre.src-dash:before  { content: 'dash'; }
+  pre.src-ksh:before  { content: 'ksh'; }
+  pre.src-mksh:before  { content: 'mksh'; }
+  pre.src-posh:before  { content: 'posh'; }
+  /* Additional Emacs modes also supported by the LaTeX listings package */
+  pre.src-ada:before { content: 'Ada'; }
+  pre.src-asm:before { content: 'Assembler'; }
+  pre.src-caml:before { content: 'Caml'; }
+  pre.src-delphi:before { content: 'Delphi'; }
+  pre.src-html:before { content: 'HTML'; }
+  pre.src-idl:before { content: 'IDL'; }
+  pre.src-mercury:before { content: 'Mercury'; }
+  pre.src-metapost:before { content: 'MetaPost'; }
+  pre.src-modula-2:before { content: 'Modula-2'; }
+  pre.src-pascal:before { content: 'Pascal'; }
+  pre.src-ps:before { content: 'PostScript'; }
+  pre.src-prolog:before { content: 'Prolog'; }
+  pre.src-simula:before { content: 'Simula'; }
+  pre.src-tcl:before { content: 'tcl'; }
+  pre.src-tex:before { content: 'TeX'; }
+  pre.src-plain-tex:before { content: 'Plain TeX'; }
+  pre.src-verilog:before { content: 'Verilog'; }
+  pre.src-vhdl:before { content: 'VHDL'; }
+  pre.src-xml:before { content: 'XML'; }
+  pre.src-nxml:before { content: 'XML'; }
+  /* add a generic configuration mode; LaTeX export needs an additional
+     (add-to-list 'org-latex-listings-langs '(conf " ")) in .emacs */
+  pre.src-conf:before { content: 'Configuration File'; }
+
+  table { border-collapse:collapse; }
+  caption.t-above { caption-side: top; }
+  caption.t-bottom { caption-side: bottom; }
+  td, th { vertical-align:top;  }
+  th.org-right  { text-align: center;  }
+  th.org-left   { text-align: center;   }
+  th.org-center { text-align: center; }
+  td.org-right  { text-align: right;  }
+  td.org-left   { text-align: left;   }
+  td.org-center { text-align: center; }
+  dt { font-weight: bold; }
+  .footpara { display: inline; }
+  .footdef  { margin-bottom: 1em; }
+  .figure { padding: 1em; }
+  .figure p { text-align: center; }
+  .equation-container {
+    display: table;
+    text-align: center;
+    width: 100%;
+  }
+  .equation {
+    vertical-align: middle;
+  }
+  .equation-label {
+    display: table-cell;
+    text-align: right;
+    vertical-align: middle;
+  }
+  .inlinetask {
+    padding: 10px;
+    border: 2px solid gray;
+    margin: 10px;
+    background: #ffffcc;
+  }
+  #org-div-home-and-up
+   { text-align: right; font-size: 70%; white-space: nowrap; }
+  textarea { overflow-x: auto; }
+  .linenr { font-size: smaller }
+  .code-highlighted { background-color: #ffff00; }
+  .org-info-js_info-navigation { border-style: none; }
+  #org-info-js_console-label
+    { font-size: 10px; font-weight: bold; white-space: nowrap; }
+  .org-info-js_search-highlight
+    { background-color: #ffff00; color: #000000; font-weight: bold; }
+  .org-svg { width: 90%; }
+  /*]]>*/-->
+</style>
+<link rel="stylesheet" type="text/css" href="https://brettviren.github.io/moo/other/readtheorg/css/htmlize.css"/>
+<link rel="stylesheet" type="text/css" href="https://brettviren.github.io/moo/other/readtheorg/css/readtheorg.css"/>
+<script type="text/javascript" src="https://brettviren.github.io/moo/other/lib/js/jquery.min.js"></script>
+<script type="text/javascript" src="https://brettviren.github.io/moo/other/lib/js/bootstrap.min.js"></script>
+<script type="text/javascript" src="https://brettviren.github.io/moo/other/lib/js/jquery.stickytableheaders.min.js"></script>
+<script type="text/javascript" src="https://brettviren.github.io/moo/other/readtheorg/js/readtheorg.js"></script>
+<style> #content{max-width:1800px;}</style>
+<style> p{max-width:800px;}</style>
+<style> li{max-width:800px;}</style>
+<style> pre.src{border-radius: 5px; background-color:#333; color:#0f0;}</style>
+<style> pre.example{border-radius: 5px; background-color:#333; color:#0f0;}</style>
+<style> code{border-radius: 5px; background-color:#333; color:#0f0;}</style>
+<script type="text/javascript">
+// @license magnet:?xt=urn:btih:e95b018ef3580986a04669f1b5879592219e2a7a&dn=public-domain.txt Public Domain
+<!--/*--><![CDATA[/*><!--*/
+     function CodeHighlightOn(elem, id)
+     {
+       var target = document.getElementById(id);
+       if(null != target) {
+         elem.classList.add("code-highlighted");
+         target.classList.add("code-highlighted");
+       }
+     }
+     function CodeHighlightOff(elem, id)
+     {
+       var target = document.getElementById(id);
+       if(null != target) {
+         elem.classList.remove("code-highlighted");
+         target.classList.remove("code-highlighted");
+       }
+     }
+    /*]]>*///-->
+// @license-end
+</script>
+</head>
+<body>
+<div id="content">
+<h1 class="title">Generate Jsonnet constructor functions
+<br />
+<span class="subtitle">Yo Dawg, I heard you like Jsonnet so I used Jsonnet to make Jsonnet</span>
+</h1>
+<div id="table-of-contents">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents">
+<ul>
+<li><a href="#orgdd2f51f">Goals and overview</a></li>
+<li><a href="#orgdeab017">Exercise the example</a>
+<ul>
+<li><a href="#org319be25">Generating Jsonnet constructor functions.</a></li>
+<li><a href="#orgc4c4625">Using the generated constructor functions.</a></li>
+<li><a href="#orgf65052c">Default record item values</a></li>
+<li><a href="#orgbfe3574">Catch mistakes</a></li>
+<li><a href="#org2df437e">Larger example</a></li>
+</ul>
+</li>
+<li><a href="#org34b1114">Caveats and todo</a></li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-orgdd2f51f" class="outline-2">
+<h2 id="orgdd2f51f">Goals and overview</h2>
+<div class="outline-text-2" id="text-orgdd2f51f">
+<p>
+Use moo schema to provide a <i>valid by construction</i> pattern for
+creating data objects of types defined by the schema.
+</p>
+
+<p>
+We will do this by deriving (generating) a Jsonnet function for each
+type in the schema.  The function arguments pass in type-specific
+values and the function returns a value instance of the type.
+</p>
+
+<p>
+In the process of constructing the return value, the generated code
+may assert various constraints.  We seek to have "hermetic validation"
+but recognize that some aspects defined in the schema may not be
+checked due to limitation in Jsonnet or laziness in developing the
+template.
+</p>
+
+<div class="info" id="orgabf266b">
+<p>
+We could implement validating constructors purely as Jsonnet.  Eg, we
+may construct an object of functions from the sequence of type
+objects.  However, the result can not be inspected by humans.
+Instead, by generating concrete Jsonnet code, the developer may
+inspect the result as a self-documenting API.
+</p>
+
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgdeab017" class="outline-2">
+<h2 id="orgdeab017">Exercise the example</h2>
+<div class="outline-text-2" id="text-orgdeab017">
+<p>
+We reuse the schema defined in the <a href="../oschema/">oschema</a> example.  See the <a href="../../oschema.html">oschema
+doc</a> for details but for here, keep in mind it has a "base" or "system"
+schema called <code>sys</code> which provides types used in an "application" schema
+called <code>app</code>.  This dichotomy will be reflected in the output by
+generating a <code>sys.jsonnet</code> output from the input of the same name and
+etc for <code>cmd</code>.  After generating the construction functions, we will use
+them to make some objects.
+</p>
+</div>
+
+<div id="outline-container-org319be25" class="outline-3">
+<h3 id="org319be25">Generating Jsonnet constructor functions.</h3>
+<div class="outline-text-3" id="text-org319be25">
+<p>
+Here we generate the two Jsonnet files holding the per-type
+constructor functions.  We'll show the full result for the <code>app</code> schema.
+The <code>sys</code> schema is short and boring.
+</p>
+
+<div class="info" id="orgcfa327f">
+<p>
+The generated <code>app.jsonnet</code> file will <code>import</code> the genreated <code>sys.jsonnet</code>.
+For this to work, we <b>must</b> assure that our <code>moo</code> command uses the same
+file naming convention as assumed by the <code>constructors.jsonnet.j2</code>
+template.
+</p>
+
+</div>
+
+<div class="org-src-container">
+<pre class="src src-shell">moo -M ../oschema  \
+    -A os='../oschema/sys.jsonnet' -A path='sys' \
+    render omodel.jsonnet constructors.jsonnet.j2 \
+    &gt; sys.jsonnet
+moo -M ../oschema  \
+    -A os='../oschema/app.jsonnet' -A path='app' \
+    render omodel.jsonnet constructors.jsonnet.j2 \
+    &gt; app.jsonnet
+cat app.jsonnet
+</pre>
+</div>
+
+<div class="org-src-container">
+<pre class="src src-jsonnet">/*
+ * This file is 100% generated.  Any manual edits will likely be lost.
+ *
+ * This holds constructor functions for creating objects from the
+ * schema: 
+ * 
+ * Prefer these functions over manual object construction to assure
+ * greater validity.
+ */
+local sys = import "sys.jsonnet";
+
+sys +
+{
+    app: {
+    // Construct Affiliation (any)
+    // An associated object of any type
+    Affiliation(val) :: val,
+
+    // Construct Counts (sequence)
+    // All the counts
+    Counts(val) :: assert(std.type(val)=='array'); [$.sys.Count(v) for v in val],
+
+    // Construct Email (string)
+    // Electronic mail address
+    Email(val) :: assert(std.type(val)=='string'); val,
+
+    // Construct MBTI (enum)
+    // 
+    MBTI(val) :: assert(std.type(val)=='string'); val,
+
+    // Construct Make (string)
+    // 
+    Make(val) :: assert(std.type(val)=='string'); val,
+
+    // Construct Model (string)
+    // 
+    Model(val) :: assert(std.type(val)=='string'); val,
+
+    // Construct VehicleClass (enum)
+    // 
+    VehicleClass(val) :: assert(std.type(val)=='string'); val,
+
+    // Construct Vehicle (record)
+    // 
+    Vehicle(obj=null, make="Subaru", model="WRX", type="fun") :: {
+        assert(std.setMember(std.type(obj), ["null", "object"])),
+        res: if std.type(obj) == 'object' then obj else {
+            make: $.app.Make(make),
+            model: $.app.Model(model),
+            type: $.app.VehicleClass(type),
+        },
+    }.res,
+
+    // Construct Person (record)
+    // Describe everything there is to know about an individual human
+    Person(obj=null, email="", email2="me@example.com", counts=[], counts2=[0, 1, 2], affil={}, mbti="introversion", vehicle={make: "Subaru", model: "WRX", type: "fun"}, vehicle2={make: "Subaru", model: "CrossTrek", type: "boring"}, vehicle3={make: "Subaru", model: "BRZ", type: "fun"}) :: {
+        assert(std.setMember(std.type(obj), ["null", "object"])),
+        res: if std.type(obj) == 'object' then obj else {
+            email: $.app.Email(email),
+            email2: $.app.Email(email2),
+            counts: $.app.Counts(counts),
+            counts2: $.app.Counts(counts2),
+            affil: $.app.Affiliation(affil),
+            mbti: $.app.MBTI(mbti),
+            vehicle: $.app.Vehicle(vehicle),
+            vehicle2: $.app.Vehicle(vehicle2),
+            vehicle3: $.app.Vehicle(vehicle3),
+        },
+    }.res,
+
+     } 
+}
+</pre>
+</div>
+</div>
+</div>
+
+
+<div id="outline-container-orgc4c4625" class="outline-3">
+<h3 id="orgc4c4625">Using the generated constructor functions.</h3>
+<div class="outline-text-3" id="text-orgc4c4625">
+<p>
+We now may reap the benefit of using the generated constructor
+functions instead of creating "hand-made" objects.
+</p>
+
+<div class="info" id="orgb34c5d7">
+<p>
+After producing the generated output above, we no longer need <code>moo</code> as a
+dependency.  The generated Jsonnet should be idempotent under
+subsequent generation and so is safe to commit to a code repository
+without concern over bloating.  This gives the developers of a project
+using this example the option to avoid exposing <code>moo</code> as a build-time
+dependency.
+</p>
+
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgf65052c" class="outline-3">
+<h3 id="orgf65052c">Default record item values</h3>
+<div class="outline-text-3" id="text-orgf65052c">
+<div class="org-src-container">
+<pre class="src src-shell">jsonnet -e 'local ctor = import "app.jsonnet"; ctor.app.Vehicle()'
+</pre>
+</div>
+
+<div class="org-src-container">
+<pre class="src src-json">{
+   "make": "Subaru",
+   "model": "WRX",
+   "type": "fun"
+}
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgbfe3574" class="outline-3">
+<h3 id="orgbfe3574">Catch mistakes</h3>
+<div class="outline-text-3" id="text-orgbfe3574">
+<div class="org-src-container">
+<pre class="src src-shell">jsonnet -e 'local ctor = import "app.jsonnet"; ctor.app.Vehicle(make=42)' 2&gt;&amp;1 || true
+</pre>
+</div>
+
+<pre class="example" id="org102f2f0">
+RUNTIME ERROR: Assertion failed.
+	app.jsonnet:33:18-54	function &lt;anonymous&gt;
+	app.jsonnet:48:19-35	object &lt;anonymous&gt;
+	During manifestation	
+</pre>
+</div>
+</div>
+
+<div id="outline-container-org2df437e" class="outline-3">
+<h3 id="org2df437e">Larger example</h3>
+<div class="outline-text-3" id="text-org2df437e">
+<p>
+Here is a larger example:
+</p>
+
+<div class="org-src-container">
+<pre class="src src-jsonnet">local c = import "app.jsonnet";
+local car1 = c.app.Vehicle(model="Justy", type="slow");
+c.app.Person(email="brett.viren@gmail.com", vehicle=car1)
+</pre>
+</div>
+
+<div class="org-src-container">
+<pre class="src src-shell">jsonnet objects.jsonnet
+</pre>
+</div>
+
+<div class="org-src-container">
+<pre class="src src-json">{
+   "affil": { },
+   "counts": [ ],
+   "counts2": [
+      0,
+      1,
+      2
+   ],
+   "email": "brett.viren@gmail.com",
+   "email2": "me@example.com",
+   "mbti": "introversion",
+   "vehicle": {
+      "make": "Subaru",
+      "model": "Justy",
+      "type": "slow"
+   },
+   "vehicle2": {
+      "make": "Subaru",
+      "model": "CrossTrek",
+      "type": "boring"
+   },
+   "vehicle3": {
+      "make": "Subaru",
+      "model": "BRZ",
+      "type": "fun"
+   }
+}
+</pre>
+</div>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org34b1114" class="outline-2">
+<h2 id="org34b1114">Caveats and todo</h2>
+</div>
+</div>
+<div id="postamble" class="status">
+<p class="author">Author: Brett Viren</p>
+<p class="date">Created: 2021-06-24 Thu 13:53</p>
+<p class="validation"><a href="https://validator.w3.org/check?uri=referer">Validate</a></p>
+</div>
+</body>
+</html>

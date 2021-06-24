@@ -2,6 +2,7 @@ import os
 from jinja2 import meta, Environment, FileSystemLoader
 
 from . import cpp
+from . import jsonnet
 from .util import find_type, listify, relpath
 from moo.util import search_path
 
@@ -35,7 +36,7 @@ def make_env(path, **kwds):
     env.filters["listify"] = listify
     env.filters["relpath"] = relpath
     env.globals.update(find_type=find_type,
-                       cpp=cpp)
+                       cpp=cpp, jsonnet=jsonnet)
     return env
 
 

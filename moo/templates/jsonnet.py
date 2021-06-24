@@ -1,7 +1,7 @@
 '''
-This provides support for templates that produce C++ code.
+This provides support for templates that produce Jsonnet code.
 
-See also ocpp.jsonnet and ocpp.hpp.j2.
+See also octor.jsonnet.j2 and constructors.jsonnet.j2.
 
 This is added to the environment via the jinjaint module.
 '''
@@ -13,7 +13,7 @@ import numpy
 # fixme: this reproduces some bits that are also in otypes.
 
 def literal_value(types, fqn, val):
-    '''Convert val of type typ to a C++ literal syntax.'''
+    '''Convert val of type typ to a Jsonnet literal syntax.'''
     typ = find_type(types, fqn)
     schema = typ['schema']
 
@@ -24,9 +24,9 @@ def literal_value(types, fqn, val):
 
     if schema == "sequence":
         if val is None:
-            return '{}'
+            return '[]'
         seq = ', '.join([literal_value(types, typ['items'], ele) for ele in val])
-        return '{%s}' % seq
+        return '[%s]' % seq
 
     if schema == "number":
         dtype = typ["dtype"]
@@ -44,18 +44,18 @@ def literal_value(types, fqn, val):
             val = typ.get('default', None)
         if val is None:
             val = typ.symbols[0]
-        nsp = list(typ['path']) + [typ['name'], val]
-        return '::'.join(nsp)
+        return f'"{val}"'
 
     if schema == "record":
         val = val or dict()
         seq = list()
         for f in typ['fields']:
-            fval = val.get(f['name'], f.get('default', None))
+            fname = f['name']
+            fval = val.get(fname, f.get('default', None))
             if fval is None:
                 break
-            cppval = literal_value(types, f['item'], fval)
-            seq.append(cppval)
+            jsval = literal_value(types, f['item'], fval)
+            seq.append(f'{fname}: {jsval}')
         return '{%s}' % (', '.join(seq))
 
     if schema == "any":

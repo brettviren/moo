@@ -1,0 +1,226 @@
+#+title: Generate Jsonnet constructor functions
+#+subtitle: Yo Dawg, I heard you like Jsonnet so I used Jsonnet to make Jsonnet
+#+EXPORT_FILE_NAME: index.html
+#+setupfile: ../../other/setup-topic.org
+
+* Goals and overview
+
+Use moo schema to provide a /valid by construction/ pattern for
+creating data objects of types defined by the schema.
+
+We will do this by deriving (generating) a Jsonnet function for each
+type in the schema.  The function arguments pass in type-specific
+values and the function returns a value instance of the type.
+
+In the process of constructing the return value, the generated code
+may assert various constraints.  We seek to have "hermetic validation"
+but recognize that some aspects defined in the schema may not be
+checked due to limitation in Jsonnet or laziness in developing the
+template.
+
+#+begin_info
+We could implement validating constructors purely as Jsonnet.  Eg, we
+may construct an object of functions from the sequence of type
+objects.  However, the result can not be inspected by humans.
+Instead, by generating concrete Jsonnet code, the developer may
+inspect the result as a self-documenting API.
+#+end_info
+
+* Exercise the example
+
+We reuse the schema defined in the [[file:../oschema/][oschema]] example.  See the [[file:../../oschema.org][oschema
+doc]] for details but for here, keep in mind it has a "base" or "system"
+schema called ~sys~ which provides types used in an "application" schema
+called ~app~.  This dichotomy will be reflected in the output by
+generating a ~sys.jsonnet~ output from the input of the same name and
+etc for ~cmd~.  After generating the construction functions, we will use
+them to make some objects.
+
+** Generating Jsonnet constructor functions.
+
+Here we generate the two Jsonnet files holding the per-type
+constructor functions.  We'll show the full result for the ~app~ schema.
+The ~sys~ schema is short and boring.
+
+#+begin_info
+The generated ~app.jsonnet~ file will ~import~ the genreated ~sys.jsonnet~.
+For this to work, we *must* assure that our ~moo~ command uses the same
+file naming convention as assumed by the ~constructors.jsonnet.j2~
+template.
+#+end_info
+
+#+begin_src shell :exports both :results output code :wrap "src jsonnet"
+  moo -M ../oschema  \
+      -A os='../oschema/sys.jsonnet' -A path='sys' \
+      render omodel.jsonnet constructors.jsonnet.j2 \
+      > sys.jsonnet
+  moo -M ../oschema  \
+      -A os='../oschema/app.jsonnet' -A path='app' \
+      render omodel.jsonnet constructors.jsonnet.j2 \
+      > app.jsonnet
+  cat app.jsonnet
+#+end_src
+
+#+RESULTS:
+#+begin_src jsonnet
+/*
+ ,* This file is 100% generated.  Any manual edits will likely be lost.
+ ,*
+ ,* This holds constructor functions for creating objects from the
+ ,* schema: 
+ ,* 
+ ,* Prefer these functions over manual object construction to assure
+ ,* greater validity.
+ ,*/
+local sys = import "sys.jsonnet";
+
+sys +
+{
+    app: {
+    // Construct Affiliation (any)
+    // An associated object of any type
+    Affiliation(val) :: val,
+
+    // Construct Counts (sequence)
+    // All the counts
+    Counts(val) :: assert(std.type(val)=='array'); [$.sys.Count(v) for v in val],
+
+    // Construct Email (string)
+    // Electronic mail address
+    Email(val) :: assert(std.type(val)=='string'); val,
+
+    // Construct MBTI (enum)
+    // 
+    MBTI(val) :: assert(std.type(val)=='string'); val,
+
+    // Construct Make (string)
+    // 
+    Make(val) :: assert(std.type(val)=='string'); val,
+
+    // Construct Model (string)
+    // 
+    Model(val) :: assert(std.type(val)=='string'); val,
+
+    // Construct VehicleClass (enum)
+    // 
+    VehicleClass(val) :: assert(std.type(val)=='string'); val,
+
+    // Construct Vehicle (record)
+    // 
+    Vehicle(obj=null, make="Subaru", model="WRX", type="fun") :: {
+        assert(std.setMember(std.type(obj), ["null", "object"])),
+        res: if std.type(obj) == 'object' then obj else {
+            make: $.app.Make(make),
+            model: $.app.Model(model),
+            type: $.app.VehicleClass(type),
+        },
+    }.res,
+
+    // Construct Person (record)
+    // Describe everything there is to know about an individual human
+    Person(obj=null, email="", email2="me@example.com", counts=[], counts2=[0, 1, 2], affil={}, mbti="introversion", vehicle={make: "Subaru", model: "WRX", type: "fun"}, vehicle2={make: "Subaru", model: "CrossTrek", type: "boring"}, vehicle3={make: "Subaru", model: "BRZ", type: "fun"}) :: {
+        assert(std.setMember(std.type(obj), ["null", "object"])),
+        res: if std.type(obj) == 'object' then obj else {
+            email: $.app.Email(email),
+            email2: $.app.Email(email2),
+            counts: $.app.Counts(counts),
+            counts2: $.app.Counts(counts2),
+            affil: $.app.Affiliation(affil),
+            mbti: $.app.MBTI(mbti),
+            vehicle: $.app.Vehicle(vehicle),
+            vehicle2: $.app.Vehicle(vehicle2),
+            vehicle3: $.app.Vehicle(vehicle3),
+        },
+    }.res,
+
+     } 
+}
+#+end_src
+
+
+** Using the generated constructor functions.
+
+We now may reap the benefit of using the generated constructor
+functions instead of creating "hand-made" objects.
+
+#+begin_info
+After producing the generated output above, we no longer need ~moo~ as a
+dependency.  The generated Jsonnet should be idempotent under
+subsequent generation and so is safe to commit to a code repository
+without concern over bloating.  This gives the developers of a project
+using this example the option to avoid exposing ~moo~ as a build-time
+dependency.
+#+end_info
+
+** Default record item values
+
+#+begin_src shell :exports both :results output code :wrap "src json"
+jsonnet -e 'local ctor = import "app.jsonnet"; ctor.app.Vehicle()'
+#+end_src
+
+#+RESULTS:
+#+begin_src json
+{
+   "make": "Subaru",
+   "model": "WRX",
+   "type": "fun"
+}
+#+end_src
+
+** Catch mistakes
+
+#+begin_src shell :exports both :results output code :wrap "example"
+jsonnet -e 'local ctor = import "app.jsonnet"; ctor.app.Vehicle(make=42)' 2>&1 || true
+#+end_src
+
+#+RESULTS:
+#+begin_example
+RUNTIME ERROR: Assertion failed.
+	app.jsonnet:31:18-54	function <anonymous>
+	app.jsonnet:47:19-35	object <anonymous>
+	During manifestation	
+#+end_example
+
+** Larger example
+
+Here is a larger example:
+
+#+include: objects.jsonnet src jsonnet
+
+#+begin_src shell :exports both :results output code :wrap "src json"
+jsonnet objects.jsonnet
+#+end_src
+
+#+RESULTS:
+#+begin_src json
+{
+   "affil": { },
+   "counts": [ ],
+   "counts2": [
+      0,
+      1,
+      2
+   ],
+   "email": "brett.viren@gmail.com",
+   "email2": "me@example.com",
+   "mbti": "introversion",
+   "vehicle": {
+      "make": "Subaru",
+      "model": "Justy",
+      "type": "slow"
+   },
+   "vehicle2": {
+      "make": "Subaru",
+      "model": "CrossTrek",
+      "type": "boring"
+   },
+   "vehicle3": {
+      "make": "Subaru",
+      "model": "BRZ",
+      "type": "fun"
+   }
+}
+#+end_src
+
+* Caveats and todo
+
