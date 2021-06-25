@@ -9,7 +9,9 @@ from moo.version import version
 
 __version__ = version
 
-known_extensions = ["jsonnet", "json", "csv", "xml", "yaml", "ini"]
+# note: schema is an alias for jsonnet
+known_extensions = ["jsonnet", "json", "csv", "xml", "yaml", "ini",
+                    "schema"]
 try:
     import moo.xls
 except ImportError:

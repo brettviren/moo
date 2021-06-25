@@ -30,7 +30,7 @@ class Context:
 
     def just_load(self, filename, dpath=None):
         '''
-        Simple load with path search and dpath reduction
+        Simple load with path search and dpath reduction.
         '''
         return moo.io.load(self.resolve(filename),
                            self.search_path(filename),
@@ -165,6 +165,8 @@ def path(ctx, filename):
     '''
     Print search path for representative file or file extension name
     '''
+    if '.' not in filename:
+        filename = 'test.' + filename
     p = ctx.obj.search_path(filename)
     click.echo('\n'.join(p))
 

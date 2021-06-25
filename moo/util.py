@@ -117,9 +117,10 @@ def search_path(likename, paths=None):
 
     # Finally apply built-ins at end to allow for user override
     bis = list()
-    if likename.endswith("jsonnet"):
+    ext = os.path.splitext(likename)[-1]
+    if ext in (".jsonnet", ".schema"):
         bis = search_path_models()
-    if likename.endswith("j2"):
+    if ext in (".j2",):
         bis = search_path_templates()
     for bi in bis:
         if bi in sp:
@@ -218,7 +219,7 @@ def tla_pack(tlas, jpath):
         chunks = val.split(".")
         if len(chunks) > 1:   # maybe a file
             ext = chunks[-1]
-            if ext in [".jsonnet", ".json"]:
+            if ext in [".jsonnet", ".json", ".schema"]:
                 fname = resolve(val, jpath)
                 tla_codes[key] = open(fname).read()
                 continue

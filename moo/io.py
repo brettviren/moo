@@ -2,7 +2,7 @@
 '''
 File and other I/O
 '''
-
+import os
 from moo.util import clean_paths, resolve, select_path
 import moo.jsonnet
 import anyconfig
@@ -12,7 +12,7 @@ import anyconfig
 default_load_path = []
 
 def load(filename, fpath=(), dpath = None, **kwds):
-    '''Load a file and return its data structure.  
+    '''Load a file and return its data structure.
 
     If dpath given, return substructure at that "path" in the
     resulting data structure.
@@ -25,14 +25,16 @@ def load(filename, fpath=(), dpath = None, **kwds):
     MOO_LOAD_PATH environment variable is consulted.
 
     '''
+    fmt = os.path.splitext(filename)[-1]
+
     paths = clean_paths(fpath) + list(default_load_path)
     filename = resolve(filename, paths)
     
-    if filename.endswith(".jsonnet"):
+    if fmt in (".jsonnet",".schema"):
         data = moo.jsonnet.load(filename, paths, **kwds)
-    elif filename.endswith(".csv"):
+    elif fmt in (".csv",):
         data = moo.csvio.load(filename, paths, **kwds)
-    elif filename.endswith(".xls") or filename.endswith(".xlsx"):
+    elif fmt in (".xls", ".xlsx"):
         data = moo.xls.load(filename, paths, **kwds)
     else:
         data = anyconfig.load(filename)
