@@ -1,0 +1,94 @@
+#+title: moo-rpc
+
+* Goal
+
+This example uses ~moo~ to develop a remote-procedure call system.
+
+In ~moo-rpc~, procedures are collected as class methods and defined via
+~moo~ schema.  Methods may take arguments eachof which are of a type
+which is also given by the ~moo~ schema.
+
+From the schema we generate code for client (caller) and server
+(callee) classes that reflect the method schema.  The two instances
+are linked via a transport such that calling a method on a client
+instance results in the following sequence.
+
+[[file:moo-rpc.svg]]
+
+** Desired RPC schema
+
+We reuse ~moo.oschema~ to define data types and extend it with ~moo.orpc~
+to allow writing RPC schema like:
+
+#+begin_src jsonnet
+meth1 : s.method("my_method", args=[
+            s.argument("n", s.SomeNumber, doc="n docstring"),
+            s.argument("data", s.MyData, doc="data docstring"),
+], doc="my_method docstring"),
+#+end_src
+
+** Desired code examples
+
+We want client application code like the following Python
+
+#+begin_src python
+ltype = "connect" # link type
+addr = "tcp://127.0.0.1:5678"
+# MyMethods is generated
+mm = MyMethods(ltype, addr)
+# MyData is also generated
+dat = MyData()        
+ret = mm.my_method(42, data=dat)
+type(ret) # --> MyOtherData
+#+end_src
+
+We want server application code like the following C++
+
+#+begin_src c++
+class MyMethodsImp : public MyMethods {
+public:
+    MyOtherData my_method(int n, MyData dat) {
+        return MyOtherData(n, dat); // eg
+    }
+};
+serv = moo::rpc::server<MyMethodsImp>("bind", "tcp://127.0.0.1:5678");
+serv.start()
+#+end_src
+
+And we want to be able to write similar C++ client and Python server.
+
+** Code generation
+
+For C++ we reuse ~ostructs.hpp.j2~ to define data types and ~onljs.hpp.j2~
+or ~omsgp.hpp.j2~ to define serialization for JSON and MessagePack,
+respectively.  We must add ~orpc-client.hpp.j2~ and ~orpc-server.hpp.j2~
+to generate client and server.
+
+For Python we may follow suite or workout how to use Python
+metaprogramming as we do with ~moo.otypes~.
+
+** Message transport
+
+Unless the effort is made to define an API to segregate the two,
+message transport is tightly bound with the generated app-client and
+app-server API.  By writing new templates we may make utilize some
+novel transport while leaving the application unscathed.  To start
+with we will use ZeroMQ transport.
+
+The moo-rpc server must be able to handle multiple clients.  In single
+or multi threaded mode it will present a single ROUTER socket on which
+to receive requests.  This alone will allow load balancing by running
+multiple server instances.
+
+** Asynchronous operation
+
+At its simplest both client and server in moo-rpc operate
+synchronously.  When ~serv.start()~ or ~mm.my_method()~ are called, they
+block (with optional timeout).
+
+This allows application code to be written simply and does not bar the
+way for an additional layer to provide asynchronous concurrency.  The
+client layer may utilize the "futures" pattern.  Multiple instances of
+a server may be load balanced at the transport layer.
+
+

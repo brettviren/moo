@@ -1,0 +1,12 @@
+@startuml
+
+clientapp -> client : call
+client -> request : serialize method name\nand arguments and send
+request -> server : recieve, deserialize\nand call procedure
+server -> serverapp : perform procedure\nand return value
+serverapp --> server : serialize return
+server --> reply : send reply message
+reply --> client : recv reply message, deserialize and return
+client --> clientapp :: accept returned object
+
+@enduml
