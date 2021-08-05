@@ -1,0 +1,25 @@
+#+title: moo and plantuml
+#+EXPORT_FILE_NAME: index.html
+#+setupfile: ../../other/setup-topic.org
+
+* What's here
+
+This area holds support for plantuml.
+
+* Example
+
+#+begin_src shell :exports code :results none
+moo -M ../oschema -A os=app.jsonnet render -o example.plantuml omodel.jsonnet class.plantuml.j2
+plantuml example.plantuml
+#+end_src
+
+
+[[file:example.png]]
+
+#+include: example.plantuml example
+
+* Improvements
+
+- [ ] only one line per type or "Arrows from/to class members"
+- [ ] some way to show default field values?
+- [ ] better way to indicate scalar types eg ~string~?

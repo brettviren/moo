@@ -1,0 +1,12 @@
+{% import 'oplantuml.plantuml.j2' as plum %}
+
+@startuml
+
+set namespaceSeparator ::
+
+{% for t in model.types %}
+{{ plum["declare_"+t.schema](model, t) }}
+{% endfor %}
+
+@enduml
+

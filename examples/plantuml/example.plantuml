@@ -1,0 +1,58 @@
+
+@startuml
+
+set namespaceSeparator ::
+
+' number Count
+class sys::Count << (N,wheat) >>
+' any app::Affiliation
+class app::Affiliation << (A,red) >>
+' sequence app::Counts
+class app::Counts << (V,blue) >> {
+        sys::Count[] items
+}
+sys::Count o-- app::Counts
+' string Email
+class app::Email << (S,orchid) >>
+' enum MBTI
+enum app::MBTI
+' string Make
+class app::Make << (S,orchid) >>
+' string Model
+class app::Model << (S,orchid) >>
+' enum VehicleClass
+enum app::VehicleClass
+' record app::Vehicle
+class app::Vehicle {
+        app::Make make
+        app::Model model
+        app::VehicleClass type
+}
+app::Make o-- app::Vehicle
+app::Model o-- app::Vehicle
+app::VehicleClass o-- app::Vehicle
+
+' record app::Person
+class app::Person {
+        app::Email email
+        app::Email email2
+        app::Counts counts
+        app::Counts counts2
+        app::Affiliation affil
+        app::MBTI mbti
+        app::Vehicle vehicle
+        app::Vehicle vehicle2
+        app::Vehicle vehicle3
+}
+app::Email o-- app::Person
+app::Email o-- app::Person
+app::Counts o-- app::Person
+app::Counts o-- app::Person
+app::Affiliation o-- app::Person
+app::MBTI o-- app::Person
+app::Vehicle o-- app::Person
+app::Vehicle o-- app::Person
+app::Vehicle o-- app::Person
+
+
+@enduml
