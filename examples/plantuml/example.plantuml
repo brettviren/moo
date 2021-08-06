@@ -3,7 +3,7 @@
 
 set namespaceSeparator ::
 
-' number Count
+' number sys::Count
 class sys::Count << (N,wheat) >>
 ' any app::Affiliation
 class app::Affiliation << (A,red) >>
@@ -12,15 +12,15 @@ class app::Counts << (V,blue) >> {
         sys::Count[] items
 }
 sys::Count o-- app::Counts
-' string Email
+' string app::Email
 class app::Email << (S,orchid) >>
-' enum MBTI
+' enum app::MBTI
 enum app::MBTI
-' string Make
+' string app::Make
 class app::Make << (S,orchid) >>
-' string Model
+' string app::Model
 class app::Model << (S,orchid) >>
-' enum VehicleClass
+' enum app::VehicleClass
 enum app::VehicleClass
 ' record app::Vehicle
 class app::Vehicle {

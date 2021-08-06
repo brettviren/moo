@@ -1,53 +1,50 @@
 {# This provides some helper macros for plantuml templates #}
 
+{% macro pp(t) %}
+{{ "::".join(t.path+[t.name]) }}
+{%- endmacro %}
+
 {% macro declare_sequence(model, t) %}
-{% set pp = "::".join(t.path + [t.name]) %}
-' sequence {{pp}}
-class {{ pp }} << (V,blue) >> {
+' sequence {{ pp(t) }}
+class {{ pp(t) }} << (V,blue) >> {
         {{t["items"]|replace(".","::")}}[] items
 }
-{{t["items"]|replace(".","::")}} o-- {{ pp }}
+{{t["items"]|replace(".","::")}} o-- {{ pp(t) }}
 {%- endmacro -%}
 
 {% macro declare_record(model, t) %}
-{% set pp = "::".join(t.path + [t.name]) %}
-' record {{pp}}
-class {{ pp }} {
+' record {{ pp(t) }}
+class {{ pp(t) }} {
         {% for f in t.fields %}
-        {{f.item|listify|relpath(model.path)|join("::")}} {{f.name}}
+        {{f.item|listify|join("::")}} {{f.name}}
         {% endfor -%}
 }
 {% for f in t.fields %}
-{{f.item|listify|relpath(model.path)|join("::")}} o-- {{pp}}
+{{f.item|listify|join("::")}} o-- {{ pp(t) }}
 {% endfor -%}
 {%- endmacro -%}
 
 {% macro declare_enum(model, t) %}
-' enum {{t.name}}
-{% set pp = "::".join(t.path + [t.name]) %}
-enum {{pp}}
+' enum {{ pp(t) }}
+enum {{ pp(t) }}
 {%- endmacro -%}
 
 {% macro declare_boolean(model, t) %}
-' boolean {{t.name}}
-{% set pp = "::".join(t.path + [t.name]) %}
-class {{pp}} << (B,white) >> 
+' boolean {{ pp(t) }}
+class {{ pp(t) }} << (B,white) >> 
 {%- endmacro -%}
 
 {% macro declare_string(model, t) %}
-' string {{t.name}}
-{% set pp = "::".join(t.path + [t.name]) %}
-class {{pp}} << (S,orchid) >> 
+' string {{ pp(t) }}
+class {{ pp(t) }} << (S,orchid) >> 
 {%- endmacro -%}
 
 {% macro declare_number(model, t) %}
-' number {{t.name}}
-{% set pp = "::".join(t.path + [t.name]) %}
-class {{pp}} << (N,wheat) >> 
+' number {{ pp(t) }}
+class {{ pp(t) }} << (N,wheat) >> 
 {%- endmacro -%}
 
 {% macro declare_any(model, t) %}
-{% set pp = "::".join(t.path + [t.name]) %}
-' any {{pp}}
-class {{ pp }} << (A,red) >>
+' any {{ pp(t) }}
+class {{ pp(t) }} << (A,red) >>
 {%- endmacro -%}

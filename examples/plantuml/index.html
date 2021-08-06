@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2021-08-05 Thu 18:07 -->
+<!-- 2021-08-06 Fri 13:44 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>moo and plantuml</title>
@@ -40,7 +40,7 @@
   }
   pre.src {
     position: relative;
-    overflow: visible;
+    overflow: auto;
     padding-top: 1.2em;
   }
   pre.src:before {
@@ -52,7 +52,7 @@
     padding: 3px;
     border: 1px solid black;
   }
-  pre.src:hover:before { display: inline;}
+  pre.src:hover:before { display: inline; margin-top: 14px;}
   /* Languages per Org manual */
   pre.src-asymptote:before { content: 'Asymptote'; }
   pre.src-awk:before { content: 'Awk'; }
@@ -206,50 +206,26 @@
 <style> pre.example{border-radius: 5px; background-color:#333; color:#0f0;}</style>
 <style> code{border-radius: 5px; background-color:#333; color:#0f0;}</style>
 <script type="text/javascript">
-/*
-@licstart  The following is the entire license notice for the
-JavaScript code in this tag.
-
-Copyright (C) 2012-2020 Free Software Foundation, Inc.
-
-The JavaScript code in this tag is free software: you can
-redistribute it and/or modify it under the terms of the GNU
-General Public License (GNU GPL) as published by the Free Software
-Foundation, either version 3 of the License, or (at your option)
-any later version.  The code is distributed WITHOUT ANY WARRANTY;
-without even the implied warranty of MERCHANTABILITY or FITNESS
-FOR A PARTICULAR PURPOSE.  See the GNU GPL for more details.
-
-As additional permission under GNU GPL version 3 section 7, you
-may distribute non-source (e.g., minimized or compacted) forms of
-that code without the copy of the GNU GPL normally required by
-section 4, provided you include this license notice and a URL
-through which recipients can access the Corresponding Source.
-
-
-@licend  The above is the entire license notice
-for the JavaScript code in this tag.
-*/
+// @license magnet:?xt=urn:btih:1f739d935676111cfff4b4693e3816e664797050&amp;dn=gpl-3.0.txt GPL-v3-or-Later
 <!--/*--><![CDATA[/*><!--*/
- function CodeHighlightOn(elem, id)
- {
-   var target = document.getElementById(id);
-   if(null != target) {
-     elem.cacheClassElem = elem.className;
-     elem.cacheClassTarget = target.className;
-     target.className = "code-highlighted";
-     elem.className   = "code-highlighted";
-   }
- }
- function CodeHighlightOff(elem, id)
- {
-   var target = document.getElementById(id);
-   if(elem.cacheClassElem)
-     elem.className = elem.cacheClassElem;
-   if(elem.cacheClassTarget)
-     target.className = elem.cacheClassTarget;
- }
-/*]]>*///-->
+     function CodeHighlightOn(elem, id)
+     {
+       var target = document.getElementById(id);
+       if(null != target) {
+         elem.classList.add("code-highlighted");
+         target.classList.add("code-highlighted");
+       }
+     }
+     function CodeHighlightOff(elem, id)
+     {
+       var target = document.getElementById(id);
+       if(null != target) {
+         elem.classList.remove("code-highlighted");
+         target.classList.remove("code-highlighted");
+       }
+     }
+    /*]]>*///-->
+// @license-end
 </script>
 </head>
 <body>
@@ -259,44 +235,44 @@ for the JavaScript code in this tag.
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents">
 <ul>
-<li><a href="#orgae0a18b">What's here</a></li>
-<li><a href="#orgefee50b">Example</a></li>
-<li><a href="#org87c1288">Improvements</a></li>
+<li><a href="#orgdb25b6d">What's here</a></li>
+<li><a href="#org7da194c">Example</a></li>
+<li><a href="#orgb5d93d1">Improvements</a></li>
 </ul>
 </div>
 </div>
 
-<div id="outline-container-orgae0a18b" class="outline-2">
-<h2 id="orgae0a18b">What's here</h2>
-<div class="outline-text-2" id="text-orgae0a18b">
+<div id="outline-container-orgdb25b6d" class="outline-2">
+<h2 id="orgdb25b6d">What's here</h2>
+<div class="outline-text-2" id="text-orgdb25b6d">
 <p>
 This area holds support for plantuml.
 </p>
 </div>
 </div>
 
-<div id="outline-container-orgefee50b" class="outline-2">
-<h2 id="orgefee50b">Example</h2>
-<div class="outline-text-2" id="text-orgefee50b">
+<div id="outline-container-org7da194c" class="outline-2">
+<h2 id="org7da194c">Example</h2>
+<div class="outline-text-2" id="text-org7da194c">
 <div class="org-src-container">
-<pre class="src src-shell">moo -M ../oschema -A <span style="color: #fcaf3e;">os</span>=app.jsonnet render -o example.plantuml omodel.jsonnet class.plantuml.j2
+<pre class="src src-shell">moo -M ../oschema -A os=app.jsonnet render -o example.plantuml omodel.jsonnet class.plantuml.j2
 plantuml example.plantuml
 </pre>
 </div>
 
 
 
-<div class="figure">
+<div id="orge9059c5" class="figure">
 <p><img src="example.png" alt="example.png" />
 </p>
 </div>
 
-<pre class="example">
+<pre class="example" id="org90b7d64">
 @startuml
 
 set namespaceSeparator ::
 
-' number Count
+' number sys::Count
 class sys::Count &lt;&lt; (N,wheat) &gt;&gt;
 ' any app::Affiliation
 class app::Affiliation &lt;&lt; (A,red) &gt;&gt;
@@ -305,15 +281,15 @@ class app::Counts &lt;&lt; (V,blue) &gt;&gt; {
         sys::Count[] items
 }
 sys::Count o-- app::Counts
-' string Email
+' string app::Email
 class app::Email &lt;&lt; (S,orchid) &gt;&gt;
-' enum MBTI
+' enum app::MBTI
 enum app::MBTI
-' string Make
+' string app::Make
 class app::Make &lt;&lt; (S,orchid) &gt;&gt;
-' string Model
+' string app::Model
 class app::Model &lt;&lt; (S,orchid) &gt;&gt;
-' enum VehicleClass
+' enum app::VehicleClass
 enum app::VehicleClass
 ' record app::Vehicle
 class app::Vehicle {
@@ -353,9 +329,9 @@ app::Vehicle o-- app::Person
 </div>
 </div>
 
-<div id="outline-container-org87c1288" class="outline-2">
-<h2 id="org87c1288">Improvements</h2>
-<div class="outline-text-2" id="text-org87c1288">
+<div id="outline-container-orgb5d93d1" class="outline-2">
+<h2 id="orgb5d93d1">Improvements</h2>
+<div class="outline-text-2" id="text-orgb5d93d1">
 <ul class="org-ul">
 <li class="off"><code>[&#xa0;]</code> only one line per type or "Arrows from/to class members"</li>
 <li class="off"><code>[&#xa0;]</code> some way to show default field values?</li>
@@ -366,8 +342,8 @@ app::Vehicle o-- app::Person
 </div>
 <div id="postamble" class="status">
 <p class="author">Author: Brett Viren</p>
-<p class="date">Created: 2021-08-05 Thu 18:07</p>
-<p class="validation"><a href="http://validator.w3.org/check?uri=referer">Validate</a></p>
+<p class="date">Created: 2021-08-06 Fri 13:44</p>
+<p class="validation"><a href="https://validator.w3.org/check?uri=referer">Validate</a></p>
 </div>
 </body>
 </html>
