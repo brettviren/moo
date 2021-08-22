@@ -254,7 +254,15 @@ local not_both(a,b) =
     },
     
     // Return edges to other nodes reached from n in graph.
-    edges(graph, n) :: [d for d in graph[n].deps if std.objectHas(graph, d)],
+    // fixme: need to worry about deps of bases?
+    edges(graph, n) :: {
+        local deps = graph[n].deps,
+        local bases = if std.objectHas(graph[n], "bases")
+                      then [std.join(".", b.path+[b.name]) for b in graph[n].bases]
+                      else [],
+        ret: [d for d in deps + bases if std.objectHas(graph, d)]
+    }.ret,
+
 
     // Sort the keys of a qualified object 
     sort :: _tsmod(edges = $.edges).toposort,

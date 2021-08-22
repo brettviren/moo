@@ -61,9 +61,12 @@ def literal_value(types, fqn, val):
     if schema == "any":
         return '{}'
 
-    sys.stderr.write(f'warning: unsupported default CPP record field type {schema} for {fqn} using native value')
-    return val                  # go fish
+    if schema == "oneOf" :
+        return '{}'
 
+    sys.stderr.write(f'moo.templates.cpp: warning: unsupported default CPP record field type {schema} for {fqn} using native value')
+    return val                  # go fish
+        
 
 def field_default(types, field):
     'Return a field default as C++ syntax'

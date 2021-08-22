@@ -29,7 +29,8 @@
         sequence: ["vector"],
         string: ["string"],
         enum: ["string"],
-        anyof: ["variant"],
+        anyOf: ["variant"],
+        oneOf: ["variant"],
         any: ["nlohmann/json.hpp"],
     }
 }

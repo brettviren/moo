@@ -1,0 +1,91 @@
+#+title: Wire-Cell Image Graph
+
+* Overview
+
+The [[https://wirecell.github.io/][Wire-Cell Toolkit]] provides, among other features, components to
+perform 3D image reconstruction given a number (typically 3) of 2D
+tomographic views of a 3D scalar field (eg ionization electrons in
+LArTPC).  Each view senses the 3D field as a sequence of 1D
+measurements along a transverse dimension of the moving/drifting
+scalar field.  In the real detector this sensing is done by "wires"
+penetrating the drifting 3D scene.  The sensed scalar field is sampled
+over time of the longitudinal drift as the 3D field moves past wires.
+This time provides the second dimension of the 2D tomographic view.
+More than one wire may be multiplexed into a readout channel such as
+due to "wire wrapping".
+
+WCT represents the reconstructed 3D image as a graph structure.  Each
+node of the graph is of a particular type.  The allowed types are
+limited and described below and in more detail in the "ray grid"
+manual.  Not all graphs will contain nodes of all types.  A WCT
+interface class which corresponds closely to a node type is given in
+parenthesis.
+
+- channel :: an electronics readout channel (~IChannel~)
+- wire :: one physical wire segment contributing sensory info to one channel (~IWire~)
+- blob :: a value and its uncertainty of scalar field sampling (amount of ionization charge) associated to a limited region of 3-space (~IBlob~)
+- slice :: the all channel samples above some threshold from all views and each integrated over a fixed span of drift time.  (~ISlice~)
+- measurement :: channels contributing to one element of a measurement vector (~vector<IChannel>~, really, this is a point node used to define edges to channels).
+
+The possible edges between types of nodes are summarized in the
+following figure from the WCT "ray grid" manual:
+
+[[file:cluster-graph-types.png]]
+
+
+The edges are explained:
+
+- c-w :: physical association of a wire segment feeding a channel
+- c-m :: a channel contributing to a measurement
+- w-b :: a blob's boundary is defined by wires
+- b-m :: a blob's value is derived from measurements
+- b-b :: neighboring blobs in proximity build up a cluster
+- b-s :: a blob is bound longitudinally by a slice and its measurement channels refer to values provided by the slice
+
+* Example contents
+
+This example provides:
+
+- A general use *moo* schema for a property graph where node or
+  edge properties may be represented by a pre-determined record schema
+  (ie, not one that translates to an ad-hoc / free form ~map~ or ~dict~)
+
+- A schema for WCT imaging data types
+
+- A combination of the two to make a WCT imaging graph schema.
+
+* The graph schema
+
+* The WCT imaging schema
+
+The WCT imaging schema has to parts, one provides types for node
+property records and the other defines graph node types.  The property
+record types attempt to cleave to the WCT interface classes while
+mostly achieving normalization (in the database sense of the term).
+However, some redundancy is allowed in order to give at least one
+property to every node type, avoid possible ambiguities or otherwise
+to replace some rather indirect graph queries with their resolved
+values.
+
+
+* Exercise 
+
+#+begin_src shell :exports code :results none
+mkdir -p graph wct/img
+moo -g '/lang:ocpp.jsonnet' \
+    -A os=graph-schema.jsonnet \
+    -A path='graph' \
+    render omodel.jsonnet ostructs.hpp.j2 \
+    > graph/Structs.hpp
+moo -g '/lang:ocpp.jsonnet' \
+    -A os=wig-schema.jsonnet \
+    -A path='wct.img' \
+    render omodel.jsonnet ostructs.hpp.j2 \
+    > wct/img/Structs.hpp
+g++ -I. -std=c++17 -o test-wig test-wig.cpp
+./test-wig
+#+end_src
+
+
+
+

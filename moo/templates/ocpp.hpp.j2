@@ -9,7 +9,8 @@ using {{t.name}} = {{model.lang.types.sequence}}<{{t["items"]|replace(".","::")}
 {%- endmacro -%}
 
 {% macro declare_record(model, t) %}
-struct {{t.name}} {
+struct {{t.name}}{% set comma=":" %}{% for b in t.bases %}{{comma}} public {{(b.path+[b.name])|join("::") }} {% set comma = ","%}{%endfor%} 
+{
     {% for f in t.fields %}
 
     // @brief {{f.doc}}
@@ -36,6 +37,10 @@ using {{t.name}} = {{model.lang.dtypes[t.dtype]}};
 
 {% macro declare_any(model, t) %}
 using {{t.name}} = {{model.lang.types.any}};
+{%- endmacro -%}
+
+{% macro declare_oneOf(model, t) %}
+using {{t.name}} = std::variant<{%for one in t.types%}{{one|replace(".","::")}}{{ ", " if not loop.last }}{%endfor%}>;
 {%- endmacro -%}
 
 {% macro declare_enum(model, t) %}

@@ -1,0 +1,19 @@
+graph cgt {
+        graph[layout=circo,nodesep=2]
+             
+
+        node[shape=circle,fixedsize=true,width=1.2]
+        c[label="\"c\"\nchannel"]
+        w[label="\"w\"\nwire"]
+        b[label="\"b\"\nblob"]
+        s[label="\"s\"\nslice"]        
+        m[label="\"m\"\nmeasurement"];
+
+        edge[dir=both]
+        c--w
+        b--w
+        s--b
+        b--m
+        m--c
+        b--b
+}
