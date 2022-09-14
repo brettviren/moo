@@ -8,6 +8,159 @@ import json
 import jsonpointer
 
 
+def unflatten(flatdict, delim='.'):
+    '''
+    Take dict like: {"a.dot.path":"value", ...}
+    And produce a dict like:
+    {"a": {"dot" : {"path":value}, ...}, ...}
+    '''
+    ret = dict()
+    for flatkey, val in flatdict.items():
+        here = ret
+        keys = list(flatkey.split(delim))
+        for one in keys[:-1]:
+            if one not in here:
+                here[one] = dict()
+            here = here[one]
+        here[keys[-1]] = val
+    return ret
+            
+
+def flatten(deepdict, delim='.'):
+    '''
+    Reverse of unflatten
+    '''
+    def paths(thing, cur=()):
+        if isinstance(thing, dict):
+            for n, s in thing.items():
+                for path in paths(s, cur+(n,)):
+                    yield path
+        else:
+            yield cur + (thing,)
+
+    return {delim.join(p[:-1]):p[-1] for p in paths(deepdict)}
+
+
+def flatpath(schema, with_leaf=True, delim='.'):
+    '''
+    Return the flattened path name.
+    '''
+    p = list(schema['path'])
+    if with_leaf:
+        p.append(schema['name'])
+    return delim.join(p)
+
+
+def pathify(oschema):
+    '''
+    Given a list of schema or a "hier" of schema, produce a flattened map from FQ pathname to oschema.
+    '''
+    if 'schema' in oschema:     # scalar
+        return {flatpath(oschema): oschema}
+
+    if isinstance(oschema, dict):
+        oschema = list(oschema.values())
+
+    return {flatpath(o):o for o in oschema}
+
+
+def unprefix(string, default=None, delim=':'):
+    '''
+    Return (prefix,rest) 
+    '''
+    if delim in string:
+        return string.split(delim,1)
+    return (default,string)
+
+
+def resolve_schema(targets, context=None, file_loader=None):
+    '''
+    Return list of schema objects from targets potentially referencing context.
+
+    A target may be a number, string, an object or a list thereof.
+
+    If targets is the empty list, the context is returned if it looks like a schema.
+
+    If file_loader is given it is a function which must accept a filename with optional datapath: prefix and which must return the object representation of the file or raise exception.
+
+    '''
+
+    def is_schema(thing):
+        if thing is None:
+            return False
+        if not isinstance(thing, dict):
+            return False
+        mooish = set(["name","schema","path"])
+        if len(mooish.intersection(thing.keys())) == len(mooish):
+            return True
+        if '$schema' in thing:
+            return True
+        return False
+
+    if targets is None or (isinstance(targets, (list, tuple)) and len(targets) == 0):
+        if is_schema(context):
+            return [context]
+        raise ValueError(f'null targets but context does not appear to be a schema')
+
+    if isinstance(targets, (list, tuple)):
+        ret = list()
+        for target in targets:
+            ret += resolve_schema(target, context, file_loader)
+        return ret
+
+    # we have a scalar
+    target = targets
+
+    if is_schema(target):
+        return [target]
+
+
+    try:                        # maybe int'ish
+        index = int(target)
+    except ValueError:
+        pass
+    else:
+        if isinstance(context, (list, tuple)):
+            return [context[index]]
+        if context is not None:
+            flat = pathify(context)
+            return [flat[list(flat.keys())[index]]]
+        raise ValueError(f'integer target ({index}) but no or non-sequence context')
+
+    if isinstance(target, str):
+
+        if ',' in target:       # string list
+            return resolve_schema([t.strip() for t in target.split(",")], context, file_loader)
+
+        # maybe its a file 
+        if file_loader:
+            try:
+                got = file_loader(target)
+            except ValueError as err:
+                pass
+            else:
+                return resolve_schema(got, context, file_loader)
+
+        if context is None:
+            raise ValueError(f'string target ({target}) requires context')
+
+        # maybe it is a key
+        if target in context:
+            return [context[target]]
+
+        flat = pathify(context)
+        if target in flat:
+            return [flat[target]]
+
+        got = [v for v in flat.values() if v['name'] == target]
+        if got:
+            return [got[0]]
+
+
+    raise ValueError(f'failed to resolve target: |{target}| in context of type {type(context)}')
+
+
+
 def select_path(obj, path, delim='.'):
     '''Select out a part of obj structure based on a path.
 
@@ -29,23 +182,6 @@ def select_path(obj, path, delim='.'):
         obj = obj[one]
 
     return obj
-
-
-# fixme: erase type difference between the two validators!
-from jsonschema.exceptions import ValidationError
-def validate(model, schema, validator="jsonschema"):
-    'Validate model against schema with validator'
-    if validator == "jsonschema":
-        from jsonschema import validate as js_validate
-        from jsonschema import draft7_format_checker
-        return js_validate(instance=model, schema=schema,
-                           format_checker=draft7_format_checker)
-    if validator == "fastjsonschema":
-        from fastjsonschema import validate as fjs_validate
-        return fjs_validate(schema, model)
-    raise ValueError(f"unknown validator: {validator}")
-
-
 
 def existing_paths(paths, warn=False):
     '''
@@ -167,7 +303,7 @@ def deref_defs(ctx, defs):
     '''
     if type(ctx) in [int, float, str, bool]:
         return ctx
-    if isinstance(ctx, list):
+    if isinstance(ctx, (list, tuple)):
         return [deref_defs(ele, defs) for ele in ctx]
     ret = dict()
     for key, val in ctx.items():

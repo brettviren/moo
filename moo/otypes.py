@@ -275,6 +275,7 @@ class {name}(_Record):
 '''.format(**field)
         acc.append(one)
     source = '\n'.join([class_source] + acc)
+    print(source)
     return classify(source, **ost)
 
 

@@ -26,10 +26,13 @@ def test_validate():
         validate(None, None, "dne")
 
     validate("hello", dict(type="string"))
+    validate(1234, dict(type="number"))
     validate("1234", dict(type="string", pattern="^[0-9]+$"))
     validate("me@example.com", dict(type="string", format="email"))
     with pytest.raises(ValidationError):
         validate("1234", dict(type="string", format="email"))
+    with pytest.raises(ValidationError):
+        validate(1234, dict(type="string"))
     with pytest.raises(ValidationError):
         validate("wrong", dict(type="number"))
 

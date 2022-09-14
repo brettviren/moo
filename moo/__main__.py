@@ -31,7 +31,10 @@ class Context:
     def just_load(self, filename, dpath=None):
         '''
         Simple load with path search and dpath reduction.
+
+        Filename may be prefixed as dpath:fiilename to use that dpath instead of the one passed.
         '''
+        dpath, filename = moo.util.unprefix(filename, dpath)
         return moo.io.load(self.resolve(filename),
                            self.search_path(filename),
                            dpath or self.dpath, **self.tlas)
@@ -41,7 +44,10 @@ class Context:
         Load a data structure from a file.
 
         Search mpath for file and return substructure at dpath.
+
+        Filename may be prefixed as dpath:fiilename to use that dpath instead of the one passed.
         '''
+        dpath, filename = moo.util.unprefix(filename, dpath)
         model = self.just_load(filename, dpath)
         model = self.graft(model)
         model = self.transform(model)
@@ -120,7 +126,9 @@ class Context:
             fp.write(data)
             
 
-@click.group()
+cmddef = dict(context_settings = dict(help_option_names=['-h', '--help']))
+
+@click.group(**cmddef)
 @click.option('-D', '--dpath', default="",
               help="Specify a selection path into the model data structure")
 @click.option('-M', '--mpath', envvar='MOO_LOAD_PATH', multiple=True,
@@ -175,13 +183,12 @@ def path(ctx, filename):
 @click.option('-o', '--output', default="/dev/stdout",
               type=click.Path(exists=False, dir_okay=False, file_okay=True),
               help="Output file, default is stdout")
-@click.option('-S', '--spath', default="",
-              help="Specify path to validation schema object in schema data")
-@click.option('-s', '--schema', required=True,
-              type=click.Path(exists=True, dir_okay=False, file_okay=True),
-              help="JSON Schema to validate against.")
+@click.option('-s', '--schema', type=str,
+              help="File containing a representation of a schema.")
+@click.option('-t', '--target', default=None, multiple=True,
+              help="Specify target schema of the model")
 @click.option("--sequence", default=False, is_flag=True,
-              help="Assume a sequence of schema and models")
+              help="Indicate the model is a sequence of models (ie, not an array model)")
 @click.option("--passfail", default=False, is_flag=True,
               help="Print PASS or FAIL instead of null/throw")
 @click.option('-V', '--validator', default="jsonschema",
@@ -189,32 +196,59 @@ def path(ctx, filename):
               help="Specify which validator")
 @click.argument('model')
 @click.pass_context
-def cmd_validate(ctx, output, spath, schema, sequence, passfail, validator, model):
+def cmd_validate(ctx, output, schema, target, sequence, passfail, validator, model):
     '''
-    Validate a model against a schema
-    '''
-    sche = ctx.obj.just_load(schema, spath)
-    data = ctx.obj.load(model)
+    Validate models against target schema.
 
+    A full "context" schema must be provided by -s/--schema if it is required for target schema to resolve any dependencies.  The "context" schema is identified with a string of the form "filename with optional dataprefix".
+
+        -s myschema.subschema:my-schema.jsonnet
+
+    This resulst ins the "subschema" attribute of the "myschema" attribute of the top level object from "my-schema.jsonnet" to be used as the "context" schema.
+
+    A "target" schema is what is used to validate a model and may be specified in a variety of "target forms" with the -t/--target option.  The supported target forms are:
+
+    - an integer indicating an index into the full "context" schema is alloweed when the context is of a sequence form.
+
+    - a simple string indicating either a key of the full "context" schema, allowed only if the context is an object, or indicating the "name" attribute of an moo oschema object held in the context (be it of sequence or object form).
+
+    - a filename with optional "datapath:" prefix.
+
+    When this last form is used the resulting data structure may be any target form listed above or may directly be an moo oschema object or a JSON Schema object.
+
+    By default, this command operates in "scalar mode" meaning a single model and single target schema are processed.  It may instead operate in "sequence mode" which expects a matching sequence of models and target schema.
+
+    Sequence mode is entered when any of the following are true:
+
+    - the --sequence option is given indicating array of models is given
+
+    - more than one -t/--target is given
+
+    - a -t/--target value is a comma-separated list of target forms
+
+    - a -t/--target is a filename with optional "datapath:" prefix and the loaded data produces a list or tuple form.
+
+    The multiple targets are concantenated and the resulting sequence must match the supplied sequence of models.
+
+    In the special cases that all target schema are either in JSON Schema form or are in moo oschema form but lack any type dependency, a context schema is not required.
+
+
+    '''
+
+    context = None if schema is None else ctx.obj.just_load(schema)
+    # always returns list even if target is scalar
+    targets = moo.util.resolve_schema(target, context, ctx.obj.just_load)
+    if len(targets) > 1:
+        sequence = True
+    # reflects user data
+    models = ctx.obj.load(model)
     if not sequence:
-        data = [data]
-        sche = [sche]
-    else:
-        assert len(data) == len(sche)
-    res = list()
-    for m, s in zip(data, sche):
-        if passfail:
-            try:
-                one = moo.util.validate(m, s, validator)
-            except moo.util.ValidationError:
-                res.append("FAIL")
-            else:
-                res.append("PASS")
-        else:
-            one = moo.util.validate(m, s, validator)
-            res.append(one)
-    if not sequence:
-        res = res[0]
+        models = [models]
+
+    if len(targets) != len(models):
+        raise ValueError(f'sequence size mismatch: #models:{len(models)}, #targets:{len(targets)}\nDid you forget --sequence?')
+
+    res = moo.ovalid.validate(models, targets, context, not passfail, validator)
     text = json.dumps(res, indent=4)
     ctx.obj.save(output, text)
 
@@ -310,6 +344,30 @@ def dump(ctx, output, format, model):
     else:
         print(data)
 
+
+@cli.command()
+@click.option('-o', '--output', default="/dev/stdout",
+              type=click.Path(exists=False, dir_okay=False, file_okay=True),
+              help="Output file, default is stdout")
+@click.option('-t', '--target', default=None, multiple=True,
+              help="Specify target schema")
+@click.argument('oschema')
+@click.pass_context
+def jsonschema(ctx, output, target, oschema):
+    '''
+    Convert from moo oschema to JSON Schema
+    '''
+    from moo.jsonschema import convert
+
+    context = ctx.obj.just_load(oschema)
+    if target is None:
+        targets = [context]
+    else:
+        targets = moo.util.resolve_schema(target, context, ctx.obj.just_load)
+
+    jtext = [json.dumps( convert(target, context), indent=4 ) for target in targets]
+    ctx.obj.save(output, '\n'.join(jtext))
+    
 
 @cli.command()
 @click.option('-o', '--output', default="/dev/stdout",

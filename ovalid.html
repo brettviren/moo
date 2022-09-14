@@ -1,0 +1,882 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+<!-- 2022-09-14 Wed 16:54 -->
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title><code>moo</code> 無 <code>ovalid</code></title>
+<meta name="generator" content="Org mode" />
+<meta name="author" content="Brett Viren" />
+<style type="text/css">
+ <!--/*--><![CDATA[/*><!--*/
+  .title  { text-align: center;
+             margin-bottom: .2em; }
+  .subtitle { text-align: center;
+              font-size: medium;
+              font-weight: bold;
+              margin-top:0; }
+  .todo   { font-family: monospace; color: red; }
+  .done   { font-family: monospace; color: green; }
+  .priority { font-family: monospace; color: orange; }
+  .tag    { background-color: #eee; font-family: monospace;
+            padding: 2px; font-size: 80%; font-weight: normal; }
+  .timestamp { color: #bebebe; }
+  .timestamp-kwd { color: #5f9ea0; }
+  .org-right  { margin-left: auto; margin-right: 0px;  text-align: right; }
+  .org-left   { margin-left: 0px;  margin-right: auto; text-align: left; }
+  .org-center { margin-left: auto; margin-right: auto; text-align: center; }
+  .underline { text-decoration: underline; }
+  #postamble p, #preamble p { font-size: 90%; margin: .2em; }
+  p.verse { margin-left: 3%; }
+  pre {
+    border: 1px solid #ccc;
+    box-shadow: 3px 3px 3px #eee;
+    padding: 8pt;
+    font-family: monospace;
+    overflow: auto;
+    margin: 1.2em;
+  }
+  pre.src {
+    position: relative;
+    overflow: auto;
+    padding-top: 1.2em;
+  }
+  pre.src:before {
+    display: none;
+    position: absolute;
+    background-color: white;
+    top: -10px;
+    right: 10px;
+    padding: 3px;
+    border: 1px solid black;
+  }
+  pre.src:hover:before { display: inline; margin-top: 14px;}
+  /* Languages per Org manual */
+  pre.src-asymptote:before { content: 'Asymptote'; }
+  pre.src-awk:before { content: 'Awk'; }
+  pre.src-C:before { content: 'C'; }
+  /* pre.src-C++ doesn't work in CSS */
+  pre.src-clojure:before { content: 'Clojure'; }
+  pre.src-css:before { content: 'CSS'; }
+  pre.src-D:before { content: 'D'; }
+  pre.src-ditaa:before { content: 'ditaa'; }
+  pre.src-dot:before { content: 'Graphviz'; }
+  pre.src-calc:before { content: 'Emacs Calc'; }
+  pre.src-emacs-lisp:before { content: 'Emacs Lisp'; }
+  pre.src-fortran:before { content: 'Fortran'; }
+  pre.src-gnuplot:before { content: 'gnuplot'; }
+  pre.src-haskell:before { content: 'Haskell'; }
+  pre.src-hledger:before { content: 'hledger'; }
+  pre.src-java:before { content: 'Java'; }
+  pre.src-js:before { content: 'Javascript'; }
+  pre.src-latex:before { content: 'LaTeX'; }
+  pre.src-ledger:before { content: 'Ledger'; }
+  pre.src-lisp:before { content: 'Lisp'; }
+  pre.src-lilypond:before { content: 'Lilypond'; }
+  pre.src-lua:before { content: 'Lua'; }
+  pre.src-matlab:before { content: 'MATLAB'; }
+  pre.src-mscgen:before { content: 'Mscgen'; }
+  pre.src-ocaml:before { content: 'Objective Caml'; }
+  pre.src-octave:before { content: 'Octave'; }
+  pre.src-org:before { content: 'Org mode'; }
+  pre.src-oz:before { content: 'OZ'; }
+  pre.src-plantuml:before { content: 'Plantuml'; }
+  pre.src-processing:before { content: 'Processing.js'; }
+  pre.src-python:before { content: 'Python'; }
+  pre.src-R:before { content: 'R'; }
+  pre.src-ruby:before { content: 'Ruby'; }
+  pre.src-sass:before { content: 'Sass'; }
+  pre.src-scheme:before { content: 'Scheme'; }
+  pre.src-screen:before { content: 'Gnu Screen'; }
+  pre.src-sed:before { content: 'Sed'; }
+  pre.src-sh:before { content: 'shell'; }
+  pre.src-sql:before { content: 'SQL'; }
+  pre.src-sqlite:before { content: 'SQLite'; }
+  /* additional languages in org.el's org-babel-load-languages alist */
+  pre.src-forth:before { content: 'Forth'; }
+  pre.src-io:before { content: 'IO'; }
+  pre.src-J:before { content: 'J'; }
+  pre.src-makefile:before { content: 'Makefile'; }
+  pre.src-maxima:before { content: 'Maxima'; }
+  pre.src-perl:before { content: 'Perl'; }
+  pre.src-picolisp:before { content: 'Pico Lisp'; }
+  pre.src-scala:before { content: 'Scala'; }
+  pre.src-shell:before { content: 'Shell Script'; }
+  pre.src-ebnf2ps:before { content: 'ebfn2ps'; }
+  /* additional language identifiers per "defun org-babel-execute"
+       in ob-*.el */
+  pre.src-cpp:before  { content: 'C++'; }
+  pre.src-abc:before  { content: 'ABC'; }
+  pre.src-coq:before  { content: 'Coq'; }
+  pre.src-groovy:before  { content: 'Groovy'; }
+  /* additional language identifiers from org-babel-shell-names in
+     ob-shell.el: ob-shell is the only babel language using a lambda to put
+     the execution function name together. */
+  pre.src-bash:before  { content: 'bash'; }
+  pre.src-csh:before  { content: 'csh'; }
+  pre.src-ash:before  { content: 'ash'; }
+  pre.src-dash:before  { content: 'dash'; }
+  pre.src-ksh:before  { content: 'ksh'; }
+  pre.src-mksh:before  { content: 'mksh'; }
+  pre.src-posh:before  { content: 'posh'; }
+  /* Additional Emacs modes also supported by the LaTeX listings package */
+  pre.src-ada:before { content: 'Ada'; }
+  pre.src-asm:before { content: 'Assembler'; }
+  pre.src-caml:before { content: 'Caml'; }
+  pre.src-delphi:before { content: 'Delphi'; }
+  pre.src-html:before { content: 'HTML'; }
+  pre.src-idl:before { content: 'IDL'; }
+  pre.src-mercury:before { content: 'Mercury'; }
+  pre.src-metapost:before { content: 'MetaPost'; }
+  pre.src-modula-2:before { content: 'Modula-2'; }
+  pre.src-pascal:before { content: 'Pascal'; }
+  pre.src-ps:before { content: 'PostScript'; }
+  pre.src-prolog:before { content: 'Prolog'; }
+  pre.src-simula:before { content: 'Simula'; }
+  pre.src-tcl:before { content: 'tcl'; }
+  pre.src-tex:before { content: 'TeX'; }
+  pre.src-plain-tex:before { content: 'Plain TeX'; }
+  pre.src-verilog:before { content: 'Verilog'; }
+  pre.src-vhdl:before { content: 'VHDL'; }
+  pre.src-xml:before { content: 'XML'; }
+  pre.src-nxml:before { content: 'XML'; }
+  /* add a generic configuration mode; LaTeX export needs an additional
+     (add-to-list 'org-latex-listings-langs '(conf " ")) in .emacs */
+  pre.src-conf:before { content: 'Configuration File'; }
+
+  table { border-collapse:collapse; }
+  caption.t-above { caption-side: top; }
+  caption.t-bottom { caption-side: bottom; }
+  td, th { vertical-align:top;  }
+  th.org-right  { text-align: center;  }
+  th.org-left   { text-align: center;   }
+  th.org-center { text-align: center; }
+  td.org-right  { text-align: right;  }
+  td.org-left   { text-align: left;   }
+  td.org-center { text-align: center; }
+  dt { font-weight: bold; }
+  .footpara { display: inline; }
+  .footdef  { margin-bottom: 1em; }
+  .figure { padding: 1em; }
+  .figure p { text-align: center; }
+  .equation-container {
+    display: table;
+    text-align: center;
+    width: 100%;
+  }
+  .equation {
+    vertical-align: middle;
+  }
+  .equation-label {
+    display: table-cell;
+    text-align: right;
+    vertical-align: middle;
+  }
+  .inlinetask {
+    padding: 10px;
+    border: 2px solid gray;
+    margin: 10px;
+    background: #ffffcc;
+  }
+  #org-div-home-and-up
+   { text-align: right; font-size: 70%; white-space: nowrap; }
+  textarea { overflow-x: auto; }
+  .linenr { font-size: smaller }
+  .code-highlighted { background-color: #ffff00; }
+  .org-info-js_info-navigation { border-style: none; }
+  #org-info-js_console-label
+    { font-size: 10px; font-weight: bold; white-space: nowrap; }
+  .org-info-js_search-highlight
+    { background-color: #ffff00; color: #000000; font-weight: bold; }
+  .org-svg { width: 90%; }
+  /*]]>*/-->
+</style>
+<link rel="stylesheet" type="text/css" href="https://brettviren.github.io/moo/other/readtheorg/css/htmlize.css"/>
+<link rel="stylesheet" type="text/css" href="https://brettviren.github.io/moo/other/readtheorg/css/readtheorg.css"/>
+<script type="text/javascript" src="https://brettviren.github.io/moo/other/lib/js/jquery.min.js"></script>
+<script type="text/javascript" src="https://brettviren.github.io/moo/other/lib/js/bootstrap.min.js"></script>
+<script type="text/javascript" src="https://brettviren.github.io/moo/other/lib/js/jquery.stickytableheaders.min.js"></script>
+<script type="text/javascript" src="https://brettviren.github.io/moo/other/readtheorg/js/readtheorg.js"></script>
+<style> #content{max-width:1800px;}</style>
+<style> p{max-width:800px;}</style>
+<style> li{max-width:800px;}</style>
+<style> pre.src{border-radius: 5px; background-color:#333; color:#0f0;}</style>
+<style> pre.example{border-radius: 5px; background-color:#333; color:#0f0;}</style>
+<style> code{border-radius: 5px; background-color:#333; color:#0f0;}</style>
+<script type="text/javascript">
+// @license magnet:?xt=urn:btih:1f739d935676111cfff4b4693e3816e664797050&amp;dn=gpl-3.0.txt GPL-v3-or-Later
+<!--/*--><![CDATA[/*><!--*/
+     function CodeHighlightOn(elem, id)
+     {
+       var target = document.getElementById(id);
+       if(null != target) {
+         elem.classList.add("code-highlighted");
+         target.classList.add("code-highlighted");
+       }
+     }
+     function CodeHighlightOff(elem, id)
+     {
+       var target = document.getElementById(id);
+       if(null != target) {
+         elem.classList.remove("code-highlighted");
+         target.classList.remove("code-highlighted");
+       }
+     }
+    /*]]>*///-->
+// @license-end
+</script>
+</head>
+<body>
+<div id="content">
+<h1 class="title"><code>moo</code> 無 <code>ovalid</code>
+<br />
+<span class="subtitle">Validating objects with <code>moo</code> <i>oschema</i> types</span>
+</h1>
+<div id="table-of-contents">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents">
+<ul>
+<li><a href="#org2fca966">Concepts</a></li>
+<li><a href="#orgd591a2e">Validation from the command line</a>
+<ul>
+<li><a href="#orgaf29797">Atomic model and schema</a></li>
+<li><a href="#orgf3eb406">Providing JSON Schema</a></li>
+<li><a href="#org28ac9d7">Validating with a non-trivial but still simple schema</a></li>
+<li><a href="#org2295baa">More information when validation fails</a></li>
+<li><a href="#org8362601">Using a different validation engine</a></li>
+<li><a href="#org3610ec1">Other ways to identify target schema</a></li>
+<li><a href="#org285084a">Validating in sequence mode</a></li>
+</ul>
+</li>
+<li><a href="#org84e1f40">Validation in Python</a>
+<ul>
+<li><a href="#orge9c73f5">Loading files</a></li>
+<li><a href="#org34910d2">Loading the context schema</a></li>
+<li><a href="#org86c1624">Loading target schema</a></li>
+<li><a href="#org966a024">Loading models</a></li>
+<li><a href="#orgebe1344">Validation</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-org2fca966" class="outline-2">
+<h2 id="org2fca966">Concepts</h2>
+<div class="outline-text-2" id="text-org2fca966">
+<p>
+<b>moo</b> provides a method called <code>ovalid</code> which is used to validate data structures (models) against <b>moo</b> <a href="oschema.html">oschema</a> (or JSON Schema).  When using <b>moo</b> <code>oschema</code> to produce <b>moo</b> <a href="otypes.html">otypes</a> a <i>valid by construction</i> pattern is enacted.  On the other hand, it is common to receive data structures (models) which "should" be valid against an <code>oschema</code> but which may actually have been constructed in some faulty manner.  The <b>moo</b> <code>ovalid</code> methods can be used to check their validity.
+</p>
+
+<p>
+This second form of validation relies on the standard <a href="https://json-schema.org/">JSON Schema</a> form of schema information and its Python implementations for validation (so far including the <code>jsonschema</code> and <code>fastjsonschema</code> Python packages).  <b>moo</b> will accept a schema description in moo <code>oschema</code> form (as well as JSON Schema form) and some arbitrary data and will determine if that data is valid against the schema.  A flexible <code>moo validate</code> command line interface is provided to apply the validation to a single model/schema pair or to a pair of matched sequences of models and schema.  This "sequence mode" is particularly well suited to writing unit tests to assure your schema and example models are mutually valid.
+</p>
+
+<p>
+Much of the same functionality exposed by the <code>moo validate</code> command line interface can be utilized from your own Python programs via the <code>moo.ovalid</code> module.
+</p>
+
+<p>
+The remainder of this document describes how to apply <b>moo</b> <code>ovalid</code> validation on the command line through a series of examples and then describes how to apply it in your own Python code.
+</p>
+</div>
+</div>
+
+<div id="outline-container-orgd591a2e" class="outline-2">
+<h2 id="orgd591a2e">Validation from the command line</h2>
+<div class="outline-text-2" id="text-orgd591a2e">
+<p>
+The validation is actually performed using both schema and data structure (model) represented as Python objects.  With <b>moo</b>'s support for many file formats the user is able to provide file representations of these objects to the command line interface in a variety of formats.
+</p>
+
+<p>
+Validation at the command line starts with the <code>moo validate</code> commmand line interface and its comprehensive "help" provides all the essential documentation:
+</p>
+
+<div class="org-src-container">
+<pre class="src src-shell">moo validate --help
+</pre>
+</div>
+
+<pre class="example" id="org98260e3">
+Usage: moo validate [OPTIONS] MODEL
+
+  Validate models against target schema.
+
+  A full "context" schema must be provided by -s/--schema if it is required
+  for target schema to resolve any dependencies.  The "context" schema is
+  identified with a string of the form "filename with optional dataprefix".
+
+      -s myschema.subschema:my-schema.jsonnet
+
+  This resulst ins the "subschema" attribute of the "myschema" attribute of
+  the top level object from "my-schema.jsonnet" to be used as the "context"
+  schema.
+
+  A "target" schema is what is used to validate a model and may be specified
+  in a variety of "target forms" with the -t/--target option.  The supported
+  target forms are:
+
+  - an integer indicating an index into the full "context" schema is alloweed
+  when the context is of a sequence form.
+
+  - a simple string indicating either a key of the full "context" schema,
+  allowed only if the context is an object, or indicating the "name" attribute
+  of an moo oschema object held in the context (be it of sequence or object
+  form).
+
+  - a filename with optional "datapath:" prefix.
+
+  When this last form is used the resulting data structure may be any target
+  form listed above or may directly be an moo oschema object or a JSON Schema
+  object.
+
+  By default, this command operates in "scalar mode" meaning a single model
+  and single target schema are processed.  It may instead operate in "sequence
+  mode" which expects a matching sequence of models and target schema.
+
+  Sequence mode is entered when any of the following are true:
+
+  - the --sequence option is given indicating array of models is given
+
+  - more than one -t/--target is given
+
+  - a -t/--target value is a comma-separated list of target forms
+
+  - a -t/--target is a filename with optional "datapath:" prefix and the
+  loaded data produces a list or tuple form.
+
+  The multiple targets are concantenated and the resulting sequence must match
+  the supplied sequence of models.
+
+  In the special cases that all target schema are either in JSON Schema form
+  or are in moo oschema form but lack any type dependency, a context schema is
+  not required.
+
+Options:
+  -o, --output FILE               Output file, default is stdout
+  -s, --schema TEXT               File containing a representation of a
+                                  schema.
+  -t, --target TEXT               Specify target schema of the model
+  --sequence                      Indicate the model is a sequence of models
+                                  (ie, not an array model)
+  --passfail                      Print PASS or FAIL instead of null/throw
+  -V, --validator [jsonschema|fastjsonschema]
+                                  Specify which validator
+  -h, --help                      Show this message and exit.
+</pre>
+
+<p>
+Through this CLI you may provide both schema and model (data) files in a variety of ways and formats giving flexibility in use.  This flexibility can become complex as needed.  The rest of this section goes through examples, starting from the simple and gaining complexity to show more advanced processing patterns.
+</p>
+</div>
+
+<div id="outline-container-orgaf29797" class="outline-3">
+<h3 id="orgaf29797">Atomic model and schema</h3>
+<div class="outline-text-3" id="text-orgaf29797">
+<p>
+The most simple case is to validate a single "atomic" unit of data with no structure such as a number or a string.
+To keep the number of files small we bundle both the model and schema in a single file.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-jsonnet"">local moo = import "moo.jsonnet";
+local as = moo.oschema.schema("ovalid.atomic");
+{
+    model: 42,
+    target: as.number("Count", dtype="u4")
+}
+</pre>
+</div>
+
+<p>
+We tell <b>moo</b> where in that single file to find the model and the target schema via "data path prefixed file names":
+</p>
+
+<div class="org-src-container">
+<pre class="src src-shell">moo validate --passfail \
+    -t target:examples/ovalid/atomic.jsonnet \
+    model:examples/ovalid/atomic.jsonnet
+</pre>
+</div>
+
+<div class="org-src-container">
+<pre class="src src-json">[
+    true
+]
+</pre>
+</div>
+
+<p>
+If you read the <code>--help</code> output above you may note taht there is no "context schema" provided via the <code>-s/--schema</code> option.  This can be avoided in this case because the target schema is provided as an object directly and because that schema depends on no other schema (it is atomic).  In examples below we will show how the "context" schema becomes required.
+</p>
+</div>
+</div>
+
+<div id="outline-container-orgf3eb406" class="outline-3">
+<h3 id="orgf3eb406">Providing JSON Schema</h3>
+<div class="outline-text-3" id="text-orgf3eb406">
+<p>
+Before increasing the complexity of the schema we can use the "atomic" example to show how <code>moo validate</code> can also utilize schema in <b>JSON Schema</b> form in addition to <b>moo</b> <code>oschema</code> form.  It is convenient here to provide the JSON Schema via the <code>moo jsonschema</code> command but the JSON Schema could just as well be provided in some other manner.  Just to show what JSON Schema gets used in validation we emit the intermediate results:
+</p>
+
+<div class="org-src-container">
+<pre class="src src-shell">moo jsonschema target:examples/ovalid/atomic.jsonnet
+</pre>
+</div>
+
+<div class="org-src-container">
+<pre class="src src-json">{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$defs": {},
+    "type": "integer",
+    "minimum": 0
+}
+</pre>
+</div>
+
+<p>
+More complex JSON Schema can be generated from <b>moo</b> <code>oschema</code> via this command.  If the schema is compound then a target schema likely must be provided via <code>-t/--target</code> option.  We will see more about target schema in the later <code>moo validate</code> examples below.  Or, as always, see the help:
+</p>
+
+<div class="org-src-container">
+<pre class="src src-shell">moo jsonschema -h
+</pre>
+</div>
+
+<pre class="example" id="org3b2b587">
+Usage: moo jsonschema [OPTIONS] OSCHEMA
+
+  Convert from moo oschema to JSON Schema
+
+Options:
+  -o, --output FILE  Output file, default is stdout
+  -t, --target TEXT  Specify target schema
+  -h, --help         Show this message and exit.
+</pre>
+
+<p>
+In any case, here shows that the JSON Schema form also validates our simple atomic model:
+</p>
+
+<div class="org-src-container">
+<pre class="src src-shell">moo jsonschema  target:examples/ovalid/atomic.jsonnet &gt; atomic.json
+moo validate --passfail \
+    -t atomic.json \
+    model:examples/ovalid/atomic.jsonnet
+</pre>
+</div>
+
+<div class="org-src-container">
+<pre class="src src-json">[
+    true
+]
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org28ac9d7" class="outline-3">
+<h3 id="org28ac9d7">Validating with a non-trivial but still simple schema</h3>
+<div class="outline-text-3" id="text-org28ac9d7">
+<p>
+A schema describing an atomic model is not very expressive.  Within the rules of <b>moo</b> <code>oschema</code>, arbitrarily complex structure can be described.  In this example we minimally extend the atomic case to include a few more atoms and a <code>record</code> type named <code>Object</code> with fields composed of these other types.
+</p>
+
+<p>
+As described more in the <a href="oschema.html">oschema</a> doc we typically build any moderately complex schema in the context of a "working object" (often named a "hier" as in "hierarchy of types").  This allows constructing one type with references to others via  referencing features provided by the Jsonnet language.   Here is a simple such schema:
+</p>
+
+<div class="org-src-container">
+<pre class="src src-jsonnet">local moo = import "moo.jsonnet";
+local as = moo.oschema.schema("ovalid.simple");
+{
+    name: as.string("Name"),
+    count: as.number("Count", dtype="u4"),
+    real: as.number("Real", dtype="f4"),
+    any: as.any("Data"),
+
+    obj: as.record("Object", [
+        as.field("rname", self.name, doc="required string"),
+        as.field("rany", self.any, doc="required any"),
+        as.field("oname", self.name, optional=true, doc="optional string"),
+        as.field("oany", self.any, optional=true, doc="optional any"),                
+        as.field("dname", self.name, default="", doc="default string"),
+        ///NOTE: can not currently provide a default to an any!
+        //as.field("dany", self.any, default=???, doc="default any"),
+    ]),
+
+    counts: as.sequence("Counts", self.count),
+    cobj: as.record("CountsObject", [
+        as.field("counts", self.counts),
+    ]),
+
+}
+</pre>
+</div>
+
+<p>
+And here is an example of a model that matches the <code>Object</code> schema:
+</p>
+
+<div class="org-src-container">
+<pre class="src src-jsonnet">{
+    rname: "required_name",
+    rany: ["anything",4,"you"],
+}
+</pre>
+</div>
+
+<p>
+Let's check if it indeed matches:
+</p>
+
+<div class="org-src-container">
+<pre class="src src-shell">moo validate \
+    --passfail \
+    --target Object \
+    --schema examples/ovalid/simple-schema-hier.jsonnet \
+    examples/ovalid/simple-model.jsonnet
+</pre>
+</div>
+
+<div class="org-src-container">
+<pre class="src src-json">[
+    true
+]
+</pre>
+</div>
+
+<p>
+Here we have provided <code>moo validate</code> schema information in two ways that are different from the atomic example.
+</p>
+
+<ol class="org-ol">
+<li>We have provided a "context schema" with the <code>-s/--schema</code> option.</li>
+<li>We have identified the target inside this context via its type name <code>Object</code></li>
+</ol>
+
+<p>
+An example below shows some other ways to provide target schema.   
+</p>
+</div>
+</div>
+
+<div id="outline-container-org2295baa" class="outline-3">
+<h3 id="org2295baa">More information when validation fails</h3>
+<div class="outline-text-3" id="text-org2295baa">
+<p>
+So far, the examples are all valid and <code>true</code> is returned.  Let's make a failure.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-shell">moo validate \
+    --passfail \
+    --target Count \
+    --schema examples/ovalid/simple-schema-hier.jsonnet \
+    examples/ovalid/simple-model.jsonnet
+</pre>
+</div>
+
+<pre class="example" id="org27bfc4b">
+[
+    false
+]
+</pre>
+
+<p>
+Now a <code>false</code> is printed.  The model is really meant to be of type <code>Object</code> but we validate it against type <code>Count</code>.  We can see what the underlying JSON Schema validation engine thinks of this situation by omitting the <code>--passfail</code> option.  Here is an example:
+</p>
+
+<div class="org-src-container">
+<pre class="src src-shell">moo validate \
+    --target Count \
+    --schema examples/ovalid/simple-schema-hier.jsonnet \
+    examples/ovalid/simple-model.jsonnet 2&gt;&amp;1 | awk /Failed/,EOF
+</pre>
+</div>
+
+<pre class="example" id="orgbd082df">
+Failed validating 'type' in schema:
+    {'$defs': {},
+     '$schema': 'http://json-schema.org/draft-07/schema#',
+     'minimum': 0,
+     'type': 'integer'}
+
+On instance:
+    {'rany': ['anything', 4, 'you'], 'rname': 'required_name'}
+</pre>
+
+<p>
+We use the <code>awk</code> bit to avoid cluttering this display with the Python traceback that precedes the more useful bits. 
+</p>
+</div>
+</div>
+
+<div id="outline-container-org8362601" class="outline-3">
+<h3 id="org8362601">Using a different validation engine</h3>
+<div class="outline-text-3" id="text-org8362601">
+<p>
+By default <code>moo validate</code> uses the <a href="https://github.com/python-jsonschema/jsonschema">jsonschema</a> Python module to perform <code>ovalid</code> type validation.  Optionallhy it may apply <a href="https://github.com/horejsek/python-fastjsonschema">fastjsonschema</a> like so:
+</p>
+
+<div class="org-src-container">
+<pre class="src src-shell">moo validate \
+    --target Count \
+    --validator fastjsonschema \
+    --schema examples/ovalid/simple-schema-hier.jsonnet \
+    examples/ovalid/simple-model.jsonnet 2&gt;&amp;1 | grep '^fastjsonschema'
+</pre>
+</div>
+
+<pre class="example" id="orgc464fbe">
+fastjsonschema.exceptions.JsonSchemaValueException: data must be integer
+</pre>
+
+<p>
+As can be seen, <code>fastjsonschema</code> provides a rather more terse explanation of validation failures.
+</p>
+</div>
+</div>
+
+<div id="outline-container-org3610ec1" class="outline-3">
+<h3 id="org3610ec1">Other ways to identify target schema</h3>
+<div class="outline-text-3" id="text-org3610ec1">
+<p>
+Getting back to our "simple" schema, we identified a target schema in the above examples by providing a schema <code>name</code> of <code>Object</code>.  Because as that schema was provided in a "hier" schema object form we can also give an object key:
+</p>
+
+
+<div class="org-src-container">
+<pre class="src src-shell">moo validate \
+    --passfail \
+    --target obj \
+    --schema examples/ovalid/simple-schema-hier.jsonnet \
+    examples/ovalid/simple-model.jsonnet
+</pre>
+</div>
+
+<pre class="example" id="org1ee87f8">
+[
+    true
+]
+</pre>
+
+<p>
+You can learn the key name by reading the Jsonnet source but it can sometimes be easier to compile the Jsonnet to JSON and examine that.  We won't do that here but the command would be:
+</p>
+
+<pre class="example" id="org0624f7c">
+moo dump -f json examples/ovalid/simple-schema-hier.jsonnet
+</pre>
+
+<p>
+In may cases, the context schema is provided not as a "hier" object but as a sequence which has been topologically sorted according to type dependency information.  The "simple" hier object is transformed into such a sequence with this example:
+</p>
+
+<div class="org-src-container">
+<pre class="src src-jsonnet">local moo = import "moo.jsonnet";
+local hier = import "simple-schema-hier.jsonnet";
+moo.oschema.sort_select(hier)
+</pre>
+</div>
+
+<p>
+In order to identify a target schema in a sequence context schema one can still provide the schema name (ie <code>Object</code>, <code>Count</code>, etc) or we may identify the target in the sequence by providing an index as an integer counting in the usual "Python" way:
+</p>
+
+<div class="org-src-container">
+<pre class="src src-shell">moo validate \
+    --passfail \
+    --target -2 \
+    --schema examples/ovalid/simple-schema-seq.jsonnet \
+    examples/ovalid/simple-model.jsonnet
+</pre>
+</div>
+
+<pre class="example" id="orgbe804cb">
+[
+    true
+]
+</pre>
+
+<p>
+And, again,  <code>moo dump</code> may provide an easy way to learn which index to supply.
+</p>
+</div>
+</div>
+
+<div id="outline-container-org285084a" class="outline-3">
+<h3 id="org285084a">Validating in sequence mode</h3>
+<div class="outline-text-3" id="text-org285084a">
+<p>
+So far the examples validated in the default "scalar mode" of <code>moo validate</code>.  This mode assumes both the target schema and the model are singular, be they atomic or an aggregate.  <code>moo validate</code> has a second mode called "sequence mode" where a pair of matched sequences of individual models and schema is assumed.
+</p>
+
+<p>
+The "sequence mode" is really not much more than a glorified loop calling <code>moo validate</code> in "scalar mode" on each singular, matched model/schema from their individual sequences.  User may implement this loop themselves by calling <code>moo validate</code> many times in "scalar mode".  The benefit in moving this loop inside of <code>moo validate</code> is that the user may provide more concise and fewer files holding schema and model information.  In particular, sequence mode is useful to develop unit tests which exercise various portions of a larger schema.
+</p>
+
+<p>
+We now look at an example of applying sequence mode using the "simple" example.  We provide a single, concise file that brings both context and a sequence of target schema together with their sequence of models:
+</p>
+
+<div class="org-src-container">
+<pre class="src src-jsonnet">local h = import "simple-schema-hier.jsonnet";
+{
+    schema: h,
+    targets: ["real", h.count, "Name", "Counts", "Counts", "Counts", "Count", "Count"],
+    models: [6.9, 42, "Arthur", [1,2,3], [1.1, 2.2, 3.3], ["one", "two", "three"], 1.1, "one"]
+}
+</pre>
+</div>
+
+<p>
+Note the <code>targets</code> attribute of the top-level object which this file produces is an array of same length as that of the <code>models</code> array.  The validation walk down both arrays in step.  The <code>targets</code> array holds a schema name or the key by which the schema can be found in the context schema, provided by the <code>schema</code> attribute.
+</p>
+
+<p>
+We validate the entire sequence with this command:
+</p>
+
+<div class="org-src-container">
+<pre class="src src-shell">moo validate \
+    --passfail \
+    -t targets:examples/ovalid/simple-sandm.jsonnet \
+    -s schema:examples/ovalid/simple-sandm.jsonnet \
+    models:examples/ovalid/simple-sandm.jsonnet
+</pre>
+</div>
+
+<pre class="example" id="orgefc4ef0">
+[
+    true,
+    true,
+    true,
+    true,
+    false,
+    false,
+    false,
+    false
+]
+</pre>
+
+<p>
+Compared to examples above, we identify target and context schema and the models all as attributes of the same file.  Because the data provide by <code>-t/--target</code> resolves to more than one target schema, <code>moo validate</code> enters sequence mode automatically.  Sequence mode is also detected if more than one <code>-t/--target</code> option is given or the user can explicitly request it with the <code>--sequence</code> flag.  Strictly speaking, this flag is only required if one processes a sequence of exactly one target.
+</p>
+
+<p>
+As can be seen, half the validations failed.  This is contrived and you can examine <code>simple-sandm.jsonnet</code> to understand why, In looking at that file, not that several ways to "spell" a target are used.  As described in <code>moo validate --help</code> you can provide a target in at least these ways:
+</p>
+
+<ul class="org-ul">
+<li>the key name into a context schema object as in <code>"real"</code></li>
+<li>directly a <b>moo</b> oschema or JSON Schema object as in <code>h.count</code></li>
+<li>the schema name as in <code>"Name"</code></li>
+</ul>
+
+<p>
+If the context schema is provided as an array of schema objects one can specify a target as an integer index.  It is even possible to specify a target as another data path prefixed file name.
+</p>
+</div>
+</div>
+</div>
+
+
+
+<div id="outline-container-org84e1f40" class="outline-2">
+<h2 id="org84e1f40">Validation in Python</h2>
+<div class="outline-text-2" id="text-org84e1f40">
+<p>
+The <code>moo validate</code> command line interface is a thin wrapper around <code>moo</code> Python modules.  This section steps through the essential function calls.
+</p>
+</div>
+
+<div id="outline-container-orge9c73f5" class="outline-3">
+<h3 id="orge9c73f5">Loading files</h3>
+<div class="outline-text-3" id="text-orge9c73f5">
+<p>
+A function is needed to load data files.  Without going into details here is a one example.  If search paths, top-level-arguments and datapath prefixes are not important, they can be omitted.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-python">def load_file(fn, path=(), **tlas):
+    dpath, filename = moo.util.unprefix(filename)
+    sp = moo.util.search_path(filename, path)
+    return moo.io.load(filename, sp, dpath, **tlas)
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org34910d2" class="outline-3">
+<h3 id="org34910d2">Loading the context schema</h3>
+<div class="outline-text-3" id="text-org34910d2">
+<p>
+The context schema, if used, can then be loaded:
+</p>
+
+<div class="org-src-container">
+<pre class="src src-python">context = load_file(context_filename)
+</pre>
+</div>
+</div>
+</div>
+
+
+<div id="outline-container-org86c1624" class="outline-3">
+<h3 id="org86c1624">Loading target schema</h3>
+<div class="outline-text-3" id="text-org86c1624">
+<p>
+The target schema can be given as described above in many forms.  They can be resolved with code like:
+</p>
+
+<div class="org-src-container">
+<pre class="src src-python">targets = [...] # list of targets in various forms
+targets = moo.util.resolve_schema(targets, context, load_file)
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org966a024" class="outline-3">
+<h3 id="org966a024">Loading models</h3>
+<div class="outline-text-3" id="text-org966a024">
+<p>
+Models are loaded like schema
+</p>
+
+<div class="org-src-container">
+<pre class="src src-python">models = ctx.obj.load(model)
+# or with multiple models:
+models = [ctx.obj.load(model) for model in models]
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgebe1344" class="outline-3">
+<h3 id="orgebe1344">Validation</h3>
+<div class="outline-text-3" id="text-orgebe1344">
+<p>
+Finally, validation, assuming a matched sequence of target schema and models:
+</p>
+
+<div class="org-src-container">
+<pre class="src src-python">throw = True  # False if you want [bool, array, results]
+moo.ovalid.validate(models, targets, context, throw)
+</pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div id="postamble" class="status">
+<p class="author">Author: Brett Viren</p>
+<p class="date">Created: 2022-09-14 Wed 16:54</p>
+<p class="validation"><a href="https://validator.w3.org/check?uri=referer">Validate</a></p>
+</div>
+</body>
+</html>

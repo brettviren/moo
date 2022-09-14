@@ -1,4 +1,415 @@
-#+title: ~moo~ 無 /ovalid/
+#+title: ~moo~ 無 ~ovalid~
 #+subtitle: Validating objects with ~moo~ /oschema/ types
 #+setupfile: other/setup-topic.org
 
+* Concepts
+
+*moo* provides a method called ~ovalid~ which is used to validate data structures (models) against *moo* [[file:oschema.org][oschema]] (or JSON Schema).  When using *moo* ~oschema~ to produce *moo* [[file:otypes.org][otypes]] a /valid by construction/ pattern is enacted.  On the other hand, it is common to receive data structures (models) which "should" be valid against an ~oschema~ but which may actually have been constructed in some faulty manner.  The *moo* ~ovalid~ methods can be used to check their validity.
+
+This second form of validation relies on the standard [[https://json-schema.org/][JSON Schema]] form of schema information and its Python implementations for validation (so far including the ~jsonschema~ and ~fastjsonschema~ Python packages).  *moo* will accept a schema description in moo ~oschema~ form (as well as JSON Schema form) and some arbitrary data and will determine if that data is valid against the schema.  A flexible ~moo validate~ command line interface is provided to apply the validation to a single model/schema pair or to a pair of matched sequences of models and schema.  This "sequence mode" is particularly well suited to writing unit tests to assure your schema and example models are mutually valid.
+
+Much of the same functionality exposed by the ~moo validate~ command line interface can be utilized from your own Python programs via the ~moo.ovalid~ module.
+
+The remainder of this document describes how to apply *moo* ~ovalid~ validation on the command line through a series of examples and then describes how to apply it in your own Python code.
+
+* Validation from the command line
+
+The validation is actually performed using both schema and data structure (model) represented as Python objects.  With *moo*'s support for many file formats the user is able to provide file representations of these objects to the command line interface in a variety of formats.
+
+Validation at the command line starts with the ~moo validate~ commmand line interface and its comprehensive "help" provides all the essential documentation:
+
+#+begin_src shell :exports both :results output code :wrap example
+moo validate --help
+#+end_src
+
+#+RESULTS:
+#+begin_example
+Usage: moo validate [OPTIONS] MODEL
+
+  Validate models against target schema.
+
+  A full "context" schema must be provided by -s/--schema if it is required
+  for target schema to resolve any dependencies.  The "context" schema is
+  identified with a string of the form "filename with optional dataprefix".
+
+      -s myschema.subschema:my-schema.jsonnet
+
+  This resulst ins the "subschema" attribute of the "myschema" attribute of
+  the top level object from "my-schema.jsonnet" to be used as the "context"
+  schema.
+
+  A "target" schema is what is used to validate a model and may be specified
+  in a variety of "target forms" with the -t/--target option.  The supported
+  target forms are:
+
+  - an integer indicating an index into the full "context" schema is alloweed
+  when the context is of a sequence form.
+
+  - a simple string indicating either a key of the full "context" schema,
+  allowed only if the context is an object, or indicating the "name" attribute
+  of an moo oschema object held in the context (be it of sequence or object
+  form).
+
+  - a filename with optional "datapath:" prefix.
+
+  When this last form is used the resulting data structure may be any target
+  form listed above or may directly be an moo oschema object or a JSON Schema
+  object.
+
+  By default, this command operates in "scalar mode" meaning a single model
+  and single target schema are processed.  It may instead operate in "sequence
+  mode" which expects a matching sequence of models and target schema.
+
+  Sequence mode is entered when any of the following are true:
+
+  - the --sequence option is given
+
+  - more than one -t/--target is given
+
+  - a -t/--target value is a comma-separated list of target forms
+
+  - a -t/--target is a filename with optional "datapath:" prefix and the
+  loaded data produces a list or tuple form.
+
+  The multiple targets are concantenated and the resulting sequence must match
+  the supplied sequence of models.
+
+  In the special cases that all target schema are either in JSON Schema form
+  or are in moo oschema form but lack any type dependency, a context schema is
+  not required.
+
+Options:
+  -o, --output FILE               Output file, default is stdout
+  -s, --schema TEXT               File containing a representation of a
+                                  schema.
+  -t, --target TEXT               Specify target schema of the model
+  --sequence                      Assume a sequence of schema and models
+  --passfail                      Print PASS or FAIL instead of null/throw
+  -V, --validator [jsonschema|fastjsonschema]
+                                  Specify which validator
+  -h, --help                      Show this message and exit.
+#+end_example
+
+Through this CLI you may provide both schema and model (data) files in a variety of ways and formats giving flexibility in use.  This flexibility can become complex as needed.  The rest of this section goes through examples, starting from the simple and gaining complexity to show more advanced processing patterns.
+
+** Atomic model and schema
+
+The most simple case is to validate a single "atomic" unit of data with no structure such as a number or a string.
+To keep the number of files small we bundle both the model and schema in a single file.
+
+#+include: examples/ovalid/atomic.jsonnet "src jsonnet"
+
+We tell *moo* where in that single file to find the model and the target schema via "data path prefixed file names":
+
+#+begin_src shell :exports both :results output code :wrap "src json"
+  moo validate --passfail \
+      -t target:examples/ovalid/atomic.jsonnet \
+      model:examples/ovalid/atomic.jsonnet
+#+end_src
+
+#+RESULTS:
+#+begin_src json
+[
+    true
+]
+#+end_src
+
+If you read the ~--help~ output above you may note taht there is no "context schema" provided via the ~-s/--schema~ option.  This can be avoided in this case because the target schema is provided as an object directly and because that schema depends on no other schema (it is atomic).  In examples below we will show how the "context" schema becomes required.
+
+** Providing JSON Schema
+
+Before increasing the complexity of the schema we can use the "atomic" example to show how ~moo validate~ can also utilize schema in *JSON Schema* form in addition to *moo* ~oschema~ form.  It is convenient here to provide the JSON Schema via the ~moo jsonschema~ command but the JSON Schema could just as well be provided in some other manner.  Just to show what JSON Schema gets used in validation we emit the intermediate results:
+
+#+begin_src shell :exports both :results output code :wrap "src json"
+moo jsonschema target:examples/ovalid/atomic.jsonnet
+#+end_src
+
+#+RESULTS:
+#+begin_src json
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$defs": {},
+    "type": "integer",
+    "minimum": 0
+}
+#+end_src
+
+More complex JSON Schema can be generated from *moo* ~oschema~ via this command.  If the schema is compound then a target schema likely must be provided via ~-t/--target~ option.  We will see more about target schema in the later ~moo validate~ examples below.  Or, as always, see the help:
+
+#+begin_src shell :exports both :results output code :wrap example
+moo jsonschema -h
+#+end_src
+
+#+RESULTS:
+#+begin_example
+Usage: moo jsonschema [OPTIONS] OSCHEMA
+
+  Convert from moo oschema to JSON Schema
+
+Options:
+  -o, --output FILE  Output file, default is stdout
+  -t, --target TEXT  Specify target schema
+  -h, --help         Show this message and exit.
+#+end_example
+
+In any case, here shows that the JSON Schema form also validates our simple atomic model:
+
+#+begin_src shell :exports both :results output code :wrap "src json"
+  moo jsonschema  target:examples/ovalid/atomic.jsonnet > atomic.json
+  moo validate --passfail \
+      -t atomic.json \
+      model:examples/ovalid/atomic.jsonnet
+#+end_src
+
+#+RESULTS:
+#+begin_src json
+[
+    true
+]
+#+end_src
+
+** Validating with a non-trivial but still simple schema
+
+A schema describing an atomic model is not very expressive.  Within the rules of *moo* ~oschema~, arbitrarily complex structure can be described.  In this example we minimally extend the atomic case to include a few more atoms and a ~record~ type named ~Object~ with fields composed of these other types.
+
+As described more in the [[file:oschema.org][oschema]] doc we typically build any moderately complex schema in the context of a "working object" (often named a "hier" as in "hierarchy of types").  This allows constructing one type with references to others via  referencing features provided by the Jsonnet language.   Here is a simple such schema:
+
+#+include: examples/ovalid/simple-schema-hier.jsonnet src jsonnet
+
+And here is an example of a model that matches the ~Object~ schema:
+
+#+include: examples/ovalid/simple-model.jsonnet src jsonnet
+
+Let's check if it indeed matches:
+
+#+begin_src shell :exports both :results output code :wrap "src json"
+   moo validate \
+       --passfail \
+       --target Object \
+       --schema examples/ovalid/simple-schema-hier.jsonnet \
+       examples/ovalid/simple-model.jsonnet
+#+end_src
+
+#+RESULTS:
+#+begin_src json
+[
+    true
+]
+#+end_src
+
+Here we have provided ~moo validate~ schema information in two ways that are different from the atomic example.
+
+1. We have provided a "context schema" with the ~-s/--schema~ option.
+2. We have identified the target inside this context via its type name ~Object~
+
+An example below shows some other ways to provide target schema.   
+
+** More information when validation fails
+
+So far, the examples are all valid and ~true~ is returned.  Let's make a failure.
+
+#+begin_src shell :exports both :results output code :wrap example
+  moo validate \
+      --passfail \
+      --target Count \
+      --schema examples/ovalid/simple-schema-hier.jsonnet \
+      examples/ovalid/simple-model.jsonnet
+#+end_src
+
+#+RESULTS:
+#+begin_example
+[
+    false
+]
+#+end_example
+
+Now a ~false~ is printed.  The model is really meant to be of type ~Object~ but we validate it against type ~Count~.  We can see what the underlying JSON Schema validation engine thinks of this situation by omitting the ~--passfail~ option.  Here is an example:
+
+#+begin_src shell :exports both :results output code :wrap example
+  moo validate \
+      --target Count \
+      --schema examples/ovalid/simple-schema-hier.jsonnet \
+      examples/ovalid/simple-model.jsonnet 2>&1 | awk /Failed/,EOF
+#+end_src
+
+#+RESULTS:
+#+begin_example
+Failed validating 'type' in schema:
+    {'$defs': {},
+     '$schema': 'http://json-schema.org/draft-07/schema#',
+     'minimum': 0,
+     'type': 'integer'}
+
+On instance:
+    {'rany': ['anything', 4, 'you'], 'rname': 'required_name'}
+#+end_example
+
+We use the ~awk~ bit to avoid cluttering this display with the Python traceback that precedes the more useful bits. 
+
+** Using a different validation engine
+
+By default ~moo validate~ uses the [[https://github.com/python-jsonschema/jsonschema][jsonschema]] Python module to perform ~ovalid~ type validation.  Optionallhy it may apply [[https://github.com/horejsek/python-fastjsonschema][fastjsonschema]] like so:
+  
+#+begin_src shell :exports both :results output code :wrap example
+  moo validate \
+      --target Count \
+      --validator fastjsonschema \
+      --schema examples/ovalid/simple-schema-hier.jsonnet \
+      examples/ovalid/simple-model.jsonnet 2>&1 | grep '^fastjsonschema'
+#+end_src
+
+#+RESULTS:
+#+begin_example
+fastjsonschema.exceptions.JsonSchemaValueException: data must be integer
+#+end_example
+
+As can be seen, ~fastjsonschema~ provides a rather more terse explanation of validation failures.
+
+** Other ways to identify target schema
+
+Getting back to our "simple" schema, we identified a target schema in the above examples by providing a schema ~name~ of ~Object~.  Because as that schema was provided in a "hier" schema object form we can also give an object key:
+
+
+#+begin_src shell :exports both :results output code :wrap example
+   moo validate \
+       --passfail \
+       --target obj \
+       --schema examples/ovalid/simple-schema-hier.jsonnet \
+       examples/ovalid/simple-model.jsonnet
+#+end_src
+
+#+RESULTS:
+#+begin_example
+[
+    true
+]
+#+end_example
+
+You can learn the key name by reading the Jsonnet source but it can sometimes be easier to compile the Jsonnet to JSON and examine that.  We won't do that here but the command would be:
+
+#+begin_example
+moo dump -f json examples/ovalid/simple-schema-hier.jsonnet
+#+end_example
+
+In may cases, the context schema is provided not as a "hier" object but as a sequence which has been topologically sorted according to type dependency information.  The "simple" hier object is transformed into such a sequence with this example:
+
+#+include: examples/ovalid/simple-schema-seq.jsonnet src jsonnet
+
+In order to identify a target schema in a sequence context schema one can still provide the schema name (ie ~Object~, ~Count~, etc) or we may identify the target in the sequence by providing an index as an integer counting in the usual "Python" way:
+
+#+begin_src shell :exports both :results output code :wrap example
+  moo validate \
+      --passfail \
+      --target -2 \
+      --schema examples/ovalid/simple-schema-seq.jsonnet \
+      examples/ovalid/simple-model.jsonnet
+#+end_src
+
+#+RESULTS:
+#+begin_example
+[
+    true
+]
+#+end_example
+
+And, again,  ~moo dump~ may provide an easy way to learn which index to supply.
+
+** Validating in sequence mode
+
+So far the examples validated in the default "scalar mode" of ~moo validate~.  This mode assumes both the target schema and the model are singular, be they atomic or an aggregate.  ~moo validate~ has a second mode called "sequence mode" where a pair of matched sequences of individual models and schema is assumed.
+
+The "sequence mode" is really not much more than a glorified loop calling ~moo validate~ in "scalar mode" on each singular, matched model/schema from their individual sequences.  User may implement this loop themselves by calling ~moo validate~ many times in "scalar mode".  The benefit in moving this loop inside of ~moo validate~ is that the user may provide more concise and fewer files holding schema and model information.  In particular, sequence mode is useful to develop unit tests which exercise various portions of a larger schema.
+
+We now look at an example of applying sequence mode using the "simple" example.  We provide a single, concise file that brings both context and a sequence of target schema together with their sequence of models:
+
+#+include: examples/ovalid/simple-sandm.jsonnet src jsonnet
+
+Note the ~targets~ attribute of the top-level object which this file produces is an array of same length as that of the ~models~ array.  The validation walk down both arrays in step.  The ~targets~ array holds a schema name or the key by which the schema can be found in the context schema, provided by the ~schema~ attribute.
+
+We validate the entire sequence with this command:
+
+#+begin_src shell :exports both :results output code :wrap example
+  moo validate \
+      --passfail \
+      -t targets:examples/ovalid/simple-sandm.jsonnet \
+      -s schema:examples/ovalid/simple-sandm.jsonnet \
+      models:examples/ovalid/simple-sandm.jsonnet
+#+end_src
+
+#+RESULTS:
+#+begin_example
+[
+    true,
+    true,
+    true,
+    true,
+    false,
+    false,
+    false,
+    false
+]
+#+end_example
+
+Compared to examples above, we identify target and context schema and the models all as attributes of the same file.  Because the data provide by ~-t/--target~ resolves to more than one target schema, ~moo validate~ enters sequence mode automatically.  Sequence mode is also detected if more than one ~-t/--target~ option is given or the user can explicitly request it with the ~--sequence~ flag.  Strictly speaking, this flag is only required if one processes a sequence of exactly one target.
+
+As can be seen, half the validations failed.  This is contrived and you can examine ~simple-sandm.jsonnet~ to understand why, In looking at that file, not that several ways to "spell" a target are used.  As described in ~moo validate --help~ you can provide a target in at least these ways:
+
+- the key name into a context schema object as in ~"real"~
+- directly a *moo* oschema or JSON Schema object as in ~h.count~
+- the schema name as in ~"Name"~
+
+If the context schema is provided as an array of schema objects one can specify a target as an integer index.  It is even possible to specify a target as another data path prefixed file name.
+
+
+
+* Validation in Python
+
+The ~moo validate~ command line interface is a thin wrapper around ~moo~ Python modules.  This section steps through the essential function calls.
+
+** Loading files
+
+A function is needed to load data files.  Without going into details here is a one example.  If search paths, top-level-arguments and datapath prefixes are not important, they can be omitted.
+
+#+begin_src python
+    def load_file(fn, path=(), **tlas):
+        dpath, filename = moo.util.unprefix(filename)
+        sp = moo.util.search_path(filename, path)
+        return moo.io.load(filename, sp, dpath, **tlas)
+#+end_src
+
+** Loading the context schema
+
+The context schema, if used, can then be loaded:
+
+#+begin_src python
+  context = load_file(context_filename)
+#+end_src
+
+
+** Loading target schema
+
+The target schema can be given as described above in many forms.  They can be resolved with code like:
+
+#+begin_src python
+  targets = [...] # list of targets in various forms
+  targets = moo.util.resolve_schema(targets, context, load_file)
+#+end_src
+
+** Loading models
+
+Models are loaded like schema
+
+#+begin_src python
+  models = ctx.obj.load(model)
+  # or with multiple models:
+  models = [ctx.obj.load(model) for model in models]
+#+end_src
+
+** Validation
+
+Finally, validation, assuming a matched sequence of target schema and models:
+
+#+begin_src python
+  throw = True  # False if you want [bool, array, results]
+  moo.ovalid.validate(models, targets, context, throw)
+#+end_src

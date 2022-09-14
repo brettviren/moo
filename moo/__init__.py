@@ -5,6 +5,8 @@ import moo.io
 import moo.csvio
 import moo.oschema
 import moo.otypes
+import moo.ovalid
+import moo.jsonschema
 from moo.version import version
 
 __version__ = version
