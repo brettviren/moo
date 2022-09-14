@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2022-09-14 Wed 16:54 -->
+<!-- 2022-09-14 Wed 17:09 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title><code>moo</code> 無 <code>ovalid</code></title>
@@ -238,34 +238,34 @@
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents">
 <ul>
-<li><a href="#org2fca966">Concepts</a></li>
-<li><a href="#orgd591a2e">Validation from the command line</a>
+<li><a href="#org2934457">Concepts</a></li>
+<li><a href="#orgb4f35f7">Validation from the command line</a>
 <ul>
-<li><a href="#orgaf29797">Atomic model and schema</a></li>
-<li><a href="#orgf3eb406">Providing JSON Schema</a></li>
-<li><a href="#org28ac9d7">Validating with a non-trivial but still simple schema</a></li>
-<li><a href="#org2295baa">More information when validation fails</a></li>
-<li><a href="#org8362601">Using a different validation engine</a></li>
-<li><a href="#org3610ec1">Other ways to identify target schema</a></li>
-<li><a href="#org285084a">Validating in sequence mode</a></li>
+<li><a href="#org761a416">Atomic model and schema</a></li>
+<li><a href="#orgbb15a5b">Providing JSON Schema</a></li>
+<li><a href="#org72cbbfe">Validating with a non-trivial but still simple schema</a></li>
+<li><a href="#orgcc8da82">More information when validation fails</a></li>
+<li><a href="#orgcf74c56">Using a different validation engine</a></li>
+<li><a href="#orgd6daea5">Other ways to identify target schema</a></li>
+<li><a href="#org3b28e72">Validating in sequence mode</a></li>
 </ul>
 </li>
-<li><a href="#org84e1f40">Validation in Python</a>
+<li><a href="#org55eb8e2">Validation in Python</a>
 <ul>
-<li><a href="#orge9c73f5">Loading files</a></li>
-<li><a href="#org34910d2">Loading the context schema</a></li>
-<li><a href="#org86c1624">Loading target schema</a></li>
-<li><a href="#org966a024">Loading models</a></li>
-<li><a href="#orgebe1344">Validation</a></li>
+<li><a href="#orgac9d5a2">Loading files</a></li>
+<li><a href="#org9d4cd43">Loading the context schema</a></li>
+<li><a href="#org15186d7">Loading target schema</a></li>
+<li><a href="#orge600a80">Loading models</a></li>
+<li><a href="#org38f9eea">Validation</a></li>
 </ul>
 </li>
 </ul>
 </div>
 </div>
 
-<div id="outline-container-org2fca966" class="outline-2">
-<h2 id="org2fca966">Concepts</h2>
-<div class="outline-text-2" id="text-org2fca966">
+<div id="outline-container-org2934457" class="outline-2">
+<h2 id="org2934457">Concepts</h2>
+<div class="outline-text-2" id="text-org2934457">
 <p>
 <b>moo</b> provides a method called <code>ovalid</code> which is used to validate data structures (models) against <b>moo</b> <a href="oschema.html">oschema</a> (or JSON Schema).  When using <b>moo</b> <code>oschema</code> to produce <b>moo</b> <a href="otypes.html">otypes</a> a <i>valid by construction</i> pattern is enacted.  On the other hand, it is common to receive data structures (models) which "should" be valid against an <code>oschema</code> but which may actually have been constructed in some faulty manner.  The <b>moo</b> <code>ovalid</code> methods can be used to check their validity.
 </p>
@@ -284,9 +284,9 @@ The remainder of this document describes how to apply <b>moo</b> <code>ovalid</c
 </div>
 </div>
 
-<div id="outline-container-orgd591a2e" class="outline-2">
-<h2 id="orgd591a2e">Validation from the command line</h2>
-<div class="outline-text-2" id="text-orgd591a2e">
+<div id="outline-container-orgb4f35f7" class="outline-2">
+<h2 id="orgb4f35f7">Validation from the command line</h2>
+<div class="outline-text-2" id="text-orgb4f35f7">
 <p>
 The validation is actually performed using both schema and data structure (model) represented as Python objects.  With <b>moo</b>'s support for many file formats the user is able to provide file representations of these objects to the command line interface in a variety of formats.
 </p>
@@ -300,7 +300,7 @@ Validation at the command line starts with the <code>moo validate</code> commman
 </pre>
 </div>
 
-<pre class="example" id="org98260e3">
+<pre class="example" id="orgb315386">
 Usage: moo validate [OPTIONS] MODEL
 
   Validate models against target schema.
@@ -373,9 +373,9 @@ Through this CLI you may provide both schema and model (data) files in a variety
 </p>
 </div>
 
-<div id="outline-container-orgaf29797" class="outline-3">
-<h3 id="orgaf29797">Atomic model and schema</h3>
-<div class="outline-text-3" id="text-orgaf29797">
+<div id="outline-container-org761a416" class="outline-3">
+<h3 id="org761a416">Atomic model and schema</h3>
+<div class="outline-text-3" id="text-org761a416">
 <p>
 The most simple case is to validate a single "atomic" unit of data with no structure such as a number or a string.
 To keep the number of files small we bundle both the model and schema in a single file.
@@ -415,9 +415,9 @@ If you read the <code>--help</code> output above you may note taht there is no "
 </div>
 </div>
 
-<div id="outline-container-orgf3eb406" class="outline-3">
-<h3 id="orgf3eb406">Providing JSON Schema</h3>
-<div class="outline-text-3" id="text-orgf3eb406">
+<div id="outline-container-orgbb15a5b" class="outline-3">
+<h3 id="orgbb15a5b">Providing JSON Schema</h3>
+<div class="outline-text-3" id="text-orgbb15a5b">
 <p>
 Before increasing the complexity of the schema we can use the "atomic" example to show how <code>moo validate</code> can also utilize schema in <b>JSON Schema</b> form in addition to <b>moo</b> <code>oschema</code> form.  It is convenient here to provide the JSON Schema via the <code>moo jsonschema</code> command but the JSON Schema could just as well be provided in some other manner.  Just to show what JSON Schema gets used in validation we emit the intermediate results:
 </p>
@@ -446,7 +446,7 @@ More complex JSON Schema can be generated from <b>moo</b> <code>oschema</code> v
 </pre>
 </div>
 
-<pre class="example" id="org3b2b587">
+<pre class="example" id="org56209d1">
 Usage: moo jsonschema [OPTIONS] OSCHEMA
 
   Convert from moo oschema to JSON Schema
@@ -478,9 +478,9 @@ moo validate --passfail \
 </div>
 </div>
 
-<div id="outline-container-org28ac9d7" class="outline-3">
-<h3 id="org28ac9d7">Validating with a non-trivial but still simple schema</h3>
-<div class="outline-text-3" id="text-org28ac9d7">
+<div id="outline-container-org72cbbfe" class="outline-3">
+<h3 id="org72cbbfe">Validating with a non-trivial but still simple schema</h3>
+<div class="outline-text-3" id="text-org72cbbfe">
 <p>
 A schema describing an atomic model is not very expressive.  Within the rules of <b>moo</b> <code>oschema</code>, arbitrarily complex structure can be described.  In this example we minimally extend the atomic case to include a few more atoms and a <code>record</code> type named <code>Object</code> with fields composed of these other types.
 </p>
@@ -564,9 +564,9 @@ An example below shows some other ways to provide target schema.
 </div>
 </div>
 
-<div id="outline-container-org2295baa" class="outline-3">
-<h3 id="org2295baa">More information when validation fails</h3>
-<div class="outline-text-3" id="text-org2295baa">
+<div id="outline-container-orgcc8da82" class="outline-3">
+<h3 id="orgcc8da82">More information when validation fails</h3>
+<div class="outline-text-3" id="text-orgcc8da82">
 <p>
 So far, the examples are all valid and <code>true</code> is returned.  Let's make a failure.
 </p>
@@ -580,7 +580,7 @@ So far, the examples are all valid and <code>true</code> is returned.  Let's mak
 </pre>
 </div>
 
-<pre class="example" id="org27bfc4b">
+<pre class="example" id="org42a87d6">
 [
     false
 ]
@@ -598,7 +598,7 @@ Now a <code>false</code> is printed.  The model is really meant to be of type <c
 </pre>
 </div>
 
-<pre class="example" id="orgbd082df">
+<pre class="example" id="org53b7be7">
 Failed validating 'type' in schema:
     {'$defs': {},
      '$schema': 'http://json-schema.org/draft-07/schema#',
@@ -615,9 +615,9 @@ We use the <code>awk</code> bit to avoid cluttering this display with the Python
 </div>
 </div>
 
-<div id="outline-container-org8362601" class="outline-3">
-<h3 id="org8362601">Using a different validation engine</h3>
-<div class="outline-text-3" id="text-org8362601">
+<div id="outline-container-orgcf74c56" class="outline-3">
+<h3 id="orgcf74c56">Using a different validation engine</h3>
+<div class="outline-text-3" id="text-orgcf74c56">
 <p>
 By default <code>moo validate</code> uses the <a href="https://github.com/python-jsonschema/jsonschema">jsonschema</a> Python module to perform <code>ovalid</code> type validation.  Optionallhy it may apply <a href="https://github.com/horejsek/python-fastjsonschema">fastjsonschema</a> like so:
 </p>
@@ -631,7 +631,7 @@ By default <code>moo validate</code> uses the <a href="https://github.com/python
 </pre>
 </div>
 
-<pre class="example" id="orgc464fbe">
+<pre class="example" id="orgd12164b">
 fastjsonschema.exceptions.JsonSchemaValueException: data must be integer
 </pre>
 
@@ -641,9 +641,9 @@ As can be seen, <code>fastjsonschema</code> provides a rather more terse explana
 </div>
 </div>
 
-<div id="outline-container-org3610ec1" class="outline-3">
-<h3 id="org3610ec1">Other ways to identify target schema</h3>
-<div class="outline-text-3" id="text-org3610ec1">
+<div id="outline-container-orgd6daea5" class="outline-3">
+<h3 id="orgd6daea5">Other ways to identify target schema</h3>
+<div class="outline-text-3" id="text-orgd6daea5">
 <p>
 Getting back to our "simple" schema, we identified a target schema in the above examples by providing a schema <code>name</code> of <code>Object</code>.  Because as that schema was provided in a "hier" schema object form we can also give an object key:
 </p>
@@ -658,7 +658,7 @@ Getting back to our "simple" schema, we identified a target schema in the above 
 </pre>
 </div>
 
-<pre class="example" id="org1ee87f8">
+<pre class="example" id="org9d74592">
 [
     true
 ]
@@ -668,7 +668,7 @@ Getting back to our "simple" schema, we identified a target schema in the above 
 You can learn the key name by reading the Jsonnet source but it can sometimes be easier to compile the Jsonnet to JSON and examine that.  We won't do that here but the command would be:
 </p>
 
-<pre class="example" id="org0624f7c">
+<pre class="example" id="orgfaa8447">
 moo dump -f json examples/ovalid/simple-schema-hier.jsonnet
 </pre>
 
@@ -696,7 +696,7 @@ In order to identify a target schema in a sequence context schema one can still 
 </pre>
 </div>
 
-<pre class="example" id="orgbe804cb">
+<pre class="example" id="orgd34af23">
 [
     true
 ]
@@ -708,9 +708,9 @@ And, again,  <code>moo dump</code> may provide an easy way to learn which index 
 </div>
 </div>
 
-<div id="outline-container-org285084a" class="outline-3">
-<h3 id="org285084a">Validating in sequence mode</h3>
-<div class="outline-text-3" id="text-org285084a">
+<div id="outline-container-org3b28e72" class="outline-3">
+<h3 id="org3b28e72">Validating in sequence mode</h3>
+<div class="outline-text-3" id="text-org3b28e72">
 <p>
 So far the examples validated in the default "scalar mode" of <code>moo validate</code>.  This mode assumes both the target schema and the model are singular, be they atomic or an aggregate.  <code>moo validate</code> has a second mode called "sequence mode" where a pair of matched sequences of individual models and schema is assumed.
 </p>
@@ -750,7 +750,7 @@ We validate the entire sequence with this command:
 </pre>
 </div>
 
-<pre class="example" id="orgefc4ef0">
+<pre class="example" id="org6c9559e">
 [
     true,
     true,
@@ -786,17 +786,17 @@ If the context schema is provided as an array of schema objects one can specify 
 
 
 
-<div id="outline-container-org84e1f40" class="outline-2">
-<h2 id="org84e1f40">Validation in Python</h2>
-<div class="outline-text-2" id="text-org84e1f40">
+<div id="outline-container-org55eb8e2" class="outline-2">
+<h2 id="org55eb8e2">Validation in Python</h2>
+<div class="outline-text-2" id="text-org55eb8e2">
 <p>
 The <code>moo validate</code> command line interface is a thin wrapper around <code>moo</code> Python modules.  This section steps through the essential function calls.
 </p>
 </div>
 
-<div id="outline-container-orge9c73f5" class="outline-3">
-<h3 id="orge9c73f5">Loading files</h3>
-<div class="outline-text-3" id="text-orge9c73f5">
+<div id="outline-container-orgac9d5a2" class="outline-3">
+<h3 id="orgac9d5a2">Loading files</h3>
+<div class="outline-text-3" id="text-orgac9d5a2">
 <p>
 A function is needed to load data files.  Without going into details here is a one example.  If search paths, top-level-arguments and datapath prefixes are not important, they can be omitted.
 </p>
@@ -811,9 +811,9 @@ A function is needed to load data files.  Without going into details here is a o
 </div>
 </div>
 
-<div id="outline-container-org34910d2" class="outline-3">
-<h3 id="org34910d2">Loading the context schema</h3>
-<div class="outline-text-3" id="text-org34910d2">
+<div id="outline-container-org9d4cd43" class="outline-3">
+<h3 id="org9d4cd43">Loading the context schema</h3>
+<div class="outline-text-3" id="text-org9d4cd43">
 <p>
 The context schema, if used, can then be loaded:
 </p>
@@ -826,9 +826,9 @@ The context schema, if used, can then be loaded:
 </div>
 
 
-<div id="outline-container-org86c1624" class="outline-3">
-<h3 id="org86c1624">Loading target schema</h3>
-<div class="outline-text-3" id="text-org86c1624">
+<div id="outline-container-org15186d7" class="outline-3">
+<h3 id="org15186d7">Loading target schema</h3>
+<div class="outline-text-3" id="text-org15186d7">
 <p>
 The target schema can be given as described above in many forms.  They can be resolved with code like:
 </p>
@@ -841,9 +841,9 @@ targets = moo.util.resolve_schema(targets, context, load_file)
 </div>
 </div>
 
-<div id="outline-container-org966a024" class="outline-3">
-<h3 id="org966a024">Loading models</h3>
-<div class="outline-text-3" id="text-org966a024">
+<div id="outline-container-orge600a80" class="outline-3">
+<h3 id="orge600a80">Loading models</h3>
+<div class="outline-text-3" id="text-orge600a80">
 <p>
 Models are loaded like schema
 </p>
@@ -857,16 +857,15 @@ models = [ctx.obj.load(model) for model in models]
 </div>
 </div>
 
-<div id="outline-container-orgebe1344" class="outline-3">
-<h3 id="orgebe1344">Validation</h3>
-<div class="outline-text-3" id="text-orgebe1344">
+<div id="outline-container-org38f9eea" class="outline-3">
+<h3 id="org38f9eea">Validation</h3>
+<div class="outline-text-3" id="text-org38f9eea">
 <p>
 Finally, validation, assuming a matched sequence of target schema and models:
 </p>
 
 <div class="org-src-container">
-<pre class="src src-python">throw = True  # False if you want [bool, array, results]
-moo.ovalid.validate(models, targets, context, throw)
+<pre class="src src-python">res = moo.ovalid.validate(models, targets, context, throw=False)
 </pre>
 </div>
 </div>
@@ -875,7 +874,7 @@ moo.ovalid.validate(models, targets, context, throw)
 </div>
 <div id="postamble" class="status">
 <p class="author">Author: Brett Viren</p>
-<p class="date">Created: 2022-09-14 Wed 16:54</p>
+<p class="date">Created: 2022-09-14 Wed 17:09</p>
 <p class="validation"><a href="https://validator.w3.org/check?uri=referer">Validate</a></p>
 </div>
 </body>

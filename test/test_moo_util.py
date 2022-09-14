@@ -1,6 +1,5 @@
 import pytest
-from moo.util import resolve, select_path, validate, clean_paths, graft
-from jsonschema.exceptions import ValidationError
+from moo.util import resolve, select_path, clean_paths, graft
 from jsonpointer import JsonPointerException
 
 
@@ -19,22 +18,6 @@ def test_select_path():
     with pytest.raises(KeyError):
         select_path(data, "dne")
 
-
-def test_validate():
-    'Check validation method'
-    with pytest.raises(ValueError):
-        validate(None, None, "dne")
-
-    validate("hello", dict(type="string"))
-    validate(1234, dict(type="number"))
-    validate("1234", dict(type="string", pattern="^[0-9]+$"))
-    validate("me@example.com", dict(type="string", format="email"))
-    with pytest.raises(ValidationError):
-        validate("1234", dict(type="string", format="email"))
-    with pytest.raises(ValidationError):
-        validate(1234, dict(type="string"))
-    with pytest.raises(ValidationError):
-        validate("wrong", dict(type="number"))
 
 
 def test_clean_paths():

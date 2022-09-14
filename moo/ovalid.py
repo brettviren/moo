@@ -5,7 +5,9 @@ Methods to validate models against schema.
 
 import moo.jsonschema 
 
-def validate(models, targets, context=None, throw=False, validator="jsonschema"):
+from moo.jsonschema import ValidationError
+
+def validate(models, targets, context=None, throw=True, validator="jsonschema"):
     '''
     Validate models against schema.
 
@@ -36,7 +38,7 @@ def validate(models, targets, context=None, throw=False, validator="jsonschema")
             continue
         try:
             moo.jsonschema.validate(model, js, validator)
-        except moo.jsonschema.ValidationError:
+        except ValidationError:
             res.append(False)
         else:
             res.append(True)

@@ -410,6 +410,5 @@ Models are loaded like schema
 Finally, validation, assuming a matched sequence of target schema and models:
 
 #+begin_src python
-  throw = True  # False if you want [bool, array, results]
-  moo.ovalid.validate(models, targets, context, throw)
+  res = moo.ovalid.validate(models, targets, context, throw=False)
 #+end_src
