@@ -32,7 +32,7 @@ class Context:
         '''
         Simple load with path search and dpath reduction.
 
-        Filename may be prefixed as dpath:fiilename to use that dpath instead of the one passed.
+        Filename may be prefixed as dpath:filename to use that dpath instead of the one passed.
         '''
         dpath, filename = moo.util.unprefix(filename, dpath)
         return moo.io.load(self.resolve(filename),
@@ -45,7 +45,7 @@ class Context:
 
         Search mpath for file and return substructure at dpath.
 
-        Filename may be prefixed as dpath:fiilename to use that dpath instead of the one passed.
+        Filename may be prefixed as dpath:filename to use that dpath instead of the one passed.
         '''
         dpath, filename = moo.util.unprefix(filename, dpath)
         model = self.just_load(filename, dpath)
@@ -103,7 +103,7 @@ class Context:
 
     def imports(self, filename):
         '''
-        Return list of files the given file imports
+        Return list of files the given file imports.
         '''
         filename = self.resolve(filename)
         if filename.endswith('.j2'):

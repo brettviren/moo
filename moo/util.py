@@ -275,7 +275,9 @@ def resolve(filename, paths=()):
     if not filename:
         raise ValueError("no file name provided")
     if filename.startswith('/'):
-        return filename
+        if os.path.exists(filename):
+            return filename
+        raise ValueError(f'absolute path not found: {filename}')
     paths = search_path(filename, paths)
 
     for maybe in clean_paths(paths):
