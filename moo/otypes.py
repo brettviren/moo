@@ -275,7 +275,6 @@ class {name}(_Record):
 '''.format(**field)
         acc.append(one)
     source = '\n'.join([class_source] + acc)
-    print(source)
     return classify(source, **ost)
 
 
@@ -486,8 +485,6 @@ class _Number(BaseType):
         return val
 
     def update(self, val):
-        print(list(self.ost.keys()))
-        print(self.ost)
         dtype = self.ost["dtype"]
         dtype = numpy.dtype(dtype)
 
