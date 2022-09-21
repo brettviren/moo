@@ -416,7 +416,8 @@ def render_deps(ctx, target, output, model, templ):
     model_deps = ctx.obj.imports(model)
     templ_deps = ctx.obj.imports(templ)
 
-    deps = [os.path.realpath(model), os.path.realpath(templ)]
+    deps = [os.path.realpath(ctx.obj.resolve(model)), 
+            os.path.realpath(ctx.obj.resolve(templ))]
     deps += templ_deps + model_deps
     deps_string = ' '.join(deps)
     result = f'{target}: {deps_string}\n'
