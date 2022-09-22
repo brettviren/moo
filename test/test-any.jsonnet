@@ -1,4 +1,8 @@
+local moo = import "moo.jsonnet";
+local as = moo.oschema.schema("test.any");
+
 {
-    valid: {},
-    model: [42, {what:"anything"}],
+    context: {derp: as.any("Anything") },
+    targets: ["derp","derp"],
+    models: [42, {what:"anything"}],
 }

@@ -159,7 +159,7 @@ def wash_record(types, ost, *args, **kwds):
                 fval = item_type(field["default"])
             else:
                 fval = item_type()
-                print(f'default {fname} = {fval}')
+                # print(f'default {fname} = {fval}')
                 if fval is None:
                     missed.append(fname)
         out[fname] = item_type(fval)
@@ -243,7 +243,7 @@ class TypeBuilder:
         typ.__doc__ = doc or f'Schema class {scname} type {fullpath}'
         typ.__qualname__ = name
         typ.__module__ = dotpath
-        print(f'Register {typ}')
+        # print(f'Register {typ}')
         self._types[fullpath] = typ
         return typ
 

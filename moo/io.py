@@ -55,7 +55,7 @@ def load_schema(uri, fpath, dpath=None):
         return {"$ref": "https://json-schema.org/draft-07/schema"}
     try:
         fname = resolve(uri, fpath)
-        print(f'load_schema from {fname}')
+        # print(f'load_schema from {fname}')
         return load(uri, fname, dpath)
     except ValueError:
         pass

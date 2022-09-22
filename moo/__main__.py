@@ -442,7 +442,7 @@ def render_many(ctx, outdir, model):
         data = ctx.obj.transform(one["model"], one.get("transform", ()))
         text = ctx.obj.render(one["template"], data)
         output = os.path.join(outdir, one["filename"])
-        print(f"generating {output}:")
+        # print(f"generating {output}:")
         odir = os.path.dirname(output)
         if not os.path.exists(odir):
             os.makedirs(odir)

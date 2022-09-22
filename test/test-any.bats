@@ -1,8 +1,11 @@
 #!/usr/bin/env bats
 
 @test "test any" {
-    run moo -M test -D model validate  -S valid -s test/test-any.jsonnet test/test-any.jsonnet
-    echo "$output"
-    [ "$status" -eq 0 ]
-    [ "$output" = 'null' ]
+    local res=$(moo -M test validate \
+                    -s context:test/test-any.jsonnet \
+                    -t targets:test/test-any.jsonnet \
+                    models:test/test-any.jsonnet)
+
+    [ "$(echo -e "$res" | grep -c true)" -eq 2 ]
+    [ "$(echo -e "$res" | grep -c false)" -eq 0 ]
 }

@@ -89,13 +89,14 @@
     [ "$status" -eq 0 ]
 }
 
-@test "moo validate anys" {
-    res=$(moo -D fail.model validate --passfail --sequence \
-              -S fail.valid -s examples/oschema/anys-data.jsonnet examples/oschema/anys-data.jsonnet)
-    [ "$?" -eq 0 ]
-    [ -z "$(echo $res | grep PASS)" ]
-    res=$(moo -D pass.model validate --passfail --sequence \
-              -S pass.valid -s examples/oschema/anys-data.jsonnet examples/oschema/anys-data.jsonnet)
-    [ "$?" -eq 0 ]
-    [ -z "$(echo $res | grep FAIL)" ]
-}
+## removed old style validate.  See test-issue17.bats for new style exercised.
+# @test "moo validate anys" {
+#     res=$(moo -D fail.model validate --passfail --sequence \
+#               -S fail.valid -s examples/oschema/anys-data.jsonnet examples/oschema/anys-data.jsonnet)
+#     [ "$?" -eq 0 ]
+#     [ -z "$(echo $res | grep PASS)" ]
+#     res=$(moo -D pass.model validate --passfail --sequence \
+#               -S pass.valid -s examples/oschema/anys-data.jsonnet examples/oschema/anys-data.jsonnet)
+#     [ "$?" -eq 0 ]
+#     [ -z "$(echo $res | grep FAIL)" ]
+# }

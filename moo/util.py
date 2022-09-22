@@ -117,6 +117,8 @@ def resolve_schema(targets, context=None, file_loader=None):
 
     try:                        # maybe int'ish
         index = int(target)
+    except TypeError:
+        pass
     except ValueError:
         pass
     else:

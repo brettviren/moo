@@ -1,16 +1,26 @@
 #!/usr/bin/env bats
 
 validate () {
-    local want="$1"
-    local WANT="$(echo $want | tr [:lower:] [:upper:])"
-    local tfile="$BATS_TEST_DIRNAME/issue17-object.jsonnet"
+    local kind="$1"
+    like="true"
+    hate="false"
+    if [ "$kind" = "fail" ] ; then
+        like="false"
+        hate="true"
+    fi
+    
+    local tfile="$BATS_TEST_DIRNAME/issue17.jsonnet"
 
-    local num="$(moo -D $want.jschema compile $tfile | jq length)"
+    local num="$(moo compile ${kind}.schema:$tfile | jq length)"
 
-    local res=$(moo -D "$want".model validate --passfail --sequence \
-                    -S "$want".jschema -s "$tfile" "$tfile")
+    local res=$(moo validate --passfail \
+                    -s hier:$tfile \
+                    -t ${kind}.schema:$tfile \
+                    ${kind}.models:$tfile)
+
     [ -n "$res" ]
-    [ "$(echo -e "$res" | grep -c $WANT)" -eq $num ]
+    [ "$(echo -e "$res" | grep -c $like)" -eq $num ]
+    [ "$(echo -e "$res" | grep -c $hate)" -eq 0 ]
 }
 
 @test "check passing" {
