@@ -1,0 +1,70 @@
+{# This provides some helper macros for python templates #}
+
+{%- macro field_type(ft) %}
+{% if ft == "any"%}model.anytype{% else %}{{ ft }}{% endif %}
+
+{%- endmacro -%}
+
+{% macro declare_sequence(model, t) %}
+{{t.name}} = {{model.lang.types.sequence}}[{{t["items"]|listify|relpath(model.path)|join(".")}}]
+
+{%- endmacro -%}
+
+{% macro declare_record(model, t) %}
+class {{t.name}}{% set comma=":" %}{% for b in t.bases %}{{comma}} {{(b.path+[b.name])|relpath(model.path)|join(".") }} {% set comma = ","%}{%endfor%}:
+'''
+{{t.doc}}
+'''
+def __init__(self{% for f in t.fields %},
+  {{f.name}}:{{f.item|listify|relpath(model.path)|join(".")}} = {{py.field_default(model.all_types, f)}}{% endfor %}):
+{% if t.fields == [] %}    pass{% else %}{% for f in t.fields %}    self.{{f.name}} = {{f.name}}{% if f.doc %} # {{f.doc}}
+{% else %}
+{% endif %}{% endfor %}{% endif %}
+
+{%- endmacro -%}
+
+{% macro declare_boolean(model, t) %}
+{{t.name}} = {{model.lang.types.boolean}}
+
+{%- endmacro -%}
+
+{% macro declare_string(model, t) %}
+{{t.name}} = {{model.lang.types.string}}
+
+{%- endmacro -%}
+
+{% macro declare_number(model, t) %}
+{% if t.dtype[0] == "u" %}{{t.name}} = {{model.lang.dtypes[t.dtype]}}{% else %}{{t.name}} = {{model.lang.dtypes[t.dtype]}}{% endif %}
+
+{%- endmacro -%}
+
+{% macro declare_any(model, t) %}
+{{t.name}} = {{model.lang.types.any}}
+
+{%- endmacro -%}
+
+{% macro declare_oneOf(model, t) %}
+raise RuntimeError("OneOf not implemented")
+{# {{t.name}} = std::variant<{%for one in t.types%}{{one|replace(".","::")}}{{ ", " if not loop.last }}{%endfor%}> #}
+
+{%- endmacro -%}
+
+{% macro declare_enum(model, t) %}
+class {{t.name}}(Enum):
+    {% for sname in t.symbols %}
+    {{sname}} = {{loop.index0}}
+    {% endfor %}
+
+    @staticmethod
+    def parse_{{t.name}}(val:str, defolt:0):
+    {% for sname in t.symbols %}
+        if val == "{{sname}}": return {{t.name}}.{{sname}}
+    {% endfor %}
+        return defolt
+
+{%- endmacro -%}
+
+{% macro ns(model) %}
+class {{ ".".join(model.path) }}
+
+{%- endmacro -%}

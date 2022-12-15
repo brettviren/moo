@@ -9,6 +9,10 @@ def find_type(types, fqn):
             return typ
     raise KeyError(f"no oschema type found: {type(fqn)} {fqn}")
 
+def debug(text):
+    from rich.pretty import pprint
+    pprint(text)
+    return ''
 
 def listify(thing, delim="."):
     'Return thing as a list.  If string split on delim'
