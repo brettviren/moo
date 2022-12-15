@@ -56,7 +56,7 @@ def literal_value(types, fqn, val):
             seq.append(pyval)
 
         record_name = typ["name"]
-        record_args = ",\n   ".join(seq)
+        record_args = "   "+",\n   ".join(seq)
         s = '%s(\n%s)' % (record_name, record_args)
         return s
 
