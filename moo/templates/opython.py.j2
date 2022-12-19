@@ -59,7 +59,10 @@ def __init__(self,
 {% filter indent(width=13) %}
 
 {% for f in t.fields %}
-{{f.name}}:{{f.item|listify|relpath(model.path)|join(".")}} = {{py.field_default(model.all_types, f)}},
+{% set ext_field = py.is_external_field(f, model.extrefs) %}
+{% if ext_field == [] %}{{f.name}}:{{f.item|listify|relpath(model.path)|join(".")}} = {{py.field_default(model.all_types, f)}},
+{% else %}{{f.name}}:{{ext_field|relpath(model.path)|join(".")}} = {{ext_field|relpath(model.path)|join(".")}}.{{py.field_default(model.all_types, f)}},
+{% endif %}
 {% endfor %}
 ):
 {% endfilter %} {#def __init__ args w=13#}
