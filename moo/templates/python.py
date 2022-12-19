@@ -75,3 +75,11 @@ def field_default(types, field):
     field = untypify(field)
     types = untypify(types)
     return literal_value(types, field['item'], field.get('default', None))
+
+def is_external_field(field, exrefs, tcname):
+    # returns the path of external field with tcname
+    for exref in exrefs:
+        if exref in field.item:
+            item = field.item.split('.')
+            return [item[:-2], tcname, item[-1]]
+    return []
