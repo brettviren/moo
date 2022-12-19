@@ -16,14 +16,14 @@
     },
     // fixme: there are more numpy dtypes that are supported here!
     dtypes: {
-        i2: "int",
-        i4: "int",
-        i8: "int",
-        u2: "int",
-        u4: "int",
-        u8: "int",
-        f4: "float",
-        f8: "float",
+        i2: "np.int16",
+        i4: "np.int32",
+        i8: "np.int64",
+        u2: "np.uint16",
+        u4: "np.uint32",
+        u8: "np.uint64",
+        f4: "np.float32",
+        f8: "np.float64",
     },
     // imports: {          // ie, the ... in #include <...>
     //     sequence: ["list"],
