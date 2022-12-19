@@ -1,14 +1,14 @@
 {# This provides some helper macros for python templates #}
 
-{%- macro field_type(ft) %}
+{% macro field_type(ft) %}
 {% if ft == "any"%}model.anytype{% else %}{{ ft }}{% endif %}
 
-{%- endmacro -%}
+{% endmacro %}
 
 {% macro declare_sequence(model, t) %}
 {{t.name}} = {{model.lang.types.sequence}}[{{t["items"]|listify|relpath(model.path)|join(".")}}]
 
-{%- endmacro -%}
+{% endmacro %}
 
 {% macro valid_string(model, field) %}
 if type({{field.name}}) != str: raise RuntimeError("{{field.name}} isn't of type string")
@@ -80,33 +80,33 @@ self.{{f.name}} = {{f.name}}
 {% endfilter %} {#def__init__ w=4#}
 {% endfilter %} {#class w=4#}
 
-{%- endmacro -%}
+{% endmacro %}
 
 {% macro declare_boolean(model, t) %}
 {{t.name}} = {{model.lang.types.boolean}}
 
-{%- endmacro -%}
+{% endmacro %}
 
 {% macro declare_string(model, t) %}
 {{t.name}} = {{model.lang.types.string}}
 
-{%- endmacro -%}
+{% endmacro %}
 
 {% macro declare_number(model, t) %}
-{% if t.dtype[0] == "u" %}{{t.name}} = {{model.lang.dtypes[t.dtype]}}{% else %}{{t.name}} = {{model.lang.dtypes[t.dtype]}}{% endif %}
+{{t.name}} = {{model.lang.dtypes[t.dtype]}}
 
-{%- endmacro -%}
+{% endmacro %}
 
 {% macro declare_any(model, t) %}
 {{t.name}} = {{model.lang.types.any}}
 
-{%- endmacro -%}
+{% endmacro %}
 
 {% macro declare_oneOf(model, t) %}
 raise RuntimeError("OneOf not implemented")
 {# {{t.name}} = std::variant<{%for one in t.types%}{{one|replace(".","::")}}{{ ", " if not loop.last }}{%endfor%}> #}
 
-{%- endmacro -%}
+{% endmacro %}
 
 {% macro declare_enum(model, t) %}
 class {{t.name}}(Enum):
@@ -127,9 +127,9 @@ return defolt
 
 {% endfilter %}
 {% endfilter %}
-{%- endmacro -%}
+{% endmacro %}
 
 {% macro ns(model) %}
 class {{ ".".join(model.path) }}
 
-{%- endmacro -%}
+{% endmacro %}
