@@ -20,7 +20,6 @@ if not regex.fullmatch({{field.name}}): raise RuntimeError(f"{{field.name}} ({ {
 {% endmacro %}
 
 {% macro valid_number(model, field, full_model) %}
-{# {{ model | debug }} #}
 if not np.issubdtype(type({{field.name}}), {{full_model.lang.dtypes[model.dtype]}}): raise RuntimeError(f"{{field.name}} isn't of type {{full_model.lang.dtypes[model.dtype]}}, but of type {type({{field.name}})}")
 {% if model["constraints"] %}
 {% if "exclusiveMaximum" in model["constraints"] %}if {{field.name}} >= {{model["constraints"]["exclusiveMaximum"]}}: raise RuntimeError(f'{{field.name}} ({ {{field.name}} }) is too large (exclMax = {{model["constraints"]["exclusiveMaximum"]}})')
@@ -64,7 +63,6 @@ def __init__(self,
 {% filter indent(width=13) %}
 {% for f in t.fields %}
 {% set ext_field = py.is_external_field(f, model.extrefs, "PyStructs") %}
-{{ ext_field|debug}}
 {% if ext_field == [] %}{{f.name}}:{{f.item|listify|relpath(model.path)|join(".")}} = {{py.field_default(model.all_types, f)}},
 {% else %}{{f.name}}:{{ext_field|relpath(model.path)|join(".")}} = {{py.field_default(model.all_types, f)}},
 {% endif %}
