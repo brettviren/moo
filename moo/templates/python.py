@@ -30,7 +30,7 @@ def literal_value(types, fqn, val):
         dtype = typ["dtype"]
         dtype = numpy.dtype(dtype)
         val = numpy.array(val or 0, dtype).item() # coerce
-        return f'{val}'
+        return f'np.{dtype}({val})'
 
     if schema == "string":
         if val is None:
@@ -79,7 +79,7 @@ def field_default(types, field):
 def is_external_field(field, exrefs, tcname):
     # returns the path of external field with tcname
     for exref in exrefs:
-        if exref in field.item:
-            item = field.item.split('.')
-            return [item[:-2], tcname, item[-1]]
+        if exref in field['item']:
+            item = field['item'].split('.')
+            return item[:-1]+[tcname]
     return []

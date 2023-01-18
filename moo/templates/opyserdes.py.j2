@@ -28,10 +28,15 @@ import {{ep|listify|join(".")}}.{{tcname}}
 import {{tcname}}
 {% endif %}
 {% endfor %}
+import numpy as np
 
 {% for fqn in model.byscn.record %}
 {% set r = model.byref[fqn] %}
 {% set n = fqn|listify|relpath(model.path)|join(".") %}
+#####
+##### {{r.name}} serialisation/deserialisation
+#####
+
 def {{r.name}}_to_json(obj:{{n}}) -> dict:
     j=dict()
     {% for f in r.fields %}
@@ -50,8 +55,15 @@ def {{r.name}}_from_json(j:dict) -> {{r.name}}:
     {% for f in r.fields %}
     if "{{f.name}}" in j: {% if f.item in model.byscn.record %}d["{{f.name}}"] = {{f.item.split('.')[-1]}}_from_json(j["{{f.name}}"])
     {% elif f.item in model.byscn.sequence and model.byref[f.item]["items"] in model.byscn.record %}d["{{f.name}}"] = [{{model.byref[f.item]["items"].split('.')[-1]}}_from_json(item) for item in j["{{f.name}}"]]
+    {% elif f.item in model.byscn.number %}
+
+        if not np.can_cast(j['{{f.name}}'], {{model.lang.dtypes[model.byref[f.item].dtype]}}):
+            raise RuntimeError(f"Cannot cast {{f.name}} = {% raw %}{{% endraw %}j['{{f.name}}']{% raw %}}{% endraw %} to {{model.lang.dtypes[model.byref[f.item].dtype]}}")
+        d["{{f.name}}"] = {{model.lang.dtypes[model.byref[f.item].dtype]}}(j['{{f.name}}'])
     {% else %}d["{{f.name}}"] = j["{{f.name}}"]
     {% endif %}
     {% endfor %}
     return {{r.name}}(**d)
+
+
 {% endfor %}
