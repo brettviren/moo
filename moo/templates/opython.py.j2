@@ -1,0 +1,160 @@
+{# This provides some helper macros for python templates #}
+
+{% macro field_type(ft) %}
+{% if ft == "any"%}model.anytype{% else %}{{ ft }}{% endif %}
+
+{% endmacro %}
+
+{% macro declare_sequence(model, t) %}
+{{t.name}} = {{model.lang.types.sequence}}[{{t["items"]|listify|relpath(model.path)|join(".")}}]
+
+{% endmacro %}
+
+{% macro valid_string(model, field) %}
+if type({{field.name}}) != str: raise RuntimeError("{{field.name}} isn't of type string")
+{% if model["pattern"] %}
+import re
+regex = re.compile(r"{{model["pattern"]}}")
+if not regex.fullmatch({{field.name}}): raise RuntimeError(f"{{field.name}} ({ {{field.name}} }) doesn't match "+ r"{{model["pattern"]}}")
+{% endif %}
+{% endmacro %}
+
+{% macro valid_number(model, field, full_model) %}
+if not np.issubdtype(type({{field.name}}), {{full_model.lang.dtypes[model.dtype]}}): raise RuntimeError(f"{{field.name}} isn't of type {{full_model.lang.dtypes[model.dtype]}}, but of type {type({{field.name}})}")
+{% if model["constraints"] %}
+{% if "exclusiveMaximum" in model["constraints"] %}if {{field.name}} >= {{model["constraints"]["exclusiveMaximum"]}}: raise RuntimeError(f'{{field.name}} ({ {{field.name}} }) is too large (exclMax = {{model["constraints"]["exclusiveMaximum"]}})')
+{% endif %}
+{% if "exclusiveMinimum" in model["constraints"] %}if {{field.name}} <= {{model["constraints"]["exclusiveMinimum"]}}: raise RuntimeError(f'{{field.name}} ({ {{field.name}} }) is too small (exclMin = {{model["constraints"]["exclusiveMinimum"]}})')
+{% endif %}
+{% if "maximum" in model["constraints"] %}if {{field.name}} > {{model["constraints"]["maximum"]}}: raise RuntimeError(f'{{field.name}} ({ {{field.name}} }) is too large (Max = {{model["constraints"]["maximum"]}})')
+{% endif %}
+{% if "minimum" in model["constraints"] %}if {{field.name}} < {{model["constraints"]["minimum"]}}: raise RuntimeError(f'{{field.name}} ({ {{field.name}} }) is too small (Min = {{model["constraints"]["minimum"]}})')
+{% endif %}
+{% if "multipleOf" in model["constraints"] %}if {{field.name}}%{{model["constraints"]["multipleOf"]}} != 0: raise RuntimeError(f'{{field.name}} ({ {{field.name}} }) is not a multiple of {{model["constraints"]["multipleOf"]}})')
+{% endif %}
+{% endif %}
+{% endmacro %}
+
+{% macro valid_boolean(model, field) %}
+if type({{field.name}}) != {{(field.item|listify)[-1]}}: raise RuntimeError("{{field.name}} isn't of type bool")
+{% endmacro %}
+
+{% macro valid_sequence(model, field) %}
+if type({{field.name}}) != list: raise RuntimeError("{{field.name}} isn't of type list")
+if len({{field.name}}) > 0 and type({{field.name}}[0]) != {{(model['items']|listify)[-1]}}: raise RuntimeError("{{field.name}} items isn't of type {{(model['items']|listify)[-1]}}")
+{% endmacro %}
+
+{% macro valid_record(model, field) %}
+if type({{field.name}}) != {{(field.item|listify)[-1]}}: raise RuntimeError("{{field.name}} isn't of type {{(field.item|listify)[-1]}}")
+{% endmacro %}
+
+{# {% macro valid_enum(model, field) %} #}
+{# if not {{(field.item|listify)[-1]}}.parse_({{field.name}}): raise RuntimeError("Incorrect value for {{field.name}}!") #}
+{# {% endmacro %} #}
+
+{% macro declare_record(model, t) %}
+class {{t.name}}{% set comma=":" %}{% for b in t.bases %}{{comma}} {{(b.path+[b.name])|relpath(model.path)|join(".") }} {% set comma = ","%}{%endfor%}:
+{% filter indent(width=4) %}
+
+'''
+{{t.doc}}
+'''
+def __init__(self,
+{% filter indent(width=13) %}
+{% for f in t.fields %}
+{% set ext_field = py.is_external_field(f, model.extrefs, "PyStructs") %}
+{% if ext_field == [] %}{{f.name}}:{{f.item|listify|relpath(model.path)|join(".")}} = {{py.field_default(model.all_types, f)}},
+{% else %}{{f.name}}:{{ext_field|relpath(model.path)|join(".")}} = {{py.field_default(model.all_types, f)}},
+{% endif %}
+{% endfor %}
+):
+{% endfilter %} {#def __init__ args w=13#}
+{% filter indent(width=4) %}
+
+{% if t.fields == [] %}
+pass
+{% else %}
+{% for f in t.fields %}
+###################
+{% if f.doc %}# {{f.doc}}{% endif %}
+
+{% set this_model = model.byref[f.item] %}
+{% if this_model.schema == "string" %}{{valid_string(this_model, f)}}{% elif this_model.schema == "number" %}{{valid_number(this_model, f, model)}}{% elif this_model.schema == "boolean" %}{{valid_boolean(this_model, f)}}{% elif this_model.schema == "sequence" %}{{valid_sequence(this_model, f)}}{% elif this_model.schema == "record" %}{{valid_record(this_model, f)}}{% endif %}
+{# {% if this_model.schema=="enum" %} #}
+{# self.{{f.name}} = {{(f.item|listify)[-1]}}.parse_{{(f.item|listify)[-1]}}({{f.name}}) #}
+{# {% else %} #}
+self.{{f.name}} = {{f.name}}
+{# {% endif %} #}
+{% endfor %}
+{% endif %}
+{% endfilter %} {#def__init__ w=4#}
+{% endfilter %} {#class w=4#}
+
+{% endmacro %}
+
+{% macro declare_boolean(model, t) %}
+{{t.name}} = {{model.lang.types.boolean}}
+
+{% endmacro %}
+
+{% macro declare_string(model, t) %}
+{{t.name}} = {{model.lang.types.string}}
+
+{% endmacro %}
+
+{% macro declare_number(model, t) %}
+{{t.name}} = {{model.lang.dtypes[t.dtype]}}
+
+{% endmacro %}
+
+{% macro declare_any(model, t) %}
+{{t.name}} = {{model.lang.types.any}}
+
+{% endmacro %}
+
+{% macro declare_oneOf(model, t) %}
+raise RuntimeError("OneOf not implemented")
+{# {{t.name}} = std::variant<{%for one in t.types%}{{one|replace(".","::")}}{{ ", " if not loop.last }}{%endfor%}> #}
+
+{% endmacro %}
+
+{% macro declare_enum(model, t) %}
+class {{t.name}}(Enum):
+{% filter indent(width=4) %}
+
+{% for sname in t.symbols %}
+{{sname}} = {{loop.index0}}
+{% endfor %}
+
+@staticmethod
+def parse_{{t.name}}(val:str, defolt=None):
+{% filter indent(width=4) %}
+
+{% for sname in t.symbols %}
+if val == "{{sname}}": return {{t.name}}.{{sname}}
+{% endfor %}
+if defolt is not None:
+    return defolt
+else:
+    raise RuntimeError(f'Value {val} is incorrect for {{t.name}}')
+
+{% endfilter %}
+@staticmethod
+def has_index(value):
+{% filter indent(width=4) %}
+
+values = {
+{% for sname in t.symbols %}
+    {{loop.index0}}, # {{sname}}
+{% endfor %}
+}
+if value in values: return True
+return False
+{% endfilter %}
+{% endfilter %}
+{% endmacro %}
+
+{% macro ns(model) %}
+class {{ ".".join(model.path) }}
+
+{% endmacro %}

@@ -1,0 +1,69 @@
+{% import 'opython.py.j2' as py_model %}
+'''
+This file is 100% generated.  Any manual edits will likely be lost.
+
+This contains functions struct and other type definitions for shema in
+{{py_model.ns(model)}} to be serialized via json
+'''
+{% set tcname = "PySerdes" %}
+
+# My structs
+{% set ctxpath = model.ctxpath or [] %}
+{% set prefix = model.path|relpath(ctxpath)|join(".") %}
+{% set all_types = model.all_types|join(', ', attribute='name') %}
+{{ all_types | debug }}
+{% if prefix %}
+from {{ prefix }}.PyStructs import {{all_types}}
+{% else %}
+from PyStructs import {{all_types}}
+{% endif %}
+
+{% if model.extrefs %}
+# {{tcname}} for externally referenced schema
+{% endif %}
+{% for ep in model.extrefs %}
+{% if ep %}
+import {{ep|listify|join(".")}}.{{tcname}}
+{% else %}
+import {{tcname}}
+{% endif %}
+{% endfor %}
+import numpy as np
+
+{% for fqn in model.byscn.record %}
+{% set r = model.byref[fqn] %}
+{% set n = fqn|listify|relpath(model.path)|join(".") %}
+#####
+##### {{r.name}} serialisation/deserialisation
+#####
+
+def {{r.name}}_to_json(obj:{{n}}) -> dict:
+    j=dict()
+    {% for f in r.fields %}
+    {% if f.item in model.byscn.record %}
+    j["{{f.name}}"] = {{f.item.split(".")[-1]}}_to_json(obj.{{f.name}})
+    {% elif f.item in model.byscn.sequence and model.byref[f.item]["items"] in model.byscn.record %}
+    j["{{f.name}}"] = [{{model.byref[f.item]["items"].split('.')[-1]}}_to_json(item) for item in obj.{{f.name}}]
+    {% else %}
+    j["{{f.name}}"] = obj.{{f.name}}
+    {% endif %}
+    {% endfor %}
+    return j
+
+def {{r.name}}_from_json(j:dict) -> {{r.name}}:
+    d = dict()
+    {% for f in r.fields %}
+    if "{{f.name}}" in j: {% if f.item in model.byscn.record %}d["{{f.name}}"] = {{f.item.split('.')[-1]}}_from_json(j["{{f.name}}"])
+    {% elif f.item in model.byscn.sequence and model.byref[f.item]["items"] in model.byscn.record %}d["{{f.name}}"] = [{{model.byref[f.item]["items"].split('.')[-1]}}_from_json(item) for item in j["{{f.name}}"]]
+    {% elif f.item in model.byscn.number %}
+
+        if not np.can_cast(j['{{f.name}}'], {{model.lang.dtypes[model.byref[f.item].dtype]}}):
+            raise RuntimeError(f"Cannot cast {{f.name}} = {% raw %}{{% endraw %}j['{{f.name}}']{% raw %}}{% endraw %} to {{model.lang.dtypes[model.byref[f.item].dtype]}}")
+        d["{{f.name}}"] = {{model.lang.dtypes[model.byref[f.item].dtype]}}(j['{{f.name}}'])
+    {% else %}d["{{f.name}}"] = j["{{f.name}}"]
+    {% endif %}
+    {% endfor %}
+    return {{r.name}}(**d)
+
+
+{% endfor %}

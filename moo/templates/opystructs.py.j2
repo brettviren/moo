@@ -1,0 +1,16 @@
+{% import 'opython.py.j2' as py_model %}
+'''
+This file is 100% generated.  Any manual edits will likely be lost.
+'''
+{% set tcname = "PyStructs" %}
+
+from enum import Enum
+import numpy as np
+
+{% for ep in model.extrefs %}
+import {{ep|listify|relpath(model.extpath)|join(".")}}.{{tcname}}
+{% endfor %}
+
+{% for t in model.types %}
+{{ py_model["declare_"+t.schema](model, t)|indent}}
+{% endfor %}
