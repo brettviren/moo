@@ -20,8 +20,8 @@ def try_path(path, rel):
         raise RuntimeError('Attempted to import a directory')
 
     if not os.path.isfile(full_path):
-        return full_path, None
-    with open(full_path) as f:
+        raise RuntimeError(f"path is not a file: {full_path}")
+    with open(full_path, "rb") as f:
         return full_path, f.read()
 
 

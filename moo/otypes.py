@@ -1,3 +1,7 @@
+#!/usr/bin/env python3
+'''
+Produce instances of types defined by moo oschema.
+'''
 import os
 import json
 import numpy
@@ -370,11 +374,11 @@ class _String(BaseType):
         if ost["format"]:
             schema["format"] = ost["format"]
         from jsonschema import validate as js_validate
-        from jsonschema import draft7_format_checker
+        from .jsonschema import format_checker
         from jsonschema.exceptions import ValidationError
         try:
             js_validate(instance=val, schema=schema,
-                        format_checker=draft7_format_checker)
+                        format_checker=format_checker)
         except ValidationError as verr:
             raise ValueError(f'format mismatch for string {cname}') from verr
         self._value = val

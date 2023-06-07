@@ -4,6 +4,8 @@ from .util import unflatten, pathify
 # We 'borrow' jsonschema exception as our own 
 from jsonschema.exceptions import ValidationError
 
+import jsonschema
+format_checker = jsonschema.Draft7Validator.FORMAT_CHECKER
 
 def ref(oschema):
     '''
@@ -145,11 +147,10 @@ def make_validator_jsonschema():
     '''
     from jsonschema.exceptions import SchemaError
     from jsonschema import validate as js_validate
-    from jsonschema import draft7_format_checker
     def validate(model, schema={}):
         try:
             return js_validate(instance=model, schema=schema,
-                               format_checker=draft7_format_checker)
+                               format_checker=format_checker)
         except SchemaError as err:
             raise ValidationError('invalid') from err
     return validate

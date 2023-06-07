@@ -16,6 +16,17 @@ class Context:
     '''
     def __init__(self, dpath="", mpath=(), tpath=(),
                  tla=(), transform=(), graft=()):
+        '''
+        A CLI context
+
+        - dpath :: data path to sub-structure to use
+        - mpath :: file paths to search for models
+        - tpath :: file paths to search for templates
+        - tla :: Jsonnet top level arguments
+        - transform :: transformations to apply
+        - graph :: data to graft on to model
+        '''
+
         # use substructure at this data object path
         self.dpath = dpath 
         # search path for models (data)
