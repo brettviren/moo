@@ -2,7 +2,10 @@
 
 import os
 import json
-from _jsonnet import evaluate_file, evaluate_snippet
+try:
+    from _gojsonnet import evaluate_file, evaluate_snippet
+except ImportError:
+    from _jsonnet import evaluate_file, evaluate_snippet
 from moo.util import clean_paths, resolve
 
 
