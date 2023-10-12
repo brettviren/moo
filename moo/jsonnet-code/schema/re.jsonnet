@@ -4,19 +4,19 @@
     ident: '[a-zA-Z][a-zA-Z0-9_]*',
     ident_only: '^' + self.ident + '$',
     // DNS hostname
-    ipv4: '[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}',
-    dnslabel: '[a-zA-Z0-9]([a-zA-Z0-9\\-]*[a-zA-Z0-9])?',
-    dnshost: '%s(\\.%s)*' % [self.dnslabel, self.dnslabel],
+    ipv4: '[0-9]{1,3}.[0-9]{1,3}.[0-9]{1,3}.[0-9]{1,3}',
+    dnslabel: '[a-zA-Z0-9]([a-zA-Z0-9-]*[a-zA-Z0-9])?',
+    dnshost: '%s(.%s)*' % [self.dnslabel, self.dnslabel],
 
     tcpport: '(:[0-9]+)?',
 
     // a slash-separated list/path like FS paths
     // fixme: this is maybe too accepting
-    hiername: '[a-zA-Z0-9.]([a-zA-Z0-9._+\\-])?',
+    hiername: '[a-zA-Z0-9.]([a-zA-Z0-9._+-])?',
     hierpath: '/?(%s/?)+' % self.hiername,
     // a dot-separated list/path list Python modules
     dotname: self.ident,
-    dotpath: '%s(\\.%s)*' % [self.dotname, self.dotname],
+    dotpath: '%s(.%s)*' % [self.dotname, self.dotname],
 
     // thing specific to zmq
     zmq: {
@@ -36,7 +36,7 @@
 
         uri_list : [self.tcp.uri, self.ipc.uri, self.inproc.uri],
         uri: '(%s)' % std.join('|',['(%s)'%one for one in self.uri_list]),
-        
+
         socket: {
             name_list: [
                 "PAIR", "PUB", "SUB", "REQ", "REP", "DEALER", "ROUTER",
@@ -65,4 +65,4 @@
     compname: self.ident,
     // match a "typename" for a component
     comptype: self.ident,
-}    
+}
