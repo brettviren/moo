@@ -1,11 +1,15 @@
 #!/usr/bin/env python3
 from .util import unflatten, pathify
 
-# We 'borrow' jsonschema exception as our own 
+# We 'borrow' jsonschema exception as our own
 from jsonschema.exceptions import ValidationError
 
 import jsonschema
-format_checker = jsonschema.Draft7Validator.FORMAT_CHECKER
+# Deprecated:
+# https://python-jsonschema.readthedocs.io/en/stable/api/jsonschema/protocols/#jsonschema.protocols.Validator.FORMAT_CHECKER
+# format_checker = jsonschema.Draft7Validator.FORMAT_CHECKER
+
+
 
 def ref(oschema):
     '''
@@ -73,7 +77,7 @@ def field(f):
           "title": name[0].upper() + name[1:].replace("_", " "),
           "description": "%s (type: %s)" % (f.get("doc",''), item.split(".")[-1])}
     return js
-    
+
 
 def record(r):
     '''
@@ -82,7 +86,7 @@ def record(r):
     js = dict(type='object',
               properties = { f["name"]: field(f) for f in r["fields"] })
     return js
-    
+
 
 def enum(e):
     return {type: "string", enum: e['symbols']}
@@ -103,7 +107,7 @@ def typify(o):
     tn = o["schema"]
     return globals()[tn](o)
 
-    
+
 def get_all_deps(flat, deps):
     ret = set(deps)
     for dep in deps:
@@ -120,7 +124,7 @@ def convert(target, context=None, id=None):
     Convert a target moo oschema in a moo schema context to a JSON Schema form or pass through JSON Schema.
 
     @param target:the moo schema to form the top-level JSON Schema or an already made JSON Schema
-    
+
     @param context:a sequence or object with values that of individual moo schema.
 
     """
@@ -140,7 +144,7 @@ def convert(target, context=None, id=None):
     last = typify(target)
     js.update(last)
     return js
-     
+
 def make_validator_jsonschema():
     '''
     Return a generic looking validator using jsonschema
@@ -149,8 +153,7 @@ def make_validator_jsonschema():
     from jsonschema import validate as js_validate
     def validate(model, schema={}):
         try:
-            return js_validate(instance=model, schema=schema,
-                               format_checker=format_checker)
+            return js_validate(instance=model, schema=schema)#,format_checker=format_checker)
         except SchemaError as err:
             raise ValidationError('invalid') from err
     return validate

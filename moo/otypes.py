@@ -374,11 +374,10 @@ class _String(BaseType):
         if ost["format"]:
             schema["format"] = ost["format"]
         from jsonschema import validate as js_validate
-        from .jsonschema import format_checker
+        #from .jsonschema import format_checker
         from jsonschema.exceptions import ValidationError
         try:
-            js_validate(instance=val, schema=schema,
-                        format_checker=format_checker)
+            js_validate(instance=val, schema=schema) #,format_checker=format_checker)
         except ValidationError as verr:
             raise ValueError(f'format mismatch for string {cname}') from verr
         self._value = val
@@ -515,17 +514,17 @@ class _Number(BaseType):
             if emaxi is not None:
                 if not v < emaxi:
                    raise ValueError(f'illegal {cname} number {v} not strictly less than {emaxi}')
-               
+
             emini = nc.get("exclusiveMinimum", None)
             if emini is not None:
                 if not v > emini:
                    raise ValueError(f'illegal {cname} number {v} not strictly greater than {emini}')
-               
+
             maxi = nc.get("maximum", None)
             if maxi is not None:
                 if not v <= maxi:
                    raise ValueError(f'illegal {cname} number {v} not less than or equal {maxi}')
-               
+
             mini = nc.get("minimum", None)
             if mini is not None:
                 if not v >= mini:
@@ -671,7 +670,7 @@ def make_type(**ost):
 
 
 def make_types(schema):
-    '''Make Python types from a schema structure.  
+    '''Make Python types from a schema structure.
 
     The schema should be in the form of an array of oschema type
     structures.
