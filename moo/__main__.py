@@ -277,7 +277,22 @@ def cmd_validate(ctx, output, schema, target, sequence, passfail, validator, mod
 @click.pass_context
 def cmd_regex(ctx, validator, only, rpath, regex, string):
     '''
-    Validate a string against a regex
+    Validate a string against a regex.
+
+    Examples
+
+        $ moo regex '^[a-z]$' a
+
+        OKAY: ...
+    
+        $ moo regex '^[a-z]$' aa
+
+        <statck trace and error>
+    
+        $ moo regex -R zmq.tcp.uri schema/re.jsonnet 'tcp://127.0.0.1:1234'
+
+        OKAY: ...
+
     '''
     if rpath:
         regex = ctx.obj.just_load(regex, rpath)
@@ -289,10 +304,8 @@ def cmd_regex(ctx, validator, only, rpath, regex, string):
             regex = regex + '$'
 
     valid = dict(type="string", pattern=regex)
-    res = moo.util.validate(string, valid, validator)
-    if res:
-        print(regex)
-        print(res)
+    res = moo.oschema.validate(string, valid) # throws
+    print(f'OKAY: "{regex}" match gives "{res}"')
 
 
 @cli.command("compile")
