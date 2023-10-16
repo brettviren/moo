@@ -57,6 +57,10 @@ def test_with_schema():
     Person = types['app.Person']
     Affiliation = types['app.Affiliation']
 
+    with pytest.raises(ValueError):
+        e = Email("this is not an email address and should fail")
+        print(f'EMAIL: {e} {repr(e)}')
+
     p = Person()
     with pytest.raises(ValueError):
         p.email = "this should fail"

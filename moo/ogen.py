@@ -98,6 +98,7 @@ def wash_string(types, ost, *args, **kwds):
         schema["format"] = ost["format"]
     if "pattern" in ost:
         schema["pattern"] = ost["pattern"]
+
     try:
         js_validate(instance=val, schema=schema,
                     format_checker=format_checker)

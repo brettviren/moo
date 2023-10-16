@@ -5,9 +5,9 @@ from .util import unflatten, pathify
 from jsonschema.exceptions import ValidationError
 
 import jsonschema
-# Deprecated:
-# https://python-jsonschema.readthedocs.io/en/stable/api/jsonschema/protocols/#jsonschema.protocols.Validator.FORMAT_CHECKER
-# format_checker = jsonschema.Draft7Validator.FORMAT_CHECKER
+
+# without this, format="..." will be ignored.
+format_checker = jsonschema.Draft7Validator.FORMAT_CHECKER
 
 
 
@@ -153,7 +153,7 @@ def make_validator_jsonschema():
     from jsonschema import validate as js_validate
     def validate(model, schema={}):
         try:
-            return js_validate(instance=model, schema=schema)#,format_checker=format_checker)
+            return js_validate(instance=model, schema=schema,format_checker=format_checker)
         except SchemaError as err:
             raise ValidationError('invalid') from err
     return validate
