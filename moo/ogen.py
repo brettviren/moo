@@ -10,9 +10,7 @@ import sys
 from moo.modutil import resolve, module_at
 from collections.abc import Mapping
 
-from jsonschema import validate as js_validate
-from jsonschema.exceptions import ValidationError
-from .jsonschema import format_checker
+from .jsonschema import validate, ValidationError
 
 class BaseType:
     pass
@@ -100,8 +98,7 @@ def wash_string(types, ost, *args, **kwds):
         schema["pattern"] = ost["pattern"]
 
     try:
-        js_validate(instance=val, schema=schema,
-                    format_checker=format_checker)
+        validate(val, schema)
     except ValidationError as verr:
         raise ValueError(f'illegal string format {name} value: {val}') from verr
     return val

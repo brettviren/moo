@@ -6,10 +6,14 @@ from jsonschema.exceptions import ValidationError
 
 import jsonschema
 
-# without this, format="..." will be ignored.
-format_checker = jsonschema.Draft7Validator.FORMAT_CHECKER
-
-
+# Without this, format="..." will be ignored.
+# Older versions of jsonschema (eg 3.2.0) lack it.
+try:
+    format_checker = jsonschema.Draft7Validator.FORMAT_CHECKER
+except AttributeError:
+    import sys
+    sys.stderr.write("WARNING: your jsonschema is old.  string format constraints will be ignored")
+    format_checker = None
 
 def ref(oschema):
     '''

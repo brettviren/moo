@@ -2,7 +2,7 @@ import os
 import pytest
 import moo
 from moo.ogen import TypeBuilder
-
+from moo.jsonschema import format_checker
 
 def test_type_builder():
     sc = [
@@ -50,8 +50,9 @@ def test_type_builder():
         Age(Height(177.8))
 
     from a.b import Email
-    with pytest.raises(ValueError):
-        Email("not-an-email-address")
+    if format_checker:
+        with pytest.raises(ValueError):
+            Email("not-an-email-address")
 
     from a.b import Fruit
     assert "apple" == Fruit("apple").pod()

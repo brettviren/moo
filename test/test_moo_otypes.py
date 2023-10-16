@@ -5,7 +5,7 @@ Test moo.otypes.
 import os
 import moo
 import pytest
-
+from moo.jsonschema import format_checker
 
 def test_junk():
     'Test various stuff about moo.otypes'
@@ -57,13 +57,15 @@ def test_with_schema():
     Person = types['app.Person']
     Affiliation = types['app.Affiliation']
 
-    with pytest.raises(ValueError):
-        e = Email("this is not an email address and should fail")
-        print(f'EMAIL: {e} {repr(e)}')
+    if format_checker:
+        with pytest.raises(ValueError):
+            e = Email("this is not an email address and should fail")
+            print(f'EMAIL: {e} {repr(e)}')
 
     p = Person()
-    with pytest.raises(ValueError):
-        p.email = "this should fail"
+    if format_checker:
+        with pytest.raises(ValueError):
+            p.email = "this should fail"
     with pytest.raises(AttributeError):
         p.email
     p.email = "brett.viren@gmail.com"

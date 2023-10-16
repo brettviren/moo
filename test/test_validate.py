@@ -1,5 +1,6 @@
 import pytest
 
+from moo.jsonschema import format_checker
 from moo.ovalid import validate, ValidationError
 
 def test_regex():
@@ -18,12 +19,13 @@ def test_regex():
                                pattern = '[0-9]{1,3}.[0-9]{1,3}.[0-9]{1,3}.[0-9]{1,3}'))
 
     validate("127.0.0.1", dict(js, type="string", format="ipv4"))
-    with pytest.raises(ValidationError):
-        validate("& not @ ip", dict(js, type="string", format="ipv4"))
 
-    # https://github.com/python-jsonschema/jsonschema/issues/403
-    with pytest.raises(ValidationError):
-        validate("1;2;3#4", dict(js, type="string", format="email"))
+    if format_checker:
+        with pytest.raises(ValidationError):
+            validate("& not @ ip", dict(js, type="string", format="ipv4"))
+
+        with pytest.raises(ValidationError):
+            validate("1;2;3#4", dict(js, type="string", format="email"))
 
     with pytest.raises(ValidationError):
         validate(1234, dict(js, type="string"))

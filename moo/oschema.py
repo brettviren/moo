@@ -12,13 +12,7 @@ defined through schema classes.
 
 
 import numpy
-import jsonschema
-
-
-def validate(value, schema):
-    jsonschema.validate(value, schema,
-                        format_checker=jsonschema.draft7_format_checker)
-    return value
+from .jsonschema import validate, ValidationError
 
 
 # this holds all known types

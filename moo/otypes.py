@@ -9,6 +9,7 @@ from abc import ABC, abstractmethod
 from importlib import import_module
 from moo.modutil import module_at
 from moo.io import load as load_file
+from .jsonschema import validate, ValidationError
 
 
 def get_deps(deps=None, **ost):
@@ -373,11 +374,8 @@ class _String(BaseType):
             schema["pattern"] = ost["pattern"]
         if ost["format"]:
             schema["format"] = ost["format"]
-        from jsonschema import validate as js_validate
-        from .jsonschema import format_checker
-        from jsonschema.exceptions import ValidationError
         try:
-            js_validate(instance=val, schema=schema,format_checker=format_checker)
+            validate(val, schema)
         except ValidationError as verr:
             raise ValueError(f'format mismatch for string {cname}') from verr
         self._value = val
